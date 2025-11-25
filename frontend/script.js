@@ -4,14 +4,13 @@ let prodottoInModifica = null;
 let prodottoDettaglio = null;
 
 // Funzione centrale per aggiornare tutti i dati
-// MODIFICA CRITICA: Resa asincrona e usa await per caricare i prodotti in modo sincrono.
 async function refreshAllData() {
   console.log("Aggiornamento automatico di tutte le sezioni...");
-  await caricaProdotti(); // <-- AGGIUNGI 'await' per garantire la giacenza aggiornata
+  await caricaProdotti(); 
   caricaDati();
   caricaRiepilogo();
   caricaValoreMagazzino();
-  caricaSelectProdotti(); // Ora l'array globale 'prodotti' è aggiornato
+  caricaSelectProdotti(); 
 }
 
 // Funzione interna pulita per cambiare tab senza dipendere dall'evento
@@ -36,42 +35,36 @@ function forceSwitchTab(tab) {
     section.classList.add("active");
   }
 
-  // Esegui l'aggiornamento dei dati solo se necessario
-  // Lo facciamo per tutte le tab principali per coerenza con refreshAllData
   if (["prodotti", "dati", "riepilogo"].includes(tab)) {
     refreshAllData();
   }
 }
 
 function checkUrlHashAndSwitch() {
-  const hash = window.location.hash.substring(1); // Rimuove il '#'
+  const hash = window.location.hash.substring(1); 
   const validTabs = ["prodotti", "dati", "riepilogo"];
 
-  let targetTab = "prodotti"; // Default
+  let targetTab = "prodotti"; 
 
   if (hash && validTabs.includes(hash)) {
     targetTab = hash;
   }
 
-  // Forza lo switch iniziale e l'aggiornamento dei dati
-  forceSwitchTab(targetTab);
+  forceSwitchTab(targetTab); 
 }
 
 // Inizializzazione: Chiama la funzione di refresh completa all'avvio E controlla l'URL
 document.addEventListener("DOMContentLoaded", () => {
-  checkUrlHashAndSwitch(); // Inizializza la tab in base all'URL
+  checkUrlHashAndSwitch(); 
   togglePrezzo();
 });
 
 // Switch tra tabs e aggiorna l'URL hash
 function switchTab(tab) {
-  // 1. Aggiorna l'hash URL per ricordare la sezione
   if (window.location.hash !== `#${tab}`) {
-    // Usiamo replaceState per evitare di riempire la cronologia con i click
     history.replaceState(null, null, `#${tab}`);
   }
 
-  // 2. Esegue lo switch effettivo
   forceSwitchTab(tab);
 }
 
@@ -227,7 +220,8 @@ async function salvaNomeProdotto() {
 }
 
 async function eliminaProdotto(id) {
-  if (!confirm("Sei sicuro di voler eliminare questo prodotto?")) {
+  // Messaggio di conferma aggiornato
+  if (!confirm("ATTENZIONE: L'eliminazione è consentita SOLO se la giacenza è zero. Se procedi, verranno cancellati PERMANENTEMENTE tutti i movimenti e lotti associati. Sei sicuro di voler procedere?")) {
     return;
   }
 
@@ -239,14 +233,15 @@ async function eliminaProdotto(id) {
     const data = await res.json();
 
     if (!res.ok) {
-      mostraAlert("error", data.error, "prodotti");
+      // Se fallisce, mostra l'errore specifico (es. giacenza > 0)
+      mostraAlert("error", data.error || "Errore durante l'eliminazione", "prodotti");
       return;
     }
 
-    mostraAlert("success", "Prodotto eliminato con successo", "prodotti");
+    mostraAlert("success", "Prodotto e tutti i suoi dati storici eliminati con successo", "prodotti");
     refreshAllData();
   } catch (err) {
-    mostraAlert("error", "Errore durante l'eliminazione", "prodotti");
+    mostraAlert("error", "Errore di rete durante l'eliminazione", "prodotti");
   }
 }
 
@@ -277,30 +272,27 @@ function renderDati() {
 
         let prezzoUnitarioDisplay = "-";
         let prezzoTotaleDisplay = "-";
-        let prezzoTotaleClass = ""; // Per colorare il prezzo totale
+        let prezzoTotaleClass = ""; 
 
         if (d.tipo === "carico") {
           if (d.prezzo !== null) {
             prezzoUnitarioDisplay = `€ ${d.prezzo.toFixed(2)}`;
           }
           if (d.prezzo_totale !== null) {
-            // Carico: Valore positivo (Quantità * Prezzo Unitario)
             prezzoTotaleDisplay = `€ ${d.prezzo_totale.toFixed(2)}`;
-            prezzoTotaleClass = "tipo-carico"; // Verde
+            prezzoTotaleClass = "tipo-carico"; 
           }
         } else if (d.tipo === "scarico") {
           if (d.prezzo_unitario_scarico !== null) {
-            // Scarico: Prezzo unitario medio di costo (Costo FIFO / Quantità)
             prezzoUnitarioDisplay = `Ø € ${d.prezzo_unitario_scarico.toFixed(
               2
             )}`;
           }
 
           if (d.prezzo_totale !== null) {
-            // Scarico: Valore negativo (Costo FIFO) per mostrare la sottrazione di valore
             const costoScarico = -Math.abs(d.prezzo_totale);
             prezzoTotaleDisplay = `€ ${costoScarico.toFixed(2)}`;
-            prezzoTotaleClass = "tipo-scarico"; // Rosso
+            prezzoTotaleClass = "tipo-scarico"; 
           }
         }
 
@@ -337,7 +329,6 @@ async function caricaValoreMagazzino() {
   }
 }
 
-// VERIFICATO: include la giacenza aggiornata
 function caricaSelectProdotti() {
   const select = document.getElementById("dato-prodotto");
   select.innerHTML =
@@ -390,7 +381,7 @@ async function aggiungiDato() {
     document.getElementById("dato-prezzo").value = "";
 
     mostraAlert("success", "Dato aggiunto con successo", "dati");
-    await refreshAllData(); // <-- USA await per l'aggiornamento
+    await refreshAllData(); 
   } catch (err) {
     mostraAlert("error", "Errore durante l'aggiunta", "dati");
   }
@@ -465,7 +456,6 @@ async function mostraDettaglioLotti(prodottoId, nomeProdotto) {
     const lotti = await res.json();
     renderDettaglioLotti(lotti);
 
-    // Imposta la sezione dettaglio come attiva
     document
       .querySelectorAll(".section")
       .forEach((s) => s.classList.remove("active"));
@@ -474,7 +464,6 @@ async function mostraDettaglioLotti(prodottoId, nomeProdotto) {
       .forEach((t) => t.classList.remove("active"));
     document.getElementById("dettaglio-section").classList.add("active");
 
-    // Aggiorna l'hash URL per riflettere la sezione dettaglio
     history.replaceState(null, null, `#dettaglio`);
   } catch (err) {
     console.error("Errore caricamento lotti:", err);
@@ -513,6 +502,5 @@ function renderDettaglioLotti(lotti) {
 }
 
 function tornaARiepilogo() {
-  // Chiama la funzione di switch che aggiorna anche l'hash
   switchTab("riepilogo");
 }

@@ -14,14 +14,13 @@ app.use(express.json());
 // Database locale SQLite
 const db = new sqlite3.Database('./magazzino.db');
 
-// Creazione tabelle
+// Creazione tabelle (immutato)
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS prodotti (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome TEXT UNIQUE NOT NULL
   )`);
 
-  // AGGIUNTO: prezzo_totale_movimento per memorizzare il valore totale del carico/scarico (costo FIFO)
   db.run(`CREATE TABLE IF NOT EXISTS dati (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     prodotto_id INTEGER,
@@ -33,7 +32,6 @@ db.serialize(() => {
     FOREIGN KEY(prodotto_id) REFERENCES prodotti(id)
   )`);
 
-  // Tabella lotti per tracciare ogni carico con quantità rimanente
   db.run(`CREATE TABLE IF NOT EXISTS lotti (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     prodotto_id INTEGER,
@@ -47,7 +45,7 @@ db.serialize(() => {
 
 app.use(express.static(path.join(__dirname, '../frontend')));
 
-// ===== PRODOTTI =====
+// ===== PRODOTTI (immutato, solo DELETE è modificato) =====
 app.get('/api/prodotti', (req, res) => {
   const query = `
     SELECT 
@@ -104,29 +102,77 @@ app.put('/api/prodotti/:id', (req, res) => {
   });
 });
 
+// LOGICA MODIFICATA: Controlla la giacenza PRIMA di eliminare a cascata
 app.delete('/api/prodotti/:id', (req, res) => {
   const { id } = req.params;
   
-  db.get('SELECT COUNT(*) as count FROM dati WHERE prodotto_id = ?', [id], (err, row) => {
-    if (err) return res.status(500).json({ error: err.message });
-    
-    if (row.count > 0) {
-      return res.status(400).json({ error: 'Impossibile eliminare: prodotto con movimenti' });
-    }
-    
-    db.run('DELETE FROM prodotti WHERE id = ?', [id], function(err) {
-      if (err) return res.status(500).json({ error: err.message });
-      if (this.changes === 0) {
-        return res.status(404).json({ error: 'Prodotto non trovato' });
+  // Utilizza una transazione per assicurare che tutte le eliminazioni siano atomiche
+  db.serialize(() => {
+    db.run('BEGIN TRANSACTION;');
+
+    // 1. Controlla la giacenza (SUM(quantita_rimanente))
+    const checkGiacenzaQuery = `
+      SELECT COALESCE(SUM(quantita_rimanente), 0) as giacenza
+      FROM lotti
+      WHERE prodotto_id = ?
+    `;
+
+    db.get(checkGiacenzaQuery, [id], (err, row) => {
+      if (err) {
+        db.run('ROLLBACK;');
+        return res.status(500).json({ error: `Errore durante la verifica della giacenza: ${err.message}` });
       }
-      res.json({ success: true });
+
+      // **BLOCCO se la giacenza è maggiore di zero**
+      if (row.giacenza > 0) {
+        db.run('ROLLBACK;');
+        return res.status(400).json({ error: `Impossibile eliminare: il prodotto ha una giacenza residua di ${row.giacenza}. Scarica il prodotto prima di eliminarlo.` });
+      }
+      
+      // --- Giacenza = 0: procede con la cancellazione a cascata ---
+
+      // 2. Elimina i lotti associati (anche quelli a giacenza zero sono storici)
+      db.run('DELETE FROM lotti WHERE prodotto_id = ?', [id], (err) => {
+        if (err) {
+          db.run('ROLLBACK;');
+          return res.status(500).json({ error: `Errore durante l'eliminazione dei lotti: ${err.message}` });
+        }
+
+        // 3. Elimina i dati (movimenti) associati
+        db.run('DELETE FROM dati WHERE prodotto_id = ?', [id], (err) => {
+          if (err) {
+            db.run('ROLLBACK;');
+            return res.status(500).json({ error: `Errore durante l'eliminazione dei movimenti: ${err.message}` });
+          }
+          
+          // 4. Elimina il prodotto dalla tabella principale
+          db.run('DELETE FROM prodotti WHERE id = ?', [id], function(err) {
+            if (err) {
+              db.run('ROLLBACK;');
+              return res.status(500).json({ error: `Errore durante l'eliminazione del prodotto: ${err.message}` });
+            }
+            
+            if (this.changes === 0) {
+              db.run('ROLLBACK;');
+              return res.status(404).json({ error: 'Prodotto non trovato' });
+            }
+
+            // Commit della transazione se tutto è andato bene
+            db.run('COMMIT;', (commitErr) => {
+              if (commitErr) {
+                return res.status(500).json({ error: `Errore durante il commit: ${commitErr.message}` });
+              }
+              res.json({ success: true, message: 'Prodotto e storico eliminati con successo.' });
+            });
+          });
+        });
+      });
     });
   });
 });
 
-// ===== DATI & MAGAZZINO =====
+// ===== DATI & MAGAZZINO (immutato) =====
 
-// GET Tutti i movimenti
 app.get('/api/dati', (req, res) => {
   const query = `
     SELECT 
@@ -137,7 +183,6 @@ app.get('/api/dati', (req, res) => {
       d.quantita,
       d.prezzo,
       d.prezzo_totale_movimento as prezzo_totale,
-      -- Calcolo del prezzo unitario di scarico (costo medio ponderato dello scarico)
       CASE WHEN d.tipo = 'scarico' AND d.prezzo_totale_movimento IS NOT NULL AND d.quantita > 0 THEN d.prezzo_totale_movimento / d.quantita ELSE NULL END as prezzo_unitario_scarico,
       d.data
     FROM dati d
@@ -150,7 +195,6 @@ app.get('/api/dati', (req, res) => {
   });
 });
 
-// GET valore totale magazzino (FIFO)
 app.get('/api/valore-magazzino', (req, res) => {
   const query = `
     SELECT COALESCE(SUM(quantita_rimanente * prezzo), 0) as valore_totale
@@ -164,7 +208,6 @@ app.get('/api/valore-magazzino', (req, res) => {
   });
 });
 
-// GET riepilogo magazzino
 app.get('/api/riepilogo', (req, res) => {
   const query = `
     SELECT 
@@ -185,7 +228,6 @@ app.get('/api/riepilogo', (req, res) => {
   });
 });
 
-// GET dettaglio lotti per prodotto
 app.get('/api/lotti/:prodotto_id', (req, res) => {
   const { prodotto_id } = req.params;
   const query = `
@@ -205,7 +247,6 @@ app.get('/api/lotti/:prodotto_id', (req, res) => {
   });
 });
 
-// POST nuovo dato (carico/scarico)
 app.post('/api/dati', (req, res) => {
   const { prodotto_id, tipo, quantita, prezzo } = req.body;
   
@@ -225,18 +266,15 @@ app.post('/api/dati', (req, res) => {
       return res.status(400).json({ error: 'Prezzo obbligatorio e maggiore di 0 per il carico' });
     }
     
-    // Calcolo richiesto: Prezzo Totale per parte (Carico)
     const prezzoTotale = prc * qty; 
     const data = new Date().toISOString();
     
-    // Inserisci in dati
     db.run(
       'INSERT INTO dati (prodotto_id, tipo, quantita, prezzo, prezzo_totale_movimento, data) VALUES (?, ?, ?, ?, ?, ?)',
       [prodotto_id, tipo, qty, prc, prezzoTotale, data],
       function(err) {
         if (err) return res.status(500).json({ error: err.message });
         
-        // Crea nuovo lotto
         db.run(
           'INSERT INTO lotti (prodotto_id, quantita_iniziale, quantita_rimanente, prezzo, data_carico) VALUES (?, ?, ?, ?, ?)',
           [prodotto_id, qty, qty, prc, data],
@@ -261,9 +299,8 @@ app.post('/api/dati', (req, res) => {
           return res.status(400).json({ error: `Giacenza insufficiente (disponibili: ${giacenzaTotale})` });
         }
         
-        // Scarica dai lotti e calcola il costo totale FIFO
         let daScaricare = qty;
-        let costoTotaleScarico = 0; // Il Prezzo Totale per lo Scarico (Costo FIFO)
+        let costoTotaleScarico = 0; 
         const updates = [];
         
         for (const lotto of lotti) {
@@ -272,7 +309,6 @@ app.post('/api/dati', (req, res) => {
           const qtaDaQuestoLotto = Math.min(daScaricare, lotto.quantita_rimanente);
           const nuovaQta = lotto.quantita_rimanente - qtaDaQuestoLotto;
           
-          // Costo FIFO
           costoTotaleScarico += qtaDaQuestoLotto * lotto.prezzo; 
           
           updates.push({
@@ -283,11 +319,9 @@ app.post('/api/dati', (req, res) => {
           daScaricare -= qtaDaQuestoLotto;
         }
         
-        // Esegui gli aggiornamenti
         db.serialize(() => {
           const data = new Date().toISOString();
           
-          // Inserisci in dati con il costo FIFO calcolato come prezzo_totale_movimento
           db.run(
             'INSERT INTO dati (prodotto_id, tipo, quantita, prezzo, prezzo_totale_movimento, data) VALUES (?, ?, ?, ?, ?, ?)',
             [prodotto_id, tipo, qty, null, costoTotaleScarico, data],
@@ -316,7 +350,7 @@ app.delete('/api/dati/:id', (req, res) => {
   });
 });
 
-// Avvio server e apertura browser
+// Avvio server e apertura browser (immutato)
 app.listen(PORT, () => {
   console.log(`Backend avviato su http://localhost:${PORT}`);
   const url = `http://localhost:${PORT}/`;
