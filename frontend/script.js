@@ -6,11 +6,11 @@ let prodottoDettaglio = null;
 // Funzione centrale per aggiornare tutti i dati
 async function refreshAllData() {
   console.log("Aggiornamento automatico di tutte le sezioni...");
-  await caricaProdotti(); 
+  await caricaProdotti();
   caricaDati();
   caricaRiepilogo();
   caricaValoreMagazzino();
-  caricaSelectProdotti(); 
+  caricaSelectProdotti();
 }
 
 // Funzione interna pulita per cambiare tab senza dipendere dall'evento
@@ -41,21 +41,21 @@ function forceSwitchTab(tab) {
 }
 
 function checkUrlHashAndSwitch() {
-  const hash = window.location.hash.substring(1); 
+  const hash = window.location.hash.substring(1);
   const validTabs = ["prodotti", "dati", "riepilogo"];
 
-  let targetTab = "prodotti"; 
+  let targetTab = "prodotti";
 
   if (hash && validTabs.includes(hash)) {
     targetTab = hash;
   }
 
-  forceSwitchTab(targetTab); 
+  forceSwitchTab(targetTab);
 }
 
 // Inizializzazione: Chiama la funzione di refresh completa all'avvio E controlla l'URL
 document.addEventListener("DOMContentLoaded", () => {
-  checkUrlHashAndSwitch(); 
+  checkUrlHashAndSwitch();
   togglePrezzo();
 });
 
@@ -221,7 +221,11 @@ async function salvaNomeProdotto() {
 
 async function eliminaProdotto(id) {
   // Messaggio di conferma aggiornato
-  if (!confirm("ATTENZIONE: L'eliminazione è consentita SOLO se la giacenza è zero. Se procedi, verranno cancellati PERMANENTEMENTE tutti i movimenti e lotti associati. Sei sicuro di voler procedere?")) {
+  if (
+    !confirm(
+      "ATTENZIONE: L'eliminazione è consentita SOLO se la giacenza è zero. Se procedi, verranno cancellati PERMANENTEMENTE tutti i movimenti e lotti associati. Sei sicuro di voler procedere?"
+    )
+  ) {
     return;
   }
 
@@ -234,11 +238,19 @@ async function eliminaProdotto(id) {
 
     if (!res.ok) {
       // Se fallisce, mostra l'errore specifico (es. giacenza > 0)
-      mostraAlert("error", data.error || "Errore durante l'eliminazione", "prodotti");
+      mostraAlert(
+        "error",
+        data.error || "Errore durante l'eliminazione",
+        "prodotti"
+      );
       return;
     }
 
-    mostraAlert("success", "Prodotto e tutti i suoi dati storici eliminati con successo", "prodotti");
+    mostraAlert(
+      "success",
+      "Prodotto e tutti i suoi dati storici eliminati con successo",
+      "prodotti"
+    );
     refreshAllData();
   } catch (err) {
     mostraAlert("error", "Errore di rete durante l'eliminazione", "prodotti");
@@ -272,7 +284,7 @@ function renderDati() {
 
         let prezzoUnitarioDisplay = "-";
         let prezzoTotaleDisplay = "-";
-        let prezzoTotaleClass = ""; 
+        let prezzoTotaleClass = "";
 
         if (d.tipo === "carico") {
           if (d.prezzo !== null) {
@@ -280,7 +292,7 @@ function renderDati() {
           }
           if (d.prezzo_totale !== null) {
             prezzoTotaleDisplay = `€ ${d.prezzo_totale.toFixed(2)}`;
-            prezzoTotaleClass = "tipo-carico"; 
+            prezzoTotaleClass = "tipo-carico";
           }
         } else if (d.tipo === "scarico") {
           if (d.prezzo_unitario_scarico !== null) {
@@ -292,7 +304,7 @@ function renderDati() {
           if (d.prezzo_totale !== null) {
             const costoScarico = -Math.abs(d.prezzo_totale);
             prezzoTotaleDisplay = `€ ${costoScarico.toFixed(2)}`;
-            prezzoTotaleClass = "tipo-scarico"; 
+            prezzoTotaleClass = "tipo-scarico";
           }
         }
 
@@ -381,7 +393,7 @@ async function aggiungiDato() {
     document.getElementById("dato-prezzo").value = "";
 
     mostraAlert("success", "Dato aggiunto con successo", "dati");
-    await refreshAllData(); 
+    await refreshAllData();
   } catch (err) {
     mostraAlert("error", "Errore durante l'aggiunta", "dati");
   }
