@@ -478,13 +478,14 @@
     let prodottoDettaglio = null;
     
     // Funzione centrale per aggiornare tutti i dati
-    function refreshAllData() {
+    // MODIFICA CRITICA: Resa asincrona e usa await per caricare i prodotti in modo sincrono.
+    async function refreshAllData() { 
       console.log('Aggiornamento automatico di tutte le sezioni...');
-      caricaProdotti();
+      await caricaProdotti(); // <-- AGGIUNGI 'await' per garantire la giacenza aggiornata
       caricaDati(); 
       caricaRiepilogo();
       caricaValoreMagazzino();
-      caricaSelectProdotti(); // Aggiorna la dropdown nella sezione Dati
+      caricaSelectProdotti(); // Ora l'array globale 'prodotti' è aggiornato
     }
 
     // Funzione interna pulita per cambiare tab senza dipendere dall'evento
@@ -783,10 +784,10 @@
       }
     }
     
+    // VERIFICATO: include la giacenza aggiornata
     function caricaSelectProdotti() {
       const select = document.getElementById('dato-prodotto');
       select.innerHTML = '<option value="">Seleziona prodotto...</option>' +
-        // Già corretto per mostrare la giacenza
         prodotti.map(p => `<option value="${p.id}">${p.nome} (Giacenza: ${p.giacenza})</option>`).join('');
     }
     
@@ -825,7 +826,7 @@
         document.getElementById('dato-prezzo').value = '';
         
         mostraAlert('success', 'Dato aggiunto con successo', 'dati');
-        refreshAllData(); 
+        await refreshAllData(); // <-- USA await per l'aggiornamento
       } catch (err) {
         mostraAlert('error', 'Errore durante l\'aggiunta', 'dati');
       }
