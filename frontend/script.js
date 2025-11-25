@@ -3,6 +3,18 @@ let dati = [];
 let prodottoInModifica = null;
 let prodottoDettaglio = null;
 
+// Funzione helper per formattare i numeri come valuta italiana (virgola come separatore decimale)
+function formatNumber(value) {
+  if (value === null || typeof value === 'undefined' || isNaN(value)) {
+    return '0,00';
+  }
+  // Usa 'it-IT' per il formato europeo (virgola come separatore decimale)
+  return value.toLocaleString('it-IT', { 
+    minimumFractionDigits: 2, 
+    maximumFractionDigits: 2 
+  });
+}
+
 // Funzione centrale per aggiornare tutti i dati
 async function refreshAllData() {
   console.log("Aggiornamento automatico di tutte le sezioni...");
@@ -256,7 +268,7 @@ async function eliminaProdotto(id) {
   }
 }
 
-// ===== DATI (CARICO/SCARICO) - MODIFICATO PER CONSENTIRE DELETE DI ENTRAMBI =====
+// ===== DATI (CARICO/SCARICO) =====
 async function caricaDati() {
   try {
     const res = await fetch("/api/dati");
@@ -288,10 +300,12 @@ function renderDati() {
 
         if (d.tipo === "carico") {
           if (d.prezzo !== null) {
-            prezzoUnitarioDisplay = `€ ${d.prezzo.toFixed(2)}`;
+            // USO formatNumber
+            prezzoUnitarioDisplay = `€ ${formatNumber(d.prezzo)}`;
           }
           if (d.prezzo_totale !== null) {
-            prezzoTotaleDisplay = `€ ${d.prezzo_totale.toFixed(2)}`;
+            // USO formatNumber
+            prezzoTotaleDisplay = `€ ${formatNumber(d.prezzo_totale)}`;
             prezzoTotaleClass = "tipo-carico";
           }
           // Pulsante di eliminazione per i CARICHI
@@ -299,14 +313,14 @@ function renderDati() {
 
         } else if (d.tipo === "scarico") {
           if (d.prezzo_unitario_scarico !== null) {
-            prezzoUnitarioDisplay = `Ø € ${d.prezzo_unitario_scarico.toFixed(
-              2
-            )}`;
+            // USO formatNumber
+            prezzoUnitarioDisplay = `Ø € ${formatNumber(d.prezzo_unitario_scarico)}`;
           }
 
           if (d.prezzo_totale !== null) {
             const costoScarico = -Math.abs(d.prezzo_totale);
-            prezzoTotaleDisplay = `€ ${costoScarico.toFixed(2)}`;
+            // USO formatNumber
+            prezzoTotaleDisplay = `€ ${formatNumber(costoScarico)}`;
             prezzoTotaleClass = "tipo-scarico";
           }
            // Pulsante di eliminazione per gli SCARICHI
@@ -339,8 +353,8 @@ async function caricaValoreMagazzino() {
   try {
     const res = await fetch("/api/valore-magazzino");
     const data = await res.json();
-    document.getElementById("valore-magazzino").textContent =
-      data.valore_totale.toFixed(2);
+    // USO formatNumber
+    document.getElementById("valore-magazzino").textContent = formatNumber(data.valore_totale);
   } catch (err) {
     console.error("Errore caricamento valore:", err);
   }
@@ -374,14 +388,18 @@ async function aggiungiDato() {
     mostraAlert("error", "Compila prodotto e quantità", "dati");
     return;
   }
-
-  if (tipo === "carico" && (!prezzo || parseFloat(prezzo) <= 0)) {
-    mostraAlert(
-      "error",
-      "Il prezzo è obbligatorio e deve essere maggiore di 0 per il carico",
-      "dati"
-    );
-    return;
+  
+  // Controllo validità prezzo anche con la virgola (il server farà il parsing)
+  if (tipo === "carico") {
+    const prezzoString = String(prezzo).trim();
+    if (!prezzoString || (!prezzoString.includes('.') && !prezzoString.includes(',')) || parseFloat(prezzoString.replace(",", ".")) <= 0) {
+        mostraAlert(
+          "error",
+          "Il prezzo è obbligatorio e deve essere maggiore di 0 per il carico",
+          "dati"
+        );
+        return;
+    }
   }
 
   try {
@@ -471,7 +489,7 @@ function renderRiepilogo(riepilogo) {
   if (riepilogo.length === 0) {
     tbody.innerHTML =
       '<tr><td colspan="4" class="empty-state">Nessun prodotto in magazzino</td></tr>';
-    document.getElementById("valore-magazzino-riepilogo").textContent = "0.00";
+    document.getElementById("valore-magazzino-riepilogo").textContent = "0,00"; // Aggiornato a 0,00
   } else {
     let totaleGenerale = 0;
 
@@ -488,7 +506,7 @@ function renderRiepilogo(riepilogo) {
                 ${r.giacenza}
               </td>
               <td style="text-align: right;">
-                <strong>€ ${r.valore_totale.toFixed(2)}</strong>
+                <strong>€ ${formatNumber(r.valore_totale)}</strong>
               </td>
               <td style="text-align: center;">
                 <button class="btn btn-primary btn-small" onclick="mostraDettaglioLotti(${
@@ -502,8 +520,9 @@ function renderRiepilogo(riepilogo) {
       })
       .join("");
 
+    // USO formatNumber
     document.getElementById("valore-magazzino-riepilogo").textContent =
-      totaleGenerale.toFixed(2);
+      formatNumber(totaleGenerale);
   }
 }
 
@@ -548,10 +567,8 @@ function renderDettaglioLotti(lotti) {
               <td style="text-align: right;" class="giacenza positiva">${
                 l.quantita_rimanente
               }</td>
-              <td style="text-align: right;">€ ${l.prezzo.toFixed(2)}</td>
-              <td style="text-align: right;"><strong>€ ${valoreLotto.toFixed(
-                2
-              )}</strong></td>
+              <td style="text-align: right;">€ ${formatNumber(l.prezzo)}</td>
+              <td style="text-align: right;"><strong>€ ${formatNumber(valoreLotto)}</strong></td>
             </tr>
           `;
       })

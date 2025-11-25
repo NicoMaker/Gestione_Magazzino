@@ -290,7 +290,10 @@ app.post("/api/dati", (req, res) => {
   }
 
   if (tipo === "carico") {
-    const prc = parseFloat(prezzo);
+    // MODIFICA: Prepara la stringa del prezzo per l'analisi, sostituendo la virgola con il punto
+    let prezzoString = String(prezzo).replace(",", ".");
+    const prc = parseFloat(prezzoString); 
+
     if (isNaN(prc) || prc <= 0) {
       return res
         .status(400)
