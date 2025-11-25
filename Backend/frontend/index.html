@@ -175,7 +175,6 @@
     .actions {
       display: flex;
       gap: 5px;
-      justify-content: center;
     }
     
     .totale {
@@ -300,11 +299,6 @@
     }
 
     #prezzo-group.hidden {
-      opacity: 0.3;
-      pointer-events: none;
-    }
-
-    #modifica-prezzo-group.hidden {
       opacity: 0.3;
       pointer-events: none;
     }
@@ -476,51 +470,13 @@
       </div>
     </div>
   </div>
-
-  <div id="modal-modifica-dato" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Modifica Movimento <span id="modifica-dato-id-display"></span></h3>
-      </div>
-      <div id="modifica-dato-alert"></div>
-      <div class="form-group">
-        <label for="modifica-dato-prodotto">Prodotto</label>
-        <select id="modifica-dato-prodotto">
-          </select>
-      </div>
-      <div class="form-group">
-        <label for="modifica-dato-tipo">Tipo</label>
-        <select id="modifica-dato-tipo" onchange="togglePrezzoModifica()">
-          <option value="carico">Carico</option>
-          <option value="scarico">Scarico</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="modifica-dato-quantita">Quantità</label>
-        <input type="number" id="modifica-dato-quantita" min="1" placeholder="Quantità">
-      </div>
-      <div class="form-group" id="modifica-prezzo-group">
-        <label for="modifica-dato-prezzo">Prezzo Unitario €</label>
-        <input type="number" id="modifica-dato-prezzo" step="0.01" min="0.01" placeholder="Prezzo Unitario">
-      </div>
-      <div class="form-group">
-        <label for="modifica-dato-data">Data/Ora Movimento</label>
-        <input type="datetime-local" id="modifica-dato-data">
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-primary" onclick="salvaModificaDato()">Salva Modifica</button>
-        <button class="btn" onclick="chiudiModalDato()">Annulla</button>
-      </div>
-    </div>
-  </div>
   
   <script>
     let prodotti = [];
     let dati = [];
-    let prodottoInModifica = null; // Per i prodotti
+    let prodottoInModifica = null;
     let prodottoDettaglio = null;
-    let datiInModifica = null; // Per i movimenti (dati)
-
+    
     // Funzione centrale per aggiornare tutti i dati
     function refreshAllData() {
       console.log('Aggiornamento automatico di tutte le sezioni...');
@@ -548,6 +504,7 @@
         }
         
         // Esegui l'aggiornamento dei dati solo se necessario
+        // Lo facciamo per tutte le tab principali per coerenza con refreshAllData
         if (['prodotti', 'dati', 'riepilogo'].includes(tab)) {
           refreshAllData();
         }
@@ -585,7 +542,7 @@
       forceSwitchTab(tab); 
     }
     
-    // Toggle campo prezzo per la NUOVA creazione
+    // Toggle campo prezzo
     function togglePrezzo() {
       const tipo = document.getElementById('dato-tipo').value;
       const prezzoGroup = document.getElementById('prezzo-group');
@@ -600,27 +557,12 @@
         prezzoInput.setAttribute('required', 'required');
       }
     }
-
-    // Toggle campo prezzo per la MODIFICA
-    function togglePrezzoModifica() {
-      const tipo = document.getElementById('modifica-dato-tipo').value;
-      const prezzoGroup = document.getElementById('modifica-prezzo-group');
-      const prezzoInput = document.getElementById('modifica-dato-prezzo');
-      
-      if (tipo === 'scarico') {
-        prezzoGroup.classList.add('hidden');
-        prezzoInput.removeAttribute('required');
-      } else {
-        prezzoGroup.classList.remove('hidden');
-        prezzoInput.setAttribute('required', 'required');
-      }
-    }
     
     // Mostra alert
     function mostraAlert(tipo, messaggio, sezione) {
       const alertDiv = document.getElementById(`${sezione}-alert`);
       alertDiv.innerHTML = `<div class="alert alert-${tipo}">${messaggio}</div>`;
-      setTimeout(() => alertDiv.innerHTML = '', 7000); // 7 secondi per i messaggi importanti di ricalcolo
+      setTimeout(() => alertDiv.innerHTML = '', 3000);
     }
     
     // ===== PRODOTTI (CRUD) =====
@@ -763,126 +705,7 @@
       }
     }
     
-    // ===== DATI (CARICO/SCARICO) & MODIFICA/ELIMINAZIONE (NUOVO) =====
-    
-    // Modal per Modifica Dati
-    function chiudiModalDato() {
-      document.getElementById('modal-modifica-dato').classList.remove('active');
-      datiInModifica = null;
-    }
-
-    async function apriModificaDato(id) {
-      datiInModifica = id;
-      const dato = dati.find(d => d.id === id);
-
-      if (!dato) {
-        mostraAlert('error', 'Movimento non trovato', 'dati');
-        return;
-      }
-      
-      // Load product options into the select
-      const selectProdotto = document.getElementById('modifica-dato-prodotto');
-      selectProdotto.innerHTML = prodotti.map(p => 
-          `<option value="${p.id}" ${p.id == dato.prodotto_id ? 'selected' : ''}>${p.nome}</option>`
-      ).join('');
-
-      document.getElementById('modifica-dato-id-display').textContent = `(#${id})`;
-      document.getElementById('modifica-dato-tipo').value = dato.tipo;
-      document.getElementById('modifica-dato-quantita').value = dato.quantita;
-      document.getElementById('modifica-dato-prezzo').value = dato.prezzo || '';
-      
-      // Format data from ISO to datetime-local format (YYYY-MM-DDTHH:MM)
-      const date = new Date(dato.data);
-      // Funzione per formattare la data/ora in formato YYYY-MM-DDTHH:MM
-      const formattedDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
-        .toISOString()
-        .slice(0, 16);
-        
-      document.getElementById('modifica-dato-data').value = formattedDate;
-
-      togglePrezzoModifica();
-      document.getElementById('modal-modifica-dato').classList.add('active');
-    }
-
-    async function salvaModificaDato() {
-      const id = datiInModifica;
-      const prodotto_id = document.getElementById('modifica-dato-prodotto').value;
-      const tipo = document.getElementById('modifica-dato-tipo').value;
-      const quantita = document.getElementById('modifica-dato-quantita').value;
-      const prezzo = document.getElementById('modifica-dato-prezzo').value;
-      const data = document.getElementById('modifica-dato-data').value;
-      
-      // Basic validation
-      if (!prodotto_id || !quantita || !data || parseInt(quantita) <= 0) {
-        mostraAlert('error', 'Compila tutti i campi (Quantità > 0)', 'modifica-dato');
-        return;
-      }
-
-      if (tipo === 'carico' && (parseFloat(prezzo) <= 0 || !prezzo)) {
-        mostraAlert('error', 'Prezzo è obbligatorio e deve essere maggiore di 0 per il carico', 'modifica-dato');
-        return;
-      }
-
-      // API call
-      try {
-        const res = await fetch(`/api/dati/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            prodotto_id, 
-            tipo, 
-            quantita: parseInt(quantita), 
-            prezzo: tipo === 'carico' ? parseFloat(prezzo) : null,
-            data: new Date(data).toISOString() // Convert back to ISO for server
-          })
-        });
-        
-        const dataRes = await res.json();
-        
-        if (!res.ok) {
-          mostraAlert('error', dataRes.error || 'Errore durante la modifica', 'modifica-dato');
-          return;
-        }
-        
-        chiudiModalDato();
-        mostraAlert('success', 'Movimento modificato e magazzino ricalcolato con successo', 'dati');
-        refreshAllData(); 
-      } catch (err) {
-        mostraAlert('error', 'Errore di connessione o sistema', 'modifica-dato');
-      }
-    }
-
-
-    async function eliminaDato(id) {
-      if (!confirm('ATTENZIONE: Eliminare questo movimento storico causerà un ricalcolo completo del magazzino (FIFO). Sei sicuro?')) {
-        return;
-      }
-      
-      try {
-        const res = await fetch(`/api/dati/${id}`, {
-          method: 'DELETE'
-        });
-        
-        const dataRes = await res.json();
-        
-        if (!res.ok) {
-          // Special handling for the negative stock error
-          if (dataRes.requires_correction) {
-             mostraAlert('error', dataRes.error, 'dati');
-          } else {
-             mostraAlert('error', dataRes.error || 'Errore durante l\'eliminazione', 'dati');
-          }
-          return;
-        }
-        
-        mostraAlert('success', dataRes.message, 'dati');
-        refreshAllData(); 
-      } catch (err) {
-        mostraAlert('error', 'Errore di connessione o sistema', 'dati');
-      }
-    }
-    
-    // Altre funzioni per i Dati
+    // ===== DATI (CARICO/SCARICO) =====
     async function caricaDati() {
       try {
         const res = await fetch('/api/dati');
@@ -906,25 +729,28 @@
           
           let prezzoUnitarioDisplay = '-';
           let prezzoTotaleDisplay = '-';
-          let prezzoTotaleClass = ''; 
+          let prezzoTotaleClass = ''; // Per colorare il prezzo totale
           
           if (d.tipo === 'carico') {
               if (d.prezzo !== null) {
                   prezzoUnitarioDisplay = `€ ${d.prezzo.toFixed(2)}`;
               }
               if (d.prezzo_totale !== null) {
+                  // Carico: Valore positivo (Quantità * Prezzo Unitario)
                   prezzoTotaleDisplay = `€ ${d.prezzo_totale.toFixed(2)}`;
-                  prezzoTotaleClass = 'tipo-carico'; 
+                  prezzoTotaleClass = 'tipo-carico'; // Verde
               }
           } else if (d.tipo === 'scarico') {
               if (d.prezzo_unitario_scarico !== null) {
+                  // Scarico: Prezzo unitario medio di costo (Costo FIFO / Quantità)
                   prezzoUnitarioDisplay = `Ø € ${d.prezzo_unitario_scarico.toFixed(2)}`;
               }
               
               if (d.prezzo_totale !== null) {
+                  // Scarico: Valore negativo (Costo FIFO) per mostrare la sottrazione di valore
                   const costoScarico = -Math.abs(d.prezzo_totale); 
                   prezzoTotaleDisplay = `€ ${costoScarico.toFixed(2)}`;
-                  prezzoTotaleClass = 'tipo-scarico'; 
+                  prezzoTotaleClass = 'tipo-scarico'; // Rosso
               }
           }
 
@@ -937,14 +763,9 @@
               <td style="text-align: right;">${prezzoUnitarioDisplay}</td>
               <td style="text-align: right;" class="${prezzoTotaleClass}"><strong>${prezzoTotaleDisplay}</strong></td>
               <td style="text-align: center;">
-                <div class="actions">
-                  <button class="btn btn-warning btn-small" onclick="apriModificaDato(${d.id})">
-                    ✏️ Modifica
-                  </button>
-                  <button class="btn btn-danger btn-small" onclick="eliminaDato(${d.id})">
-                    🗑️ Elimina
-                  </button>
-                </div>
+                <button class="btn btn-danger btn-small" onclick="eliminaDato(${d.id})">
+                  🗑️ Elimina
+                </button>
               </td>
             </tr>
           `;
@@ -1011,6 +832,11 @@
       }
     }
     
+    async function eliminaDato(id) {
+      alert('Non è possibile eliminare movimenti dopo la registrazione. Questo comprometterebbe il calcolo dei lotti e delle giacenze.');
+      return;
+    }
+
     // ===== RIEPILOGO =====
     async function caricaRiepilogo() {
       try {
@@ -1065,10 +891,12 @@
         const lotti = await res.json();
         renderDettaglioLotti(lotti);
         
+        // Imposta la sezione dettaglio come attiva
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.getElementById('dettaglio-section').classList.add('active');
 
+        // Aggiorna l'hash URL per riflettere la sezione dettaglio
         history.replaceState(null, null, `#dettaglio`); 
 
       } catch (err) {
@@ -1101,6 +929,7 @@
     }
 
     function tornaARiepilogo() {
+      // Chiama la funzione di switch che aggiorna anche l'hash
       switchTab('riepilogo'); 
     }
   </script>
