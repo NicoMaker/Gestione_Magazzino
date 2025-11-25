@@ -74,8 +74,11 @@ function checkUrlHashAndSwitch() {
 // Inizializzazione: Chiama la funzione di refresh completa all'avvio E controlla l'URL
 document.addEventListener("DOMContentLoaded", () => {
   setInitialDate(); // Imposta la data iniziale
+  
+  // Inizializza con i campi nascosti (nessun tipo selezionato)
+  toggleCaricoFields();
+  
   checkUrlHashAndSwitch();
-  toggleCaricoFields(); // RINOMINATA E MODIFICATA
 });
 
 // Switch tra tabs e aggiorna l'URL hash
@@ -111,13 +114,24 @@ function toggleCaricoFields() {
     fornitoreGroup.classList.add("hidden");
     fornitoreInput.value = "";
     
-  } else {
+  } else if (tipo === "carico") {
     // Mostra e imposta i campi specifici del carico
     prezzoGroup.classList.remove("hidden");
     prezzoInput.setAttribute("required", "required");
 
     fatturaGroup.classList.remove("hidden");
     fornitoreGroup.classList.remove("hidden");
+  } else {
+    // Nessun tipo selezionato: nasconde tutto
+    prezzoGroup.classList.add("hidden");
+    prezzoInput.value = "";
+    prezzoInput.removeAttribute("required");
+
+    fatturaGroup.classList.add("hidden");
+    fatturaInput.value = "";
+
+    fornitoreGroup.classList.add("hidden");
+    fornitoreInput.value = "";
   }
 }
 
@@ -125,15 +139,15 @@ function toggleCaricoFields() {
 function mostraAlert(tipo, messaggio, sezione) {
   const alertDiv = document.getElementById(`${sezione}-alert`);
   alertDiv.innerHTML = `<div class="alert alert-${tipo}">${messaggio}</div>`;
-  setTimeout(() => (alertDiv.innerHTML = ""), 3000);
+  setTimeout(() => (alertDiv.innerHTML = ""), 4000);
 }
 
-// ===== PRODOTTI (CRUD) - Nessuna modifica al codice qui sotto =====
+// ===== PRODOTTI (CRUD) =====
 async function caricaProdotti() {
   try {
     const res = await fetch("/api/prodotti");
     prodotti = await res.json();
-    prodotti.sort((a, b) => a.nome.localeCompare(b.nome)); // Ordina i prodotti per la tabella
+    prodotti.sort((a, b) => a.nome.localeCompare(b.nome));
     renderProdotti();
   } catch (err) {
     console.error("Errore caricamento prodotti:", err);
@@ -152,10 +166,10 @@ function renderProdotti() {
         (p) => `
           <tr>
             <td><strong>${p.nome}</strong></td>
-            <td style="text-align: center;" class="giacenza ${
-              p.giacenza > 0 ? "positiva" : "zero"
-            }">
-              ${p.giacenza}
+            <td style="text-align: center;">
+              <span class="giacenza ${p.giacenza > 0 ? "positiva" : "zero"}">
+                ${p.giacenza}
+              </span>
             </td>
             <td style="text-align: center;">
               <div class="actions">
@@ -209,7 +223,7 @@ async function aggiungiProdotto() {
     }
 
     input.value = "";
-    mostraAlert("success", "Prodotto aggiunto con successo", "prodotti");
+    mostraAlert("success", "✅ Prodotto aggiunto con successo", "prodotti");
     refreshAllData();
   } catch (err) {
     mostraAlert("error", "Errore durante l'aggiunta", "prodotti");
@@ -250,7 +264,7 @@ async function salvaNomeProdotto() {
     }
 
     chiudiModal();
-    mostraAlert("success", "Nome prodotto modificato con successo", "prodotti");
+    mostraAlert("success", "✅ Nome prodotto modificato", "prodotti");
     refreshAllData();
   } catch (err) {
     alert("Errore durante la modifica");
@@ -260,7 +274,7 @@ async function salvaNomeProdotto() {
 async function eliminaProdotto(id) {
   if (
     !confirm(
-      "ATTENZIONE: L'eliminazione è consentita SOLO se la giacenza è zero. Se procedi, verranno cancellati PERMANENTEMENTE tutti i movimenti e lotti associati. Sei sicuro di voler procedere?"
+      "⚠️ ATTENZIONE: L'eliminazione è consentita SOLO se la giacenza è zero. Se procedi, verranno cancellati PERMANENTEMENTE tutti i movimenti e lotti associati. Sei sicuro?"
     )
   ) {
     return;
@@ -284,7 +298,7 @@ async function eliminaProdotto(id) {
 
     mostraAlert(
       "success",
-      "Prodotto e tutti i suoi dati storici eliminati con successo",
+      "✅ Prodotto e storico eliminati",
       "prodotti"
     );
     refreshAllData();
@@ -293,7 +307,7 @@ async function eliminaProdotto(id) {
   }
 }
 
-// ===== DATI (CARICO/SCARICO) - AGGIORNATE =====
+// ===== DATI (CARICO/SCARICO) =====
 async function caricaDati() {
   try {
     const res = await fetch("/api/dati");
@@ -303,7 +317,7 @@ async function caricaDati() {
     console.error("Errore caricamento dati:", err);
     const tbody = document.getElementById("dati-body");
     tbody.innerHTML =
-      '<tr><td colspan="9" class="empty-state" style="color: #e74c3c;">Errore nel caricamento dei dati dal server.</td></tr>';
+      '<tr><td colspan="9" class="empty-state" style="color: #ef4444;">⚠️ Errore nel caricamento dei dati</td></tr>';
   }
 }
 
@@ -316,7 +330,6 @@ function renderDati() {
   } else {
     tbody.innerHTML = dati
       .map((d) => {
-        // La data da mostrare è quella di MOVIMENTO (inserita dall'utente)
         const dataMovimentoFormatted = new Date(d.data_movimento).toLocaleDateString("it-IT");
 
         let prezzoUnitarioDisplay = "-";
@@ -329,33 +342,26 @@ function renderDati() {
 
         if (d.tipo === "carico") {
           if (d.prezzo !== null) {
-            // USO formatNumber
             prezzoUnitarioDisplay = `€ ${formatNumber(d.prezzo)}`;
           }
           if (d.prezzo_totale !== null) {
-            // USO formatNumber
             prezzoTotaleDisplay = `€ ${formatNumber(d.prezzo_totale)}`;
             prezzoTotaleClass = "tipo-carico";
           }
-          // Pulsante di eliminazione per i CARICHI
           deleteButton = `<button class="btn btn-danger btn-small" onclick="eliminaDato(${d.id}, 'carico')">🗑️ Elimina</button>`;
 
         } else if (d.tipo === "scarico") {
           if (d.prezzo_unitario_scarico !== null) {
-            // USO formatNumber
             prezzoUnitarioDisplay = `Ø € ${formatNumber(d.prezzo_unitario_scarico)}`;
           }
 
           if (d.prezzo_totale !== null) {
             const costoScarico = -Math.abs(d.prezzo_totale);
-            // USO formatNumber
             prezzoTotaleDisplay = `€ ${formatNumber(costoScarico)}`;
             prezzoTotaleClass = "tipo-scarico";
           }
-           // Pulsante di eliminazione per gli SCARICHI
           deleteButton = `<button class="btn btn-danger btn-small" onclick="eliminaDato(${d.id}, 'scarico')">🗑️ Elimina</button>`;
           
-          // I campi di fattura e fornitore non sono rilevanti per lo scarico, ma li manteniamo vuoti per consistenza.
           fatturaDisplay = "-";
           fornitoreDisplay = "-";
         }
@@ -365,7 +371,7 @@ function renderDati() {
               <td>${dataMovimentoFormatted}</td>
               <td><strong>${d.prodotto_nome}</strong></td>
               <td><span class="tipo-${d.tipo}">${d.tipo.toUpperCase()}</span></td>
-              <td style="text-align: right;">${d.quantita}</td>
+              <td style="text-align: right;"><strong>${d.quantita}</strong></td>
               <td style="text-align: right;">${prezzoUnitarioDisplay}</td>
               <td style="text-align: right;" class="${prezzoTotaleClass}"><strong>${prezzoTotaleDisplay}</strong></td>
               <td style="text-align: center;">${fatturaDisplay}</td>
@@ -386,7 +392,6 @@ async function caricaValoreMagazzino() {
   try {
     const res = await fetch("/api/valore-magazzino");
     const data = await res.json();
-    // USO formatNumber
     document.getElementById("valore-magazzino").textContent = formatNumber(data.valore_totale);
   } catch (err) {
     console.error("Errore caricamento valore:", err);
@@ -413,29 +418,32 @@ function caricaSelectProdotti() {
 async function aggiungiDato() {
   const prodotto_id = document.getElementById("dato-prodotto").value;
   const tipo = document.getElementById("dato-tipo").value;
-  const data_movimento = document.getElementById("dato-data").value; // NUOVO
+  const data_movimento = document.getElementById("dato-data").value;
   const quantita = document.getElementById("dato-quantita").value;
   
-  // Campi specifici del carico
   const prezzo =
     tipo === "carico" ? document.getElementById("dato-prezzo").value : null;
   const fattura_doc = 
-    tipo === "carico" ? document.getElementById("dato-fattura").value.trim() : null; // NUOVO
+    tipo === "carico" ? document.getElementById("dato-fattura").value.trim() : null;
   const fornitore_cliente_id = 
-    tipo === "carico" ? document.getElementById("dato-fornitore").value.trim() : null; // NUOVO
+    tipo === "carico" ? document.getElementById("dato-fornitore").value.trim() : null;
+
+  if (!tipo) {
+    mostraAlert("error", "⚠️ Seleziona il tipo di operazione (Carico/Scarico)", "dati");
+    return;
+  }
 
   if (!prodotto_id || !quantita || !data_movimento) {
-    mostraAlert("error", "Compila prodotto, quantità e data movimento", "dati");
+    mostraAlert("error", "⚠️ Compila prodotto, quantità e data", "dati");
     return;
   }
   
-  // Controllo validità prezzo (anche con la virgola)
   if (tipo === "carico") {
     const prezzoString = String(prezzo).trim();
     if (!prezzoString || (!prezzoString.includes('.') && !prezzoString.includes(',')) || parseFloat(prezzoString.replace(",", ".")) <= 0) {
         mostraAlert(
           "error",
-          "Il prezzo è obbligatorio e deve essere maggiore di 0 per il carico",
+          "⚠️ Il prezzo è obbligatorio per il carico",
           "dati"
         );
         return;
@@ -451,9 +459,9 @@ async function aggiungiDato() {
         tipo, 
         quantita, 
         prezzo, 
-        data_movimento, // NUOVO
-        fattura_doc, // NUOVO
-        fornitore_cliente_id // NUOVO
+        data_movimento,
+        fattura_doc,
+        fornitore_cliente_id
       }),
     });
 
@@ -464,33 +472,32 @@ async function aggiungiDato() {
       return;
     }
 
-    // Pulisci i campi dopo l'inserimento
+    document.getElementById("dato-tipo").value = "";
     document.getElementById("dato-prodotto").value = "";
     document.getElementById("dato-quantita").value = "";
     document.getElementById("dato-prezzo").value = "";
-    document.getElementById("dato-fattura").value = ""; // NUOVO
-    document.getElementById("dato-fornitore").value = ""; // NUOVO
-    setInitialDate(); // Reimposta la data a oggi
+    document.getElementById("dato-fattura").value = "";
+    document.getElementById("dato-fornitore").value = "";
+    setInitialDate();
+    toggleCaricoFields(); // Nasconde i campi dopo il reset
 
-    mostraAlert("success", "Dato aggiunto con successo", "dati");
+    mostraAlert("success", "✅ Movimento registrato con successo", "dati");
     await refreshAllData();
   } catch (err) {
     mostraAlert("error", "Errore durante l'aggiunta", "dati");
   }
 }
 
-// Nuova funzione per l'eliminazione dei carichi e scarichi
 async function eliminaDato(id, tipo) {
   let messaggioConferma;
   
   if (tipo === 'carico') {
-      messaggioConferma = "ATTENZIONE: Stai per eliminare un movimento di CARICO. L'eliminazione è consentita SOLO se il lotto non è stato utilizzato. Sei sicuro?";
+      messaggioConferma = "⚠️ ATTENZIONE: Stai per eliminare un CARICO. L'eliminazione è consentita SOLO se il lotto non è stato utilizzato. Confermi?";
   } else if (tipo === 'scarico') {
-      messaggioConferma = "ATTENZIONE: Stai per eliminare un movimento di SCARICO. Questa operazione annullerà lo scarico ripristinando la quantità ai lotti da cui è stata prelevata (dal più recente). L'uso di questa funzione richiede CAUTELA. Sei sicuro?";
+      messaggioConferma = "⚠️ ATTENZIONE: Stai per annullare uno SCARICO. Questa operazione ripristinerà la quantità ai lotti. Confermi?";
   } else {
       messaggioConferma = "Sei sicuro di voler eliminare questo movimento?";
   }
-
 
   if (!confirm(messaggioConferma)) {
     return;
@@ -506,7 +513,7 @@ async function eliminaDato(id, tipo) {
     if (!res.ok) {
       mostraAlert(
         "error",
-        data.error || "Errore durante l'eliminazione del movimento",
+        data.error || "Errore durante l'eliminazione",
         "dati"
       );
       return;
@@ -514,7 +521,7 @@ async function eliminaDato(id, tipo) {
 
     mostraAlert(
       "success",
-      data.message || "Movimento eliminato con successo",
+      data.message || "✅ Movimento eliminato con successo",
       "dati"
     );
     refreshAllData();
@@ -523,7 +530,7 @@ async function eliminaDato(id, tipo) {
   }
 }
 
-// ===== RIEPILOGO - AGGIORNATE le colonne nel dettaglio lotti =====
+// ===== RIEPILOGO =====
 async function caricaRiepilogo() {
   try {
     const res = await fetch("/api/riepilogo");
@@ -541,7 +548,7 @@ function renderRiepilogo(riepilogo) {
   if (riepilogo.length === 0) {
     tbody.innerHTML =
       '<tr><td colspan="4" class="empty-state">Nessun prodotto in magazzino</td></tr>';
-    document.getElementById("valore-magazzino-riepilogo").textContent = "0,00"; // Aggiornato a 0,00
+    document.getElementById("valore-magazzino-riepilogo").textContent = "0,00";
   } else {
     let totaleGenerale = 0;
 
@@ -552,10 +559,10 @@ function renderRiepilogo(riepilogo) {
         return `
             <tr>
               <td><strong>${r.nome}</strong></td>
-              <td style="text-align: center;" class="giacenza ${
-                r.giacenza > 0 ? "positiva" : "zero"
-              }">
-                ${r.giacenza}
+              <td style="text-align: center;">
+                <span class="giacenza ${r.giacenza > 0 ? "positiva" : "zero"}">
+                  ${r.giacenza}
+                </span>
               </td>
               <td style="text-align: right;">
                 <strong>€ ${formatNumber(r.valore_totale)}</strong>
@@ -564,7 +571,7 @@ function renderRiepilogo(riepilogo) {
                 <button class="btn btn-primary btn-small" onclick="mostraDettaglioLotti(${
                   r.id
                 }, '${r.nome.replace(/'/g, "\\'")}')">
-                  📦 Vedi Lotti
+                  🔍 Lotti
                 </button>
               </td>
             </tr>
@@ -572,7 +579,6 @@ function renderRiepilogo(riepilogo) {
       })
       .join("");
 
-    // USO formatNumber
     document.getElementById("valore-magazzino-riepilogo").textContent =
       formatNumber(totaleGenerale);
   }
@@ -620,9 +626,9 @@ function renderDettaglioLotti(lotti) {
               <td>${dataFormatted}</td>
               <td style="text-align: center;">${fatturaDisplay}</td>
               <td style="text-align: center;">${fornitoreDisplay}</td>
-              <td style="text-align: right;" class="giacenza positiva">${
-                l.quantita_rimanente
-              }</td>
+              <td style="text-align: right;">
+                <span class="giacenza positiva">${l.quantita_rimanente}</span>
+              </td>
               <td style="text-align: right;">€ ${formatNumber(l.prezzo)}</td>
               <td style="text-align: right;"><strong>€ ${formatNumber(valoreLotto)}</strong></td>
             </tr>
