@@ -14,7 +14,7 @@ app.use(express.json());
 // Database locale SQLite
 const db = new sqlite3.Database("./magazzino.db");
 
-// Creazione tabelle (immutato)
+// Creazione tabelle (AGGIORNATE per fattura, fornitore e data_movimento)
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS prodotti (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,7 +28,10 @@ db.serialize(() => {
     quantita INTEGER NOT NULL CHECK(quantita > 0),
     prezzo REAL, /* Prezzo unitario per il carico, NULL per lo scarico */
     prezzo_totale_movimento REAL, /* Valore totale del carico (Qta*Prezzo) o scarico (costo FIFO) */
-    data TEXT NOT NULL,
+    data_movimento TEXT NOT NULL, /* La data inserita dall'utente */
+    data_registrazione TEXT NOT NULL, /* La data/ora di inserimento nel sistema (per ordinamento dati) */
+    fattura_doc TEXT, /* Numero di fattura/documento (solo per carico) */
+    fornitore_cliente_id TEXT, /* ID fornitore/cliente (solo per carico) */
     FOREIGN KEY(prodotto_id) REFERENCES prodotti(id)
   )`);
 
@@ -38,14 +41,17 @@ db.serialize(() => {
     quantita_iniziale INTEGER NOT NULL,
     quantita_rimanente INTEGER NOT NULL,
     prezzo REAL NOT NULL,
-    data_carico TEXT NOT NULL,
+    data_carico TEXT NOT NULL, /* Data inserita dall'utente */
+    data_registrazione TEXT NOT NULL, /* Data/ora di registrazione effettiva (per FIFO) */
+    fattura_doc TEXT,
+    fornitore_cliente_id TEXT,
     FOREIGN KEY(prodotto_id) REFERENCES prodotti(id)
   )`);
 });
 
 app.use(express.static(path.join(__dirname, "../frontend")));
 
-// ===== PRODOTTI (CRUD) =====
+// ===== PRODOTTI (CRUD) - Nessuna modifica se non nell'ordinamento =====
 app.get("/api/prodotti", (req, res) => {
   const query = `
     SELECT 
@@ -209,10 +215,13 @@ app.get("/api/dati", (req, res) => {
       d.prezzo,
       d.prezzo_totale_movimento as prezzo_totale,
       CASE WHEN d.tipo = 'scarico' AND d.prezzo_totale_movimento IS NOT NULL AND d.quantita > 0 THEN d.prezzo_totale_movimento / d.quantita ELSE NULL END as prezzo_unitario_scarico,
-      d.data
+      d.data_movimento,
+      d.data_registrazione,
+      d.fattura_doc,
+      d.fornitore_cliente_id
     FROM dati d
     JOIN prodotti p ON d.prodotto_id = p.id
-    ORDER BY d.data DESC, d.id DESC
+    ORDER BY d.data_registrazione DESC, d.id DESC
   `;
   db.all(query, (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -260,10 +269,12 @@ app.get("/api/lotti/:prodotto_id", (req, res) => {
       id,
       quantita_rimanente,
       prezzo,
-      data_carico
+      data_carico,
+      fattura_doc,
+      fornitore_cliente_id
     FROM lotti
     WHERE prodotto_id = ? AND quantita_rimanente > 0
-    ORDER BY data_carico ASC
+    ORDER BY data_registrazione ASC
   `;
 
   db.all(query, [prodotto_id], (err, rows) => {
@@ -273,12 +284,18 @@ app.get("/api/lotti/:prodotto_id", (req, res) => {
 });
 
 app.post("/api/dati", (req, res) => {
-  const { prodotto_id, tipo, quantita, prezzo } = req.body;
+  // Aggiunti i nuovi campi: data_movimento, fattura_doc, fornitore_cliente_id
+  const { prodotto_id, tipo, quantita, prezzo, data_movimento, fattura_doc, fornitore_cliente_id } = req.body;
 
-  if (!prodotto_id || !tipo || !quantita) {
+  if (!prodotto_id || !tipo || !quantita || !data_movimento) {
     return res
       .status(400)
-      .json({ error: "Prodotto, tipo e quantità sono obbligatori" });
+      .json({ error: "Prodotto, tipo, quantità e data movimento sono obbligatori" });
+  }
+  
+  // Validazione data (solo formato YYYY-MM-DD)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(data_movimento)) {
+    return res.status(400).json({ error: "Formato data non valido (YYYY-MM-DD)" });
   }
 
   const qty = parseInt(quantita);
@@ -288,9 +305,11 @@ app.post("/api/dati", (req, res) => {
       .status(400)
       .json({ error: "Quantità deve essere maggiore di 0" });
   }
+  
+  const data_registrazione = new Date().toISOString(); // Data/ora reale di inserimento
 
   if (tipo === "carico") {
-    // MODIFICA: Prepara la stringa del prezzo per l'analisi, sostituendo la virgola con il punto
+    
     let prezzoString = String(prezzo).replace(",", ".");
     const prc = parseFloat(prezzoString); 
 
@@ -301,17 +320,18 @@ app.post("/api/dati", (req, res) => {
     }
 
     const prezzoTotale = prc * qty;
-    const data = new Date().toISOString();
-
+    
+    // Inserimento in `dati`
     db.run(
-      "INSERT INTO dati (prodotto_id, tipo, quantita, prezzo, prezzo_totale_movimento, data) VALUES (?, ?, ?, ?, ?, ?)",
-      [prodotto_id, tipo, qty, prc, prezzoTotale, data],
+      "INSERT INTO dati (prodotto_id, tipo, quantita, prezzo, prezzo_totale_movimento, data_movimento, data_registrazione, fattura_doc, fornitore_cliente_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [prodotto_id, tipo, qty, prc, prezzoTotale, data_movimento, data_registrazione, fattura_doc, fornitore_cliente_id],
       function (err) {
         if (err) return res.status(500).json({ error: err.message });
 
+        // Inserimento in `lotti`
         db.run(
-          "INSERT INTO lotti (prodotto_id, quantita_iniziale, quantita_rimanente, prezzo, data_carico) VALUES (?, ?, ?, ?, ?)",
-          [prodotto_id, qty, qty, prc, data],
+          "INSERT INTO lotti (prodotto_id, quantita_iniziale, quantita_rimanente, prezzo, data_carico, data_registrazione, fattura_doc, fornitore_cliente_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+          [prodotto_id, qty, qty, prc, data_movimento, data_registrazione, fattura_doc, fornitore_cliente_id],
           function (err) {
             if (err) return res.status(500).json({ error: err.message });
             res.json({ id: this.lastID });
@@ -320,9 +340,9 @@ app.post("/api/dati", (req, res) => {
       }
     );
   } else {
-    // SCARICO - usa FIFO per scaricare dai lotti più vecchi
+    // SCARICO - usa FIFO per scaricare dai lotti più vecchi (ordinati per data_registrazione)
     db.all(
-      "SELECT id, quantita_rimanente, prezzo FROM lotti WHERE prodotto_id = ? AND quantita_rimanente > 0 ORDER BY data_carico ASC",
+      "SELECT id, quantita_rimanente, prezzo FROM lotti WHERE prodotto_id = ? AND quantita_rimanente > 0 ORDER BY data_registrazione ASC",
       [prodotto_id],
       (err, lotti) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -364,16 +384,16 @@ app.post("/api/dati", (req, res) => {
         }
 
         db.serialize(() => {
-          const data = new Date().toISOString();
-
+          // Inserimento in `dati`
           db.run(
-            "INSERT INTO dati (prodotto_id, tipo, quantita, prezzo, prezzo_totale_movimento, data) VALUES (?, ?, ?, ?, ?, ?)",
-            [prodotto_id, tipo, qty, null, costoTotaleScarico, data],
+            "INSERT INTO dati (prodotto_id, tipo, quantita, prezzo, prezzo_totale_movimento, data_movimento, data_registrazione) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            [prodotto_id, tipo, qty, null, costoTotaleScarico, data_movimento, data_registrazione],
             function (err) {
               if (err) return res.status(500).json({ error: err.message });
             }
           );
 
+          // Aggiornamento `lotti`
           updates.forEach((u) => {
             db.run("UPDATE lotti SET quantita_rimanente = ? WHERE id = ?", [
               u.nuova_quantita,
@@ -395,9 +415,9 @@ app.delete("/api/dati/:id", (req, res) => {
   db.serialize(() => {
     db.run("BEGIN TRANSACTION;");
 
-    // 1. Recupera il movimento da eliminare
+    // 1. Recupera il movimento da eliminare (usiamo la data di registrazione per l'identificazione univoca del lotto)
     db.get(
-      "SELECT prodotto_id, tipo, quantita, data FROM dati WHERE id = ?",
+      "SELECT prodotto_id, tipo, quantita, data_movimento, data_registrazione FROM dati WHERE id = ?",
       [id],
       (err, movimento) => {
         if (err) {
@@ -409,7 +429,7 @@ app.delete("/api/dati/:id", (req, res) => {
           return res.status(404).json({ error: "Movimento non trovato" });
         }
 
-        const { prodotto_id, tipo, quantita, data } = movimento;
+        const { prodotto_id, tipo, quantita, data_movimento, data_registrazione } = movimento;
 
         if (tipo === "carico") {
           // --- Logica di Eliminazione CARICO ---
@@ -418,14 +438,14 @@ app.delete("/api/dati/:id", (req, res) => {
             FROM lotti
             WHERE prodotto_id = ? 
             AND quantita_iniziale = ? 
-            AND data_carico = ?
+            AND data_registrazione = ?
             ORDER BY id DESC 
             LIMIT 1
           `;
 
           db.get(
             lottoQuery,
-            [prodotto_id, quantita, data],
+            [prodotto_id, quantita, data_registrazione],
             (err, lotto) => {
               if (err) {
                 db.run("ROLLBACK;");
@@ -484,12 +504,12 @@ app.delete("/api/dati/:id", (req, res) => {
           
           let qtaDaRipristinare = quantita;
           
-          // Cerca i lotti in ordine inverso (dal più recente) per ripristinare la quantità
+          // Cerca i lotti in ordine inverso (dal più recente, basato su data_registrazione) per ripristinare la quantità
           const lottiQuery = `
             SELECT id, quantita_iniziale, quantita_rimanente 
             FROM lotti 
             WHERE prodotto_id = ? 
-            ORDER BY data_carico DESC
+            ORDER BY data_registrazione DESC
           `;
 
           db.all(lottiQuery, [prodotto_id], (err, lotti) => {

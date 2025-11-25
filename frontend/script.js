@@ -15,6 +15,12 @@ function formatNumber(value) {
   });
 }
 
+// Funzione per impostare la data corrente (oggi) al caricamento della pagina
+function setInitialDate() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById("dato-data").value = today;
+}
+
 // Funzione centrale per aggiornare tutti i dati
 async function refreshAllData() {
   console.log("Aggiornamento automatico di tutte le sezioni...");
@@ -67,8 +73,9 @@ function checkUrlHashAndSwitch() {
 
 // Inizializzazione: Chiama la funzione di refresh completa all'avvio E controlla l'URL
 document.addEventListener("DOMContentLoaded", () => {
+  setInitialDate(); // Imposta la data iniziale
   checkUrlHashAndSwitch();
-  togglePrezzo();
+  toggleCaricoFields(); // RINOMINATA E MODIFICATA
 });
 
 // Switch tra tabs e aggiorna l'URL hash
@@ -80,19 +87,37 @@ function switchTab(tab) {
   forceSwitchTab(tab);
 }
 
-// Toggle campo prezzo
-function togglePrezzo() {
+// Toggle campi di Carico (Prezzo, Fattura, Fornitore)
+function toggleCaricoFields() {
   const tipo = document.getElementById("dato-tipo").value;
+  
   const prezzoGroup = document.getElementById("prezzo-group");
   const prezzoInput = document.getElementById("dato-prezzo");
+  const fatturaGroup = document.getElementById("fattura-group");
+  const fatturaInput = document.getElementById("dato-fattura");
+  const fornitoreGroup = document.getElementById("fornitore-group");
+  const fornitoreInput = document.getElementById("dato-fornitore");
+
 
   if (tipo === "scarico") {
+    // Nasconde e svuota i campi specifici del carico
     prezzoGroup.classList.add("hidden");
     prezzoInput.value = "";
     prezzoInput.removeAttribute("required");
+
+    fatturaGroup.classList.add("hidden");
+    fatturaInput.value = "";
+
+    fornitoreGroup.classList.add("hidden");
+    fornitoreInput.value = "";
+    
   } else {
+    // Mostra e imposta i campi specifici del carico
     prezzoGroup.classList.remove("hidden");
     prezzoInput.setAttribute("required", "required");
+
+    fatturaGroup.classList.remove("hidden");
+    fornitoreGroup.classList.remove("hidden");
   }
 }
 
@@ -103,7 +128,7 @@ function mostraAlert(tipo, messaggio, sezione) {
   setTimeout(() => (alertDiv.innerHTML = ""), 3000);
 }
 
-// ===== PRODOTTI (CRUD) =====
+// ===== PRODOTTI (CRUD) - Nessuna modifica al codice qui sotto =====
 async function caricaProdotti() {
   try {
     const res = await fetch("/api/prodotti");
@@ -268,7 +293,7 @@ async function eliminaProdotto(id) {
   }
 }
 
-// ===== DATI (CARICO/SCARICO) =====
+// ===== DATI (CARICO/SCARICO) - AGGIORNATE =====
 async function caricaDati() {
   try {
     const res = await fetch("/api/dati");
@@ -278,7 +303,7 @@ async function caricaDati() {
     console.error("Errore caricamento dati:", err);
     const tbody = document.getElementById("dati-body");
     tbody.innerHTML =
-      '<tr><td colspan="7" class="empty-state" style="color: #e74c3c;">Errore nel caricamento dei dati dal server.</td></tr>';
+      '<tr><td colspan="9" class="empty-state" style="color: #e74c3c;">Errore nel caricamento dei dati dal server.</td></tr>';
   }
 }
 
@@ -287,16 +312,20 @@ function renderDati() {
 
   if (dati.length === 0) {
     tbody.innerHTML =
-      '<tr><td colspan="7" class="empty-state">Nessun movimento presente</td></tr>';
+      '<tr><td colspan="9" class="empty-state">Nessun movimento presente</td></tr>';
   } else {
     tbody.innerHTML = dati
       .map((d) => {
-        const dataFormatted = new Date(d.data).toLocaleString("it-IT");
+        // La data da mostrare è quella di MOVIMENTO (inserita dall'utente)
+        const dataMovimentoFormatted = new Date(d.data_movimento).toLocaleDateString("it-IT");
 
         let prezzoUnitarioDisplay = "-";
         let prezzoTotaleDisplay = "-";
         let prezzoTotaleClass = "";
         let deleteButton = ""; 
+        let fatturaDisplay = d.fattura_doc || "-";
+        let fornitoreDisplay = d.fornitore_cliente_id || "-";
+
 
         if (d.tipo === "carico") {
           if (d.prezzo !== null) {
@@ -325,18 +354,22 @@ function renderDati() {
           }
            // Pulsante di eliminazione per gli SCARICHI
           deleteButton = `<button class="btn btn-danger btn-small" onclick="eliminaDato(${d.id}, 'scarico')">🗑️ Elimina</button>`;
+          
+          // I campi di fattura e fornitore non sono rilevanti per lo scarico, ma li manteniamo vuoti per consistenza.
+          fatturaDisplay = "-";
+          fornitoreDisplay = "-";
         }
 
         return `
             <tr>
-              <td>${dataFormatted}</td>
+              <td>${dataMovimentoFormatted}</td>
               <td><strong>${d.prodotto_nome}</strong></td>
-              <td><span class="tipo-${
-                d.tipo
-              }">${d.tipo.toUpperCase()}</span></td>
+              <td><span class="tipo-${d.tipo}">${d.tipo.toUpperCase()}</span></td>
               <td style="text-align: right;">${d.quantita}</td>
               <td style="text-align: right;">${prezzoUnitarioDisplay}</td>
               <td style="text-align: right;" class="${prezzoTotaleClass}"><strong>${prezzoTotaleDisplay}</strong></td>
+              <td style="text-align: center;">${fatturaDisplay}</td>
+              <td style="text-align: center;">${fornitoreDisplay}</td>
               <td style="text-align: center;">
                 <div class="actions">${deleteButton}</div>
               </td>
@@ -380,16 +413,23 @@ function caricaSelectProdotti() {
 async function aggiungiDato() {
   const prodotto_id = document.getElementById("dato-prodotto").value;
   const tipo = document.getElementById("dato-tipo").value;
+  const data_movimento = document.getElementById("dato-data").value; // NUOVO
   const quantita = document.getElementById("dato-quantita").value;
+  
+  // Campi specifici del carico
   const prezzo =
     tipo === "carico" ? document.getElementById("dato-prezzo").value : null;
+  const fattura_doc = 
+    tipo === "carico" ? document.getElementById("dato-fattura").value.trim() : null; // NUOVO
+  const fornitore_cliente_id = 
+    tipo === "carico" ? document.getElementById("dato-fornitore").value.trim() : null; // NUOVO
 
-  if (!prodotto_id || !quantita) {
-    mostraAlert("error", "Compila prodotto e quantità", "dati");
+  if (!prodotto_id || !quantita || !data_movimento) {
+    mostraAlert("error", "Compila prodotto, quantità e data movimento", "dati");
     return;
   }
   
-  // Controllo validità prezzo anche con la virgola (il server farà il parsing)
+  // Controllo validità prezzo (anche con la virgola)
   if (tipo === "carico") {
     const prezzoString = String(prezzo).trim();
     if (!prezzoString || (!prezzoString.includes('.') && !prezzoString.includes(',')) || parseFloat(prezzoString.replace(",", ".")) <= 0) {
@@ -406,7 +446,15 @@ async function aggiungiDato() {
     const res = await fetch("/api/dati", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prodotto_id, tipo, quantita, prezzo }),
+      body: JSON.stringify({ 
+        prodotto_id, 
+        tipo, 
+        quantita, 
+        prezzo, 
+        data_movimento, // NUOVO
+        fattura_doc, // NUOVO
+        fornitore_cliente_id // NUOVO
+      }),
     });
 
     const data = await res.json();
@@ -416,9 +464,13 @@ async function aggiungiDato() {
       return;
     }
 
+    // Pulisci i campi dopo l'inserimento
     document.getElementById("dato-prodotto").value = "";
     document.getElementById("dato-quantita").value = "";
     document.getElementById("dato-prezzo").value = "";
+    document.getElementById("dato-fattura").value = ""; // NUOVO
+    document.getElementById("dato-fornitore").value = ""; // NUOVO
+    setInitialDate(); // Reimposta la data a oggi
 
     mostraAlert("success", "Dato aggiunto con successo", "dati");
     await refreshAllData();
@@ -471,7 +523,7 @@ async function eliminaDato(id, tipo) {
   }
 }
 
-// ===== RIEPILOGO =====
+// ===== RIEPILOGO - AGGIORNATE le colonne nel dettaglio lotti =====
 async function caricaRiepilogo() {
   try {
     const res = await fetch("/api/riepilogo");
@@ -554,16 +606,20 @@ function renderDettaglioLotti(lotti) {
 
   if (lotti.length === 0) {
     tbody.innerHTML =
-      '<tr><td colspan="4" class="empty-state">Nessun lotto disponibile</td></tr>';
+      '<tr><td colspan="6" class="empty-state">Nessun lotto disponibile</td></tr>';
   } else {
     tbody.innerHTML = lotti
       .map((l) => {
-        const dataFormatted = new Date(l.data_carico).toLocaleString("it-IT");
+        const dataFormatted = new Date(l.data_carico).toLocaleDateString("it-IT");
         const valoreLotto = l.quantita_rimanente * l.prezzo;
+        const fatturaDisplay = l.fattura_doc || "-";
+        const fornitoreDisplay = l.fornitore_cliente_id || "-";
 
         return `
             <tr>
               <td>${dataFormatted}</td>
+              <td style="text-align: center;">${fatturaDisplay}</td>
+              <td style="text-align: center;">${fornitoreDisplay}</td>
               <td style="text-align: right;" class="giacenza positiva">${
                 l.quantita_rimanente
               }</td>

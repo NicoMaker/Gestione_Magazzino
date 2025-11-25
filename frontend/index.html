@@ -58,27 +58,42 @@
         
         <div id="dati-alert"></div>
         
-        <div class="form-inline">
+        <div class="form-inline multi-row">
           <div class="form-group">
-            <label for="dato-prodotto">Prodotto</label>
-            <select id="dato-prodotto">
-              <option value="">Seleziona prodotto...</option>
-            </select>
+            <label for="dato-data">Data Movimento</label>
+            <input type="date" id="dato-data" required>
           </div>
           <div class="form-group">
             <label for="dato-tipo">Tipo</label>
-            <select id="dato-tipo" onchange="togglePrezzo()">
+            <select id="dato-tipo" onchange="toggleCaricoFields()">
               <option value="carico">Carico</option>
               <option value="scarico">Scarico</option>
             </select>
           </div>
+          <div class="form-group" id="fattura-group">
+            <label for="dato-fattura">N. Fattura / Documento</label>
+            <input type="text" id="dato-fattura" placeholder="N. Fattura (solo Carico)">
+          </div>
+          <div class="form-group" id="fornitore-group">
+            <label for="dato-fornitore">ID Fornitore / Cliente</label>
+            <input type="text" id="dato-fornitore" placeholder="ID (solo Carico)">
+          </div>
+        </div>
+        
+        <div class="form-inline">
+          <div class="form-group" style="flex: 2;">
+            <label for="dato-prodotto">Prodotto</label>
+            <select id="dato-prodotto" required>
+              <option value="">Seleziona prodotto...</option>
+            </select>
+          </div>
           <div class="form-group">
             <label for="dato-quantita">Quantità</label>
-            <input type="number" id="dato-quantita" min="1" placeholder="Quantità">
+            <input type="number" id="dato-quantita" min="1" placeholder="Quantità" required>
           </div>
           <div class="form-group" id="prezzo-group">
             <label for="dato-prezzo">Prezzo Unitario € <span style="color: #e74c3c;">*</span></label>
-            <input type="number" id="dato-prezzo" step="0.01" min="0.01" placeholder="Prezzo Unitario">
+            <input type="number" id="dato-prezzo" step="0.01" min="0.01" placeholder="Prezzo Unitario" required>
           </div>
           <button class="btn btn-success" onclick="aggiungiDato()">+ Aggiungi</button>
         </div>
@@ -86,13 +101,15 @@
         <table id="dati-table">
           <thead>
             <tr>
-              <th>Data</th>
+              <th>Data Movim.</th>
               <th>Prodotto</th>
               <th>Tipo</th>
               <th style="text-align: right;">Quantità</th>
               <th style="text-align: right;">Prezzo Unitario €</th>
               <th style="text-align: right;">Prezzo Totale €</th>
-              <th style="text-align: center;">Note</th>
+              <th style="text-align: center;">Fattura</th>
+              <th style="text-align: center;">Fornitore</th>
+              <th style="text-align: center;">Azioni</th>
             </tr>
           </thead>
           <tbody id="dati-body">
@@ -141,6 +158,8 @@
           <thead>
             <tr>
               <th>Data Carico</th>
+              <th style="text-align: center;">Fattura</th>
+              <th style="text-align: center;">Fornitore</th>
               <th style="text-align: right;">Quantità Rimanente</th>
               <th style="text-align: right;">Prezzo Unitario €</th>
               <th style="text-align: right;">Valore Lotto €</th>
