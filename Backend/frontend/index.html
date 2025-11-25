@@ -390,7 +390,7 @@
               <th style="text-align: right;">Quantità</th>
               <th style="text-align: right;">Prezzo Unitario €</th>
               <th style="text-align: right;">Prezzo Totale €</th>
-              <th style="text-align: center;">Azioni</th>
+              <th style="text-align: center;">Note</th>
             </tr>
           </thead>
           <tbody id="dati-body">
@@ -763,9 +763,7 @@
               <td style="text-align: right;">${prezzoUnitarioDisplay}</td>
               <td style="text-align: right;" class="${prezzoTotaleClass}"><strong>${prezzoTotaleDisplay}</strong></td>
               <td style="text-align: center;">
-                <button class="btn btn-danger btn-small" onclick="eliminaDato(${d.id})">
-                  🗑️ Elimina
-                </button>
+                <span style="color: #c0392b; font-size: 10px;">(Bloccato)</span>
               </td>
             </tr>
           `;
@@ -788,6 +786,7 @@
     function caricaSelectProdotti() {
       const select = document.getElementById('dato-prodotto');
       select.innerHTML = '<option value="">Seleziona prodotto...</option>' +
+        // Già corretto per mostrare la giacenza
         prodotti.map(p => `<option value="${p.id}">${p.nome} (Giacenza: ${p.giacenza})</option>`).join('');
     }
     
