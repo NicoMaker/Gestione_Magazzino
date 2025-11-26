@@ -1,8 +1,10 @@
+// routes/magazzino.js
+
 const express = require("express");
 const router = express.Router();
 const { db } = require("../db/init");
 
-// GET - Valore totale del magazzino
+// GET - Valore totale del magazzino (FIFO)
 router.get("/valore-magazzino", (req, res) => {
   const query = `
     SELECT COALESCE(SUM(quantita_rimanente * prezzo), 0) as valore_totale
@@ -16,7 +18,7 @@ router.get("/valore-magazzino", (req, res) => {
   });
 });
 
-// GET - Riepilogo per prodotto
+// GET - Riepilogo per prodotto (Giacenza e Valore Totale FIFO)
 router.get("/riepilogo", (req, res) => {
   const query = `
     SELECT 
@@ -37,26 +39,27 @@ router.get("/riepilogo", (req, res) => {
   });
 });
 
-// GET - Lotti per prodotto specifico
-router.get("/lotti/:prodotto_id", (req, res) => {
-  const { prodotto_id } = req.params;
-  const query = `
-    SELECT 
-      id,
-      quantita_rimanente,
-      prezzo,
-      data_carico,
-      fattura_doc,
-      fornitore_cliente_id
-    FROM lotti
-    WHERE prodotto_id = ? AND quantita_rimanente > 0
-    ORDER BY data_registrazione ASC
-  `;
+// GET - Dettaglio Lotti per Prodotto (FIFO Order)
+router.get("/riepilogo/:prodottoId", (req, res) => {
+    const { prodottoId } = req.params;
 
-  db.all(query, [prodotto_id], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(rows);
-  });
+    const query = `
+      SELECT
+        id,
+        quantita_rimanente,
+        prezzo,
+        data_carico,
+        fattura_doc
+      FROM lotti
+      WHERE prodotto_id = ? AND quantita_rimanente > 0
+      ORDER BY data_carico ASC, id ASC
+    `;
+
+    db.all(query, [prodottoId], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
 });
+
 
 module.exports = router;

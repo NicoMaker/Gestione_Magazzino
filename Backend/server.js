@@ -13,13 +13,14 @@ const authRoutes = require("./routes/auth");
 const prodottiRoutes = require("./routes/prodotti");
 const datiRoutes = require("./routes/dati");
 const magazzinoRoutes = require("./routes/magazzino");
-const utentiRoutes = require("./routes/utenti"); // <-- route utenti
+const utentiRoutes = require("./routes/utenti"); 
 
 const PORT = 3000;
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+// Assumendo che i file frontend siano nella cartella ../frontend
 app.use(express.static(path.join(__dirname, "../frontend")));
 
 // Inizializza database
@@ -29,8 +30,8 @@ initDatabase();
 app.use("/api/auth", authRoutes);
 app.use("/api/prodotti", prodottiRoutes);
 app.use("/api/dati", datiRoutes);
-app.use("/api", magazzinoRoutes);
-app.use("/api/utenti", utentiRoutes); // <-- utenti
+app.use("/api", magazzinoRoutes); // Rotte /api/valore-magazzino e /api/riepilogo
+app.use("/api/utenti", utentiRoutes); 
 
 // Avvio server e apertura browser
 app.listen(PORT, () => {
@@ -48,14 +49,7 @@ app.listen(PORT, () => {
       break;
     default:
       cmd = `xdg-open ${url}`;
+      break;
   }
-
-  exec(cmd, (err) => {
-    if (err) {
-      console.warn(
-        "Non è stato possibile aprire automaticamente il browser:",
-        err
-      );
-    }
-  });
+  exec(cmd);
 });

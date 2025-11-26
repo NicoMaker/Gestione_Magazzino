@@ -1,3 +1,5 @@
+// db/init.js
+
 const sqlite3 = require("sqlite3").verbose();
 const bcrypt = require("bcrypt");
 const path = require("path");
@@ -23,12 +25,12 @@ async function initDatabase() {
       )
     `);
 
-    // Tabella dati
+    // Tabella dati (movimenti)
     db.run(`
       CREATE TABLE IF NOT EXISTS dati (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        prodotto_id INTEGER,
-        tipo TEXT CHECK(tipo IN ('carico', 'scarico')),
+        prodotto_id INTEGER NOT NULL,
+        tipo TEXT CHECK(tipo IN ('carico', 'scarico')) NOT NULL,
         quantita INTEGER NOT NULL CHECK(quantita > 0),
         prezzo REAL,
         prezzo_totale_movimento REAL,
@@ -40,23 +42,25 @@ async function initDatabase() {
       )
     `);
 
-    // Tabella lotti
+    // Tabella lotti (per la gestione FIFO)
     db.run(`
       CREATE TABLE IF NOT EXISTS lotti (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        prodotto_id INTEGER,
-        quantita_iniziale INTEGER NOT NULL,
-        quantita_rimanente INTEGER NOT NULL,
+        prodotto_id INTEGER NOT NULL,
+        quantita_iniziale INTEGER NOT NULL CHECK(quantita_iniziale > 0),
+        quantita_rimanente INTEGER NOT NULL CHECK(quantita_rimanente >= 0),
         prezzo REAL NOT NULL,
         data_carico TEXT NOT NULL,
         data_registrazione TEXT NOT NULL,
         fattura_doc TEXT,
         fornitore_cliente_id TEXT,
-        FOREIGN KEY(prodotto_id) REFERENCES prodotti(id)
+        dati_id INTEGER,
+        FOREIGN KEY(prodotto_id) REFERENCES prodotti(id),
+        FOREIGN KEY(dati_id) REFERENCES dati(id)
       )
     `);
 
-    // Tabella users per autenticazione
+    // Tabella utenti
     db.run(
       `
       CREATE TABLE IF NOT EXISTS users (

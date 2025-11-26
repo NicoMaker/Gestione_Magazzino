@@ -1,3 +1,5 @@
+// routes/dati.js (Modificato)
+
 const express = require("express");
 const router = express.Router();
 const { db } = require("../db/init");
@@ -65,22 +67,32 @@ router.post("/", (req, res) => {
 
     const prezzoTotale = prc * qty;
     
-    db.run(
-      "INSERT INTO dati (prodotto_id, tipo, quantita, prezzo, prezzo_totale_movimento, data_movimento, data_registrazione, fattura_doc, fornitore_cliente_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [prodotto_id, tipo, qty, prc, prezzoTotale, data_movimento, data_registrazione, fattura_doc, fornitore_cliente_id],
-      function (err) {
-        if (err) return res.status(500).json({ error: err.message });
+    // Transazione per garantire l'atomicità tra l'inserimento del movimento e la creazione del lotto
+    db.serialize(() => {
+      db.run("BEGIN TRANSACTION;");
 
-        db.run(
-          "INSERT INTO lotti (prodotto_id, quantita_iniziale, quantita_rimanente, prezzo, data_carico, data_registrazione, fattura_doc, fornitore_cliente_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-          [prodotto_id, qty, qty, prc, data_movimento, data_registrazione, fattura_doc, fornitore_cliente_id],
-          function (err) {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json({ id: this.lastID });
-          }
-        );
-      }
-    );
+      // 1. Inserimento Movimento (dati)
+      db.run(
+        "INSERT INTO dati (prodotto_id, tipo, quantita, prezzo, prezzo_totale_movimento, data_movimento, data_registrazione, fattura_doc, fornitore_cliente_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [prodotto_id, tipo, qty, prc, prezzoTotale, data_movimento, data_registrazione, fattura_doc, fornitore_cliente_id],
+        function (err) {
+          if (err) { db.run("ROLLBACK;"); return res.status(500).json({ error: err.message }); }
+          const dati_id = this.lastID; // ID del movimento appena creato
+
+          // 2. Inserimento Lotto (lotti)
+          db.run(
+            "INSERT INTO lotti (prodotto_id, quantita_iniziale, quantita_rimanente, prezzo, data_carico, data_registrazione, fattura_doc, fornitore_cliente_id, dati_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [prodotto_id, qty, qty, prc, data_movimento, data_registrazione, fattura_doc, fornitore_cliente_id, dati_id],
+            function (err) {
+              if (err) { db.run("ROLLBACK;"); return res.status(500).json({ error: err.message }); }
+              db.run("COMMIT;");
+              res.json({ id: dati_id, lotto_id: this.lastID });
+            }
+          );
+        }
+      );
+    });
+
   } else {
     // SCARICO - usa FIFO
     db.all(
@@ -123,23 +135,46 @@ router.post("/", (req, res) => {
           daScaricare -= qtaDaQuestoLotto;
         }
 
-        db.serialize(() => {
+        db.serialize(() => { // Transazione per garantire l'aggiornamento dei lotti e l'inserimento del movimento
+          db.run("BEGIN TRANSACTION;");
+
+          // 1. Inserimento Movimento (dati)
           db.run(
-            "INSERT INTO dati (prodotto_id, tipo, quantita, prezzo, prezzo_totale_movimento, data_movimento, data_registrazione) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            [prodotto_id, tipo, qty, null, costoTotaleScarico, data_movimento, data_registrazione],
+            "INSERT INTO dati (prodotto_id, tipo, quantita, prezzo, prezzo_totale_movimento, data_movimento, data_registrazione, fattura_doc, fornitore_cliente_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [prodotto_id, tipo, qty, null, costoTotaleScarico, data_movimento, data_registrazione, fattura_doc, fornitore_cliente_id],
             function (err) {
-              if (err) return res.status(500).json({ error: err.message });
+              if (err) { db.run("ROLLBACK;"); return res.status(500).json({ error: err.message }); }
+            
+              // 2. Aggiornamento Lotti (FIFO)
+              let updatesCompleted = 0;
+              const totalUpdates = updates.length;
+
+              if (totalUpdates === 0) {
+                  db.run("COMMIT;");
+                  return res.json({ success: true, costo_totale_scarico: costoTotaleScarico });
+              }
+
+              updates.forEach((u) => {
+                db.run("UPDATE lotti SET quantita_rimanente = ? WHERE id = ?", [
+                  u.nuova_quantita,
+                  u.id,
+                ], (err) => {
+                  if (err) { 
+                    if (!res.headersSent) { // Previene multiple risposte
+                      db.run("ROLLBACK;"); 
+                      return res.status(500).json({ error: `Errore durante l'aggiornamento del lotto ${u.id}: ${err.message}` });
+                    }
+                  } else {
+                    updatesCompleted++;
+                    if (updatesCompleted === totalUpdates) {
+                        db.run("COMMIT;");
+                        return res.json({ success: true, costo_totale_scarico: costoTotaleScarico });
+                    }
+                  }
+                });
+              });
             }
           );
-
-          updates.forEach((u) => {
-            db.run("UPDATE lotti SET quantita_rimanente = ? WHERE id = ?", [
-              u.nuova_quantita,
-              u.id,
-            ]);
-          });
-
-          res.json({ success: true, costo_totale_scarico: costoTotaleScarico });
         });
       }
     );
@@ -169,19 +204,18 @@ router.delete("/:id", (req, res) => {
         const { prodotto_id, tipo, quantita, data_movimento, data_registrazione } = movimento;
 
         if (tipo === "carico") {
+          // Ricerca del lotto tramite il nuovo link dati_id
           const lottoQuery = `
             SELECT id, quantita_rimanente, quantita_iniziale
             FROM lotti
-            WHERE prodotto_id = ? 
-            AND quantita_iniziale = ? 
-            AND data_registrazione = ?
-            ORDER BY id DESC 
+            WHERE dati_id = ? 
+            AND prodotto_id = ?
             LIMIT 1
           `;
 
           db.get(
             lottoQuery,
-            [prodotto_id, quantita, data_registrazione],
+            [id, prodotto_id], // Si usa l'ID del movimento
             (err, lotto) => {
               if (err) {
                 db.run("ROLLBACK;");
@@ -225,6 +259,8 @@ router.delete("/:id", (req, res) => {
         } else if (tipo === "scarico") {
           let qtaDaRipristinare = quantita;
           
+          // Per annullare uno scarico FIFO, ripristiniamo le quantità sui lotti
+          // consumati, procedendo dal lotto più recente (quello consumato per ultimo).
           const lottiQuery = `
             SELECT id, quantita_iniziale, quantita_rimanente 
             FROM lotti 
@@ -243,7 +279,9 @@ router.delete("/:id", (req, res) => {
             for (const lotto of lotti) {
               if (qtaDaRipristinare <= 0) break;
 
+              // Quantità effettivamente consumata da questo lotto in totale
               const qtaConsumata = lotto.quantita_iniziale - lotto.quantita_rimanente;
+              // Quantità da ripristinare su questo lotto (minore tra quanto manca e quanto è stato consumato)
               const qtaDaQuestoLotto = Math.min(qtaDaRipristinare, qtaConsumata);
 
               if (qtaDaQuestoLotto > 0) {
@@ -287,7 +325,8 @@ router.delete("/:id", (req, res) => {
             };
 
             if (totalUpdates === 0) {
-              handleUpdateComplete();
+              // Se non ci sono lotti da aggiornare, si elimina solo il dato (caso limite)
+              handleUpdateComplete(); 
             } else {
               updates.forEach((u) => {
                 db.run(
@@ -296,9 +335,13 @@ router.delete("/:id", (req, res) => {
                   (err) => {
                     if (err) {
                       db.run("ROLLBACK;");
-                      return res.status(500).json({
-                        error: `Errore durante il ripristino del lotto ${u.id}: ${err.message}`,
-                      });
+                      // Qui, se fallisce un aggiornamento, potremmo aver già inviato una risposta
+                      if (!res.headersSent) {
+                          return res.status(500).json({
+                            error: `Errore durante il ripristino del lotto ${u.id}: ${err.message}`,
+                          });
+                      }
+                      return;
                     }
                     handleUpdateComplete();
                   }

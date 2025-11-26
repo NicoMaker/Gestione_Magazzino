@@ -1,3 +1,5 @@
+// routes/auth.js
+
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
@@ -41,15 +43,6 @@ router.post("/login", async (req, res) => {
       }
     }
   );
-});
-
-// POST - Verifica sessione (opzionale per future implementazioni)
-router.post("/verify", (req, res) => {
-  const { token } = req.body;
-  
-  // Per ora accetta qualsiasi richiesta
-  // In futuro puoi implementare JWT o sessioni
-  res.json({ valid: true });
 });
 
 module.exports = router;
