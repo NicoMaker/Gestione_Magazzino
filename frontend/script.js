@@ -103,6 +103,7 @@ function setStoricoInitialDate() {
     if (!dateInput.value) {
         dateInput.value = today;
     }
+    return today;
 }
 
 // =========================================================================
@@ -129,10 +130,23 @@ function switchTab(tabId) {
   if (tabId === "prodotti") caricaProdotti();
   if (tabId === "dati") caricaDati();
   if (tabId === "riepilogo") caricaRiepilogo(true); 
+  
+  // ⭐ LOGICA DI CARICAMENTO AUTOMATICO STORICO ⭐
   if (tabId === "storico") {
-      setStoricoInitialDate();
-      // Non carica automaticamente, attende l'input dell'utente
+      const today = setStoricoInitialDate();
+      const historicalDate = document.getElementById("storico-data").value;
+
+      // Se la data è impostata a OGGI, carica i dati in automatico
+      if (historicalDate === today) {
+          caricaStoricoGiacenza();
+      } else {
+          // Altrimenti, pulisce i risultati vecchi e imposta un messaggio
+          document.getElementById("storico-body").innerHTML = '<tr><td colspan="4" style="text-align:center">Seleziona una data o clicca "Visualizza Storico".</td></tr>';
+          document.getElementById("valore-magazzino-storico").textContent = "€ 0,00";
+      }
   }
+  // ⭐ FINE LOGICA CARICAMENTO STORICO ⭐
+  
   if (tabId === "utenti") caricaUtenti();
 }
 
@@ -145,7 +159,15 @@ async function refreshAllData() {
   }
   
   await caricaRiepilogo(true); 
-  // Lo storico viene caricato solo su richiesta esplicita con la data
+  
+  // Se l'utente è sul tab Storico e ha la data di oggi, aggiorna automaticamente
+  if (document.getElementById("storico-section").classList.contains("active")) {
+      const today = new Date().toISOString().split("T")[0];
+      const historicalDate = document.getElementById("storico-data").value;
+      if (historicalDate === today) {
+          await caricaStoricoGiacenza();
+      }
+  }
 }
 
 // =========================================================================
@@ -934,7 +956,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 3. Imposta la data di oggi e il tipo di movimento di default
     setInitialDate();
-    setStoricoInitialDate(); // NUOVO: Imposta la data iniziale per lo storico
+    setStoricoInitialDate(); // Imposta la data iniziale per lo storico a oggi
     
     // 4. Imposta il campo per i movimenti a 'scarico' di default e nasconde i campi carico
     document.getElementById("dato-tipo").value = "scarico";
