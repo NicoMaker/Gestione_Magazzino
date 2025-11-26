@@ -46,6 +46,12 @@ function formatDate(dateString) {
   return `${day}/${month}/${year}`;
 }
 
+// FUNZIONE AGGIUNTA/CORRETTA: Helper per visualizzare il valore (stringa) o un trattino se nullo, undefined o vuoto
+function displayValue(val) {
+    // Gestisce null, undefined, stringa vuota o stringa composta solo da spazi
+    return (val && String(val).trim() !== '') ? val : "—";
+}
+
 // Helper per mostrare alert
 function mostraAlert(type, message, section) {
   const container = document.getElementById(`${section}-alert`);
@@ -87,7 +93,7 @@ function setInitialDate() {
 }
 
 // =========================================================================
-// 🔄 GESTIONE INTERFACCIA E REFRESH DATI (AGGIORNATO per coerenza)
+// 🔄 GESTIONE INTERFACCIA E REFRESH DATI 
 // =========================================================================
 
 function switchTab(tabId) {
@@ -109,21 +115,18 @@ function switchTab(tabId) {
   // Ricarica i dati specifici per il tab
   if (tabId === "prodotti") caricaProdotti();
   if (tabId === "dati") caricaDati();
-  if (tabId === "riepilogo") caricaRiepilogo(true); // Forzo il ridisegno del riepilogo
+  if (tabId === "riepilogo") caricaRiepilogo(true); 
   if (tabId === "utenti") caricaUtenti();
 }
 
-// AGGIORNATO: Forziamo il ricarico di Prodotti e Riepilogo per l'aggiornamento in tempo reale
 async function refreshAllData() {
-  await caricaProdotti(true); // Carica e ridisegna SEMPRE la tabella Prodotti
-  caricaSelectProdotti(); // Aggiorna la select Prodotti (che ha i dati di giacenza)
+  await caricaProdotti(true); 
+  caricaSelectProdotti(); 
 
-  // Ricarica la tabella Movimenti SOLO se è il tab attivo
   if (document.getElementById("dati-section").classList.contains("active")) {
     await caricaDati(); 
   }
   
-  // Ricarica Riepilogo e Valore Magazzino per l'aggiornamento immediato
   await caricaRiepilogo(true); 
 }
 
@@ -146,7 +149,6 @@ async function caricaProdotti(drawTable = true) {
   }
 }
 
-// AGGIORNATO: Rimosso ID dalla visualizzazione
 function disegnaTabellaProdotti() {
   const tbody = document.getElementById("prodotti-body");
   tbody.innerHTML = prodotti
@@ -338,7 +340,7 @@ async function caricaDati() {
   }
 }
 
-// AGGIORNATO: Rimosso ID dalla visualizzazione
+// AGGIORNATO: Ora utilizza displayValue per Fattura/Doc. e Fornitore/Cli.
 function disegnaTabellaDati() {
   const tbody = document.getElementById("dati-body");
   tbody.innerHTML = dati
@@ -363,8 +365,8 @@ function disegnaTabellaDati() {
         <td style="text-align:right">${d.quantita}</td>
         <td style="text-align:right">${prezzoCol}</td>
         <td style="text-align:right">${costoTotaleCol}</td>
-        <td>${d.fattura_doc || "—"}</td>
-        <td>${d.fornitore_cliente_id || "—"}</td>
+        <td>${displayValue(d.fattura_doc)}</td>
+        <td>${displayValue(d.fornitore_cliente_id)}</td>
         <td class="actions">
           <button class="btn btn-danger btn-sm" onclick="eliminaDato(${d.id}, '${d.tipo}', '${d.prodotto_nome}', ${d.quantita})">Annulla</button>
         </td>
@@ -469,7 +471,7 @@ async function aggiungiDato() {
     setInitialDate();
     toggleCaricoFields();
     mostraAlert("success", `Movimento di ${tipo.toUpperCase()} registrato con successo`, "dati");
-    await refreshAllData(); // AGGIORNATO: Aggiorna i dati per i 3 tab (inclusi prodotti e riepilogo)
+    await refreshAllData(); 
   } catch (err) {
     console.error("Errore durante l'aggiunta", err);
     mostraAlert("error", "Errore di rete durante l'aggiunta", "dati");
@@ -496,7 +498,7 @@ async function eliminaDato(id, tipo, nomeProdotto, quantita) {
     }
 
     mostraAlert("success", data.message || `${tipo.toUpperCase()} annullato con successo.`, "dati");
-    await refreshAllData(); // AGGIORNATO: Aggiorna i dati per i 3 tab (inclusi prodotti e riepilogo)
+    await refreshAllData(); 
   } catch (err) {
     console.error(err);
     mostraAlert("error", "Errore di rete durante l'annullamento", "dati");
@@ -537,7 +539,6 @@ async function caricaValoreMagazzino() {
 }
 
 
-// AGGIORNATO: Rimosso ID dalla visualizzazione
 function disegnaTabellaRiepilogo() {
   const tbody = document.getElementById("riepilogo-body");
   tbody.innerHTML = riepilogo
@@ -571,7 +572,8 @@ function chiudiModalDettaglioLotti() {
 
 async function caricaDettaglioLotti(prodottoId) {
     const tbody = document.getElementById("lotti-body");
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">Caricamento lotti...</td></tr>';
+    // colspan a 5 (Data, Q.tà, Prezzo, Fattura, Fornitore)
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Caricamento lotti...</td></tr>';
     
     try {
         const res = await fetch(`/api/riepilogo/${prodottoId}`);
@@ -580,24 +582,27 @@ async function caricaDettaglioLotti(prodottoId) {
         if (!res.ok) throw new Error(lotti.error || "Errore nel caricamento dei lotti");
 
         if (lotti.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">Nessun lotto attivo (Giacenza zero).</td></tr>';
+            // colspan a 5
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Nessun lotto attivo (Giacenza zero).</td></tr>';
             return;
         }
 
         tbody.innerHTML = lotti
             .map(l => `
                 <tr>
-                    <td>${l.id}</td>
                     <td>${formatDate(l.data_carico)}</td>
                     <td style="text-align:right">${l.quantita_rimanente}</td>
                     <td style="text-align:right">€ ${formatNumber(l.prezzo)}</td>
+                    <td>${displayValue(l.fattura_doc)}</td>
+                    <td>${displayValue(l.fornitore_cliente_id)}</td>
                 </tr>
             `)
             .join('');
 
     } catch (err) {
         console.error(err);
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center" class="text-danger">Errore: ${err.message}</td></tr>`;
+        // colspan a 5
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center" class="text-danger">Errore: ${err.message}</td></tr>`;
     }
 }
 
@@ -618,7 +623,6 @@ async function caricaUtenti() {
   }
 }
 
-// AGGIORNATO: Rimosso ID dalla visualizzazione
 function disegnaTabellaUtenti() {
   const tbody = document.getElementById("utenti-body");
   tbody.innerHTML = utenti
