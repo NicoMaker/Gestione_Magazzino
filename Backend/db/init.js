@@ -62,27 +62,27 @@ async function initDatabase() {
         return;
       }
 
-      // Verifica se esiste già l'utente admin
-      db.get("SELECT * FROM users WHERE username = ?", ["admin"], async (err, row) => {
+      // Verifica se esiste già l'utente Admin
+      db.get("SELECT * FROM users WHERE username = ?", ["Admin"], async (err, row) => {
         if (err) {
-          console.error("Errore verifica utente admin:", err);
+          console.error("Errore verifica utente Admin:", err);
           return;
         }
 
-        // Se non esiste, crea l'utente admin con password hashata
+        // Se non esiste, crea l'utente Admin con password hashata
         if (!row) {
           try {
-            const hashedPassword = await bcrypt.hash("admin123!", 10);
+            const hashedPassword = await bcrypt.hash("Admin123!", 10);
             const createdAt = new Date().toISOString();
             
             db.run(
               "INSERT INTO users (username, password, created_at) VALUES (?, ?, ?)",
-              ["admin", hashedPassword, createdAt],
+              ["Admin", hashedPassword, createdAt],
               (err) => {
                 if (err) {
-                  console.error("Errore creazione utente admin:", err);
+                  console.error("Errore creazione utente Admin:", err);
                 } else {
-                  console.log("✅ Utente admin creato con successo");
+                  console.log("✅ Utente Admin creato con successo");
                 }
               }
             );

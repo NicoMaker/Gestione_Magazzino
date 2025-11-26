@@ -1,3 +1,5 @@
+// server.js
+
 // Installazione: npm install express sqlite3 cors bcrypt
 const express = require("express");
 const cors = require("cors");
@@ -29,8 +31,10 @@ app.use("/api", magazzinoRoutes);
 // Avvio server e apertura browser
 app.listen(PORT, () => {
   console.log(`Backend avviato su http://localhost:${PORT}`);
-  const url = `http://localhost:${PORT}/`;
-
+  
+  // *** MODIFICA QUI: APRE DIRETTAMENTE LA PAGINA DI LOGIN ***
+  const url = `http://localhost:${PORT}/login.html`; 
+  
   let cmd;
   switch (os.platform()) {
     case "win32":
