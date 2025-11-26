@@ -8,11 +8,19 @@ function formatNumber(value) {
   if (value === null || typeof value === 'undefined' || isNaN(value)) {
     return '0,00';
   }
-  // Usa 'it-IT' per il formato europeo (virgola come separatore decimale)
   return value.toLocaleString('it-IT', { 
     minimumFractionDigits: 2, 
     maximumFractionDigits: 2 
   });
+}
+
+// Funzione per formattare la data in formato gg/mm/aaaa
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
 }
 
 // Funzione per impostare la data corrente (oggi) al caricamento della pagina
@@ -73,11 +81,8 @@ function checkUrlHashAndSwitch() {
 
 // Inizializzazione: Chiama la funzione di refresh completa all'avvio E controlla l'URL
 document.addEventListener("DOMContentLoaded", () => {
-  setInitialDate(); // Imposta la data iniziale
-  
-  // Inizializza con i campi nascosti (nessun tipo selezionato)
+  setInitialDate();
   toggleCaricoFields();
-  
   checkUrlHashAndSwitch();
 });
 
@@ -101,37 +106,40 @@ function toggleCaricoFields() {
   const fornitoreGroup = document.getElementById("fornitore-group");
   const fornitoreInput = document.getElementById("dato-fornitore");
 
-
   if (tipo === "scarico") {
-    // Nasconde e svuota i campi specifici del carico
     prezzoGroup.classList.add("hidden");
     prezzoInput.value = "";
     prezzoInput.removeAttribute("required");
 
     fatturaGroup.classList.add("hidden");
     fatturaInput.value = "";
+    fatturaInput.removeAttribute("required");
 
     fornitoreGroup.classList.add("hidden");
     fornitoreInput.value = "";
+    fornitoreInput.removeAttribute("required");
     
   } else if (tipo === "carico") {
-    // Mostra e imposta i campi specifici del carico
     prezzoGroup.classList.remove("hidden");
     prezzoInput.setAttribute("required", "required");
 
     fatturaGroup.classList.remove("hidden");
+    fatturaInput.setAttribute("required", "required");
+
     fornitoreGroup.classList.remove("hidden");
+    fornitoreInput.setAttribute("required", "required");
   } else {
-    // Nessun tipo selezionato: nasconde tutto
     prezzoGroup.classList.add("hidden");
     prezzoInput.value = "";
     prezzoInput.removeAttribute("required");
 
     fatturaGroup.classList.add("hidden");
     fatturaInput.value = "";
+    fatturaInput.removeAttribute("required");
 
     fornitoreGroup.classList.add("hidden");
     fornitoreInput.value = "";
+    fornitoreInput.removeAttribute("required");
   }
 }
 
@@ -193,7 +201,6 @@ function renderProdotti() {
 
   document.getElementById("totale-prodotti").textContent = prodotti.length;
 
-  // Calcolo e aggiornamento giacenza totale
   const giacenzaTotale = prodotti.reduce((sum, p) => sum + p.giacenza, 0);
   document.getElementById("giacenza-totale-magazzino").textContent =
     giacenzaTotale;
@@ -330,7 +337,7 @@ function renderDati() {
   } else {
     tbody.innerHTML = dati
       .map((d) => {
-        const dataMovimentoFormatted = new Date(d.data_movimento).toLocaleDateString("it-IT");
+        const dataMovimentoFormatted = formatDate(d.data_movimento);
 
         let prezzoUnitarioDisplay = "-";
         let prezzoTotaleDisplay = "-";
@@ -338,7 +345,6 @@ function renderDati() {
         let deleteButton = ""; 
         let fatturaDisplay = d.fattura_doc || "-";
         let fornitoreDisplay = d.fornitore_cliente_id || "-";
-
 
         if (d.tipo === "carico") {
           if (d.prezzo !== null) {
@@ -421,32 +427,62 @@ async function aggiungiDato() {
   const data_movimento = document.getElementById("dato-data").value;
   const quantita = document.getElementById("dato-quantita").value;
   
-  const prezzo =
-    tipo === "carico" ? document.getElementById("dato-prezzo").value : null;
-  const fattura_doc = 
-    tipo === "carico" ? document.getElementById("dato-fattura").value.trim() : null;
-  const fornitore_cliente_id = 
-    tipo === "carico" ? document.getElementById("dato-fornitore").value.trim() : null;
+  const prezzo = document.getElementById("dato-prezzo").value;
+  const fattura_doc = document.getElementById("dato-fattura").value.trim();
+  const fornitore_cliente_id = document.getElementById("dato-fornitore").value.trim();
 
+  // Validazione tipo operazione
   if (!tipo) {
     mostraAlert("error", "⚠️ Seleziona il tipo di operazione (Carico/Scarico)", "dati");
     return;
   }
 
-  if (!prodotto_id || !quantita || !data_movimento) {
-    mostraAlert("error", "⚠️ Compila prodotto, quantità e data", "dati");
+  // Validazione campi base
+  if (!prodotto_id) {
+    mostraAlert("error", "⚠️ Seleziona un prodotto", "dati");
+    return;
+  }
+
+  if (!data_movimento) {
+    mostraAlert("error", "⚠️ Inserisci la data del movimento", "dati");
+    return;
+  }
+
+  if (!quantita || quantita <= 0) {
+    mostraAlert("error", "⚠️ Inserisci una quantità valida", "dati");
     return;
   }
   
+  // Validazione COMPLETA per CARICO - TUTTI I CAMPI OBBLIGATORI
   if (tipo === "carico") {
+    // Validazione prezzo
     const prezzoString = String(prezzo).trim();
-    if (!prezzoString || (!prezzoString.includes('.') && !prezzoString.includes(',')) || parseFloat(prezzoString.replace(",", ".")) <= 0) {
-        mostraAlert(
-          "error",
-          "⚠️ Il prezzo è obbligatorio per il carico",
-          "dati"
-        );
-        return;
+    if (!prezzoString || prezzoString === "") {
+      mostraAlert("error", "⚠️ Il prezzo è obbligatorio per il carico", "dati");
+      return;
+    }
+    
+    if (!prezzoString.includes('.') && !prezzoString.includes(',')) {
+      mostraAlert("error", "⚠️ Il prezzo deve contenere decimali (es. 10.50 o 10,50)", "dati");
+      return;
+    }
+    
+    const prezzoNumerico = parseFloat(prezzoString.replace(",", "."));
+    if (isNaN(prezzoNumerico) || prezzoNumerico <= 0) {
+      mostraAlert("error", "⚠️ Il prezzo deve essere un numero valido maggiore di zero", "dati");
+      return;
+    }
+    
+    // Validazione fattura
+    if (!fattura_doc || fattura_doc === "") {
+      mostraAlert("error", "⚠️ La fattura/documento è obbligatoria per il carico", "dati");
+      return;
+    }
+    
+    // Validazione fornitore
+    if (!fornitore_cliente_id || fornitore_cliente_id === "") {
+      mostraAlert("error", "⚠️ Il fornitore/cliente è obbligatorio per il carico", "dati");
+      return;
     }
   }
 
@@ -458,10 +494,10 @@ async function aggiungiDato() {
         prodotto_id, 
         tipo, 
         quantita, 
-        prezzo, 
+        prezzo: tipo === "carico" ? prezzo : null,
         data_movimento,
-        fattura_doc,
-        fornitore_cliente_id
+        fattura_doc: tipo === "carico" ? fattura_doc : null,
+        fornitore_cliente_id: tipo === "carico" ? fornitore_cliente_id : null
       }),
     });
 
@@ -472,13 +508,9 @@ async function aggiungiDato() {
       return;
     }
 
-    // ⭐ PARTE DI RESET DOPO SUCCESSO (FIXED) ⭐
+    // Reset completo del form
     const tipoSelect = document.getElementById("dato-tipo");
-    
-    // 1. Resetta il valore a ""
     tipoSelect.value = ""; 
-
-    // 2. Forza la selezione visiva dell'opzione di default (value="")
     const defaultOption = tipoSelect.querySelector('option[value=""]');
     if (defaultOption) {
         defaultOption.selected = true;
@@ -490,8 +522,7 @@ async function aggiungiDato() {
     document.getElementById("dato-fattura").value = "";
     document.getElementById("dato-fornitore").value = "";
     setInitialDate();
-    toggleCaricoFields(); // Nasconde i campi extra
-    // ⭐ FINE RESET ⭐
+    toggleCaricoFields();
 
     mostraAlert("success", "✅ Movimento registrato con successo", "dati");
     await refreshAllData();
@@ -628,7 +659,7 @@ function renderDettaglioLotti(lotti) {
   } else {
     tbody.innerHTML = lotti
       .map((l) => {
-        const dataFormatted = new Date(l.data_carico).toLocaleDateString("it-IT");
+        const dataFormatted = formatDate(l.data_carico);
         const valoreLotto = l.quantita_rimanente * l.prezzo;
         const fatturaDisplay = l.fattura_doc || "-";
         const fornitoreDisplay = l.fornitore_cliente_id || "-";

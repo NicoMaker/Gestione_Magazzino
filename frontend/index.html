@@ -72,12 +72,12 @@
 
           <div class="form-grid">
             <div class="form-group">
-              <label for="dato-data">Data Movimento</label>
+              <label for="dato-data">Data Movimento *</label>
               <input type="date" id="dato-data" required />
             </div>
 
             <div class="form-group">
-              <label for="dato-tipo">Tipo Operazione</label>
+              <label for="dato-tipo">Tipo Operazione *</label>
               <select id="dato-tipo" onchange="toggleCaricoFields()" required>
                 <option value="" selected>Seleziona tipo...</option>
                 <option value="carico">Carico</option>
@@ -86,30 +86,30 @@
             </div>
 
             <div class="form-group">
-              <label for="dato-prodotto">Prodotto</label>
+              <label for="dato-prodotto">Prodotto *</label>
               <select id="dato-prodotto" required>
                 <option value="">Seleziona prodotto...</option>
               </select>
             </div>
 
             <div class="form-group">
-              <label for="dato-quantita">Quantità</label>
+              <label for="dato-quantita">Quantità *</label>
               <input type="number" id="dato-quantita" min="1" placeholder="inserisci Quantità" required />
             </div>
 
             <div class="form-group hidden" id="prezzo-group">
-              <label for="dato-prezzo">Prezzo Unitario Carico (Costo)</label>
-              <input type="text" id="dato-prezzo" placeholder="Es. 10.50" />
+              <label for="dato-prezzo">Prezzo Unitario Carico (Costo) *</label>
+              <input type="text" id="dato-prezzo" placeholder="Es. 10.50 (OBBLIGATORIO per carico)" />
             </div>
 
             <div class="form-group hidden" id="fattura-group">
-              <label for="dato-fattura">Fattura / Documento</label>
-              <input type="text" id="dato-fattura" placeholder="inserisci fattura"  required/>
+              <label for="dato-fattura">Fattura / Documento *</label>
+              <input type="text" id="dato-fattura" placeholder="inserisci fattura (OBBLIGATORIO per carico)" />
             </div>
 
             <div class="form-group hidden" id="fornitore-group">
-              <label for="dato-fornitore">Fornitore / Cliente</label>
-              <input type="text" id="dato-fornitore" placeholder="inserisci fornitore" required/>
+              <label for="dato-fornitore">Fornitore / Cliente *</label>
+              <input type="text" id="dato-fornitore" placeholder="inserisci fornitore (OBBLIGATORIO per carico)" />
             </div>
           </div>
 
