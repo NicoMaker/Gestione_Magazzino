@@ -3,6 +3,17 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const { db } = require("../db/init");
 
+// Controllo forza password:
+// - minimo 8 caratteri
+// - almeno una minuscola
+// - almeno una maiuscola
+// - almeno un numero
+function isPasswordStrong(password) {
+  if (typeof password !== "string") return false;
+  const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+  return regex.test(password);
+}
+
 // GET /api/utenti - lista utenti (senza password)
 router.get("/", (req, res) => {
   db.all(
@@ -28,6 +39,13 @@ router.post("/", async (req, res) => {
     return res
       .status(400)
       .json({ error: "Username e password obbligatori" });
+  }
+
+  if (!isPasswordStrong(password)) {
+    return res.status(400).json({
+      error:
+        "Password troppo debole. Deve avere almeno 8 caratteri, una maiuscola, una minuscola e un numero",
+    });
   }
 
   db.get(
@@ -96,6 +114,7 @@ router.put("/:id", async (req, res) => {
 
     const newUsername = username || user.username;
 
+    // blocca username duplicato
     db.get(
       "SELECT id FROM users WHERE username = ? AND id <> ?",
       [newUsername, id],
@@ -114,6 +133,13 @@ router.put("/:id", async (req, res) => {
 
         let newPasswordHash = user.password;
         if (password && password.trim() !== "") {
+          if (!isPasswordStrong(password)) {
+            return res.status(400).json({
+              error:
+                "Password troppo debole. Deve avere almeno 8 caratteri, una maiuscola, una minuscola e un numero",
+            });
+          }
+
           try {
             newPasswordHash = await bcrypt.hash(password, 10);
           } catch (e) {
