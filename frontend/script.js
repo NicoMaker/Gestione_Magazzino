@@ -2,10 +2,12 @@ let prodotti = [];
 let dati = [];
 let riepilogo = [];
 let utenti = [];
+let storico = []; // NUOVA VARIABILE per i dati dello storico
 
 let prodottoInModifica = null;
 let utenteInModifica = null;
 let prodottoDettaglioLotti = null; // Usato per il modale dettaglio lotti
+let prodottoDettaglioLottiStorico = null; // NUOVA VARIABILE per il modale storico
 
 // =========================================================================
 // ⭐ FUNZIONI DI SICUREZZA, FORMATTAZIONE E UTILITY ⭐
@@ -92,6 +94,17 @@ function setInitialDate() {
   }
 }
 
+// Imposta la data di oggi come default nel campo "data storico"
+function setStoricoInitialDate() {
+    const today = new Date().toISOString().split("T")[0];
+    const dateInput = document.getElementById("storico-data");
+    // Imposta la data massima a oggi per coerenza
+    dateInput.max = today; 
+    if (!dateInput.value) {
+        dateInput.value = today;
+    }
+}
+
 // =========================================================================
 // 🔄 GESTIONE INTERFACCIA E REFRESH DATI 
 // =========================================================================
@@ -116,6 +129,10 @@ function switchTab(tabId) {
   if (tabId === "prodotti") caricaProdotti();
   if (tabId === "dati") caricaDati();
   if (tabId === "riepilogo") caricaRiepilogo(true); 
+  if (tabId === "storico") {
+      setStoricoInitialDate();
+      // Non carica automaticamente, attende l'input dell'utente
+  }
   if (tabId === "utenti") caricaUtenti();
 }
 
@@ -128,6 +145,7 @@ async function refreshAllData() {
   }
   
   await caricaRiepilogo(true); 
+  // Lo storico viene caricato solo su richiesta esplicita con la data
 }
 
 // =========================================================================
@@ -606,6 +624,123 @@ async function caricaDettaglioLotti(prodottoId) {
     }
 }
 
+
+// =========================================================================
+// 🏛️ NUOVA SEZIONE: GESTIONE STORICO
+// =========================================================================
+
+async function caricaStoricoGiacenza() {
+    const historicalDate = document.getElementById("storico-data").value;
+    
+    if (!historicalDate) {
+        mostraAlert("warning", "Seleziona una data per visualizzare lo storico.", "storico");
+        return;
+    }
+
+    document.getElementById("storico-body").innerHTML = '<tr><td colspan="4" style="text-align:center">Caricamento storico...</td></tr>';
+    document.getElementById("valore-magazzino-storico").textContent = "€ 0,00";
+    
+    try {
+        const res = await fetch(`/api/storico-giacenza/${historicalDate}`);
+        const data = await res.json();
+        
+        if (!res.ok) throw new Error(data.error || "Errore nel caricamento storico");
+        
+        storico = data.riepilogo;
+        
+        disegnaTabellaStorico(historicalDate);
+        document.getElementById("valore-magazzino-storico").textContent = `€ ${formatNumber(data.valore_totale)}`;
+        
+        if(storico.length > 0) {
+            mostraAlert("success", `Storico magazzino calcolato con successo per il ${formatDate(historicalDate)}.`, "storico");
+        } else {
+             mostraAlert("info", `Nessun prodotto con giacenza a questa data (${formatDate(historicalDate)}).`, "storico");
+        }
+        
+    } catch (err) {
+        console.error(err);
+        document.getElementById("storico-body").innerHTML = '<tr><td colspan="4" style="text-align:center" class="text-danger">Errore nel calcolo storico: ' + err.message + '</td></tr>';
+        mostraAlert("error", "Errore nel caricamento storico: " + err.message, "storico");
+    }
+}
+
+
+function disegnaTabellaStorico(historicalDate) {
+  const tbody = document.getElementById("storico-body");
+  
+  if (storico.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">Nessun prodotto con giacenza a questa data.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = storico
+    .map(
+      (r) => `
+      <tr>
+        <td>${r.nome}</td>
+        <td style="text-align:right">${r.giacenza}</td>
+        <td style="text-align:right" class="text-success">€ ${formatNumber(r.valore_totale)}</td>
+        <td class="actions">
+          ${r.giacenza > 0 
+            ? `<button class="btn btn-secondary btn-sm" onclick="apriModalDettaglioLottiStorico(${r.id}, '${r.nome}', '${historicalDate}')">Dettaglio Lotti</button>` 
+            : "—"
+          }
+        </td>
+      </tr>
+    `
+    )
+    .join("");
+}
+
+function apriModalDettaglioLottiStorico(prodottoId, nomeProdotto, historicalDate) {
+    prodottoDettaglioLottiStorico = prodottoId;
+    
+    // Trova i dati del prodotto nell'array 'storico' (già calcolati dal backend)
+    const prodottoStorico = storico.find(p => p.id === prodottoId);
+    
+    if (!prodottoStorico || prodottoStorico.giacenza === 0) {
+        mostraAlert("warning", "Nessun lotto attivo per questo prodotto alla data selezionata.", "storico");
+        return;
+    }
+
+    document.getElementById("dettaglio-prodotto-nome-storico").textContent = `Dettaglio Lotti: ${nomeProdotto}`;
+    document.getElementById("data-dettaglio-storico").textContent = `Data: ${formatDate(historicalDate)}`;
+    
+    // Usa i lotti_storici già presenti nell'oggetto prodottoStorico
+    disegnaTabellaLottiStorico(prodottoStorico.lotti_storici);
+    
+    document.getElementById("modal-dettaglio-lotti-storico").style.display = "flex";
+}
+
+
+function chiudiModalDettaglioLottiStorico() {
+  document.getElementById("modal-dettaglio-lotti-storico").style.display = "none";
+  document.getElementById("lotti-body-storico").innerHTML = ""; 
+  prodottoDettaglioLottiStorico = null;
+}
+
+// Funzione dedicata per disegnare la tabella dei lotti storici
+function disegnaTabellaLottiStorico(lotti) {
+    const tbody = document.getElementById("lotti-body-storico");
+    
+    if (lotti.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Nessun lotto attivo (Giacenza zero).</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = lotti
+        .map(l => `
+            <tr>
+                <td>${formatDate(l.data_carico)}</td>
+                <td style="text-align:right">${l.quantita_rimanente}</td>
+                <td style="text-align:right">€ ${formatNumber(l.prezzo)}</td>
+                <td>${displayValue(l.fattura_doc)}</td>
+                <td>${displayValue(l.fornitore_cliente_id)}</td>
+            </tr>
+        `)
+        .join('');
+}
+
 // =========================================================================
 // 👥 GESTIONE UTENTI
 // =========================================================================
@@ -799,6 +934,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 3. Imposta la data di oggi e il tipo di movimento di default
     setInitialDate();
+    setStoricoInitialDate(); // NUOVO: Imposta la data iniziale per lo storico
     
     // 4. Imposta il campo per i movimenti a 'scarico' di default e nasconde i campi carico
     document.getElementById("dato-tipo").value = "scarico";

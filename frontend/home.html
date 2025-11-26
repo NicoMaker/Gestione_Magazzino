@@ -26,7 +26,7 @@
       <button class="tab active" onclick="switchTab('prodotti')">Prodotti</button>
       <button class="tab" onclick="switchTab('dati')">Carico/Scarico</button>
       <button class="tab" onclick="switchTab('riepilogo')">Riepilogo</button>
-      <button class="tab" onclick="switchTab('utenti')">Utenti</button>
+      <button class="tab" onclick="switchTab('storico')">Storico</button> <button class="tab" onclick="switchTab('utenti')">Utenti</button>
     </div>
 
     <div class="content">
@@ -166,6 +166,37 @@
         </div>
       </div>
       
+      <div id="storico-section" class="section">
+        <h2>Storico Magazzino alla Data</h2>
+        <div id="storico-alert"></div>
+        
+        <div class="form-container">
+            <div class="form-group" style="flex-grow: 1;">
+                <label for="storico-data">Seleziona Data</label>
+                <input type="date" id="storico-data" required />
+            </div>
+            <button class="btn btn-primary" onclick="caricaStoricoGiacenza()">
+                Visualizza Storico
+            </button>
+        </div>
+        
+        <p class="summary-total">Valore Totale Magazzino alla data: <strong id="valore-magazzino-storico">€ 0,00</strong></p>
+
+        <div class="table-container">
+          <table id="storico-table">
+            <thead>
+              <tr>
+                <th>Prodotto</th>
+                <th style="text-align:right">Giacenza Totale</th>
+                <th style="text-align:right">Valore Totale (Costo)</th>
+                <th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody id="storico-body">
+              </tbody>
+          </table>
+        </div>
+      </div>
       <div id="utenti-section" class="section">
         <h2>Gestione Utenti</h2>
         <div id="utenti-alert"></div>
@@ -258,7 +289,31 @@
       </div>
     </div>
   </div>
-
+  
+  <div id="modal-dettaglio-lotti-storico" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="dettaglio-prodotto-nome-storico">Dettaglio Lotti Storico</h3>
+        <p id="data-dettaglio-storico" style="font-weight: 600;">Data: --/--/----</p>
+      </div>
+      <button class="btn-close" onclick="chiudiModalDettaglioLottiStorico()">❌</button>
+      <div class="table-container">
+        <table id="lotti-table-storico">
+          <thead>
+            <tr>
+              <th>Data Carico</th>
+              <th style="text-align:right">Quantità Rimanente</th>
+              <th style="text-align:right">Prezzo Unitario</th>
+              <th>Fattura/Doc.</th>
+              <th>Fornitore</th>
+            </tr>
+          </thead>
+          <tbody id="lotti-body-storico">
+            </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
   <script src="script.js"></script>
 </body>
 </html>
