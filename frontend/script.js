@@ -2,6 +2,8 @@ let prodotti = [];
 let dati = [];
 let riepilogo = [];
 let utenti = [];
+let storicoGiacenza = []; // NUOVO
+let storicoMovimenti = []; // NUOVO
 
 let prodottoInModifica = null;
 let utenteInModifica = null;
@@ -86,6 +88,23 @@ function setInitialDate() {
   }
 }
 
+// NUOVO: Imposta la data di oggi come default nel campo "data storico"
+function setInitialStoricoDate() {
+    const today = new Date().toISOString().split("T")[0];
+    const dateInput = document.getElementById("storico-data");
+    
+    // Imposta la data di oggi come default
+    if (dateInput) {
+        dateInput.value = today;
+    }
+    
+    // Carica i dati con la data di oggi solo la prima volta che si apre il tab
+    if (document.getElementById("storico-giacenza-body").innerHTML === "") {
+        caricaDatiStorici(today);
+    }
+}
+
+
 // =========================================================================
 // 🔄 GESTIONE INTERFACCIA E REFRESH DATI (AGGIORNATO per coerenza)
 // =========================================================================
@@ -110,6 +129,7 @@ function switchTab(tabId) {
   if (tabId === "prodotti") caricaProdotti();
   if (tabId === "dati") caricaDati();
   if (tabId === "riepilogo") caricaRiepilogo(true); // Forzo il ridisegno del riepilogo
+  if (tabId === "storico") setInitialStoricoDate(); // NUOVO
   if (tabId === "utenti") caricaUtenti();
 }
 
@@ -125,6 +145,11 @@ async function refreshAllData() {
   
   // Ricarica Riepilogo e Valore Magazzino per l'aggiornamento immediato
   await caricaRiepilogo(true); 
+  
+  // Ricarica lo storico se il tab è attivo (per coerenza)
+  if (document.getElementById("storico-section").classList.contains("active")) {
+    caricaDatiStorici(); 
+  }
 }
 
 // =========================================================================
@@ -164,6 +189,8 @@ function disegnaTabellaProdotti() {
     )
     .join("");
 }
+
+// ... (aggiungiProdotto, apriModalModificaProdotto, chiudiModalProdotto, salvaModificaProdotto, eliminaProdotto) ...
 
 async function aggiungiProdotto() {
   const nomeInput = document.getElementById("prodotto-nome");
@@ -274,6 +301,7 @@ async function eliminaProdotto(id, nome, giacenza) {
     mostraAlert("error", "Errore di rete durante l'eliminazione", "prodotti");
   }
 }
+
 
 // =========================================================================
 // 🚛 GESTIONE MOVIMENTI (DATI)
@@ -599,6 +627,116 @@ async function caricaDettaglioLotti(prodottoId) {
         console.error(err);
         tbody.innerHTML = `<tr><td colspan="4" style="text-align:center" class="text-danger">Errore: ${err.message}</td></tr>`;
     }
+}
+
+// =========================================================================
+// 🏛️ GESTIONE STORICO (NUOVA SEZIONE)
+// =========================================================================
+
+async function caricaDatiStorici(initialDate = null) {
+  const dataInput = document.getElementById("storico-data");
+  // Prendo la data dal parametro se specificato, altrimenti dal campo input
+  const dataSelezionata = initialDate || dataInput.value;
+
+  if (!dataSelezionata) {
+    mostraAlert("error", "Seleziona una data per visualizzare lo storico.", "storico");
+    return;
+  }
+  
+  // Aggiorna l'intestazione
+  const dataFormatted = formatDate(dataSelezionata) || "N/D";
+  document.getElementById("storico-display-data").textContent = dataFormatted;
+  document.getElementById("storico-movimenti-data").textContent = dataFormatted;
+
+  // Visualizzazione loading
+  document.getElementById("storico-giacenza-body").innerHTML = '<tr><td colspan="2" style="text-align:center">Caricamento Giacenza...</td></tr>';
+  document.getElementById("storico-dati-body").innerHTML = '<tr><td colspan="8" style="text-align:center">Caricamento Movimenti...</td></tr>';
+
+
+  try {
+    // 1. Carica Giacenza Netta Storica (API /api/storico/giacenza)
+    const resGiacenza = await fetch(`/api/storico/giacenza?data=${dataSelezionata}`);
+    const dataGiacenza = await resGiacenza.json();
+    if (!resGiacenza.ok) throw new Error(dataGiacenza.error || "Errore caricamento giacenza storica");
+    storicoGiacenza = dataGiacenza;
+    disegnaTabellaStoricoGiacenza();
+
+
+    // 2. Carica Movimenti Storici (API /api/dati/storico)
+    const resMovimenti = await fetch(`/api/dati/storico?data=${dataSelezionata}`);
+    const dataMovimenti = await resMovimenti.json();
+    if (!resMovimenti.ok) throw new Error(dataMovimenti.error || "Errore caricamento movimenti storici");
+    storicoMovimenti = dataMovimenti;
+    disegnaTabellaStoricoMovimenti();
+
+
+    mostraAlert("success", `Dati storici aggiornati al ${dataFormatted}`, "storico");
+
+  } catch (err) {
+    console.error(err);
+    mostraAlert("error", "Errore nel caricamento dati storici: " + err.message, "storico");
+    document.getElementById("storico-giacenza-body").innerHTML = '<tr><td colspan="2" style="text-align:center">Errore nel caricamento dei dati.</td></tr>';
+    document.getElementById("storico-dati-body").innerHTML = '<tr><td colspan="8" style="text-align:center">Errore nel caricamento dei dati.</td></tr>';
+  }
+}
+
+// NUOVA: Disegna Tabella Giacenza Storica
+function disegnaTabellaStoricoGiacenza() {
+  const tbody = document.getElementById("storico-giacenza-body");
+  if (storicoGiacenza.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="2" style="text-align:center">Nessuna giacenza netta trovata alla data.</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = storicoGiacenza
+    .map(
+      (p) => `
+      <tr>
+        <td>${p.nome}</td>
+        <td style="text-align:right">${p.giacenza_netta}</td>
+      </tr>
+    `
+    )
+    .join("");
+}
+
+// NUOVA: Disegna Tabella Movimenti Storici (Simile a disegnaTabellaDati)
+function disegnaTabellaStoricoMovimenti() {
+  const tbody = document.getElementById("storico-dati-body");
+  if (storicoMovimenti.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center">Nessun movimento trovato fino alla data selezionata.</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = storicoMovimenti
+    .map((d) => {
+      let tipoClass = d.tipo === "carico" ? "text-success" : "text-danger";
+      let prezzoCol = "—";
+      let costoTotaleCol = "—";
+
+      // Mostriamo i dati di carico o il costo totale del movimento scarico
+      if (d.tipo === "carico" && d.prezzo !== null) {
+        prezzoCol = `€ ${formatNumber(d.prezzo)}`;
+        costoTotaleCol = `€ ${formatNumber(d.prezzo_totale)}`;
+      } else if (d.tipo === "scarico" && d.prezzo_unitario_scarico !== null) {
+        prezzoCol = `€ ${formatNumber(d.prezzo_unitario_scarico)} (Storico)`;
+        costoTotaleCol = `€ ${formatNumber(d.prezzo_totale)}`;
+      }
+
+      return `
+      <tr>
+        <td>${formatDate(d.data_movimento)}</td>
+        <td>${d.prodotto_nome}</td>
+        <td class="${tipoClass}">${d.tipo.toUpperCase()}</td>
+        <td style="text-align:right">${d.quantita}</td>
+        <td style="text-align:right">${prezzoCol}</td>
+        <td style="text-align:right">${costoTotaleCol}</td>
+        <td>${d.fattura_doc || "—"}</td>
+        <td>${d.fornitore_cliente_id || "—"}</td>
+      </tr>
+    `;
+    })
+    .join("");
 }
 
 // =========================================================================
