@@ -438,3 +438,17 @@ tbody tr:last-child td {
     width: 100%;
   }
 }
+
+/* ===================== NUOVE CLASSI DI COLORE PER DATI ===================== */
+
+/* Stile per i movimenti di "Carico" (Verde) */
+.text-success {
+  color: var(--success); /* Usa il colore verde definito */
+  font-weight: 600; /* Rendi il testo in grassetto per maggiore enfasi */
+}
+
+/* Stile per i movimenti di "Scarico" (Rosso) */
+.text-danger {
+  color: var(--danger); /* Usa il colore rosso definito */
+  font-weight: 600; /* Rendi il testo in grassetto per maggiore enfasi */
+}
