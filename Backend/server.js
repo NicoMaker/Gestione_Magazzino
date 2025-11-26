@@ -33,7 +33,7 @@ app.listen(PORT, () => {
   console.log(`Backend avviato su http://localhost:${PORT}`);
   
   // *** CORREZIONE: Apre direttamente la pagina di login ***
-  const url = `http://localhost:${PORT}/login.html`; 
+  const url = `http://localhost:${PORT}/index.html`; 
 
   let cmd;
   switch (os.platform()) {

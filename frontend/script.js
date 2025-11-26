@@ -1,10 +1,3 @@
-// script.js
-
-// Verifica autenticazione all'avvio (CORRETTO per la protezione)
-if (localStorage.getItem('isLoggedIn') !== 'true') {
-  window.location.href = '/login.html';
-}
-
 let prodotti = [];
 let dati = [];
 let prodottoInModifica = null;
@@ -56,7 +49,7 @@ function logout() {
   if (confirm('Sei sicuro di voler uscire?')) {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('username');
-    window.location.href = '/login.html';
+    window.location.href = '/index.html';
   }
 }
 

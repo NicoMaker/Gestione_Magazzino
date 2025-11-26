@@ -1,14 +1,14 @@
-// login.js
-
 const loginForm = document.getElementById("login-form");
 const loginBtn = document.getElementById("login-btn");
 const btnText = document.getElementById("btn-text");
 const alertContainer = document.getElementById("alert-container");
 
-// Controlla se l'utente è già loggato
-if (localStorage.getItem("isLoggedIn") === "true") {
-  window.location.href = "/index.html";
-}
+// *** PARTE RIMOSSA: ***
+// if (localStorage.getItem("isLoggedIn") === "true") {
+//   window.location.href = "/home.html";
+// }
+// L'utente deve sempre inserire le credenziali, non viene reindirizzato in automatico.
+// *** FINE PARTE RIMOSSA ***
 
 function showAlert(message) {
   alertContainer.innerHTML = `<div class="alert alert-error">${message}</div>`;
@@ -41,11 +41,15 @@ loginForm.addEventListener("submit", async (e) => {
 
     if (response.ok) {
       // Login riuscito
+      // Manteniamo il salvataggio in localStorage per indicare l'avvenuto login
+      // e per memorizzare lo username, ma NON lo useremo per l'autologin
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("username", data.username);
 
       // Reindirizza alla pagina principale
-      window.location.href = "/index.html";
+      // Ho corretto il reindirizzamento a /home.html come nel codice originale (se era quello corretto)
+      // Se vuoi index.html, lascia come era: window.location.href = "/index.html";
+      window.location.href = "/home.html"; 
     } else {
       // Login fallito
       showAlert(data.error || "Credenziali non valide");

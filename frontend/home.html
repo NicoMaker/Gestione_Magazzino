@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestione Magazzino Moto</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🏍️ Gestione Magazzino Moto</h1>
+      </header>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('prodotti')">
+          📦 Prodotti
+        </button>
+        <button class="tab" id="dati-tab" onclick="switchTab('dati')">
+          📊 Carico/Scarico
+        </button>
+        <button class="tab" onclick="switchTab('riepilogo')">
+          📋 Riepilogo
+        </button>
+      </div>
+
+      <div class="content">
+        <div id="prodotti-section" class="section active">
+          <h2>📦 Gestione Prodotti</h2>
+
+          <div id="prodotti-alert"></div>
+
+          <div class="form-inline">
+            <input
+              type="text"
+              id="nuovo-prodotto"
+              placeholder="Nome nuovo prodotto..."
+              required
+            />
+            <button class="btn btn-primary" onclick="aggiungiProdotto()">
+              ➕ Aggiungi
+            </button>
+          </div>
+
+          <table id="prodotti-table">
+            <thead>
+              <tr>
+                <th>Prodotto</th>
+                <th style="text-align: center">Giacenza Attuale</th>
+                <th style="text-align: center">Azioni</th>
+              </tr>
+            </thead>
+            <tbody id="prodotti-body"></tbody>
+          </table>
+
+          <div class="totale">
+            📦 Totale Prodotti: <span id="totale-prodotti">0</span> | 📦
+            Giacenza Totale: <span id="giacenza-totale-magazzino">0</span>
+          </div>
+        </div>
+
+        <div id="dati-section" class="section">
+          <h2>📊 Registra Carico / Scarico</h2>
+
+          <div id="dati-alert"></div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="dato-data">Data Movimento *</label>
+              <input type="date" id="dato-data" required />
+            </div>
+
+            <div class="form-group">
+              <label for="dato-tipo">Tipo Operazione *</label>
+              <select id="dato-tipo" onchange="toggleCaricoFields()" required>
+                <option value="" selected>Seleziona tipo...</option>
+                <option value="carico">Carico</option>
+                <option value="scarico">Scarico</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="dato-prodotto">Prodotto *</label>
+              <select id="dato-prodotto" required>
+                <option value="">Seleziona prodotto...</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="dato-quantita">Quantità *</label>
+              <input type="number" id="dato-quantita" min="1" placeholder="inserisci Quantità" required />
+            </div>
+
+            <div class="form-group hidden" id="prezzo-group">
+              <label for="dato-prezzo">Prezzo Unitario Carico (Costo) *</label>
+              <input type="text" id="dato-prezzo" placeholder="Es. 10.50 (OBBLIGATORIO per carico)" />
+            </div>
+
+            <div class="form-group hidden" id="fattura-group">
+              <label for="dato-fattura">Fattura / Documento *</label>
+              <input type="text" id="dato-fattura" placeholder="inserisci fattura (OBBLIGATORIO per carico)" />
+            </div>
+
+            <div class="form-group hidden" id="fornitore-group">
+              <label for="dato-fornitore">Fornitore / Cliente *</label>
+              <input type="text" id="dato-fornitore" placeholder="inserisci fornitore (OBBLIGATORIO per carico)" />
+            </div>
+          </div>
+
+          <button class="btn btn-success full-width" onclick="aggiungiDato()">
+            ➕ Registra Movimento
+          </button>
+
+          <h3 style="margin-top: 30px">Storico Movimenti</h3>
+
+          <table id="dati-table">
+            <thead>
+              <tr>
+                <th>📅 Data</th>
+                <th>📦 Prodotto</th>
+                <th>🔄 Tipo</th>
+                <th style="text-align: right">Qtà</th>
+                <th style="text-align: right">Prezzo Unit.</th>
+                <th style="text-align: right">Valore Totale</th>
+                <th style="text-align: center">📄 Fattura</th>
+                <th style="text-align: center">🏢 Fornitore/Cliente</th>
+                <th style="text-align: center">Azioni</th>
+              </tr>
+            </thead>
+            <tbody id="dati-body"></tbody>
+          </table>
+
+          <div class="totale">
+            📊 Totale Movimenti: <span id="totale-dati">0</span>
+          </div>
+
+          <div class="riepilogo-card">
+            <div class="card-item">
+              <p>VALORE TOTALE MAGAZZINO</p>
+              <div class="valore-magazzino">
+                € <span id="valore-magazzino">0,00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="riepilogo-section" class="section">
+          <h2>📋 Riepilogo Magazzino</h2>
+
+          <h3 style="margin-top: 20px">Giacenze per Prodotto (Costo Medio)</h3>
+
+          <table id="riepilogo-table">
+            <thead>
+              <tr>
+                <th>📦 Prodotto</th>
+                <th style="text-align: center">Giacenza</th>
+                <th style="text-align: right">Valore Attuale</th>
+                <th style="text-align: center">Dettagli</th>
+              </tr>
+            </thead>
+            <tbody id="riepilogo-body"></tbody>
+          </table>
+
+          <div class="totale">
+            💰 Valore Totale Riepilogo:
+            <strong>€ <span id="valore-magazzino-riepilogo">0,00</span></strong>
+          </div>
+        </div>
+
+        <div id="dettaglio-section" class="section">
+          <h2>
+            🔍 Dettaglio Lotti per Prodotto:
+            <span id="dettaglio-prodotto-nome"></span>
+          </h2>
+
+          <button
+            class="btn btn-primary"
+            onclick="tornaARiepilogo()"
+            style="margin-bottom: 20px"
+          >
+            ← Torna al Riepilogo
+          </button>
+
+          <table id="dettaglio-table">
+            <thead>
+              <tr>
+                <th>📅 Data Carico</th>
+                <th style="text-align: center">📄 Fattura</th>
+                <th style="text-align: center">🏢 Fornitore</th>
+                <th style="text-align: right">📦 Quantità</th>
+                <th style="text-align: right">💶 Prezzo Unit.</th>
+                <th style="text-align: right">💰 Valore Lotto</th>
+              </tr>
+            </thead>
+            <tbody id="dettaglio-body"></tbody>
+          </table>
+
+          <div class="totale">
+            📊 Totale Lotti: <span id="totale-lotti">0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="modal-modifica" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>✏️ Modifica Nome Prodotto</h3>
+        </div>
+        <div class="form-group">
+          <label for="modifica-nome">Nuovo Nome</label>
+          <input type="text" id="modifica-nome" />
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="chiudiModal()">
+            Annulla
+          </button>
+          <button class="btn btn-primary" onclick="salvaNomeProdotto()">
+            Salva
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
