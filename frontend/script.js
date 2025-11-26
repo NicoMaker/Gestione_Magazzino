@@ -1,4 +1,6 @@
-// Verifica autenticazione all'avvio
+// script.js
+
+// Verifica autenticazione all'avvio (CORRETTO per la protezione)
 if (localStorage.getItem('isLoggedIn') !== 'true') {
   window.location.href = '/login.html';
 }

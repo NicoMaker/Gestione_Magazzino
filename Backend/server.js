@@ -32,9 +32,9 @@ app.use("/api", magazzinoRoutes);
 app.listen(PORT, () => {
   console.log(`Backend avviato su http://localhost:${PORT}`);
   
-  // *** MODIFICA QUI: APRE DIRETTAMENTE LA PAGINA DI LOGIN ***
+  // *** CORREZIONE: Apre direttamente la pagina di login ***
   const url = `http://localhost:${PORT}/login.html`; 
-  
+
   let cmd;
   switch (os.platform()) {
     case "win32":

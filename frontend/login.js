@@ -5,7 +5,7 @@ const loginBtn = document.getElementById("login-btn");
 const btnText = document.getElementById("btn-text");
 const alertContainer = document.getElementById("alert-container");
 
-// Controlla se l'utente è già loggato (se è loggato, reindirizza a index.html)
+// Controlla se l'utente è già loggato
 if (localStorage.getItem("isLoggedIn") === "true") {
   window.location.href = "/index.html";
 }
