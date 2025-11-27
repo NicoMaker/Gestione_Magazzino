@@ -103,6 +103,7 @@ function setStoricoInitialDate() {
     if (!dateInput.value) {
         dateInput.value = today;
     }
+    return today;
 }
 
 // =========================================================================
@@ -129,10 +130,23 @@ function switchTab(tabId) {
   if (tabId === "prodotti") caricaProdotti();
   if (tabId === "dati") caricaDati();
   if (tabId === "riepilogo") caricaRiepilogo(true); 
+  
+  // ⭐ LOGICA DI CARICAMENTO AUTOMATICO STORICO ⭐
   if (tabId === "storico") {
-      setStoricoInitialDate();
-      // Non carica automaticamente, attende l'input dell'utente
+      const today = setStoricoInitialDate();
+      const historicalDate = document.getElementById("storico-data").value;
+
+      // Se la data è impostata a OGGI, carica i dati in automatico
+      if (historicalDate === today) {
+          caricaStoricoGiacenza();
+      } else {
+          // Altrimenti, pulisce i risultati vecchi e imposta un messaggio
+          document.getElementById("storico-body").innerHTML = '<tr><td colspan="4" style="text-align:center">Seleziona una data o clicca "Visualizza Storico".</td></tr>';
+          document.getElementById("valore-magazzino-storico").textContent = "€ 0,00";
+      }
   }
+  // ⭐ FINE LOGICA CARICAMENTO STORICO ⭐
+  
   if (tabId === "utenti") caricaUtenti();
 }
 
@@ -145,7 +159,15 @@ async function refreshAllData() {
   }
   
   await caricaRiepilogo(true); 
-  // Lo storico viene caricato solo su richiesta esplicita con la data
+  
+  // Se l'utente è sul tab Storico e ha la data di oggi, aggiorna automaticamente
+  if (document.getElementById("storico-section").classList.contains("active")) {
+      const today = new Date().toISOString().split("T")[0];
+      const historicalDate = document.getElementById("storico-data").value;
+      if (historicalDate === today) {
+          await caricaStoricoGiacenza();
+      }
+  }
 }
 
 // =========================================================================
@@ -934,7 +956,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 3. Imposta la data di oggi e il tipo di movimento di default
     setInitialDate();
-    setStoricoInitialDate(); // NUOVO: Imposta la data iniziale per lo storico
+    setStoricoInitialDate(); // Imposta la data iniziale per lo storico a oggi
     
     // 4. Imposta il campo per i movimenti a 'scarico' di default e nasconde i campi carico
     document.getElementById("dato-tipo").value = "scarico";
@@ -943,3 +965,70 @@ document.addEventListener("DOMContentLoaded", () => {
     // 5. Carica tutti i dati iniziali (inizia con Prodotti attivo)
     refreshAllData(); 
 });
+
+// Funzione disegnaTabellaDati aggiornata con segno negativo (-) per Quantità, Prezzo Unitario e Prezzo Totale in caso di SCARICO.
+function disegnaTabellaDati() {
+  const tbody = document.getElementById("dati-body");
+  if (!tbody) return;
+
+  tbody.innerHTML = dati
+    .map((d) => {
+      // 1. Prepara il valore del prezzo unitario
+      const prezzoValore =
+        d.tipo === "scarico" && d.prezzo_unitario_scarico !== null
+          ? d.prezzo_unitario_scarico
+          : d.prezzo;
+      
+      // 2. Determina le classi e il segno
+      const isScarico = d.tipo === "scarico";
+      const isCarico = d.tipo === "carico";
+      
+      // La classe di stile da applicare (rosso per scarico, verde per carico)
+      const colorClass = isScarico ? "text-danger" : isCarico ? "text-success" : "";
+
+      // Contenuto per Quantità: aggiungi '-' per scarico e applica il colore
+      const quantitaText = d.quantita;
+      const quantitaCellContent = `<span class="${colorClass}">${quantitaText}</span>`;
+
+      // Contenuto per Prezzo Unitario: aggiungi '-' per scarico e applica il colore
+      let prezzoDisplayText = prezzoValore ? formatNumber(prezzoValore) : "—";
+      if (isScarico && prezzoValore !== null) {
+          prezzoDisplayText = `-${prezzoDisplayText}`; // Aggiungi il segno meno al prezzo
+      }
+      const prezzoCellContent = `<span class="${colorClass}">€ ${prezzoDisplayText}</span>`;
+      
+      // Contenuto per Prezzo Totale: aggiungi '-' per scarico e applica il colore
+      let prezzoTotaleDisplayText = formatNumber(d.prezzo_totale);
+      if (isScarico && d.prezzo_totale !== null) {
+          prezzoTotaleDisplayText = `-${prezzoTotaleDisplayText}`; // Aggiungi il segno meno al prezzo totale
+      }
+      const prezzoTotaleCellContent = `<span class="${colorClass}">€ ${prezzoTotaleDisplayText}</span>`;
+
+      // Altri valori per la riga
+      const tipoDisplay = d.tipo === "carico" ? "Carico ✅" : "Scarico ❌";
+      const fornitoreClienteDisplay = displayValue(d.fornitore_cliente_id);
+      const fatturaDisplay = displayValue(d.fattura_doc);
+
+      return `
+        <tr>
+          <td>${formatDate(d.data_movimento)}</td>
+          <td>${d.prodotto_nome}</td>
+          <td>${tipoDisplay}</td>
+          <td style="text-align:right">${quantitaCellContent}</td>
+          <td style="text-align:right">${prezzoCellContent}</td>
+          <td style="text-align:right">${prezzoTotaleCellContent}</td>
+          <td>${fatturaDisplay}</td>
+          <td>${fornitoreClienteDisplay}</td>
+          <td class="actions">
+            <button class="btn btn-danger btn-sm" onclick="annullaDato(${d.id}, '${d.tipo}', ${d.quantita}, ${d.prodotto_id})">Annulla</button>
+          </td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  if (dati.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="9" style="text-align:center">Nessun movimento registrato.</td></tr>';
+  }
+}
