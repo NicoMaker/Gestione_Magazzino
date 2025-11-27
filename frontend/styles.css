@@ -126,6 +126,30 @@ h3 {
     border-radius: var(--radius);
 }
 
+.section-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 10px 0 30px;
+}
+
+.section-summary span {
+  background-color: var(--gray-light);
+  border: 1px solid var(--gray-border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--dark);
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.section-summary strong {
+  color: var(--primary-dark);
+  font-size: 16px;
+}
+
 /* ===================== Forms ===================== */
 .form-container {
   display: flex;
@@ -436,6 +460,10 @@ tbody tr:last-child td {
   
   .btn-primary {
     width: 100%;
+  }
+
+  .section-summary {
+    flex-direction: column;
   }
 }
 
