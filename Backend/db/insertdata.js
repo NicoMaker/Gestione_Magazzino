@@ -42,7 +42,7 @@ async function createUsers() {
 }
 
 // =========================================
-// 🔥 FUNZIONE FIFO SCARICO (async)
+// 🔥 FIFO SCARICO
 // =========================================
 function scaricoFIFO(prodotto_id, quantita_scarico) {
     return new Promise((resolve, reject) => {
@@ -55,7 +55,6 @@ function scaricoFIFO(prodotto_id, quantita_scarico) {
 
                 for (let lotto of lotti) {
                     if (q <= 0) break;
-
                     let preleva = Math.min(q, lotto.quantita_rimanente);
                     q -= preleva;
 
@@ -75,7 +74,7 @@ function scaricoFIFO(prodotto_id, quantita_scarico) {
 }
 
 // =========================================
-// 🔥 GENERA MOVIMENTI 30 PER PRODOTTO
+// 🔥 GENERA MOVIMENTI REALI (30 per prodotto)
 // =========================================
 async function generaMovimentiFIFO() {
     return new Promise((resolve, reject) => {
@@ -83,24 +82,29 @@ async function generaMovimentiFIFO() {
             if (err) return reject(err);
 
             for (const p of prodotti) {
-
                 for (let i = 1; i <= 30; i++) {
-                    let isCarico = Math.random() < 0.55; // 55% carichi
-                    let quantita = Math.floor(Math.random() * 30) + 5; // minimo 5
+
+                    let isCarico = Math.random() < 0.55; 
+                    let quantita = Math.floor(Math.random() * 30) + 5; 
                     let prezzo = (Math.random() * 30 + 1).toFixed(2);
 
-                    // Controllo stock reale dal DB
+                    // 🔥 Data random nel passato fino ad oggi
+                    let daysRange = 120; // puoi aumentare a piacere
+                    let randomMs = Math.random() * 86400000 * daysRange;
+                    let now = new Date(Date.now() - randomMs).toISOString();
+
+                    // Controllo stock attuale
                     const stock = await new Promise(res =>
                         db.get("SELECT SUM(quantita_rimanente) AS tot FROM lotti WHERE prodotto_id = ?", [p.id], (e,r) => res(r?.tot || 0))
                     );
 
+                    // Se scarico ma stock 0 → salta
                     if (!isCarico) {
-                        if (stock <= 0) continue; // niente da scaricare
+                        if (stock <= 0) continue;
                         if (quantita > stock) quantita = stock;
                     }
 
                     let totale = quantita * prezzo;
-                    let now = new Date(Date.now() - Math.random() * 86400000 * 120).toISOString(); // 120 giorni random
 
                     await new Promise((res, rej) =>
                         db.run(
@@ -120,6 +124,7 @@ async function generaMovimentiFIFO() {
                             async function (err) {
                                 if (err) return rej(err);
 
+                                // CARICO → crea lotto
                                 if (isCarico) {
                                     await new Promise((res2, rej2) =>
                                         db.run(
@@ -150,7 +155,7 @@ async function generaMovimentiFIFO() {
                 }
             }
 
-            resolve(console.log("📊 MOVIMENTI FIFO CREATI (carichi + scarichi realistici)"));
+            resolve(console.log("📊 MOVIMENTI FIFO GENERATI"));
         });
     });
 }
