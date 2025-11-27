@@ -126,30 +126,6 @@ h3 {
     border-radius: var(--radius);
 }
 
-.section-summary {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin: 10px 0 30px;
-}
-
-.section-summary span {
-  background-color: var(--gray-light);
-  border: 1px solid var(--gray-border);
-  border-radius: var(--radius);
-  padding: 10px 14px;
-  font-size: 14px;
-  color: var(--dark);
-  display: inline-flex;
-  gap: 6px;
-  align-items: center;
-}
-
-.section-summary strong {
-  color: var(--primary-dark);
-  font-size: 16px;
-}
-
 /* ===================== Forms ===================== */
 .form-container {
   display: flex;
@@ -461,22 +437,4 @@ tbody tr:last-child td {
   .btn-primary {
     width: 100%;
   }
-
-  .section-summary {
-    flex-direction: column;
-  }
-}
-
-/* ===================== NUOVE CLASSI DI COLORE PER DATI ===================== */
-
-/* Stile per i movimenti di "Carico" (Verde) */
-.text-success {
-  color: var(--success); /* Usa il colore verde definito */
-  font-weight: 600; /* Rendi il testo in grassetto per maggiore enfasi */
-}
-
-/* Stile per i movimenti di "Scarico" (Rosso) */
-.text-danger {
-  color: var(--danger); /* Usa il colore rosso definito */
-  font-weight: 600; /* Rendi il testo in grassetto per maggiore enfasi */
 }

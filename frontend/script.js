@@ -54,106 +54,6 @@ function displayValue(val) {
     return (val && String(val).trim() !== '') ? val : "—";
 }
 
-function formatInteger(value) {
-  const num = Number(value);
-  if (isNaN(num)) return "0";
-  return num.toLocaleString("it-IT");
-}
-
-function updateTextContent(id, text) {
-  const element = document.getElementById(id);
-  if (element) {
-    element.textContent = text;
-  }
-}
-
-function estraiCategoriaDaNome(nome) {
-  if (!nome || typeof nome !== "string") return null;
-  const trimmed = nome.trim();
-  if (!trimmed) return null;
-  const categoria = trimmed.split(" ")[0];
-  return categoria.toLowerCase();
-}
-
-function aggiornaTotaliProdotti() {
-  const totaleProdotti = prodotti.length;
-  const categorie = new Set();
-  prodotti.forEach((p) => {
-    const categoria = estraiCategoriaDaNome(p && p.nome);
-    if (categoria) {
-      categorie.add(categoria);
-    }
-  });
-  updateTextContent("tot-prodotti-count", formatInteger(totaleProdotti));
-  updateTextContent("tot-prodotti-categorie", formatInteger(categorie.size));
-}
-
-function aggiornaTotaliMovimenti() {
-  let caricoCount = 0;
-  let caricoQty = 0;
-  let scaricoCount = 0;
-  let scaricoQty = 0;
-
-  dati.forEach((mov) => {
-    if (mov.tipo === "carico") {
-      caricoCount += 1;
-      caricoQty += Number(mov.quantita) || 0;
-    } else if (mov.tipo === "scarico") {
-      scaricoCount += 1;
-      scaricoQty += Number(mov.quantita) || 0;
-    }
-  });
-
-  updateTextContent("tot-mov-carichi-count", formatInteger(caricoCount));
-  updateTextContent("tot-mov-carichi-qty", formatInteger(caricoQty));
-  updateTextContent("tot-mov-scarichi-count", formatInteger(scaricoCount));
-  updateTextContent("tot-mov-scarichi-qty", formatInteger(scaricoQty));
-}
-
-function aggiornaTotaliRiepilogo() {
-  const totaleProdotti = riepilogo.length;
-  const totaleGiacenza = riepilogo.reduce(
-    (sum, item) => sum + (Number(item.giacenza) || 0),
-    0
-  );
-  const totaleValore = riepilogo.reduce(
-    (sum, item) => sum + (Number(item.valore_totale) || 0),
-    0
-  );
-
-  updateTextContent("tot-riepilogo-prodotti", formatInteger(totaleProdotti));
-  updateTextContent("tot-riepilogo-giacenza", formatInteger(totaleGiacenza));
-  updateTextContent(
-    "tot-riepilogo-valore",
-    `€ ${formatNumber(totaleValore)}`
-  );
-}
-
-function aggiornaTotaliStorico() {
-  const prodottiConGiacenza = storico.filter(
-    (item) => (Number(item.giacenza) || 0) > 0
-  ).length;
-  const totaleGiacenza = storico.reduce(
-    (sum, item) => sum + (Number(item.giacenza) || 0),
-    0
-  );
-  const totaleValore = storico.reduce(
-    (sum, item) => sum + (Number(item.valore_totale) || 0),
-    0
-  );
-
-  updateTextContent("tot-storico-prodotti", formatInteger(prodottiConGiacenza));
-  updateTextContent("tot-storico-giacenza", formatInteger(totaleGiacenza));
-  updateTextContent(
-    "tot-storico-valore",
-    `€ ${formatNumber(totaleValore)}`
-  );
-}
-
-function aggiornaTotaliUtenti() {
-  updateTextContent("tot-utenti-count", formatInteger(utenti.length));
-}
-
 // Helper per mostrare alert
 function mostraAlert(type, message, section) {
   const container = document.getElementById(`${section}-alert`);
@@ -203,7 +103,6 @@ function setStoricoInitialDate() {
     if (!dateInput.value) {
         dateInput.value = today;
     }
-    return today;
 }
 
 // =========================================================================
@@ -230,25 +129,10 @@ function switchTab(tabId) {
   if (tabId === "prodotti") caricaProdotti();
   if (tabId === "dati") caricaDati();
   if (tabId === "riepilogo") caricaRiepilogo(true); 
-  
-  // ⭐ LOGICA DI CARICAMENTO AUTOMATICO STORICO ⭐
   if (tabId === "storico") {
-      const today = setStoricoInitialDate();
-      const historicalDate = document.getElementById("storico-data").value;
-
-      // Se la data è impostata a OGGI, carica i dati in automatico
-      if (historicalDate === today) {
-          caricaStoricoGiacenza();
-      } else {
-          // Altrimenti, pulisce i risultati vecchi e imposta un messaggio
-          document.getElementById("storico-body").innerHTML = '<tr><td colspan="4" style="text-align:center">Seleziona una data o clicca "Visualizza Storico".</td></tr>';
-          document.getElementById("valore-magazzino-storico").textContent = "€ 0,00";
-          storico = [];
-          aggiornaTotaliStorico();
-      }
+      setStoricoInitialDate();
+      // Non carica automaticamente, attende l'input dell'utente
   }
-  // ⭐ FINE LOGICA CARICAMENTO STORICO ⭐
-  
   if (tabId === "utenti") caricaUtenti();
 }
 
@@ -261,15 +145,7 @@ async function refreshAllData() {
   }
   
   await caricaRiepilogo(true); 
-  
-  // Se l'utente è sul tab Storico e ha la data di oggi, aggiorna automaticamente
-  if (document.getElementById("storico-section").classList.contains("active")) {
-      const today = new Date().toISOString().split("T")[0];
-      const historicalDate = document.getElementById("storico-data").value;
-      if (historicalDate === today) {
-          await caricaStoricoGiacenza();
-      }
-  }
+  // Lo storico viene caricato solo su richiesta esplicita con la data
 }
 
 // =========================================================================
@@ -307,7 +183,6 @@ function disegnaTabellaProdotti() {
     `
     )
     .join("");
-  aggiornaTotaliProdotti();
 }
 
 async function aggiungiProdotto() {
@@ -698,7 +573,6 @@ function disegnaTabellaRiepilogo() {
     `
     )
     .join("");
-  aggiornaTotaliRiepilogo();
 }
 
 function apriModalDettaglioLotti(prodottoId, nomeProdotto) {
@@ -757,17 +631,14 @@ async function caricaDettaglioLotti(prodottoId) {
 
 async function caricaStoricoGiacenza() {
     const historicalDate = document.getElementById("storico-data").value;
-    storico = [];
-    aggiornaTotaliStorico();
-    document.getElementById("valore-magazzino-storico").textContent = "€ 0,00";
     
     if (!historicalDate) {
         mostraAlert("warning", "Seleziona una data per visualizzare lo storico.", "storico");
-        document.getElementById("storico-body").innerHTML = '<tr><td colspan="4" style="text-align:center">Seleziona una data per avviare il calcolo.</td></tr>';
         return;
     }
 
     document.getElementById("storico-body").innerHTML = '<tr><td colspan="4" style="text-align:center">Caricamento storico...</td></tr>';
+    document.getElementById("valore-magazzino-storico").textContent = "€ 0,00";
     
     try {
         const res = await fetch(`/api/storico-giacenza/${historicalDate}`);
@@ -789,8 +660,6 @@ async function caricaStoricoGiacenza() {
     } catch (err) {
         console.error(err);
         document.getElementById("storico-body").innerHTML = '<tr><td colspan="4" style="text-align:center" class="text-danger">Errore nel calcolo storico: ' + err.message + '</td></tr>';
-        storico = [];
-        aggiornaTotaliStorico();
         mostraAlert("error", "Errore nel caricamento storico: " + err.message, "storico");
     }
 }
@@ -801,7 +670,6 @@ function disegnaTabellaStorico(historicalDate) {
   
   if (storico.length === 0) {
     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">Nessun prodotto con giacenza a questa data.</td></tr>';
-    aggiornaTotaliStorico();
     return;
   }
 
@@ -822,7 +690,6 @@ function disegnaTabellaStorico(historicalDate) {
     `
     )
     .join("");
-  aggiornaTotaliStorico();
 }
 
 function apriModalDettaglioLottiStorico(prodottoId, nomeProdotto, historicalDate) {
@@ -910,7 +777,6 @@ function disegnaTabellaUtenti() {
     `
     )
     .join("");
-  aggiornaTotaliUtenti();
 }
 
 async function aggiungiUtente() {
@@ -1068,102 +934,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 3. Imposta la data di oggi e il tipo di movimento di default
     setInitialDate();
-    setStoricoInitialDate(); // Imposta la data iniziale per lo storico a oggi
+    setStoricoInitialDate(); // NUOVO: Imposta la data iniziale per lo storico
     
     // 4. Imposta il campo per i movimenti a 'scarico' di default e nasconde i campi carico
     document.getElementById("dato-tipo").value = "scarico";
     toggleCaricoFields();
     
-    // 5. Inizializza i totali con dataset vuoti per evitare valori incoerenti
-    aggiornaTotaliProdotti();
-    aggiornaTotaliMovimenti();
-    aggiornaTotaliRiepilogo();
-    aggiornaTotaliStorico();
-    aggiornaTotaliUtenti();
-
-    // 6. Carica tutti i dati iniziali (inizia con Prodotti attivo)
+    // 5. Carica tutti i dati iniziali (inizia con Prodotti attivo)
     refreshAllData(); 
 });
-
-// Funzione disegnaTabellaDati aggiornata con segno negativo (-) per Quantità, Prezzo Unitario e Prezzo Totale in caso di SCARICO.
-function disegnaTabellaDati() {
-  const tbody = document.getElementById("dati-body");
-  if (!tbody) return;
-
-  tbody.innerHTML = dati
-    .map((d) => {
-      // 1. Prepara il valore del prezzo unitario
-      const prezzoValore =
-        d.tipo === "scarico" && d.prezzo_unitario_scarico !== null
-          ? d.prezzo_unitario_scarico
-          : d.prezzo;
-      
-      // 2. Determina le classi e il segno
-      const isScarico = d.tipo === "scarico";
-      const isCarico = d.tipo === "carico";
-      
-      // La classe di stile da applicare (rosso per scarico, verde per carico)
-      const colorClass = isScarico ? "text-danger" : isCarico ? "text-success" : "";
-
-      // Contenuto per Quantità: aggiungi '-' per scarico e applica il colore
-      const quantitaText = d.quantita;
-      const quantitaCellContent = `<span class="${colorClass}">${quantitaText}</span>`;
-
-      // Contenuto per Prezzo Unitario: aggiungi '-' per scarico e applica il colore
-      let prezzoDisplayText = prezzoValore ? formatNumber(prezzoValore) : "—";
-      if (isScarico && prezzoValore !== null) {
-          prezzoDisplayText = `-${prezzoDisplayText}`; // Aggiungi il segno meno al prezzo
-      }
-      const prezzoCellContent = `<span class="${colorClass}">€ ${prezzoDisplayText}</span>`;
-      
-      // Contenuto per Prezzo Totale: aggiungi '-' per scarico e applica il colore
-      let prezzoTotaleDisplayText = formatNumber(d.prezzo_totale);
-      if (isScarico && d.prezzo_totale !== null) {
-          prezzoTotaleDisplayText = `-${prezzoTotaleDisplayText}`; // Aggiungi il segno meno al prezzo totale
-      }
-      const prezzoTotaleCellContent = `<span class="${colorClass}">€ ${prezzoTotaleDisplayText}</span>`;
-
-      // Altri valori per la riga
-      const tipoDisplay = d.tipo === "carico" ? "Carico ✅" : "Scarico ❌";
-      const fornitoreClienteDisplay = displayValue(d.fornitore_cliente_id);
-      const fatturaDisplay = displayValue(d.fattura_doc);
-
-      return `
-        <tr>
-          <td>${formatDate(d.data_movimento)}</td>
-          <td>${d.prodotto_nome}</td>
-          <td>${tipoDisplay}</td>
-          <td style="text-align:right">${quantitaCellContent}</td>
-          <td style="text-align:right">${prezzoCellContent}</td>
-          <td style="text-align:right">${prezzoTotaleCellContent}</td>
-          <td>${fatturaDisplay}</td>
-          <td>${fornitoreClienteDisplay}</td>
-          <td class="actions">
-            <button class="btn btn-danger btn-sm" onclick="annullaDato(${d.id}, '${d.tipo}', ${d.quantita}, ${d.prodotto_id})">Annulla</button>
-          </td>
-        </tr>
-      `;
-    })
-    .join("");
-
-  if (dati.length === 0) {
-    tbody.innerHTML =
-      '<tr><td colspan="9" style="text-align:center">Nessun movimento registrato.</td></tr>';
-  }
-  aggiornaTotaliMovimenti();
-}
-
-// script.js (Intorno alla riga 190)
-
-function aggiornaTotaliProdotti() {
-  // Calcola la giacenza totale (somma delle giacenze di tutti i prodotti)
-  const giacenzaTotale = prodotti.reduce((sum, p) => sum + p.giacenza, 0);
-
-  // Aggiorna la card "Prodotti in Magazzino" con il valore della giacenza totale
-  // L'elemento con ID 'tot-prodotti-count' ora mostra la SOMMA delle quantità
-  document.getElementById("tot-prodotti-count").textContent = giacenzaTotale;
-
-  // Calcola il conteggio delle categorie (come faceva prima)
-  const categorie = new Set(prodotti.map((p) => p.categoria_id));
-  document.getElementById("tot-prodotti-categorie").textContent = categorie.size;
-}

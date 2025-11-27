@@ -5,10 +5,7 @@
   "main": "backend/server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js",
-    "dati":"node db/insertdata.js",
-    "start_with_data":"npm run dati && npm run start",
-    "dev_with_data":"npm run dati && npm run dev"
+    "dev": "nodemon server.js"
   },
   "keywords": [
     "magazzino",
