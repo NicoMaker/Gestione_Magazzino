@@ -1152,3 +1152,18 @@ function disegnaTabellaDati() {
   }
   aggiornaTotaliMovimenti();
 }
+
+// script.js (Intorno alla riga 190)
+
+function aggiornaTotaliProdotti() {
+  // Calcola la giacenza totale (somma delle giacenze di tutti i prodotti)
+  const giacenzaTotale = prodotti.reduce((sum, p) => sum + p.giacenza, 0);
+
+  // Aggiorna la card "Prodotti in Magazzino" con il valore della giacenza totale
+  // L'elemento con ID 'tot-prodotti-count' ora mostra la SOMMA delle quantità
+  document.getElementById("tot-prodotti-count").textContent = giacenzaTotale;
+
+  // Calcola il conteggio delle categorie (come faceva prima)
+  const categorie = new Set(prodotti.map((p) => p.categoria_id));
+  document.getElementById("tot-prodotti-categorie").textContent = categorie.size;
+}
