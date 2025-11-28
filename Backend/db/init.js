@@ -76,38 +76,34 @@ async function initDatabase() {
           return;
         }
 
-        // Verifica se esiste già l'utente Admin
-        db.get(
-          "SELECT * FROM users WHERE username = ?",
-          ["Admin"],
-          async (err2, row) => {
-            if (err2) {
-              console.error("Errore verifica utente Admin:", err2);
-              return;
-            }
+        // Verifica se ci sono già utenti nella tabella
+        db.get("SELECT COUNT(*) AS count FROM users", async (err2, row) => {
+          if (err2) {
+            console.error("Errore verifica utenti:", err2);
+            return;
+          }
 
-            // Se non esiste, crea l'utente Admin con password hashata
-            if (!row) {
-              try {
-                const hashedPassword = await bcrypt.hash("Admin123!", 10);
-                const createdAt = new Date().toISOString();
-                db.run(
-                  "INSERT INTO users (username, password, createdat) VALUES (?, ?, ?)",
-                  ["Admin", hashedPassword, createdAt],
-                  (err3) => {
-                    if (err3) {
-                      console.error("Errore creazione utente Admin:", err3);
-                    } else {
-                      console.log("✅ Utente Admin creato con successo");
-                    }
+          // Se non ci sono utenti, crea l'utente Admin
+          if (row && row.count === 0) {
+            try {
+              const hashedPassword = await bcrypt.hash("Admin123!", 10);
+              const createdAt = new Date().toISOString();
+              db.run(
+                "INSERT INTO users (username, password, createdat) VALUES (?, ?, ?)",
+                ["Admin", hashedPassword, createdAt],
+                (err3) => {
+                  if (err3) {
+                    console.error("Errore creazione utente Admin:", err3);
+                  } else {
+                    console.log("✅ Utente Admin creato con successo");
                   }
-                );
-              } catch (error) {
-                console.error("Errore hashing password:", error);
-              }
+                }
+              );
+            } catch (error) {
+              console.error("Errore hashing password:", error);
             }
           }
-        );
+        });
       }
     );
   });
