@@ -667,23 +667,42 @@ async function caricaStoricoGiacenza() {
         
         if (!res.ok) throw new Error(data.error || "Errore nel caricamento storico");
         
+        // Riepilogo dallo storico
         storico = data.riepilogo;
-        
+
+        // 🔤 Ordina alfabeticamente per nome prodotto (case-insensitive, con locale italiano)
+        storico.sort((a, b) =>
+            (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" })
+        );
+
+        // Disegna tabella con dati ordinati
         disegnaTabellaStorico(historicalDate);
         document.getElementById("valore-magazzino-storico").textContent = `€ ${formatNumber(data.valore_totale)}`;
         
-        if(storico.length > 0) {
-            mostraAlert("success", `Storico magazzino calcolato con successo per il ${formatDate(historicalDate)}.`, "storico");
+        if (storico.length > 0) {
+            mostraAlert(
+                "success",
+                `Storico magazzino calcolato con successo per il ${formatDate(historicalDate)}.`,
+                "storico"
+            );
         } else {
-             mostraAlert("info", `Nessun prodotto con giacenza a questa data (${formatDate(historicalDate)}).`, "storico");
+            mostraAlert(
+                "info",
+                `Nessun prodotto con giacenza a questa data (${formatDate(historicalDate)}).`,
+                "storico"
+            );
         }
         
     } catch (err) {
         console.error(err);
-        document.getElementById("storico-body").innerHTML = '<tr><td colspan="4" style="text-align:center" class="text-danger">Errore nel calcolo storico: ' + err.message + '</td></tr>';
+        document.getElementById("storico-body").innerHTML =
+            '<tr><td colspan="4" style="text-align:center" class="text-danger">Errore nel calcolo storico: ' +
+            err.message +
+            "</td></tr>";
         mostraAlert("error", "Errore nel caricamento storico: " + err.message, "storico");
     }
 }
+
 
 
 function disegnaTabellaStorico(historicalDate) {
