@@ -1134,3 +1134,73 @@ async function stampaRiepilogoCompleto() {
         mostraAlert("error", "Errore durante la preparazione della stampa: " + err.message, "riepilogo");
     }
 }
+
+function disegnaTabellaProdotti() {
+  const tbody = document.getElementById("prodotti-body");
+  
+  if (prodotti.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="3" class="empty-state">
+          <div class="empty-state-content">
+            <div class="empty-state-icon">📦</div>
+            <div class="empty-state-title">Nessun prodotto nel magazzino</div>
+            <div class="empty-state-text">Inizia aggiungendo il tuo primo prodotto utilizzando il modulo qui sopra.<br>Esempio: "Olio Motore 10W40", "Filtro Aria", "Candele NGK"</div>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+  
+  tbody.innerHTML = prodotti
+    .map(
+      (p) => `
+      <tr>
+        <td>${p.nome}</td>
+        <td style="text-align:right">${p.giacenza}</td>
+        <td class="actions">
+          <button class="btn btn-secondary" onclick="apriModalModificaProdotto(${p.id}, '${p.nome}')">Modifica</button>
+          <button class="btn btn-danger" onclick="eliminaProdotto(${p.id}, '${p.nome}', ${p.giacenza})">Elimina</button>
+        </td>
+      </tr>
+    `
+    )
+    .join("");
+}
+
+function disegnaTabellaProdotti() {
+  const tbody = document.getElementById("prodotti-body");
+  
+  if (prodotti.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="3" class="empty-state">
+          <div class="empty-state-content">
+            <div class="empty-state-icon">📦</div>
+            <div class="empty-state-title">Nessun prodotto nel magazzino</div>
+            <div class="empty-state-text">Inizia aggiungendo il tuo primo prodotto utilizzando il modulo qui sopra.<br>Esempio: "Olio Motore 10W40", "Filtro Aria", "Candele NGK"</div>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+  
+  tbody.innerHTML = prodotti
+    .map(
+      (p) => `
+      <tr>
+        <td>${p.nome}</td>
+        <td style="text-align:right">${p.giacenza}</td>
+        <td class="actions">
+          <button class="btn btn-secondary" onclick="apriModalModificaProdotto(${p.id}, '${p.nome}')">Modifica</button>
+          <button class="btn btn-danger" onclick="eliminaProdotto(${p.id}, '${p.nome}', ${p.giacenza})">Elimina</button>
+        </td>
+      </tr>
+    `
+    )
+    .join("");
+}
+
+

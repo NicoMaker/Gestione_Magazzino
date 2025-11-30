@@ -952,3 +952,59 @@ tbody tr:last-child td {
   }
   
 }
+
+/* ===================== Text Utilities ===================== */
+.text-success {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.text-danger {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+/* ===================== Empty State ===================== */
+.empty-state {
+  padding: 60px 40px !important;
+  text-align: center;
+  background: linear-gradient(135deg, var(--gray-light) 0%, var(--primary-light) 100%);
+}
+
+.empty-state-content {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.empty-state-icon {
+  font-size: 72px;
+  margin-bottom: 24px;
+  display: block;
+  animation: float 3s ease-in-out infinite;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.empty-state-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 12px;
+  letter-spacing: -0.3px;
+}
+
+.empty-state-text {
+  font-size: 15px;
+  color: var(--gray);
+  line-height: 1.6;
+  font-weight: 500;
+}
+
