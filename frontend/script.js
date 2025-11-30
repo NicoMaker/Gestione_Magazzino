@@ -1019,9 +1019,9 @@ async function stampaRiepilogoCompleto() {
         <div style="font-size: 14pt; margin-bottom: 10px; color: #6b7280;">
             Valore Totale Magazzino (Costo FIFO)
         </div>
-        <div class="valore">€ ${formatNumber(
+        <div class="valore">${formatNumber(
             riepilogo.reduce((sum, p) => sum + (p.valore_totale || 0), 0)
-        )}</div>
+        )} €</div>
     </div>
 `;
 
@@ -1033,7 +1033,7 @@ async function stampaRiepilogoCompleto() {
             <span class="print-prodotto-nome">${prodotto.nome}</span>
             <div class="print-prodotto-info">
                 <span class="print-prodotto-giacenza">Giacenza: ${prodotto.giacenza}</span>
-                <span class="print-prodotto-valore">Valore: € ${formatNumber(prodotto.valore_totale)}</span>
+                <span class="print-prodotto-valore">Valore: ${formatNumber(prodotto.valore_totale)} €</span>
             </div>
         </div>
         
@@ -1058,8 +1058,8 @@ async function stampaRiepilogoCompleto() {
                     <tr>
                         <th>Data Carico</th>
                         <th style="text-align:right">Quantità Rimanente</th>
-                        <th style="text-align:right">Prezzo Unitario</th>
-                        <th style="text-align:right">Valore Lotto</th>
+                        <th>Prezzo Unitario</th>
+                        <th>Valore Lotto</th>
                         <th>Fattura/Doc.</th>
                         <th>Fornitore</th>
                     </tr>
@@ -1073,8 +1073,8 @@ async function stampaRiepilogoCompleto() {
                     <tr>
                         <td>${formatDate(lotto.data_carico)}</td>
                         <td style="text-align:right">${lotto.quantita_rimanente}</td>
-                        <td style="text-align:right">€ ${formatNumber(lotto.prezzo)}</td>
-                        <td style="text-align:right">€ ${formatNumber(valoreLotto)}</td>
+                        <td><span class="print-price">${formatNumber(lotto.prezzo)} €</span></td>
+                        <td><span class="print-price">${formatNumber(valoreLotto)} €</span></td>
                         <td>${displayValue(lotto.fattura_doc)}</td>
                         <td>${displayValue(lotto.fornitore_cliente_id)}</td>
                     </tr>
