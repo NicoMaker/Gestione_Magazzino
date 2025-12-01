@@ -1139,3 +1139,312 @@ function switchTab(tabName) {
   }
   if (tabName === "utenti") caricaUtenti();
 }
+
+
+// Funzione di formattazione per quantità con decimali
+function formatQuantity(value) {
+  if (value === null || typeof value === "undefined" || isNaN(value)) {
+    return "0";
+  }
+  const num = Number(value);
+  // Se è un numero intero, mostra senza decimali, altrimenti mostra i decimali
+  return num % 1 === 0 ? num.toString() : num.toFixed(3).replace(/\.?0+$/, '');
+}
+
+// MODIFICA nella funzione aggiungiDato()
+async function aggiungiDato() {
+  const tipo = document.getElementById("dato-tipo").value;
+  const prodottoId = document.getElementById("dato-prodotto").value;
+  const dataMov = document.getElementById("dato-data").value;
+  const quantitaInput = document.getElementById("dato-quantita").value;
+  let prezzo = document.getElementById("dato-prezzo").value;
+  const fattura = document.getElementById("dato-fattura").value;
+  const fornitore = document.getElementById("dato-fornitore").value;
+
+  if (!prodottoId || !dataMov || !quantitaInput) {
+    mostraAlert("warning", "Compila tutti i campi obbligatori", "dati");
+    return;
+  }
+
+  // MODIFICA: Converte virgola in punto e accetta decimali
+  let qtaString = String(quantitaInput).replace(",", ".");
+  const quantita = parseFloat(qtaString);
+
+  if (isNaN(quantita) || quantita <= 0) {
+    mostraAlert("warning", "Quantità non valida", "dati");
+    return;
+  }
+
+  if (tipo === "carico") {
+    prezzo = String(prezzo).replace(",", ".");
+    const prc = parseFloat(prezzo);
+    if (!prc || prc <= 0) {
+      mostraAlert("warning", "Prezzo unitario carico non valido", "dati");
+      return;
+    }
+    prezzo = prc;
+  } else {
+    prezzo = null;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/dati`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        prodotto_id: Number(prodottoId),
+        tipo,
+        quantita,
+        prezzo,
+        data_movimento: dataMov,
+        fattura_doc: sanitizeInputText(fattura),
+        fornitore_cliente_id: sanitizeInputText(fornitore),
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      mostraAlert(
+        "error",
+        data.error || "Errore registrazione movimento",
+        "dati"
+      );
+      return;
+    }
+
+    mostraAlert("success", "Movimento registrato", "dati");
+
+    document.getElementById("dato-quantita").value = "";
+    document.getElementById("dato-prezzo").value = "";
+    document.getElementById("dato-fattura").value = "";
+    document.getElementById("dato-fornitore").value = "";
+
+    caricaDati();
+    caricaRiepilogo();
+  } catch (err) {
+    console.error(err);
+    mostraAlert("error", "Errore di comunicazione col server", "dati");
+  }
+}
+
+// MODIFICA nella funzione visualizzaDati()
+function visualizzaDati() {
+  const tbody = document.getElementById("dati-body");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  dati.forEach((d) => {
+    const isCarico = d.tipo === "carico";
+
+    const prezzoUnit = d.prezzo_unitario_scarico
+      ? d.prezzo_unitario_scarico
+      : d.prezzo;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${formatDate(d.data_movimento)}</td>
+      <td>${d.prodotto_nome}</td>
+      <td>${isCarico ? "CARICO" : "SCARICO"}</td>
+      <td style="text-align:right"><strong>${formatQuantity(d.quantita)}</strong></td>
+      <td style="text-align:right">${
+        prezzoUnit != null ? formatNumber(prezzoUnit) + " €" : "—"
+      }</td>
+      <td style="text-align:right">${
+        d.prezzo_totale != null ? formatNumber(d.prezzo_totale) + " €" : "—"
+      }</td>
+      <td>${displayValue(d.fattura_doc)}</td>
+      <td>${displayValue(d.fornitore_cliente_id)}</td>
+      <td>
+        <button class="btn btn-danger btn-small" onclick="eliminaDato(${
+          d.id
+        })">🗑️ Elimina</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// MODIFICA nelle funzioni di visualizzazione riepilogo e lotti
+function visualizzaRiepilogo() {
+  const tbody = document.getElementById("riepilogo-body");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  let valoreTotale = 0;
+  let giacenzaTotale = 0;
+
+  riepilogo.forEach((r) => {
+    const giac = r.giacenza || 0;
+    const val = r.valore_totale || 0;
+    giacenzaTotale += giac;
+    valoreTotale += val;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${r.nome}</td>
+      <td style="text-align:right"><strong>${formatQuantity(giac)}</strong></td>
+      <td style="text-align:right"><strong>${formatNumber(val)} €</strong></td>
+      <td>
+        ${
+          giac > 0
+            ? `<button class="btn btn-secondary btn-small" onclick="apriDettaglioLotti(${r.id}, '${r.nome}')">👁️ Dettagli Lotti</button>`
+            : ""
+        }
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const valElem = document.getElementById("riepilogo-valore-totale");
+  const giacElem = document.getElementById("riepilogo-giacenza-totale");
+  if (valElem) valElem.textContent = `€ ${formatNumber(valoreTotale)}`;
+  if (giacElem) giacElem.textContent = formatQuantity(giacenzaTotale);
+}
+
+async function apriDettaglioLotti(prodottoId, nomeProdotto) {
+  try {
+    const res = await fetch(`${API_BASE}/riepilogo/${prodottoId}`);
+    if (!res.ok) throw new Error("Errore recupero lotti");
+    const lotti = await res.json();
+
+    const titolo = document.getElementById("dettaglio-prodotto-nome");
+    const tbody = document.getElementById("lotti-body");
+
+    if (titolo) titolo.textContent = `Dettaglio Lotti - ${nomeProdotto}`;
+    if (tbody) {
+      tbody.innerHTML = "";
+      lotti.forEach((lotto) => {
+        const valoreLotto = lotto.quantita_rimanente * lotto.prezzo;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+        <td>${formatDate(lotto.data_carico)}</td>
+        <td style="text-align:right"><strong>${formatQuantity(lotto.quantita_rimanente)}</strong></td>
+        <td style="text-align:right">${formatNumber(lotto.prezzo)} €</td>
+        <td style="text-align:right"><strong>${formatNumber(valoreLotto)} €</strong></td>
+        <td>${displayValue(lotto.fattura_doc)}</td>
+        <td>${displayValue(lotto.fornitore_cliente_id)}</td>
+    `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById("modal-dettaglio-lotti").style.display = "block";
+  } catch (err) {
+    console.error(err);
+    mostraAlert("error", "Errore nel caricamento dei lotti", "riepilogo");
+  }
+}
+
+function visualizzaStorico(valoreTotale) {
+  const tbody = document.getElementById("storico-body");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  let giacenzaTotale = 0;
+
+  storico.forEach((s) => {
+    const giac = s.giacenza || 0;
+    giacenzaTotale += giac;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${s.nome}</td>
+      <td style="text-align:right"><strong>${formatQuantity(giac)}</strong></td>
+      <td style="text-align:right"><strong>${formatNumber(
+        s.valore_totale
+      )} €</strong></td>
+      <td>
+        <button class="btn btn-secondary btn-small" onclick="apriDettaglioLottiStorico(${
+          s.id
+        }, '${s.nome}')">👁️ Dettagli Lotti</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const valElem = document.getElementById("storico-valore-totale");
+  const giacElem = document.getElementById("storico-giacenza-totale");
+  const valLegacy = document.getElementById("valore-magazzino-storico");
+
+  if (valElem) valElem.textContent = `€ ${formatNumber(valoreTotale)}`;
+  if (giacElem) giacElem.textContent = formatQuantity(giacenzaTotale);
+  if (valLegacy) valLegacy.textContent = `€ ${formatNumber(valoreTotale)}`;
+}
+
+async function apriDettaglioLottiStorico(prodottoId, nomeProdotto) {
+  const data = document.getElementById("storico-data").value;
+  if (!data) return;
+
+  const prodotto = storico.find((s) => s.id === prodottoId);
+  if (!prodotto) return;
+
+  const titolo = document.getElementById("dettaglio-prodotto-nome-storico");
+  const dataLabel = document.getElementById("data-dettaglio-storico");
+  const tbody = document.getElementById("lotti-body-storico");
+
+  if (titolo) titolo.textContent = `Dettaglio Lotti Storico - ${nomeProdotto}`;
+  if (dataLabel) dataLabel.textContent = `Data: ${formatDate(data)}`;
+
+  if (tbody) {
+    tbody.innerHTML = "";
+    (prodotto.lotti_storici || []).forEach((lotto) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${formatDate(lotto.data_carico)}</td>
+        <td style="text-align:right"><strong>${formatQuantity(lotto.quantita_rimanente)}</strong></td>
+        <td style="text-align:right">${formatNumber(lotto.prezzo)} €</td>
+        <td>${displayValue(lotto.fattura_doc)}</td>
+        <td>${displayValue(lotto.fornitore_cliente_id)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  document.getElementById("modal-dettaglio-lotti-storico").style.display =
+    "block";
+}
+
+function visualizzaProdotti() {
+  const tbody = document.getElementById("prodotti-body");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  let totalGiacenza = 0;
+
+  prodotti.forEach((p) => {
+    const giac = p.giacenza || 0;
+    totalGiacenza += giac;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${p.nome}</td>
+      <td style="text-align:right"><strong>${formatQuantity(giac)}</strong></td>
+      <td>
+        <button class="btn btn-secondary btn-small" onclick="apriModalModificaProdotto(${p.id})">✏️ Modifica</button>
+        <button class="btn btn-danger btn-small" onclick="eliminaProdotto(${p.id})">🗑️ Elimina</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const totProd = document.getElementById("total-prodotti");
+  const totGiac = document.getElementById("total-giacenza");
+  if (totProd) totProd.textContent = prodotti.length;
+  if (totGiac) totGiac.textContent = formatQuantity(totalGiacenza);
+}
+
+function popolaSelectProdotti() {
+  const select = document.getElementById("dato-prodotto");
+  if (!select) return;
+
+  select.innerHTML = `<option value="">Seleziona prodotto...</option>`;
+
+  prodotti.forEach((p) => {
+    const giac = p.giacenza || 0;
+    const opt = document.createElement("option");
+    opt.value = p.id;
+    opt.textContent = `${p.nome} (${formatQuantity(giac)})`;
+    select.appendChild(opt);
+  });
+}

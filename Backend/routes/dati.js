@@ -1,4 +1,4 @@
-// routes/dati.js (Modificato)
+// routes/dati.js (Modificato per quantità decimali)
 
 const express = require("express");
 const router = express.Router();
@@ -47,9 +47,11 @@ router.post("/", (req, res) => {
     return res.status(400).json({ error: "Formato data non valido (YYYY-MM-DD)" });
   }
 
-  const qty = parseInt(quantita);
+  // MODIFICA: Accetta quantità decimali
+  let qtaString = String(quantita).replace(",", ".");
+  const qty = parseFloat(qtaString);
 
-  if (qty <= 0) {
+  if (isNaN(qty) || qty <= 0) {
     return res.status(400).json({ error: "Quantità deve essere maggiore di 0" });
   }
   
@@ -67,7 +69,6 @@ router.post("/", (req, res) => {
 
     const prezzoTotale = prc * qty;
     
-    // Transazione per garantire l'atomicità tra l'inserimento del movimento e la creazione del lotto
     db.serialize(() => {
       db.run("BEGIN TRANSACTION;");
 
@@ -77,7 +78,7 @@ router.post("/", (req, res) => {
         [prodotto_id, tipo, qty, prc, prezzoTotale, data_movimento, data_registrazione, fattura_doc, fornitore_cliente_id],
         function (err) {
           if (err) { db.run("ROLLBACK;"); return res.status(500).json({ error: err.message }); }
-          const dati_id = this.lastID; // ID del movimento appena creato
+          const dati_id = this.lastID;
 
           // 2. Inserimento Lotto (lotti)
           db.run(
@@ -135,7 +136,7 @@ router.post("/", (req, res) => {
           daScaricare -= qtaDaQuestoLotto;
         }
 
-        db.serialize(() => { // Transazione per garantire l'aggiornamento dei lotti e l'inserimento del movimento
+        db.serialize(() => {
           db.run("BEGIN TRANSACTION;");
 
           // 1. Inserimento Movimento (dati)
@@ -160,7 +161,7 @@ router.post("/", (req, res) => {
                   u.id,
                 ], (err) => {
                   if (err) { 
-                    if (!res.headersSent) { // Previene multiple risposte
+                    if (!res.headersSent) {
                       db.run("ROLLBACK;"); 
                       return res.status(500).json({ error: `Errore durante l'aggiornamento del lotto ${u.id}: ${err.message}` });
                     }
@@ -204,7 +205,6 @@ router.delete("/:id", (req, res) => {
         const { prodotto_id, tipo, quantita, data_movimento, data_registrazione } = movimento;
 
         if (tipo === "carico") {
-          // Ricerca del lotto tramite il nuovo link dati_id
           const lottoQuery = `
             SELECT id, quantita_rimanente, quantita_iniziale
             FROM lotti
@@ -215,7 +215,7 @@ router.delete("/:id", (req, res) => {
 
           db.get(
             lottoQuery,
-            [id, prodotto_id], // Si usa l'ID del movimento
+            [id, prodotto_id],
             (err, lotto) => {
               if (err) {
                 db.run("ROLLBACK;");
@@ -259,8 +259,6 @@ router.delete("/:id", (req, res) => {
         } else if (tipo === "scarico") {
           let qtaDaRipristinare = quantita;
           
-          // Per annullare uno scarico FIFO, ripristiniamo le quantità sui lotti
-          // consumati, procedendo dal lotto più recente (quello consumato per ultimo).
           const lottiQuery = `
             SELECT id, quantita_iniziale, quantita_rimanente 
             FROM lotti 
@@ -279,9 +277,7 @@ router.delete("/:id", (req, res) => {
             for (const lotto of lotti) {
               if (qtaDaRipristinare <= 0) break;
 
-              // Quantità effettivamente consumata da questo lotto in totale
               const qtaConsumata = lotto.quantita_iniziale - lotto.quantita_rimanente;
-              // Quantità da ripristinare su questo lotto (minore tra quanto manca e quanto è stato consumato)
               const qtaDaQuestoLotto = Math.min(qtaDaRipristinare, qtaConsumata);
 
               if (qtaDaQuestoLotto > 0) {
@@ -325,7 +321,6 @@ router.delete("/:id", (req, res) => {
             };
 
             if (totalUpdates === 0) {
-              // Se non ci sono lotti da aggiornare, si elimina solo il dato (caso limite)
               handleUpdateComplete(); 
             } else {
               updates.forEach((u) => {
@@ -335,7 +330,6 @@ router.delete("/:id", (req, res) => {
                   (err) => {
                     if (err) {
                       db.run("ROLLBACK;");
-                      // Qui, se fallisce un aggiornamento, potremmo aver già inviato una risposta
                       if (!res.headersSent) {
                           return res.status(500).json({
                             error: `Errore durante il ripristino del lotto ${u.id}: ${err.message}`,

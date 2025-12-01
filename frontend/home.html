@@ -37,10 +37,6 @@
         <div id="prodotti-section" class="section active">
           <h2>Gestione Prodotti</h2>
 
-          <div class="summary-total">
-            🧮 Giacenza complessiva: <strong id="total-giacenza">0</strong>
-          </div>
-
           <div id="prodotti-alert"></div>
 
           <div class="form-container">
@@ -99,12 +95,13 @@
             </div>
 
             <div class="form-group">
-              <label for="dato-quantita">Quantità</label>
+              <label for="dato-quantita">Quantità (anche decimali)</label>
               <input
-                type="number"
+                type="text"
                 id="dato-quantita"
-                placeholder="Quantità"
-                min="1"
+                placeholder="Es: 5 o 5,78 o 10.5"
+                pattern="[0-9]+([,\.][0-9]{1,3})?"
+                title="Usa virgola o punto per i decimali (max 3 cifre)"
                 required
               />
             </div>
@@ -173,14 +170,12 @@
           <div class="summary-total">
             📊 Valore Totale Magazzino (FIFO):
             <strong id="riepilogo-valore-totale">€ 0,00</strong>
-            &nbsp;|&nbsp; 🧮 Giacenza complessiva:
-            <strong id="riepilogo-giacenza-totale">0</strong>
           </div>
 
           <div id="riepilogo-alert"></div>
 
           <button class="btn btn-secondary" onclick="stampaRiepilogoCompleto()">
-            📄 Stampa Riepilogo Completo (Prodotti + Lotti)
+            🖨️ Stampa Riepilogo Completo (Prodotti + Lotti)
           </button>
 
           <div class="table-container">
@@ -205,8 +200,6 @@
           <div class="summary-total">
             📅 Valore Totale Magazzino
             <strong id="storico-valore-totale">€ 0,00</strong>
-            &nbsp;|&nbsp; 🧮 Giacenza complessiva
-            <strong id="storico-giacenza-totale">0</strong>
           </div>
 
           <div id="storico-alert"></div>
@@ -220,7 +213,7 @@
               Visualizza Storico
             </button>
             <button class="btn btn-secondary" onclick="stampaStorico()">
-              📄 Stampa Storico
+              🖨️ Stampa Storico
             </button>
           </div>
 
@@ -355,7 +348,6 @@
                 <th style="text-align: right">Quantità Rimanente</th>
                 <th style="text-align: right">Prezzo Unitario</th>
                 <th style="text-align: right">Valore Lotto</th>
-                <!-- NUOVA -->
                 <th>Fattura/Doc.</th>
                 <th>Fornitore</th>
               </tr>

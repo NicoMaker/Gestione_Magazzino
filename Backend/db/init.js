@@ -25,13 +25,13 @@ async function initDatabase() {
       )
     `);
 
-    // Tabella dati (movimenti)
+    // Tabella dati (movimenti) - MODIFICATO: quantita è REAL
     db.run(`
       CREATE TABLE IF NOT EXISTS dati (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         prodotto_id INTEGER NOT NULL,
         tipo TEXT CHECK(tipo IN ('carico', 'scarico')) NOT NULL,
-        quantita INTEGER NOT NULL CHECK(quantita > 0),
+        quantita REAL NOT NULL CHECK(quantita > 0),
         prezzo REAL,
         prezzo_totale_movimento REAL,
         data_movimento TEXT NOT NULL,
@@ -42,13 +42,13 @@ async function initDatabase() {
       )
     `);
 
-    // Tabella lotti (per la gestione FIFO)
+    // Tabella lotti (per la gestione FIFO) - MODIFICATO: quantita_iniziale e quantita_rimanente sono REAL
     db.run(`
       CREATE TABLE IF NOT EXISTS lotti (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         prodotto_id INTEGER NOT NULL,
-        quantita_iniziale INTEGER NOT NULL CHECK(quantita_iniziale > 0),
-        quantita_rimanente INTEGER NOT NULL CHECK(quantita_rimanente >= 0),
+        quantita_iniziale REAL NOT NULL CHECK(quantita_iniziale > 0),
+        quantita_rimanente REAL NOT NULL CHECK(quantita_rimanente >= 0),
         prezzo REAL NOT NULL,
         data_carico TEXT NOT NULL,
         data_registrazione TEXT NOT NULL,
