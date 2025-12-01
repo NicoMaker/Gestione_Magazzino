@@ -1008,3 +1008,59 @@ tbody tr:last-child td {
   font-weight: 500;
 }
 
+
+#riepilogo-alert {
+  text-align: center;
+}
+
+#riepilogo-alert .alert-success,
+#riepilogo-alert .alert-error,
+#riepilogo-alert .alert-warning,
+#riepilogo-alert .alert-info {
+  display: inline-block;
+  text-align: left; /* testo leggibile, ma box centrato */
+}
+
+#storico-alert {
+  text-align: center;
+}
+
+#storico-alert .alert-success,
+#storico-alert .alert-error,
+#storico-alert .alert-warning,
+#storico-alert .alert-info {
+  display: inline-block;
+  text-align: left;
+}
+
+
+/* Contenitore alert dentro la modale Dettaglio Lotti */
+#riepilogo-alert {
+  display: flex;
+  justify-content: center;   /* centro orizzontale */
+  margin-bottom: 16px;
+}
+
+/* Box dell’alert centrato e con larghezza massima */
+#riepilogo-alert .alert-success,
+#riepilogo-alert .alert-error,
+#riepilogo-alert .alert-warning,
+#riepilogo-alert .alert-info {
+  max-width: 600px;
+  width: 100%;
+}
+
+
+#storico-alert {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+#storico-alert .alert-success,
+#storico-alert .alert-error,
+#storico-alert .alert-warning,
+#storico-alert .alert-info {
+  max-width: 600px;
+  width: 100%;
+}

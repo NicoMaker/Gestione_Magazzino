@@ -430,41 +430,6 @@ async function caricaRiepilogo() {
   }
 }
 
-function visualizzaRiepilogo() {
-  const tbody = document.getElementById("riepilogo-body");
-  if (!tbody) return;
-  tbody.innerHTML = "";
-
-  let valoreTotale = 0;
-  let giacenzaTotale = 0;
-
-  riepilogo.forEach((r) => {
-    const giac = r.giacenza || 0;
-    const val = r.valore_totale || 0;
-    giacenzaTotale += giac;
-    valoreTotale += val;
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${r.nome}</td>
-      <td style="text-align:right"><strong>${giac}</strong></td>
-      <td style="text-align:right"><strong>${formatNumber(val)} €</strong></td>
-      <td>
-        <button class="btn btn-secondary btn-small" onclick="apriDettaglioLotti(${r.id}, '${r.nome}')">👁️ Dettagli Lotti</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  const valElem = document.getElementById("riepilogo-valore-totale");
-  const giacElem = document.getElementById("riepilogo-giacenza-totale");
-  const valLegacy = document.getElementById("valore-magazzino");
-
-  if (valElem) valElem.textContent = `€ ${formatNumber(valoreTotale)}`;
-  if (giacElem) giacElem.textContent = giacenzaTotale;
-  if (valLegacy) valLegacy.textContent = `€ ${formatNumber(valoreTotale)}`;
-}
-
 async function apriDettaglioLotti(prodottoId, nomeProdotto) {
   try {
     const res = await fetch(`${API_BASE}/riepilogo/${prodottoId}`);
