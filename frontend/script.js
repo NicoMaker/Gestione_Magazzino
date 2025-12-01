@@ -978,6 +978,17 @@ window.addEventListener("load", () => {
   caricaDati();
   caricaRiepilogo();
   caricaUtenti();
+
+    // ripristina ultima tab aperta (di default 'prodotti')
+  let lastTab = "prodotti";
+  try {
+    const saved = localStorage.getItem("magazzino_last_tab");
+    if (saved) lastTab = saved;
+  } catch (e) {
+    console.warn("localStorage non disponibile:", e);
+  }
+
+  switchTab(lastTab);
 });
 
 // chiusura modali cliccando fuori
@@ -1047,4 +1058,43 @@ function visualizzaRiepilogo() {
   const giacElem = document.getElementById("riepilogo-giacenza-totale");
   if (valElem) valElem.textContent = `€ ${formatNumber(valoreTotale)}`;
   if (giacElem) giacElem.textContent = giacenzaTotale;
+}
+
+// ================== NAVIGAZIONE TABS (con localStorage) ==================
+function switchTab(tabName) {
+  // salva l'ultima tab scelta in localStorage
+  try {
+    localStorage.setItem("magazzino_last_tab", tabName);
+  } catch (e) {
+    console.warn("localStorage non disponibile:", e);
+  }
+
+  // Nascondo tutte le sezioni
+  document
+    .querySelectorAll(".section")
+    .forEach((s) => s.classList.remove("active"));
+
+  // Tolgo "active" da tutti i bottoni tab
+  document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+
+  // Mostro la sezione selezionata
+  const section = document.getElementById(`${tabName}-section`);
+  if (section) section.classList.add("active");
+
+  // Evidenzio il bottone della tab selezionata
+  const tabs = document.querySelectorAll(".tabs .tab");
+  tabs.forEach((btn) => {
+    if (btn.getAttribute("onclick") === `switchTab('${tabName}')`) {
+      btn.classList.add("active");
+    }
+  });
+
+  // Caricamenti automatici per tab
+  if (tabName === "prodotti") caricaProdotti();
+  if (tabName === "dati") caricaDati();
+  if (tabName === "riepilogo") caricaRiepilogo();
+  if (tabName === "storico") {
+    // qui non carico subito, aspetto che tu scelga la data
+  }
+  if (tabName === "utenti") caricaUtenti();
 }
