@@ -38,7 +38,44 @@ router.get("/riepilogo", (req, res) => {
 
   db.all(query, (err, rows) => {
     if (err) return res.status(500).json({ error: err.message })
-    res.json(rows)
+
+    const queryLotti = `
+      SELECT 
+        l.prodotto_id,
+        l.id,
+        l.quantita_rimanente,
+        l.prezzo,
+        l.data_carico,
+        l.fattura_doc,
+        l.fornitore
+      FROM lotti l
+      WHERE l.quantita_rimanente > 0
+      ORDER BY l.data_carico ASC, l.id ASC
+    `
+
+    db.all(queryLotti, (errLotti, lotti) => {
+      if (errLotti) return res.status(500).json({ error: errLotti.message })
+
+      const lottiPerProdotto = {}
+      lotti.forEach((lotto) => {
+        if (!lottiPerProdotto[lotto.prodotto_id]) {
+          lottiPerProdotto[lotto.prodotto_id] = []
+        }
+        lottiPerProdotto[lotto.prodotto_id].push(lotto)
+      })
+
+      const riepilogo = rows.map((row) => ({
+        ...row,
+        lotti: lottiPerProdotto[row.id] || [],
+      }))
+
+      const valoreTotale = riepilogo.reduce((sum, r) => sum + Number.parseFloat(r.valore_totale || 0), 0)
+
+      res.json({
+        riepilogo: riepilogo,
+        valore_totale: valoreTotale,
+      })
+    })
   })
 })
 
