@@ -964,3 +964,7 @@ tbody tr:hover {
 html {
   scroll-behavior: smooth;
 }
+
+.user-info{
+  display: none;
+}
