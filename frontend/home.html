@@ -8,8 +8,17 @@
 </head>
 <body>
   <div class="app-container">
+    <!-- Added mobile menu toggle button -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+
     <!-- Sidebar -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <svg class="logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
@@ -412,10 +421,11 @@
   <div id="modalMovimento" class="modal">
     <div class="modal-content modal-large">
       <div class="modal-header">
-        <h2>Nuovo Movimento</h2>
+        <h2 id="modalMovimentoTitle">Nuovo Movimento</h2>
         <button class="modal-close" onclick="closeMovimentoModal()">&times;</button>
       </div>
       <form id="formMovimento">
+        <input type="hidden" id="movimentoId">
         <div class="form-row">
           <div class="form-group">
             <label for="movimentoProdotto">Prodotto *</label>

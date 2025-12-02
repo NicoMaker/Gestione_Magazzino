@@ -23,6 +23,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const savedSection = localStorage.getItem("activeSection") || "marche"
 
+  const mobileMenuToggle = document.getElementById("mobileMenuToggle")
+  const sidebar = document.getElementById("sidebar")
+
+  if (mobileMenuToggle) {
+    mobileMenuToggle.addEventListener("click", () => {
+      sidebar.classList.toggle("mobile-open")
+      mobileMenuToggle.classList.toggle("active")
+    })
+
+    document.addEventListener("click", (e) => {
+      if (window.innerWidth <= 768) {
+        if (!sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
+          sidebar.classList.remove("mobile-open")
+          mobileMenuToggle.classList.remove("active")
+        }
+      }
+    })
+  }
+
   // Setup navigation
   document.querySelectorAll(".nav-item").forEach((item) => {
     item.addEventListener("click", (e) => {
@@ -36,6 +55,11 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById(`section-${section}`).classList.add("active")
 
       localStorage.setItem("activeSection", section)
+
+      if (window.innerWidth <= 768) {
+        sidebar.classList.remove("mobile-open")
+        mobileMenuToggle.classList.remove("active")
+      }
 
       // Carica dati sezione
       if (section === "marche") loadMarche()
