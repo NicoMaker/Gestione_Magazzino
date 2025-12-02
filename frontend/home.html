@@ -1,4 +1,4 @@
-tutti fli<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8">
@@ -50,7 +50,7 @@ tutti fli<!DOCTYPE html>
         </a>
         <a href="#" class="nav-item" data-section="utenti">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
           </svg>
           Utenti
         </a>
@@ -130,17 +130,16 @@ tutti fli<!DOCTYPE html>
             <table>
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Nome Prodotto</th>
-                  <th>Marca</th>
+                  <!-- Modificata struttura colonne prodotti -->
+                  <th>Numero</th>
+                  <th>Nome (Marca) Giacenza</th>
                   <th>Descrizione</th>
-                  <th>Giacenza</th>
                   <th class="text-right">Azioni</th>
                 </tr>
               </thead>
               <tbody id="prodottiTableBody">
                 <tr>
-                  <td colspan="6" class="text-center">Caricamento...</td>
+                  <td colspan="4" class="text-center">Caricamento...</td>
                 </tr>
               </tbody>
             </table>
@@ -168,7 +167,7 @@ tutti fli<!DOCTYPE html>
             <table>
               <thead>
                 <tr>
-                  <th>ID</th>
+                  <!-- Rimossa colonna ID -->
                   <th>Prodotto</th>
                   <th>Marca</th>
                   <th>Tipo</th>
@@ -182,7 +181,7 @@ tutti fli<!DOCTYPE html>
               </thead>
               <tbody id="movimentiTableBody">
                 <tr>
-                  <td colspan="10" class="text-center">Caricamento...</td>
+                  <td colspan="9" class="text-center">Caricamento...</td>
                 </tr>
               </tbody>
             </table>
@@ -255,7 +254,6 @@ tutti fli<!DOCTYPE html>
               </svg>
               Cerca
             </button>
-            <!-- Aggiunto pulsante stampa storico -->
             <button class="btn btn-secondary" onclick="printStorico()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
@@ -283,12 +281,13 @@ tutti fli<!DOCTYPE html>
             <table>
               <thead>
                 <tr>
+                  <!-- Rimosso colonna Dettagli, lotti mostrati sotto ogni prodotto -->
                   <th>Prodotto</th>
                   <th>Marca</th>
                   <th>Descrizione</th>
                   <th>Giacenza</th>
                   <th>Valore Totale</th>
-                  <th class="text-right">Dettagli</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody id="storicoTableBody">
@@ -321,14 +320,14 @@ tutti fli<!DOCTYPE html>
             <table>
               <thead>
                 <tr>
-                  <th>ID</th>
+                  <!-- Rimossa colonna ID -->
                   <th>Username</th>
                   <th class="text-right">Azioni</th>
                 </tr>
               </thead>
               <tbody id="utentiTableBody">
                 <tr>
-                  <td colspan="3" class="text-center">Caricamento...</td>
+                  <td colspan="2" class="text-center">Caricamento...</td>
                 </tr>
               </tbody>
             </table>
@@ -493,7 +492,7 @@ tutti fli<!DOCTYPE html>
           <table>
             <thead>
               <tr>
-                <th>ID Lotto</th>
+                <!-- Rimossa colonna ID Lotto -->
                 <th>Quantità</th>
                 <th>Prezzo</th>
                 <th>Valore</th>

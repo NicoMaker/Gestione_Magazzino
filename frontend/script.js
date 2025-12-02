@@ -179,7 +179,7 @@ function renderProdotti() {
   const tbody = document.getElementById("prodottiTableBody")
 
   if (prodotti.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" class="text-center">Nessun prodotto presente</td></tr>'
+    tbody.innerHTML = '<tr><td colspan="4" class="text-center">Nessun prodotto presente</td></tr>'
     return
   }
 
@@ -187,11 +187,9 @@ function renderProdotti() {
     .map(
       (p) => `
     <tr>
-      <td>${p.id}</td>
-      <td><strong>${p.nome}</strong></td>
-      <td>${p.marca_nome || '<span style="color: #999;">-</span>'}</td>
+      <td><strong>#${p.id}</strong></td>
+      <td><strong>${p.nome}</strong> ${p.marca_nome ? `<span style="color: #6366f1;">(${p.marca_nome})</span>` : ""} <span class="badge ${p.giacenza > 0 ? "badge-success" : "badge-danger"}">${p.giacenza}</span></td>
       <td>${p.descrizione ? `<small>${p.descrizione.substring(0, 50)}${p.descrizione.length > 50 ? "..." : ""}</small>` : '<span style="color: #999;">-</span>'}</td>
-      <td><span class="badge ${p.giacenza > 0 ? "badge-success" : "badge-danger"}">${p.giacenza}</span></td>
       <td class="text-right">
         <button class="btn-icon" onclick="editProdotto(${p.id})" title="Modifica">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -319,7 +317,7 @@ function renderMovimenti() {
   const tbody = document.getElementById("movimentiTableBody")
 
   if (movimenti.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="10" class="text-center">Nessun movimento presente</td></tr>'
+    tbody.innerHTML = '<tr><td colspan="9" class="text-center">Nessun movimento presente</td></tr>'
     return
   }
 
@@ -327,7 +325,6 @@ function renderMovimenti() {
     .map(
       (m) => `
     <tr>
-      <td>${m.id}</td>
       <td><strong>${m.prodotto_nome}</strong></td>
       <td>${m.marca_nome || '<span style="color: #999;">-</span>'}</td>
       <td><span class="badge ${m.tipo === "carico" ? "badge-success" : "badge-danger"}">${m.tipo.toUpperCase()}</span></td>
@@ -364,7 +361,7 @@ async function openMovimentoModal() {
   selectProdotto.innerHTML =
     '<option value="">Seleziona prodotto...</option>' +
     prodotti
-      .map((p) => `<option value="${p.id}">${p.nome}${p.marca_nome ? ` (${p.marca_nome})` : ""}</option>`)
+      .map((p) => `<option value="${p.id}">#${p.id} - ${p.nome}${p.marca_nome ? ` (${p.marca_nome})` : ""}</option>`)
       .join("")
 
   document.getElementById("movimentoData").valueAsDate = new Date()
@@ -394,7 +391,13 @@ async function mostraGiacenzaProdotto() {
   const prodotto = prodotti.find((p) => p.id === Number.parseInt(prodottoId))
 
   if (prodotto) {
-    giacenzaValue.textContent = prodotto.giacenza || 0
+    giacenzaValue.innerHTML = `
+      <div style="margin-bottom: 5px;">
+        <strong style="font-size: 14px; color: #0369a1;">#${prodotto.id} - ${prodotto.nome}</strong>
+        ${prodotto.marca_nome ? `<span style="color: #6366f1; font-size: 13px;">(${prodotto.marca_nome})</span>` : ""}
+      </div>
+      <div style="font-size: 28px; font-weight: bold; color: #0284c7;">${prodotto.giacenza || 0} unità</div>
+    `
     giacenzaInfo.style.display = "block"
   }
 }
@@ -508,7 +511,7 @@ async function loadRiepilogo() {
   }
 }
 
-function renderRiepilogo(riepilogo) {
+async function renderRiepilogo(riepilogo) {
   const tbody = document.getElementById("riepilogoTableBody")
 
   if (riepilogo.length === 0) {
@@ -516,9 +519,10 @@ function renderRiepilogo(riepilogo) {
     return
   }
 
-  tbody.innerHTML = riepilogo
-    .map(
-      (r) => `
+  let html = ""
+
+  for (const r of riepilogo) {
+    html += `
     <tr>
       <td><strong>${r.nome}</strong></td>
       <td>${r.marca_nome || '<span style="color: #999;">-</span>'}</td>
@@ -526,9 +530,60 @@ function renderRiepilogo(riepilogo) {
       <td><span class="badge ${r.giacenza > 0 ? "badge-success" : "badge-danger"}">${r.giacenza}</span></td>
       <td><strong>€ ${Number.parseFloat(r.valore_totale).toFixed(2)}</strong></td>
     </tr>
-  `,
-    )
-    .join("")
+    `
+
+    if (r.giacenza > 0) {
+      try {
+        const lottiRes = await fetch(`${API_URL}/magazzino/riepilogo/${r.id}`)
+        const lotti = await lottiRes.json()
+
+        if (lotti && lotti.length > 0) {
+          html += `
+          <tr>
+            <td colspan="5" style="padding: 0; background-color: #f9fafb;">
+              <table style="width: 100%; margin: 0; border: none;">
+                <thead>
+                  <tr style="background-color: #e0e7ff;">
+                    <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">ID Lotto</th>
+                    <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Quantità</th>
+                    <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Prezzo Unit.</th>
+                    <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Valore</th>
+                    <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Data Carico</th>
+                    <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Documento</th>
+                    <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Fornitore</th>
+                  </tr>
+                </thead>
+                <tbody>
+          `
+
+          lotti.forEach((lotto) => {
+            html += `
+                  <tr>
+                    <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${lotto.id}</td>
+                    <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${lotto.quantita_rimanente}</td>
+                    <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">€ ${Number.parseFloat(lotto.prezzo).toFixed(2)}</td>
+                    <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;"><strong>€ ${(lotto.quantita_rimanente * lotto.prezzo).toFixed(2)}</strong></td>
+                    <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
+                    <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${lotto.fattura_doc || '<span style="color: #999;">-</span>'}</td>
+                    <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${lotto.fornitore || '<span style="color: #999;">-</span>'}</td>
+                  </tr>
+            `
+          })
+
+          html += `
+                </tbody>
+              </table>
+            </td>
+          </tr>
+          `
+        }
+      } catch (error) {
+        console.error("Errore caricamento lotti:", error)
+      }
+    }
+  }
+
+  tbody.innerHTML = html
 }
 
 async function printRiepilogo() {
@@ -679,52 +734,63 @@ function renderStorico(storico) {
     return
   }
 
-  tbody.innerHTML = storico
-    .map(
-      (s) => `
+  let html = ""
+
+  storico.forEach((s) => {
+    html += `
     <tr>
-      <td><strong>${s.nome}</strong></td>
-      <td>${s.marca_nome || '<span style="color: #999;">-</span>'}</td>
+      <td><strong>#${s.id}</strong></td>
+      <td><strong>${s.nome}</strong> ${s.marca_nome ? `<span style="color: #6366f1;">(${s.marca_nome})</span>` : ""} <span class="badge ${s.giacenza > 0 ? "badge-success" : "badge-danger"}">${s.giacenza}</span></td>
       <td>${s.descrizione ? `<small>${s.descrizione.substring(0, 40)}${s.descrizione.length > 40 ? "..." : ""}</small>` : '<span style="color: #999;">-</span>'}</td>
       <td><span class="badge ${s.giacenza > 0 ? "badge-success" : "badge-danger"}">${s.giacenza}</span></td>
       <td><strong>€ ${Number.parseFloat(s.valore_totale).toFixed(2)}</strong></td>
-      <td class="text-right">
-        ${s.giacenza > 0 && s.lotti_storici ? `<button class="btn btn-sm btn-secondary" onclick="showDettagliLottiStorico(${s.id}, '${s.nome.replace(/'/g, "\\'")}', ${JSON.stringify(s.lotti_storici).replace(/'/g, "&#39;")})">Dettagli</button>` : ""}
-      </td>
+      <td></td>
     </tr>
-  `,
-    )
-    .join("")
-}
+    `
 
-function showDettagliLottiStorico(prodottoId, prodottoNome, lotti) {
-  const modal = document.getElementById("modalDettagli")
-  const title = document.getElementById("modalDettagliTitle")
-  const tbody = document.getElementById("dettagliTableBody")
-
-  title.textContent = `Dettagli Lotti Storico - ${prodottoNome}`
-
-  if (!lotti || lotti.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center">Nessun lotto disponibile</td></tr>'
-  } else {
-    tbody.innerHTML = lotti
-      .map(
-        (l) => `
+    if (s.giacenza > 0 && s.lotti_storici && s.lotti_storici.length > 0) {
+      html += `
       <tr>
-        <td>${l.id}</td>
-        <td>${l.quantita_rimanente}</td>
-        <td>€ ${Number.parseFloat(l.prezzo).toFixed(2)}</td>
-        <td><strong>€ ${(l.quantita_rimanente * l.prezzo).toFixed(2)}</strong></td>
-        <td>${new Date(l.data_carico).toLocaleDateString("it-IT")}</td>
-        <td>${l.fattura_doc || '<span style="color: #999;">-</span>'}</td>
-        <td>${l.fornitore || '<span style="color: #999;">-</span>'}</td>
-      </tr>
-    `,
-      )
-      .join("")
-  }
+        <td colspan="6" style="padding: 0; background-color: #f9fafb;">
+          <table style="width: 100%; margin: 0; border: none;">
+            <thead>
+              <tr style="background-color: #e0e7ff;">
+                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">ID Lotto</th>
+                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Quantità</th>
+                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Prezzo Unit.</th>
+                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Valore</th>
+                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Data Carico</th>
+                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Documento</th>
+                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Fornitore</th>
+              </tr>
+            </thead>
+            <tbody>
+      `
 
-  modal.classList.add("active")
+      s.lotti_storici.forEach((lotto) => {
+        html += `
+              <tr>
+                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${lotto.id}</td>
+                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${lotto.quantita_rimanente}</td>
+                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">€ ${Number.parseFloat(lotto.prezzo).toFixed(2)}</td>
+                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;"><strong>€ ${(lotto.quantita_rimanente * lotto.prezzo).toFixed(2)}</strong></td>
+                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
+                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${lotto.fattura_doc || '<span style="color: #999;">-</span>'}</td>
+                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${lotto.fornitore || '<span style="color: #999;">-</span>'}</td>
+              </tr>
+        `
+      })
+
+      html += `
+            </tbody>
+          </table>
+        </td>
+      </tr>
+      `
+    }
+  })
+
+  tbody.innerHTML = html
 }
 
 function printStorico() {
@@ -867,7 +933,7 @@ function renderUtenti() {
   const tbody = document.getElementById("utentiTableBody")
 
   if (utenti.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="3" class="text-center">Nessun utente presente</td></tr>'
+    tbody.innerHTML = '<tr><td colspan="2" class="text-center">Nessun utente presente</td></tr>'
     return
   }
 
@@ -875,7 +941,7 @@ function renderUtenti() {
     .map(
       (u) => `
     <tr>
-      <td>${u.id}</td>
+      <!-- Rimosso ID utente -->
       <td><strong>${u.username}</strong></td>
       <td class="text-right">
         <button class="btn-icon" onclick="editUser(${u.id})" title="Modifica">
