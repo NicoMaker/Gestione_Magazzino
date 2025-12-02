@@ -100,7 +100,7 @@ function renderMarche() {
   const tbody = document.getElementById("marcheTableBody")
 
   if (marche.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="3" class="text-center">Nessuna marca presente</td></tr>'
+    tbody.innerHTML = '<tr><td colspan="2" class="text-center">Nessuna marca presente</td></tr>'
     return
   }
 
@@ -109,7 +109,6 @@ function renderMarche() {
       (m) => `
     <tr>
       <td><strong>${m.nome}</strong></td>
-      <td>${new Date(m.created_at).toLocaleDateString("it-IT")}</td>
       <td class="text-right">
         <button class="btn-icon" onclick="editMarca(${m.id})" title="Modifica">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -215,8 +214,8 @@ document.getElementById("formMarca").addEventListener("submit", async (e) => {
 async function loadProdotti() {
   try {
     const res = await fetch(`${API_URL}/prodotti`)
-    allProdotti = await res.json() // CHANGE: Salva tutte le marche in allProdotti
-    prodotti = allProdotti // CHANGE: Reimposta prodotti alla copia di allProdotti per il rendering iniziale
+    allProdotti = await res.json()
+    prodotti = allProdotti
     renderProdotti()
   } catch (error) {
     console.error("Errore caricamento prodotti:", error)
@@ -227,7 +226,7 @@ function renderProdotti() {
   const tbody = document.getElementById("prodottiTableBody")
 
   if (prodotti.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" class="text-center">Nessun prodotto presente</td></tr>'
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center">Nessun prodotto presente</td></tr>'
     return
   }
 
@@ -235,13 +234,10 @@ function renderProdotti() {
     .map(
       (p) => `
     <tr>
-      <td><strong>#${p.id}</strong></td>
-      <td>
-        <strong>${p.nome}</strong> 
-        ${p.marca_nome ? `<span style="color: #6366f1;">(${p.marca_nome})</span>` : ""} 
-        <span class="badge ${p.giacenza > 0 ? "badge-success" : "badge-danger"}">${p.giacenza || 0}</span>
-      </td>
-      <td>${p.descrizione ? `<small>${p.descrizione.substring(0, 50)}${p.descrizione.length > 50 ? "..." : ""}</small>` : '<span style="color: #999;">-</span>'}</td>
+      <td><strong>${p.nome}</strong></td>
+      <td><span class="badge badge-marca">${p.marca_nome || "N/A"}</span></td>
+      <td><span class="badge-giacenza">${p.giacenza || 0} pz</span></td>
+      <td>${p.descrizione || "-"}</td>
       <td class="text-right">
         <button class="btn-icon" onclick="editProdotto(${p.id})" title="Modifica">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -391,7 +387,11 @@ function renderMovimenti() {
     <tr>
       <td><strong>${m.prodotto_nome}</strong></td>
       <td>${m.marca_nome || '<span style="color: #999;">-</span>'}</td>
-      <td>${m.descrizione ? `<small>${m.descrizione.substring(0, 30)}${m.descrizione.length > 30 ? "..." : ""}</small>` : '<span style="color: #999;">-</span>'}</td>
+      <td>${
+        m.prodotto_descrizione
+          ? `<small>${m.prodotto_descrizione.substring(0, 30)}${m.prodotto_descrizione.length > 30 ? "..." : ""}</small>`
+          : '<span style="color: #999;">-</span>'
+      }</td>
       <td><span class="badge ${m.tipo === "carico" ? "badge-success" : "badge-danger"}">${m.tipo.toUpperCase()}</span></td>
       <td>${m.quantita}</td>
       <td>${m.tipo === "carico" ? `€ ${Number.parseFloat(m.prezzo).toFixed(2)}` : m.prezzo_unitario_scarico ? `€ ${Number.parseFloat(m.prezzo_unitario_scarico).toFixed(2)}` : "-"}</td>
@@ -418,7 +418,7 @@ document.getElementById("filterMovimenti")?.addEventListener("input", (e) => {
       m.prodotto_nome.toLowerCase().includes(searchTerm) ||
       (m.marca_nome && m.marca_nome.toLowerCase().includes(searchTerm)) ||
       m.tipo.toLowerCase().includes(searchTerm) ||
-      (m.descrizione && m.descrizione.toLowerCase().includes(searchTerm)),
+      (m.prodotto_descrizione && m.prodotto_descrizione.toLowerCase().includes(searchTerm)),
   )
   renderMovimenti()
 })
@@ -572,7 +572,7 @@ async function showGiacenzaInfo(prodottoId) {
       const giacenzaInfo = document.getElementById("giacenzaInfo")
       const giacenzaValue = document.getElementById("giacenzaValue")
 
-      giacenzaValue.textContent = `#${prodotto.id} - ${prodotto.nome} ${prodotto.marca_nome ? `(${prodotto.marca_nome})` : ""} - Giacenza: ${prodotto.giacenza || 0}`
+      giacenzaValue.textContent = `${prodotto.nome} ${prodotto.marca_nome ? `(${prodotto.marca_nome})` : ""} - Giacenza: ${prodotto.giacenza || 0}`
       giacenzaInfo.style.display = "block"
     }
   } catch (error) {
@@ -600,7 +600,7 @@ function renderRiepilogo() {
   const tbody = document.getElementById("riepilogoTableBody")
 
   if (riepilogo.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" class="text-center">Nessun prodotto in magazzino</td></tr>'
+    tbody.innerHTML = '<tr><td colspan="4" class="text-center">Nessun prodotto in magazzino</td></tr>'
     return
   }
 
@@ -608,49 +608,51 @@ function renderRiepilogo() {
 
   riepilogo.forEach((r) => {
     html += `
-    <tr>
-      <td><strong>#${r.id}</strong></td>
-      <td><strong>${r.nome}</strong> ${r.marca_nome ? `<span style="color: #6366f1;">(${r.marca_nome})</span>` : ""}</td>
-      <td>${r.descrizione ? `<small>${r.descrizione.substring(0, 40)}${r.descrizione.length > 40 ? "..." : ""}</small>` : '<span style="color: #999;">-</span>'}</td>
-      <td><span class="badge ${r.giacenza > 0 ? "badge-success" : "badge-danger"}">${r.giacenza}</span></td>
+    <tr class="product-main-row">
+      <td><strong>${r.nome}</strong> ${r.marca_nome ? `<span class="badge-marca">${r.marca_nome}</span>` : ""}</td>
+      <td>${r.descrizione ? `<small>${r.descrizione.substring(0, 50)}${r.descrizione.length > 50 ? "..." : ""}</small>` : '<span style="color: #999;">-</span>'}</td>
+      <td><span class="badge badge-giacenza">${r.giacenza} pz</span></td>
       <td><strong>€ ${Number.parseFloat(r.valore_totale).toFixed(2)}</strong></td>
     </tr>
     `
 
     if (r.giacenza > 0 && r.lotti && r.lotti.length > 0) {
       html += `
-      <tr>
-        <td colspan="5" style="padding: 0; background-color: #f9fafb;">
-          <table style="width: 100%; margin: 0; border: none;">
-            <thead>
-              <tr style="background-color: #e0e7ff;">
-                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Quantità</th>
-                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Prezzo Unit.</th>
-                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Valore</th>
-                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Data Carico</th>
-                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Documento</th>
-                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Fornitore</th>
-              </tr>
-            </thead>
-            <tbody>
+      <tr class="lotti-row">
+        <td colspan="4" class="lotti-container">
+          <div class="lotti-header">Dettaglio Lotti</div>
+          <div class="lotti-table-wrapper">
+            <table class="lotti-table">
+              <thead>
+                <tr>
+                  <th>Quantità</th>
+                  <th>Prezzo Unit.</th>
+                  <th>Valore</th>
+                  <th>Data Carico</th>
+                  <th>Documento</th>
+                  <th>Fornitore</th>
+                </tr>
+              </thead>
+              <tbody>
       `
 
       r.lotti.forEach((lotto) => {
         html += `
-              <tr>
-                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${lotto.quantita_rimanente}</td>
-                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">€ ${Number.parseFloat(lotto.prezzo).toFixed(2)}</td>
-                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;"><strong>€ ${(lotto.quantita_rimanente * lotto.prezzo).toFixed(2)}</strong></td>
-                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
-                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${lotto.fattura_doc || '<span style="color: #999;">-</span>'}</td>
-                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${lotto.fornitore || '<span style="color: #999;">-</span>'}</td>
-              </tr>
+                <tr>
+                  <td><strong>${lotto.quantita_rimanente} pz</strong></td>
+                  <td>€ ${Number.parseFloat(lotto.prezzo).toFixed(2)}</td>
+                  <td><strong>€ ${(lotto.quantita_rimanente * lotto.prezzo).toFixed(2)}</strong></td>
+                  <td>${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
+                  <td>${lotto.fattura_doc || '<span style="color: #999;">-</span>'}</td>
+                  <td>${lotto.fornitore || '<span style="color: #999;">-</span>'}</td>
+                </tr>
         `
       })
 
       html += `
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         </td>
       </tr>
       `
@@ -672,9 +674,14 @@ document.getElementById("filterRiepilogo")?.addEventListener("input", (e) => {
 })
 
 function printRiepilogo() {
-  const valoreTotale = document.getElementById("valoreTotale").textContent
+  if (riepilogo.length === 0) {
+    alert("Nessun prodotto da stampare")
+    return
+  }
 
-  const printContent = `
+  const valoreTotaleFiltrato = riepilogo.reduce((sum, r) => sum + Number.parseFloat(r.valore_totale || 0), 0)
+
+  let printContent = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -701,88 +708,79 @@ function printRiepilogo() {
     <body>
       <h1>Riepilogo Giacenze Magazzino</h1>
       <div class="info">
-        <p><strong>Valore Totale Magazzino:</strong> ${valoreTotale}</p>
+        <p><strong>Valore Totale (Filtrato):</strong> € ${valoreTotaleFiltrato.toFixed(2)}</p>
+        <p><strong>Prodotti Visualizzati:</strong> ${riepilogo.length}</p>
         <p><strong>Data Stampa:</strong> ${new Date().toLocaleDateString("it-IT")} ${new Date().toLocaleTimeString("it-IT")}</p>
       </div>
   `
 
-  fetch(`${API_URL}/magazzino/riepilogo`)
-    .then((res) => res.json())
-    .then((data) => {
-      let content = printContent
+  riepilogo.forEach((prodotto) => {
+    if (prodotto.giacenza > 0) {
+      printContent += `
+        <div class="prodotto-block">
+          <div class="prodotto-header">
+            <div class="prodotto-info">
+              <span><strong>Prodotto:</strong> ${prodotto.nome}</span>
+              <span><strong>Giacenza Totale:</strong> ${prodotto.giacenza}</span>
+            </div>
+            <div class="prodotto-info">
+              <span><strong>Marca:</strong> ${prodotto.marca_nome || "-"}</span>
+              <span><strong>Valore Totale:</strong> € ${Number.parseFloat(prodotto.valore_totale).toFixed(2)}</span>
+            </div>
+            ${prodotto.descrizione ? `<div class="prodotto-info"><span><strong>Descrizione:</strong> ${prodotto.descrizione}</span></div>` : ""}
+          </div>
+      `
 
-      data.riepilogo.forEach((prodotto) => {
-        if (prodotto.giacenza > 0) {
-          content += `
-            <div class="prodotto-block">
-              <div class="prodotto-header">
-                <div class="prodotto-info">
-                  <span><strong>Prodotto:</strong> ${prodotto.nome}</span>
-                  <span><strong>Giacenza Totale:</strong> ${prodotto.giacenza}</span>
-                </div>
-                <div class="prodotto-info">
-                  <span><strong>Marca:</strong> ${prodotto.marca_nome || "-"}</span>
-                  <span><strong>Valore Totale:</strong> € ${Number.parseFloat(prodotto.valore_totale).toFixed(2)}</span>
-                </div>
-                ${prodotto.descrizione ? `<div class="prodotto-info"><span><strong>Descrizione:</strong> ${prodotto.descrizione}</span></div>` : ""}
-              </div>
+      if (prodotto.lotti && prodotto.lotti.length > 0) {
+        printContent += `
+          <table>
+            <thead>
+              <tr>
+                <th>Quantità</th>
+                <th>Prezzo Unit.</th>
+                <th>Valore</th>
+                <th>Data Carico</th>
+                <th>Documento</th>
+                <th>Fornitore</th>
+              </tr>
+            </thead>
+            <tbody>
+        `
+
+        prodotto.lotti.forEach((lotto) => {
+          printContent += `
+            <tr class="lotto-row">
+              <td>${lotto.quantita_rimanente}</td>
+              <td>€ ${Number.parseFloat(lotto.prezzo).toFixed(2)}</td>
+              <td><strong>€ ${(lotto.quantita_rimanente * lotto.prezzo).toFixed(2)}</strong></td>
+              <td>${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
+              <td>${lotto.fattura_doc || "-"}</td>
+              <td>${lotto.fornitore || "-"}</td>
+            </tr>
           `
+        })
 
-          if (prodotto.lotti && prodotto.lotti.length > 0) {
-            content += `
-              <table>
-                <thead>
-                  <tr>
-                    <th>Quantità</th>
-                    <th>Prezzo Unit.</th>
-                    <th>Valore</th>
-                    <th>Data Carico</th>
-                    <th>Documento</th>
-                    <th>Fornitore</th>
-                  </tr>
-                </thead>
-                <tbody>
-            `
+        printContent += `
+            </tbody>
+          </table>
+        `
+      } else {
+        printContent += '<p class="no-lotti">Nessun lotto disponibile</p>'
+      }
 
-            prodotto.lotti.forEach((lotto) => {
-              content += `
-                <tr class="lotto-row">
-                  <td>${lotto.quantita_rimanente}</td>
-                  <td>€ ${Number.parseFloat(lotto.prezzo).toFixed(2)}</td>
-                  <td><strong>€ ${(lotto.quantita_rimanente * lotto.prezzo).toFixed(2)}</strong></td>
-                  <td>${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
-                  <td>${lotto.fattura_doc || "-"}</td>
-                  <td>${lotto.fornitore || "-"}</td>
-                </tr>
-              `
-            })
+      printContent += `</div>`
+    }
+  })
 
-            content += `
-                  </tbody>
-                </table>
-              `
-          } else {
-            content += '<p class="no-lotti">Nessun lotto disponibile</p>'
-          }
+  printContent += `</body></html>`
 
-          content += `</div>`
-        }
-      })
-
-      content += `</body></html>`
-
-      const printFrame = document.createElement("iframe")
-      printFrame.style.display = "none"
-      document.body.appendChild(printFrame)
-      printFrame.contentDocument.write(content)
-      printFrame.contentDocument.close()
-      printFrame.contentWindow.print()
-      setTimeout(() => document.body.removeChild(printFrame), 1000)
-    })
-    .catch((error) => {
-      console.error("Errore nella stampa:", error)
-      alert("Errore durante la stampa del riepilogo")
-    })
+  const printFrame = document.createElement("iframe")
+  printFrame.style.display = "none"
+  document.body.appendChild(printFrame)
+  printFrame.contentDocument.write(printContent)
+  printFrame.contentDocument.close()
+  printFrame.contentWindow.print()
+  setTimeout(() => document.body.removeChild(printFrame), 1000)
 }
 
 // ==================== STORICO ====================
@@ -813,7 +811,7 @@ function renderStorico(storico) {
   const tbody = document.getElementById("storicoTableBody")
 
   if (storico.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" class="text-center">Nessun dato disponibile per questa data</td></tr>'
+    tbody.innerHTML = '<tr><td colspan="4" class="text-center">Nessun dato disponibile</td></tr>'
     return
   }
 
@@ -821,50 +819,51 @@ function renderStorico(storico) {
 
   storico.forEach((s) => {
     html += `
-    <tr>
-      <td><strong>#${s.id}</strong></td>
-      <td><strong>${s.nome}</strong> ${s.marca_nome ? `<span style="color: #6366f1;">(${s.marca_nome})</span>` : ""} <span class="badge ${s.giacenza > 0 ? "badge-success" : "badge-danger"}">${s.giacenza}</span></td>
-      <td>${s.descrizione ? `<small>${s.descrizione.substring(0, 40)}${s.descrizione.length > 40 ? "..." : ""}</small>` : '<span style="color: #999;">-</span>'}</td>
-      <td><span class="badge ${s.giacenza > 0 ? "badge-success" : "badge-danger"}">${s.giacenza}</span></td>
+    <tr class="product-main-row">
+      <td><strong>${s.nome}</strong> ${s.marca_nome ? `<span class="badge-marca">${s.marca_nome}</span>` : ""}</td>
+      <td>${s.descrizione ? `<small>${s.descrizione.substring(0, 50)}${s.descrizione.length > 50 ? "..." : ""}</small>` : '<span style="color: #999;">-</span>'}</td>
+      <td><span class="badge-giacenza">${s.giacenza} pz</span></td>
       <td><strong>€ ${Number.parseFloat(s.valore_totale).toFixed(2)}</strong></td>
-      <td></td>
     </tr>
     `
 
-    if (s.giacenza > 0 && s.lotti_storici && s.lotti_storici.length > 0) {
+    if (s.giacenza > 0 && s.lotti && s.lotti.length > 0) {
       html += `
-      <tr>
-        <td colspan="6" style="padding: 0; background-color: #f9fafb;">
-          <table style="width: 100%; margin: 0; border: none;">
-            <thead>
-              <tr style="background-color: #e0e7ff;">
-                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Quantità</th>
-                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Prezzo Unit.</th>
-                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Valore</th>
-                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Data Carico</th>
-                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Documento</th>
-                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Fornitore</th>
-              </tr>
-            </thead>
-            <tbody>
+      <tr class="lotti-row">
+        <td colspan="4" class="lotti-container">
+          <div class="lotti-header">Dettaglio Lotti</div>
+          <div class="lotti-table-wrapper">
+            <table class="lotti-table">
+              <thead>
+                <tr>
+                  <th>Quantità</th>
+                  <th>Prezzo Unit.</th>
+                  <th>Valore</th>
+                  <th>Data Carico</th>
+                  <th>Documento</th>
+                  <th>Fornitore</th>
+                </tr>
+              </thead>
+              <tbody>
       `
 
-      s.lotti_storici.forEach((lotto) => {
+      s.lotti.forEach((lotto) => {
         html += `
-              <tr>
-                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${lotto.quantita_rimanente}</td>
-                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">€ ${Number.parseFloat(lotto.prezzo).toFixed(2)}</td>
-                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;"><strong>€ ${(lotto.quantita_rimanente * lotto.prezzo).toFixed(2)}</strong></td>
-                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
-                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${lotto.fattura_doc || '<span style="color: #999;">-</span>'}</td>
-                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${lotto.fornitore || '<span style="color: #999;">-</span>'}</td>
-              </tr>
+                <tr>
+                  <td><strong>${lotto.quantita_rimanente} pz</strong></td>
+                  <td>€ ${Number.parseFloat(lotto.prezzo).toFixed(2)}</td>
+                  <td><strong>€ ${(lotto.quantita_rimanente * lotto.prezzo).toFixed(2)}</strong></td>
+                  <td>${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
+                  <td>${lotto.fattura_doc || '<span style="color: #999;">-</span>'}</td>
+                  <td>${lotto.fornitore || '<span style="color: #999;">-</span>'}</td>
+                </tr>
         `
       })
 
       html += `
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         </td>
       </tr>
       `
@@ -892,13 +891,18 @@ function printStorico() {
     return
   }
 
-  const valoreTotale = document.getElementById("valoreStorico").textContent
+  if (storico.length === 0) {
+    alert("Nessun dato da stampare per questa ricerca")
+    return
+  }
+
+  const valoreStoricoFiltrato = storico.reduce((sum, s) => sum + Number.parseFloat(s.valore_totale || 0), 0)
 
   let printContent = `
     <!DOCTYPE html>
     <html>
     <head>
-      <title>Storico Magazzino - ${new Date(date).toLocaleDateString("it-IT")}</title>
+      <title>Storico Giacenze Magazzino</title>
       <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         h1 { color: #333; border-bottom: 2px solid #4F46E5; padding-bottom: 10px; }
@@ -915,97 +919,86 @@ function printStorico() {
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
         th { background-color: #6366f1; color: white; }
         .lotto-row { background-color: #f9fafb; }
-        .no-data { text-align: center; color: #999; padding: 20px; }
+        .no-lotti { text-align: center; color: #999; padding: 10px; }
       </style>
     </head>
     <body>
       <h1>Storico Giacenze Magazzino</h1>
       <div class="info">
         <p><strong>Data Storico:</strong> ${new Date(date).toLocaleDateString("it-IT")}</p>
-        <p><strong>Valore Totale:</strong> ${valoreTotale}</p>
+        <p><strong>Valore Totale (Filtrato):</strong> € ${valoreStoricoFiltrato.toFixed(2)}</p>
+        <p><strong>Prodotti Visualizzati:</strong> ${storico.length}</p>
         <p><strong>Data Stampa:</strong> ${new Date().toLocaleDateString("it-IT")} ${new Date().toLocaleTimeString("it-IT")}</p>
       </div>
   `
 
-  fetch(`${API_URL}/magazzino/storico-giacenza/${date}`)
-    .then((res) => res.json())
-    .then((data) => {
-      if (!data.riepilogo || data.riepilogo.length === 0) {
-        printContent += '<div class="no-data">Nessun dato disponibile per questa data</div>'
-      } else {
-        data.riepilogo.forEach((prodotto) => {
-          if (prodotto.giacenza > 0) {
-            printContent += `
-              <div class="prodotto-block">
-                <div class="prodotto-header">
-                  <div class="prodotto-info">
-                    <span><strong>Prodotto:</strong> ${prodotto.nome}</span>
-                    <span><strong>Giacenza Totale:</strong> ${prodotto.giacenza}</span>
-                  </div>
-                  <div class="prodotto-info">
-                    <span><strong>Marca:</strong> ${prodotto.marca_nome || "-"}</span>
-                    <span><strong>Valore Totale:</strong> € ${Number.parseFloat(prodotto.valore_totale).toFixed(2)}</span>
-                  </div>
-                  ${prodotto.descrizione ? `<div class="prodotto-info"><span><strong>Descrizione:</strong> ${prodotto.descrizione}</span></div>` : ""}
-                </div>
-            `
+  storico.forEach((prodotto) => {
+    if (prodotto.giacenza > 0) {
+      printContent += `
+        <div class="prodotto-block">
+          <div class="prodotto-header">
+            <div class="prodotto-info">
+              <span><strong>Prodotto:</strong> ${prodotto.nome}</span>
+              <span><strong>Giacenza Totale:</strong> ${prodotto.giacenza}</span>
+            </div>
+            <div class="prodotto-info">
+              <span><strong>Marca:</strong> ${prodotto.marca_nome || "-"}</span>
+              <span><strong>Valore Totale:</strong> € ${Number.parseFloat(prodotto.valore_totale).toFixed(2)}</span>
+            </div>
+            ${prodotto.descrizione ? `<div class="prodotto-info"><span><strong>Descrizione:</strong> ${prodotto.descrizione}</span></div>` : ""}
+          </div>
+      `
 
-            if (prodotto.lotti_storici && prodotto.lotti_storici.length > 0) {
-              printContent += `
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Quantità</th>
-                      <th>Prezzo Unit.</th>
-                      <th>Valore</th>
-                      <th>Data Carico</th>
-                      <th>Documento</th>
-                      <th>Fornitore</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-              `
+      if (prodotto.lotti && prodotto.lotti.length > 0) {
+        printContent += `
+          <table>
+            <thead>
+              <tr>
+                <th>Quantità</th>
+                <th>Prezzo Unit.</th>
+                <th>Valore</th>
+                <th>Data Carico</th>
+                <th>Documento</th>
+                <th>Fornitore</th>
+              </tr>
+            </thead>
+            <tbody>
+        `
 
-              prodotto.lotti_storici.forEach((lotto) => {
-                printContent += `
-                  <tr class="lotto-row">
-                    <td>${lotto.quantita_rimanente}</td>
-                    <td>€ ${Number.parseFloat(lotto.prezzo).toFixed(2)}</td>
-                    <td><strong>€ ${(lotto.quantita_rimanente * lotto.prezzo).toFixed(2)}</strong></td>
-                    <td>${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
-                    <td>${lotto.fattura_doc || "-"}</td>
-                    <td>${lotto.fornitore || "-"}</td>
-                  </tr>
-                `
-              })
-
-              printContent += `
-                  </tbody>
-                </table>
-              `
-            } else {
-              printContent += '<p style="margin: 10px 0; color: #999;">Nessun lotto disponibile</p>'
-            }
-
-            printContent += `</div>`
-          }
+        prodotto.lotti.forEach((lotto) => {
+          printContent += `
+            <tr class="lotto-row">
+              <td>${lotto.quantita_rimanente}</td>
+              <td>€ ${Number.parseFloat(lotto.prezzo).toFixed(2)}</td>
+              <td><strong>€ ${(lotto.quantita_rimanente * lotto.prezzo).toFixed(2)}</strong></td>
+              <td>${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
+              <td>${lotto.fattura_doc || "-"}</td>
+              <td>${lotto.fornitore || "-"}</td>
+            </tr>
+          `
         })
+
+        printContent += `
+            </tbody>
+          </table>
+        `
+      } else {
+        printContent += '<p class="no-lotti">Nessun lotto disponibile</p>'
       }
 
-      printContent += `</body></html>`
+      printContent += `</div>`
+    }
+  })
 
-      const printFrame = document.createElement("iframe")
-      printFrame.style.display = "none"
-      document.body.appendChild(printFrame)
-      printFrame.contentDocument.write(printContent)
-      printFrame.contentDocument.close()
-      printFrame.contentWindow.print()
-      setTimeout(() => document.body.removeChild(printFrame), 1000)
-    })
-    .catch((error) => {
-      console.error("Errore nella stampa:", error)
-      alert("Errore durante la stampa dello storico")
-    })
+  printContent += `</body></html>`
+
+  const printFrame = document.createElement("iframe")
+  printFrame.style.display = "none"
+  document.body.appendChild(printFrame)
+  printFrame.contentDocument.write(printContent)
+  printFrame.contentDocument.close()
+  printFrame.contentWindow.print()
+  setTimeout(() => document.body.removeChild(printFrame), 1000)
 }
 
 // ==================== UTENTI ====================

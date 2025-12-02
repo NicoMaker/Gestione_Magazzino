@@ -35,7 +35,7 @@
         </a>
         <a href="#" class="nav-item" data-section="prodotti">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 00 3 8v8a2 2 0 00 1 1.73l7 4a2 2 0 00 2 0l7-4A2 2 0 00 21 16z"/>
+            <path d="M21 16V8a2 2 0 00-4-4H8a4 4 0 00-4 4v8a2 2 0 004 4h4M16 17l5-5-5-5M21 12H9"/>
           </svg>
           Prodotti
         </a>
@@ -108,13 +108,12 @@
               <thead>
                 <tr>
                   <th>Nome Marca</th>
-                  <th>Data Creazione</th>
                   <th class="text-right">Azioni</th>
                 </tr>
               </thead>
               <tbody id="marcheTableBody">
                 <tr>
-                  <td colspan="3" class="text-center">Caricamento...</td>
+                  <td colspan="2" class="text-center">Caricamento...</td>
                 </tr>
               </tbody>
             </table>
@@ -130,7 +129,6 @@
             <p>Visualizza e gestisci i prodotti del magazzino</p>
           </div>
           <div class="filter-controls">
-            <!-- Aggiunto filtro per prodotti -->
             <input type="text" id="filterProdotti" class="filter-input" placeholder="Cerca prodotto, marca...">
             <button class="btn btn-primary" onclick="openProdottoModal()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -146,15 +144,16 @@
             <table>
               <thead>
                 <tr>
-                  <th>Numero</th>
-                  <th>Nome (Marca) Giacenza</th>
+                  <th>Nome Prodotto</th>
+                  <th>Marca</th>
+                  <th>Giacenza</th>
                   <th>Descrizione</th>
                   <th class="text-right">Azioni</th>
                 </tr>
               </thead>
               <tbody id="prodottiTableBody">
                 <tr>
-                  <td colspan="4" class="text-center">Caricamento...</td>
+                  <td colspan="5" class="text-center">Caricamento...</td>
                 </tr>
               </tbody>
             </table>
@@ -216,7 +215,6 @@
             <p>Giacenze e valorizzazione FIFO</p>
           </div>
           <div class="filter-controls">
-            <!-- Aggiunto filtro per riepilogo -->
             <input type="text" id="filterRiepilogo" class="filter-input" placeholder="Cerca prodotto...">
             <button class="btn btn-secondary" onclick="printRiepilogo()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -245,8 +243,7 @@
             <table>
               <thead>
                 <tr>
-                  <th>Prodotto</th>
-                  <th>Marca</th>
+                  <th>Prodotto / Marca</th>
                   <th>Descrizione</th>
                   <th>Giacenza</th>
                   <th>Valore Totale</th>
@@ -254,7 +251,7 @@
               </thead>
               <tbody id="riepilogoTableBody">
                 <tr>
-                  <td colspan="5" class="text-center">Caricamento...</td>
+                  <td colspan="4" class="text-center">Caricamento...</td>
                 </tr>
               </tbody>
             </table>
@@ -277,7 +274,6 @@
               </svg>
               Cerca
             </button>
-            <!-- Aggiunto filtro per storico -->
             <input type="text" id="filterStorico" class="filter-input" placeholder="Cerca prodotto..." style="margin-left: 10px;">
             <button class="btn btn-secondary" onclick="printStorico()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -306,17 +302,15 @@
             <table>
               <thead>
                 <tr>
-                  <th>Prodotto</th>
-                  <th>Marca</th>
+                  <th>Prodotto / Marca</th>
                   <th>Descrizione</th>
                   <th>Giacenza</th>
                   <th>Valore Totale</th>
-                  <th></th>
                 </tr>
               </thead>
               <tbody id="storicoTableBody">
                 <tr>
-                  <td colspan="6" class="text-center">Seleziona una data per visualizzare lo storico</td>
+                  <td colspan="4" class="text-center">Seleziona una data per visualizzare lo storico</td>
                 </tr>
               </tbody>
             </table>
