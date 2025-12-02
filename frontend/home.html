@@ -26,7 +26,7 @@
         </a>
         <a href="#" class="nav-item" data-section="prodotti">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 00 3 8v8a2 2 0 00 1 1.73l7 4a2 2 0 00 2 0l7-4A2 2 0 00 21 16z"/>
           </svg>
           Prodotti
         </a>
@@ -81,12 +81,16 @@
             <h1>Gestione Marche</h1>
             <p>Crea e gestisci le marche dei prodotti</p>
           </div>
-          <button class="btn btn-primary" onclick="openMarcaModal()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            Nuova Marca
-          </button>
+          <div class="filter-controls">
+            <!-- Aggiunto filtro per marche -->
+            <input type="text" id="filterMarche" class="filter-input" placeholder="Cerca marca...">
+            <button class="btn btn-primary" onclick="openMarcaModal()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Nuova Marca
+            </button>
+          </div>
         </div>
         
         <div class="card">
@@ -94,7 +98,6 @@
             <table>
               <thead>
                 <tr>
-                  <!-- Rimosso ID dalla tabella marche -->
                   <th>Nome Marca</th>
                   <th>Data Creazione</th>
                   <th class="text-right">Azioni</th>
@@ -117,12 +120,16 @@
             <h1>Gestione Prodotti</h1>
             <p>Visualizza e gestisci i prodotti del magazzino</p>
           </div>
-          <button class="btn btn-primary" onclick="openProdottoModal()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            Nuovo Prodotto
-          </button>
+          <div class="filter-controls">
+            <!-- Aggiunto filtro per prodotti -->
+            <input type="text" id="filterProdotti" class="filter-input" placeholder="Cerca prodotto, marca...">
+            <button class="btn btn-primary" onclick="openProdottoModal()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Nuovo Prodotto
+            </button>
+          </div>
         </div>
         
         <div class="card">
@@ -130,7 +137,6 @@
             <table>
               <thead>
                 <tr>
-                  <!-- Modificata struttura colonne prodotti -->
                   <th>Numero</th>
                   <th>Nome (Marca) Giacenza</th>
                   <th>Descrizione</th>
@@ -154,12 +160,16 @@
             <h1>Movimenti di Magazzino</h1>
             <p>Registra carichi e scarichi</p>
           </div>
-          <button class="btn btn-primary" onclick="openMovimentoModal()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            Nuovo Movimento
-          </button>
+          <div class="filter-controls">
+            <!-- Aggiunto filtro per movimenti -->
+            <input type="text" id="filterMovimenti" class="filter-input" placeholder="Cerca per prodotto, marca, tipo...">
+            <button class="btn btn-primary" onclick="openMovimentoModal()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Nuovo Movimento
+            </button>
+          </div>
         </div>
         
         <div class="card">
@@ -167,9 +177,9 @@
             <table>
               <thead>
                 <tr>
-                  <!-- Rimossa colonna ID -->
                   <th>Prodotto</th>
                   <th>Marca</th>
+                  <th>Descrizione</th>
                   <th>Tipo</th>
                   <th>Quantità</th>
                   <th>Prezzo Unit.</th>
@@ -181,7 +191,7 @@
               </thead>
               <tbody id="movimentiTableBody">
                 <tr>
-                  <td colspan="9" class="text-center">Caricamento...</td>
+                  <td colspan="10" class="text-center">Caricamento...</td>
                 </tr>
               </tbody>
             </table>
@@ -196,13 +206,17 @@
             <h1>Riepilogo Magazzino</h1>
             <p>Giacenze e valorizzazione FIFO</p>
           </div>
-          <button class="btn btn-secondary" onclick="printRiepilogo()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
-              <path d="M6 14h12v8H6z"/>
-            </svg>
-            Stampa
-          </button>
+          <div class="filter-controls">
+            <!-- Aggiunto filtro per riepilogo -->
+            <input type="text" id="filterRiepilogo" class="filter-input" placeholder="Cerca prodotto...">
+            <button class="btn btn-secondary" onclick="printRiepilogo()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
+                <path d="M6 14h12v8H6z"/>
+              </svg>
+              Stampa
+            </button>
+          </div>
         </div>
         
         <div class="stats-grid">
@@ -254,6 +268,8 @@
               </svg>
               Cerca
             </button>
+            <!-- Aggiunto filtro per storico -->
+            <input type="text" id="filterStorico" class="filter-input" placeholder="Cerca prodotto..." style="margin-left: 10px;">
             <button class="btn btn-secondary" onclick="printStorico()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
@@ -281,7 +297,6 @@
             <table>
               <thead>
                 <tr>
-                  <!-- Rimosso colonna Dettagli, lotti mostrati sotto ogni prodotto -->
                   <th>Prodotto</th>
                   <th>Marca</th>
                   <th>Descrizione</th>
@@ -307,12 +322,16 @@
             <h1>Gestione Utenti</h1>
             <p>Crea e gestisci gli utenti del sistema</p>
           </div>
-          <button class="btn btn-primary" onclick="openUserModal()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            Nuovo Utente
-          </button>
+          <div class="filter-controls">
+            <!-- Aggiunto filtro per utenti -->
+            <input type="text" id="filterUtenti" class="filter-input" placeholder="Cerca utente...">
+            <button class="btn btn-primary" onclick="openUserModal()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Nuovo Utente
+            </button>
+          </div>
         </div>
         
         <div class="card">
@@ -320,7 +339,6 @@
             <table>
               <thead>
                 <tr>
-                  <!-- Rimossa colonna ID -->
                   <th>Username</th>
                   <th class="text-right">Azioni</th>
                 </tr>
@@ -492,7 +510,6 @@
           <table>
             <thead>
               <tr>
-                <!-- Rimossa colonna ID Lotto -->
                 <th>Quantità</th>
                 <th>Prezzo</th>
                 <th>Valore</th>

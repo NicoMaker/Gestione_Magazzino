@@ -531,6 +531,34 @@ tbody tr:hover {
   gap: 16px;
 }
 
+/* Added styles for filter controls and inputs */
+.filter-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-input {
+  padding: 10px 16px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  min-width: 250px;
+  transition: all 0.2s;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.filter-input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .sidebar {
@@ -569,6 +597,16 @@ tbody tr:hover {
 
   .form-row {
     grid-template-columns: 1fr;
+  }
+
+  /* Added responsive styles for filters */
+  .filter-controls {
+    width: 100%;
+  }
+
+  .filter-input {
+    min-width: 100%;
+    flex: 1;
   }
 }
 

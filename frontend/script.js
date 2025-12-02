@@ -5,6 +5,14 @@ let marche = []
 let prodotti = []
 let movimenti = []
 let utenti = []
+let allMarche = []
+let allProdotti = []
+let allMovimenti = []
+let allRiepilogo = []
+let riepilogo = []
+let allStorico = []
+let storico = []
+let allUtenti = []
 
 // ==================== INIZIALIZZAZIONE ====================
 document.addEventListener("DOMContentLoaded", () => {
@@ -48,7 +56,8 @@ document.addEventListener("DOMContentLoaded", () => {
 async function loadMarche() {
   try {
     const res = await fetch(`${API_URL}/marche`)
-    marche = await res.json()
+    allMarche = await res.json() // CHANGE: Salva tutte le marche in allMarche
+    marche = allMarche // CHANGE: Reimposta marche alla copia di allMarche per il rendering iniziale
     renderMarche()
   } catch (error) {
     console.error("Errore caricamento marche:", error)
@@ -68,7 +77,7 @@ function renderMarche() {
       (m) => `
     <tr>
       <td><strong>${m.nome}</strong></td>
-      <td>${new Date(m.data_creazione).toLocaleDateString("it-IT")}</td>
+      <td>${new Date(m.created_at).toLocaleDateString("it-IT")}</td>
       <td class="text-right">
         <button class="btn-icon" onclick="editMarca(${m.id})" title="Modifica">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -87,6 +96,12 @@ function renderMarche() {
     )
     .join("")
 }
+
+document.getElementById("filterMarche")?.addEventListener("input", (e) => {
+  const searchTerm = e.target.value.toLowerCase()
+  marche = allMarche.filter((m) => m.nome.toLowerCase().includes(searchTerm))
+  renderMarche()
+})
 
 function openMarcaModal(marca = null) {
   const modal = document.getElementById("modalMarca")
@@ -168,7 +183,8 @@ document.getElementById("formMarca").addEventListener("submit", async (e) => {
 async function loadProdotti() {
   try {
     const res = await fetch(`${API_URL}/prodotti`)
-    prodotti = await res.json()
+    allProdotti = await res.json() // CHANGE: Salva tutte le marche in allProdotti
+    prodotti = allProdotti // CHANGE: Reimposta prodotti alla copia di allProdotti per il rendering iniziale
     renderProdotti()
   } catch (error) {
     console.error("Errore caricamento prodotti:", error)
@@ -188,7 +204,11 @@ function renderProdotti() {
       (p) => `
     <tr>
       <td><strong>#${p.id}</strong></td>
-      <td><strong>${p.nome}</strong> ${p.marca_nome ? `<span style="color: #6366f1;">(${p.marca_nome})</span>` : ""} <span class="badge ${p.giacenza > 0 ? "badge-success" : "badge-danger"}">${p.giacenza}</span></td>
+      <td>
+        <strong>${p.nome}</strong> 
+        ${p.marca_nome ? `<span style="color: #6366f1;">(${p.marca_nome})</span>` : ""} 
+        <span class="badge ${p.giacenza > 0 ? "badge-success" : "badge-danger"}">${p.giacenza || 0}</span>
+      </td>
       <td>${p.descrizione ? `<small>${p.descrizione.substring(0, 50)}${p.descrizione.length > 50 ? "..." : ""}</small>` : '<span style="color: #999;">-</span>'}</td>
       <td class="text-right">
         <button class="btn-icon" onclick="editProdotto(${p.id})" title="Modifica">
@@ -208,6 +228,17 @@ function renderProdotti() {
     )
     .join("")
 }
+
+document.getElementById("filterProdotti")?.addEventListener("input", (e) => {
+  const searchTerm = e.target.value.toLowerCase()
+  prodotti = allProdotti.filter(
+    (p) =>
+      p.nome.toLowerCase().includes(searchTerm) ||
+      (p.marca_nome && p.marca_nome.toLowerCase().includes(searchTerm)) ||
+      (p.descrizione && p.descrizione.toLowerCase().includes(searchTerm)),
+  )
+  renderProdotti()
+})
 
 async function openProdottoModal(prodotto = null) {
   if (marche.length === 0) {
@@ -306,7 +337,8 @@ document.getElementById("formProdotto").addEventListener("submit", async (e) => 
 async function loadMovimenti() {
   try {
     const res = await fetch(`${API_URL}/dati`)
-    movimenti = await res.json()
+    allMovimenti = await res.json() // CHANGE: Salva tutte le marche in allMovimenti
+    movimenti = allMovimenti // CHANGE: Reimposta movimenti alla copia di allMovimenti per il rendering iniziale
     renderMovimenti()
   } catch (error) {
     console.error("Errore caricamento movimenti:", error)
@@ -317,7 +349,7 @@ function renderMovimenti() {
   const tbody = document.getElementById("movimentiTableBody")
 
   if (movimenti.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" class="text-center">Nessun movimento presente</td></tr>'
+    tbody.innerHTML = '<tr><td colspan="10" class="text-center">Nessun movimento presente</td></tr>'
     return
   }
 
@@ -327,6 +359,7 @@ function renderMovimenti() {
     <tr>
       <td><strong>${m.prodotto_nome}</strong></td>
       <td>${m.marca_nome || '<span style="color: #999;">-</span>'}</td>
+      <td>${m.descrizione ? `<small>${m.descrizione.substring(0, 30)}${m.descrizione.length > 30 ? "..." : ""}</small>` : '<span style="color: #999;">-</span>'}</td>
       <td><span class="badge ${m.tipo === "carico" ? "badge-success" : "badge-danger"}">${m.tipo.toUpperCase()}</span></td>
       <td>${m.quantita}</td>
       <td>${m.tipo === "carico" ? `€ ${Number.parseFloat(m.prezzo).toFixed(2)}` : m.prezzo_unitario_scarico ? `€ ${Number.parseFloat(m.prezzo_unitario_scarico).toFixed(2)}` : "-"}</td>
@@ -344,6 +377,53 @@ function renderMovimenti() {
   `,
     )
     .join("")
+}
+
+document.getElementById("filterMovimenti")?.addEventListener("input", (e) => {
+  const searchTerm = e.target.value.toLowerCase()
+  movimenti = allMovimenti.filter(
+    (m) =>
+      m.prodotto_nome.toLowerCase().includes(searchTerm) ||
+      (m.marca_nome && m.marca_nome.toLowerCase().includes(searchTerm)) ||
+      m.tipo.toLowerCase().includes(searchTerm) ||
+      (m.descrizione && m.descrizione.toLowerCase().includes(searchTerm)),
+  )
+  renderMovimenti()
+})
+
+function togglePrezzoField() {
+  const tipo = document.getElementById("movimentoTipo").value
+  const prezzoGroup = document.getElementById("prezzoGroup")
+  const prezzoInput = document.getElementById("movimentoPrezzo")
+  const fornitoreGroup = document.getElementById("fornitoreGroup")
+  const fatturaInput = document.getElementById("movimentoFattura")
+  const fornitoreInput = document.getElementById("movimentoFornitore")
+  const docOptional = document.getElementById("docOptional")
+  const fornitoreOptional = document.getElementById("fornitoreOptional")
+  const fatturaGroup = fatturaInput.closest(".form-group")
+
+  if (tipo === "carico") {
+    prezzoGroup.style.display = "block"
+    prezzoInput.required = true
+    fornitoreGroup.style.display = "block"
+    fatturaGroup.style.display = "block"
+    fatturaInput.required = true
+    fornitoreInput.required = true
+    docOptional.textContent = "*"
+    fornitoreOptional.textContent = "*"
+  } else {
+    prezzoGroup.style.display = "none"
+    prezzoInput.required = false
+    prezzoInput.value = ""
+    fornitoreGroup.style.display = "none"
+    fatturaGroup.style.display = "none"
+    fornitoreInput.value = ""
+    fatturaInput.value = ""
+    fatturaInput.required = false
+    fornitoreInput.required = false
+    docOptional.textContent = ""
+    fornitoreOptional.textContent = ""
+  }
 }
 
 async function openMovimentoModal() {
@@ -402,56 +482,6 @@ async function mostraGiacenzaProdotto() {
   }
 }
 
-function togglePrezzoField() {
-  const tipo = document.getElementById("movimentoTipo").value
-  const prezzoGroup = document.getElementById("prezzoGroup")
-  const prezzoInput = document.getElementById("movimentoPrezzo")
-  const fornitoreGroup = document.getElementById("fornitoreGroup")
-  const fatturaInput = document.getElementById("movimentoFattura")
-  const fornitoreInput = document.getElementById("movimentoFornitore")
-  const docOptional = document.getElementById("docOptional")
-  const fornitoreOptional = document.getElementById("fornitoreOptional")
-
-  if (tipo === "carico") {
-    prezzoGroup.style.display = "block"
-    prezzoInput.required = true
-    fornitoreGroup.style.display = "block"
-    fatturaInput.required = true
-    fornitoreInput.required = true
-    docOptional.textContent = "*"
-    fornitoreOptional.textContent = "*"
-  } else {
-    prezzoGroup.style.display = "none"
-    prezzoInput.required = false
-    prezzoInput.value = ""
-    fornitoreGroup.style.display = "none"
-    fornitoreInput.value = ""
-    fatturaInput.required = false
-    fornitoreInput.required = false
-    docOptional.textContent = ""
-    fornitoreOptional.textContent = ""
-  }
-}
-
-async function deleteMovimento(id) {
-  if (!confirm("Sei sicuro di voler eliminare questo movimento?")) return
-
-  try {
-    const res = await fetch(`${API_URL}/dati/${id}`, { method: "DELETE" })
-    const data = await res.json()
-
-    if (res.ok) {
-      alert(data.message || "Movimento eliminato!")
-      loadMovimenti()
-      loadProdotti()
-    } else {
-      alert(data.error || "Errore durante l'eliminazione")
-    }
-  } catch (error) {
-    alert("Errore di connessione")
-  }
-}
-
 document.getElementById("formMovimento").addEventListener("submit", async (e) => {
   e.preventDefault()
 
@@ -496,209 +526,206 @@ document.getElementById("formMovimento").addEventListener("submit", async (e) =>
 // ==================== RIEPILOGO ====================
 async function loadRiepilogo() {
   try {
-    const resRiepilogo = fetch(`${API_URL}/magazzino/riepilogo`)
-    const resValore = fetch(`${API_URL}/magazzino/valore-magazzino`)
+    const res = await fetch(`${API_URL}/magazzino/riepilogo`)
+    const data = await res.json()
 
-    const [riepilogoRes, valoreRes] = await Promise.all([resRiepilogo, resValore])
+    document.getElementById("valoreTotale").textContent = `€ ${Number.parseFloat(data.valore_totale || 0).toFixed(2)}`
 
-    const riepilogo = await riepilogoRes.json()
-    const { valore_totale } = await valoreRes.json()
-
-    document.getElementById("valoreTotale").textContent = `€ ${Number.parseFloat(valore_totale).toFixed(2)}`
-    renderRiepilogo(riepilogo)
+    allRiepilogo = data.riepilogo || [] // CHANGE: Salva tutte le marche in allRiepilogo
+    riepilogo = allRiepilogo // CHANGE: Reimposta riepilogo alla copia di allRiepilogo per il rendering iniziale
+    renderRiepilogo()
   } catch (error) {
     console.error("Errore caricamento riepilogo:", error)
   }
 }
 
-async function renderRiepilogo(riepilogo) {
+function renderRiepilogo() {
   const tbody = document.getElementById("riepilogoTableBody")
 
   if (riepilogo.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" class="text-center">Nessun dato disponibile</td></tr>'
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center">Nessun prodotto in magazzino</td></tr>'
     return
   }
 
   let html = ""
 
-  for (const r of riepilogo) {
+  riepilogo.forEach((r) => {
     html += `
     <tr>
-      <td><strong>${r.nome}</strong></td>
-      <td>${r.marca_nome || '<span style="color: #999;">-</span>'}</td>
+      <td><strong>#${r.id}</strong></td>
+      <td><strong>${r.nome}</strong> ${r.marca_nome ? `<span style="color: #6366f1;">(${r.marca_nome})</span>` : ""}</td>
       <td>${r.descrizione ? `<small>${r.descrizione.substring(0, 40)}${r.descrizione.length > 40 ? "..." : ""}</small>` : '<span style="color: #999;">-</span>'}</td>
       <td><span class="badge ${r.giacenza > 0 ? "badge-success" : "badge-danger"}">${r.giacenza}</span></td>
       <td><strong>€ ${Number.parseFloat(r.valore_totale).toFixed(2)}</strong></td>
     </tr>
     `
 
-    if (r.giacenza > 0) {
-      try {
-        const lottiRes = await fetch(`${API_URL}/magazzino/riepilogo/${r.id}`)
-        const lotti = await lottiRes.json()
+    if (r.giacenza > 0 && r.lotti && r.lotti.length > 0) {
+      html += `
+      <tr>
+        <td colspan="5" style="padding: 0; background-color: #f9fafb;">
+          <table style="width: 100%; margin: 0; border: none;">
+            <thead>
+              <tr style="background-color: #e0e7ff;">
+                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Quantità</th>
+                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Prezzo Unit.</th>
+                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Valore</th>
+                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Data Carico</th>
+                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Documento</th>
+                <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Fornitore</th>
+              </tr>
+            </thead>
+            <tbody>
+      `
 
-        if (lotti && lotti.length > 0) {
-          html += `
-          <tr>
-            <td colspan="5" style="padding: 0; background-color: #f9fafb;">
-              <table style="width: 100%; margin: 0; border: none;">
-                <thead>
-                  <tr style="background-color: #e0e7ff;">
-                    <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Quantità</th>
-                    <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Prezzo Unit.</th>
-                    <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Valore</th>
-                    <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Data Carico</th>
-                    <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Documento</th>
-                    <th style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">Fornitore</th>
-                  </tr>
-                </thead>
-                <tbody>
-          `
+      r.lotti.forEach((lotto) => {
+        html += `
+              <tr>
+                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${lotto.quantita_rimanente}</td>
+                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">€ ${Number.parseFloat(lotto.prezzo).toFixed(2)}</td>
+                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;"><strong>€ ${(lotto.quantita_rimanente * lotto.prezzo).toFixed(2)}</strong></td>
+                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
+                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${lotto.fattura_doc || '<span style="color: #999;">-</span>'}</td>
+                <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${lotto.fornitore || '<span style="color: #999;">-</span>'}</td>
+              </tr>
+        `
+      })
 
-          lotti.forEach((lotto) => {
-            html += `
-                  <tr>
-                    <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${lotto.quantita_rimanente}</td>
-                    <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">€ ${Number.parseFloat(lotto.prezzo).toFixed(2)}</td>
-                    <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;"><strong>€ ${(lotto.quantita_rimanente * lotto.prezzo).toFixed(2)}</strong></td>
-                    <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
-                    <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${lotto.fattura_doc || '<span style="color: #999;">-</span>'}</td>
-                    <td style="padding: 6px 12px; font-size: 11px; border: 1px solid #ddd;">${lotto.fornitore || '<span style="color: #999;">-</span>'}</td>
-                  </tr>
-            `
-          })
-
-          html += `
-                </tbody>
-              </table>
-            </td>
-          </tr>
-          `
-        }
-      } catch (error) {
-        console.error("Errore caricamento lotti:", error)
-      }
+      html += `
+            </tbody>
+          </table>
+        </td>
+      </tr>
+      `
     }
-  }
+  })
 
   tbody.innerHTML = html
 }
 
-async function printRiepilogo() {
+document.getElementById("filterRiepilogo")?.addEventListener("input", (e) => {
+  const searchTerm = e.target.value.toLowerCase()
+  riepilogo = allRiepilogo.filter(
+    (r) =>
+      r.nome.toLowerCase().includes(searchTerm) ||
+      (r.marca_nome && r.marca_nome.toLowerCase().includes(searchTerm)) ||
+      (r.descrizione && r.descrizione.toLowerCase().includes(searchTerm)),
+  )
+  renderRiepilogo()
+})
+
+function printRiepilogo() {
   const valoreTotale = document.getElementById("valoreTotale").textContent
 
-  try {
-    const riepilogoRes = await fetch(`${API_URL}/magazzino/riepilogo`)
-    const riepilogo = await riepilogoRes.json()
-
-    let printContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Riepilogo Magazzino</title>
-        <style>
-          body { font-family: Arial, sans-serif; margin: 20px; }
-          h1 { color: #333; border-bottom: 2px solid #4F46E5; padding-bottom: 10px; }
-          .info { margin: 20px 0; font-size: 14px; }
-          .prodotto-block { margin-bottom: 30px; page-break-inside: avoid; }
-          .prodotto-header { 
-            background-color: #e0e7ff; 
-            padding: 10px; 
-            margin-bottom: 10px;
-            border-left: 4px solid #4F46E5;
-          }
-          .prodotto-info { display: flex; justify-content: space-between; margin: 5px 0; }
-          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
-          th { background-color: #6366f1; color: white; }
-          .lotto-row { background-color: #f9fafb; }
-          .no-lotti { text-align: center; color: #999; padding: 15px; font-style: italic; }
-        </style>
-      </head>
-      <body>
-        <h1>Riepilogo Magazzino</h1>
-        <div class="info">
-          <p><strong>Valore Totale:</strong> ${valoreTotale}</p>
-          <p><strong>Data Stampa:</strong> ${new Date().toLocaleDateString("it-IT")} ${new Date().toLocaleTimeString("it-IT")}</p>
-        </div>
-    `
-
-    for (const prodotto of riepilogo) {
-      printContent += `
-        <div class="prodotto-block">
-          <div class="prodotto-header">
-            <div class="prodotto-info">
-              <span><strong>Prodotto:</strong> ${prodotto.nome}</span>
-              <span><strong>Giacenza Totale:</strong> ${prodotto.giacenza}</span>
-            </div>
-            <div class="prodotto-info">
-              <span><strong>Marca:</strong> ${prodotto.marca_nome || "-"}</span>
-              <span><strong>Valore Totale:</strong> € ${Number.parseFloat(prodotto.valore_totale).toFixed(2)}</span>
-            </div>
-            ${prodotto.descrizione ? `<div class="prodotto-info"><span><strong>Descrizione:</strong> ${prodotto.descrizione}</span></div>` : ""}
-          </div>
-      `
-
-      if (prodotto.giacenza > 0) {
-        const lottiRes = await fetch(`${API_URL}/magazzino/riepilogo/${prodotto.id}`)
-        const lotti = await lottiRes.json()
-
-        if (lotti && lotti.length > 0) {
-          printContent += `
-            <table>
-              <thead>
-                <tr>
-                  <th>Quantità</th>
-                  <th>Prezzo Unit.</th>
-                  <th>Valore</th>
-                  <th>Data Carico</th>
-                  <th>Documento</th>
-                  <th>Fornitore</th>
-                </tr>
-              </thead>
-              <tbody>
-          `
-
-          lotti.forEach((lotto) => {
-            printContent += `
-              <tr class="lotto-row">
-                <td>${lotto.quantita_rimanente}</td>
-                <td>€ ${Number.parseFloat(lotto.prezzo).toFixed(2)}</td>
-                <td><strong>€ ${(lotto.quantita_rimanente * lotto.prezzo).toFixed(2)}</strong></td>
-                <td>${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
-                <td>${lotto.fattura_doc || "-"}</td>
-                <td>${lotto.fornitore || "-"}</td>
-              </tr>
-            `
-          })
-
-          printContent += `
-              </tbody>
-            </table>
-          `
-        } else {
-          printContent += '<p class="no-lotti">Nessun lotto disponibile</p>'
+  const printContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Riepilogo Magazzino</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; border-bottom: 2px solid #4F46E5; padding-bottom: 10px; }
+        .info { margin: 20px 0; font-size: 14px; }
+        .prodotto-block { margin-bottom: 30px; page-break-inside: avoid; }
+        .prodotto-header { 
+          background-color: #e0e7ff; 
+          padding: 10px; 
+          margin-bottom: 10px;
+          border-left: 4px solid #4F46E5;
         }
-      } else {
-        printContent += '<p class="no-lotti">Prodotto non disponibile in magazzino</p>'
-      }
+        .prodotto-info { display: flex; justify-content: space-between; margin: 5px 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
+        th { background-color: #6366f1; color: white; }
+        .lotto-row { background-color: #f9fafb; }
+        .no-lotti { text-align: center; color: #999; padding: 10px; }
+      </style>
+    </head>
+    <body>
+      <h1>Riepilogo Giacenze Magazzino</h1>
+      <div class="info">
+        <p><strong>Valore Totale Magazzino:</strong> ${valoreTotale}</p>
+        <p><strong>Data Stampa:</strong> ${new Date().toLocaleDateString("it-IT")} ${new Date().toLocaleTimeString("it-IT")}</p>
+      </div>
+  `
 
-      printContent += `</div>`
-    }
+  fetch(`${API_URL}/magazzino/riepilogo`)
+    .then((res) => res.json())
+    .then((data) => {
+      let content = printContent
 
-    printContent += `
-      </body>
-      </html>
-    `
+      data.riepilogo.forEach((prodotto) => {
+        if (prodotto.giacenza > 0) {
+          content += `
+            <div class="prodotto-block">
+              <div class="prodotto-header">
+                <div class="prodotto-info">
+                  <span><strong>Prodotto:</strong> ${prodotto.nome}</span>
+                  <span><strong>Giacenza Totale:</strong> ${prodotto.giacenza}</span>
+                </div>
+                <div class="prodotto-info">
+                  <span><strong>Marca:</strong> ${prodotto.marca_nome || "-"}</span>
+                  <span><strong>Valore Totale:</strong> € ${Number.parseFloat(prodotto.valore_totale).toFixed(2)}</span>
+                </div>
+                ${prodotto.descrizione ? `<div class="prodotto-info"><span><strong>Descrizione:</strong> ${prodotto.descrizione}</span></div>` : ""}
+              </div>
+          `
 
-    const printWindow = window.open("", "", "width=900,height=700")
-    printWindow.document.write(printContent)
-    printWindow.document.close()
-    printWindow.print()
-  } catch (error) {
-    console.error("Errore nella stampa:", error)
-    alert("Errore durante la stampa del riepilogo")
-  }
+          if (prodotto.lotti && prodotto.lotti.length > 0) {
+            content += `
+              <table>
+                <thead>
+                  <tr>
+                    <th>Quantità</th>
+                    <th>Prezzo Unit.</th>
+                    <th>Valore</th>
+                    <th>Data Carico</th>
+                    <th>Documento</th>
+                    <th>Fornitore</th>
+                  </tr>
+                </thead>
+                <tbody>
+            `
+
+            prodotto.lotti.forEach((lotto) => {
+              content += `
+                <tr class="lotto-row">
+                  <td>${lotto.quantita_rimanente}</td>
+                  <td>€ ${Number.parseFloat(lotto.prezzo).toFixed(2)}</td>
+                  <td><strong>€ ${(lotto.quantita_rimanente * lotto.prezzo).toFixed(2)}</strong></td>
+                  <td>${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
+                  <td>${lotto.fattura_doc || "-"}</td>
+                  <td>${lotto.fornitore || "-"}</td>
+                </tr>
+              `
+            })
+
+            content += `
+                  </tbody>
+                </table>
+              `
+          } else {
+            content += '<p class="no-lotti">Nessun lotto disponibile</p>'
+          }
+
+          content += `</div>`
+        }
+      })
+
+      content += `</body></html>`
+
+      const printFrame = document.createElement("iframe")
+      printFrame.style.display = "none"
+      document.body.appendChild(printFrame)
+      printFrame.contentDocument.write(content)
+      printFrame.contentDocument.close()
+      printFrame.contentWindow.print()
+      setTimeout(() => document.body.removeChild(printFrame), 1000)
+    })
+    .catch((error) => {
+      console.error("Errore nella stampa:", error)
+      alert("Errore durante la stampa del riepilogo")
+    })
 }
 
 // ==================== STORICO ====================
@@ -715,7 +742,10 @@ async function loadStorico() {
 
     document.getElementById("valoreStorico").textContent =
       `€ ${Number.parseFloat(result.valore_totale || 0).toFixed(2)}`
-    renderStorico(result.riepilogo || [])
+
+    allStorico = result.riepilogo || [] // CHANGE: Salva tutte le marche in allStorico
+    storico = allStorico // CHANGE: Reimposta storico alla copia di allStorico per il rendering iniziale
+    renderStorico(storico)
   } catch (error) {
     console.error("Errore caricamento storico:", error)
     alert("Errore nel caricamento dello storico")
@@ -786,6 +816,17 @@ function renderStorico(storico) {
 
   tbody.innerHTML = html
 }
+
+document.getElementById("filterStorico")?.addEventListener("input", (e) => {
+  const searchTerm = e.target.value.toLowerCase()
+  storico = allStorico.filter(
+    (s) =>
+      s.nome.toLowerCase().includes(searchTerm) ||
+      (s.marca_nome && s.marca_nome.toLowerCase().includes(searchTerm)) ||
+      (s.descrizione && s.descrizione.toLowerCase().includes(searchTerm)),
+  )
+  renderStorico(storico)
+})
 
 function printStorico() {
   const date = document.getElementById("storicoDate").value
@@ -894,15 +935,15 @@ function printStorico() {
         })
       }
 
-      printContent += `
-      </body>
-      </html>
-      `
+      printContent += `</body></html>`
 
-      const printWindow = window.open("", "", "width=900,height=700")
-      printWindow.document.write(printContent)
-      printWindow.document.close()
-      printWindow.print()
+      const printFrame = document.createElement("iframe")
+      printFrame.style.display = "none"
+      document.body.appendChild(printFrame)
+      printFrame.contentDocument.write(printContent)
+      printFrame.contentDocument.close()
+      printFrame.contentWindow.print()
+      setTimeout(() => document.body.removeChild(printFrame), 1000)
     })
     .catch((error) => {
       console.error("Errore nella stampa:", error)
@@ -914,7 +955,8 @@ function printStorico() {
 async function loadUtenti() {
   try {
     const res = await fetch(`${API_URL}/utenti`)
-    utenti = await res.json()
+    allUtenti = await res.json() // CHANGE: Salva tutte le marche in allUtenti
+    utenti = allUtenti // CHANGE: Reimposta utenti alla copia di allUtenti per il rendering iniziale
     renderUtenti()
   } catch (error) {
     console.error("Errore caricamento utenti:", error)
@@ -953,6 +995,12 @@ function renderUtenti() {
     )
     .join("")
 }
+
+document.getElementById("filterUtenti")?.addEventListener("input", (e) => {
+  const searchTerm = e.target.value.toLowerCase()
+  utenti = allUtenti.filter((u) => u.username.toLowerCase().includes(searchTerm))
+  renderUtenti()
+})
 
 function openUserModal(user = null) {
   const modal = document.getElementById("modalUser")
