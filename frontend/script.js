@@ -680,39 +680,32 @@ function renderRiepilogo() {
   const tbody = document.getElementById("riepilogoTableBody")
 
   if (riepilogo.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" class="text-center">Nessun prodotto presente</td></tr>'
+    tbody.innerHTML = '<tr><td colspan="4" class="text-center">Nessun prodotto disponibile</td></tr>'
     return
   }
 
   let html = ""
 
-  riepilogo.forEach((r) => {
+  riepilogo.forEach((p) => {
     html += `
     <tr class="product-main-row">
-      <td><strong>${r.nome}</strong>${
-        r.marca_nome ? ` <span class="badge-marca">(${r.marca_nome.toUpperCase()})</span>` : ""
+      <td><strong>${p.nome}</strong>${
+        p.marca_nome ? ` <span class="badge-marca">(${p.marca_nome.toUpperCase()})</span>` : ""
       }</td>
       <td>${
-        r.descrizione
-          ? `<small>${r.descrizione.substring(0, 50)}${r.descrizione.length > 50 ? "..." : ""}</small>`
+        p.descrizione
+          ? `<small>${p.descrizione.substring(0, 50)}${p.descrizione.length > 50 ? "..." : ""}</small>`
           : '<span style="color: #999;">-</span>'
       }</td>
-      <td><span class="badge-giacenza">${formatWithComma(r.giacenza)} pz</span></td>
-      <td><strong>€ ${formatWithComma(r.valore_totale)}</strong></td>
-      <td class="text-right">
-        <button class="btn-icon" onclick="toggleDettagli(${r.id})" title="Dettagli">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-          </svg>
-        </button>
-      </td>
+      <td><span class="badge-giacenza">${formatWithComma(p.giacenza)} pz</span></td>
+      <td><strong>€ ${formatWithComma(p.valore_totale)}</strong></td>
     </tr>
     `
 
-    if (r.giacenza > 0 && r.lotti && r.lotti.length > 0) {
+    if (p.giacenza > 0 && p.lotti && p.lotti.length > 0) {
       html += `
-      <tr class="lotti-row" id="lotti-${r.id}" style="display: none;">
-        <td colspan="5" class="lotti-container">
+      <tr class="lotti-row">
+        <td colspan="4" class="lotti-container">
           <div class="lotti-header">Dettaglio Lotti</div>
           <div class="lotti-table-wrapper">
             <table class="lotti-table">
@@ -729,7 +722,7 @@ function renderRiepilogo() {
               <tbody>
       `
 
-      r.lotti.forEach((lotto) => {
+      p.lotti.forEach((lotto) => {
         html += `
                 <tr>
                   <td><strong>${formatWithComma(lotto.quantita_rimanente)} pz</strong></td>
@@ -765,10 +758,10 @@ function toggleDettagli(productId) {
 document.getElementById("filterRiepilogo")?.addEventListener("input", (e) => {
   const searchTerm = e.target.value.toLowerCase()
   riepilogo = allRiepilogo.filter(
-    (r) =>
-      r.nome.toLowerCase().includes(searchTerm) ||
-      (r.marca_nome && r.marca_nome.toLowerCase().includes(searchTerm)) ||
-      (r.descrizione && r.descrizione.toLowerCase().includes(searchTerm)),
+    (p) =>
+      p.nome.toLowerCase().includes(searchTerm) ||
+      (p.marca_nome && p.marca_nome.toLowerCase().includes(searchTerm)) ||
+      (p.descrizione && p.descrizione.toLowerCase().includes(searchTerm)),
   )
   renderRiepilogo()
 })
@@ -779,7 +772,7 @@ function printRiepilogo() {
     return
   }
 
-  const valoreTotaleFiltrato = riepilogo.reduce((sum, r) => sum + Number.parseFloat(r.valore_totale || 0), 0)
+  const valoreTotaleFiltrato = riepilogo.reduce((sum, p) => sum + Number.parseFloat(p.valore_totale || 0), 0)
 
   let printContent = `
     <!DOCTYPE html>
