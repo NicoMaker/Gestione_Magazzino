@@ -1048,6 +1048,11 @@ function printStorico() {
     0
   );
 
+  const dataSelezionata = document.getElementById("storicoDate").value;
+  const dataItalianaSelezionata = dataSelezionata
+    ? new Date(dataSelezionata + "T00:00:00").toLocaleDateString("it-IT")
+    : "Non selezionata";
+
   let printContent = `
     <!DOCTYPE html>
     <html>
@@ -1075,9 +1080,7 @@ function printStorico() {
     <body>
       <h1>Storico Giacenze Magazzino</h1>
       <div class="info">
-        <p><strong>Data Selezionata:</strong> ${
-          document.getElementById("storicoDate").value
-        }</p>
+        <p><strong>Data Selezionata:</strong> ${dataItalianaSelezionata}</p>
         <p><strong>Valore Totale (Filtrato):</strong> ${formatCurrency(
           valoreStoricoFiltrato
         )}</p>
@@ -1310,7 +1313,15 @@ document.getElementById("formUser").addEventListener("submit", async (e) => {
 });
 
 // ==================== FUNZIONI DI UTILITA ====================
-// CHANGE: Aggiunta funzione per formattare i numeri in stile italiano (1.000, 10.000, ecc.)
+// CHANGE: Aggiornata funzione formatCurrency per garantire € sempre davanti al numero
+function formatCurrency(num) {
+  const n = Number.parseFloat(num);
+  if (isNaN(n)) return "€ 0,00";
+
+  return `€ ${formatNumber(n)}`;
+}
+
+// CHANGE: Funzione helper per formattare valuta con simbolo €
 function formatNumber(num) {
   const n = Number.parseFloat(num);
   if (isNaN(n)) return "0";
@@ -1322,9 +1333,4 @@ function formatNumber(num) {
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
   return parts.join(",");
-}
-
-// CHANGE: Funzione helper per formattare valuta con simbolo €
-function formatCurrency(num) {
-  return `€ ${formatNumber(num)}`;
 }
