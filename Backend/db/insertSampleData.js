@@ -54,7 +54,9 @@ async function batchInsert(query, dataArray, batchSize = 500) {
           if (err) reject(err);
           else {
             completed += batch.length;
-            process.stdout.write(`\r  Progress: ${completed}/${dataArray.length}`);
+            process.stdout.write(
+              `\r  Progress: ${completed}/${dataArray.length}`
+            );
             resolve();
           }
         });
@@ -119,13 +121,37 @@ function generateMarcaName(index, baseMarche) {
   if (index < baseMarche.length) {
     return baseMarche[index];
   }
-  const suffissi = ["Tech", "Group", "Industries", "Corporation", "International", "Global", "Solutions", "Systems"];
-  const prefissi = ["Alpha", "Beta", "Omega", "Prime", "Elite", "Pro", "Max", "Ultra", "Super", "Mega"];
-  return `${randomElement(prefissi)} ${randomElement(suffissi)} ${Math.floor(index / 100)}`;
+  const suffissi = [
+    "Tech",
+    "Group",
+    "Industries",
+    "Corporation",
+    "International",
+    "Global",
+    "Solutions",
+    "Systems",
+  ];
+  const prefissi = [
+    "Alpha",
+    "Beta",
+    "Omega",
+    "Prime",
+    "Elite",
+    "Pro",
+    "Max",
+    "Ultra",
+    "Super",
+    "Mega",
+  ];
+  return `${randomElement(prefissi)} ${randomElement(suffissi)} ${Math.floor(
+    index / 100
+  )}`;
 }
 
 async function seedDatabase() {
-  console.log("🌱 Inizio popolamento database con dati casuali su larga scala...\n");
+  console.log(
+    "🌱 Inizio popolamento database con dati casuali su larga scala...\n"
+  );
   const startTime = Date.now();
 
   try {
@@ -134,8 +160,8 @@ async function seedDatabase() {
     if (!fs.existsSync(configPath)) {
       console.log("❌ File seed-config.json non trovato!");
       console.log("📝 Creazione file di configurazione completo...");
-      
-      const exampleConfig = require('./seed-config-template.json');
+
+      const exampleConfig = require("./seed-config-template.json");
       fs.writeFileSync(configPath, JSON.stringify(exampleConfig, null, 2));
       console.log("✅ File seed-config.json creato!\n");
     }
@@ -144,13 +170,42 @@ async function seedDatabase() {
 
     // Chiedi configurazione da tastiera
     console.log("📊 CONFIGURAZIONE GENERAZIONE DATI (MAX 10000 per tipo)\n");
-    
-    const numUtenti = Math.min(10000, parseInt(await askQuestion("Numero di utenti da creare (1-10000): ") || "10"));
-    const numMarche = Math.min(10000, parseInt(await askQuestion("Numero di marche da creare (1-10000): ") || "50"));
-    const numProdotti = Math.min(10000, parseInt(await askQuestion("Numero di prodotti da creare (1-10000): ") || "100"));
-    const numCarichi = Math.min(10000, parseInt(await askQuestion("Numero di movimenti di carico (1-10000): ") || "200"));
-    const numScarichi = Math.min(10000, parseInt(await askQuestion("Numero di movimenti di scarico (1-10000): ") || "150"));
-    const giorniStorico = parseInt(await askQuestion("Giorni di storico (default 180): ") || "180");
+
+    const numUtenti = Math.min(
+      10000,
+      parseInt(
+        (await askQuestion("Numero di utenti da creare (1-10000): ")) || "10"
+      )
+    );
+    const numMarche = Math.min(
+      10000,
+      parseInt(
+        (await askQuestion("Numero di marche da creare (1-10000): ")) || "50"
+      )
+    );
+    const numProdotti = Math.min(
+      10000,
+      parseInt(
+        (await askQuestion("Numero di prodotti da creare (1-10000): ")) || "100"
+      )
+    );
+    const numCarichi = Math.min(
+      10000,
+      parseInt(
+        (await askQuestion("Numero di movimenti di carico (1-10000): ")) ||
+          "200"
+      )
+    );
+    const numScarichi = Math.min(
+      10000,
+      parseInt(
+        (await askQuestion("Numero di movimenti di scarico (1-10000): ")) ||
+          "150"
+      )
+    );
+    const giorniStorico = parseInt(
+      (await askQuestion("Giorni di storico (default 180): ")) || "180"
+    );
 
     console.log("\n⚙️  Configurazione:");
     console.log(`   • Utenti: ${numUtenti}`);
@@ -176,7 +231,7 @@ async function seedDatabase() {
       const password = `${username}123!`;
       const hashedPassword = await bcrypt.hash(password, 10);
       const createdAt = new Date().toISOString();
-      
+
       usersToInsert.push([username, hashedPassword, createdAt]);
     }
 
@@ -190,7 +245,7 @@ async function seedDatabase() {
     console.log("🏷️  Creazione marche in batch...");
     const marcheToInsert = [];
     const marcheIds = {};
-    
+
     for (let i = 0; i < numMarche; i++) {
       const nomeMarca = generateMarcaName(i, config.marche);
       const dataCreazione = new Date().toISOString();
@@ -204,7 +259,7 @@ async function seedDatabase() {
 
     // Recupera gli ID delle marche create
     const marcheRows = await getAllQuery("SELECT id, nome FROM marche");
-    marcheRows.forEach(row => {
+    marcheRows.forEach((row) => {
       marcheIds[row.nome] = row.id;
     });
     console.log(`✅ ${Object.keys(marcheIds).length} marche create!\n`);
@@ -221,18 +276,26 @@ async function seedDatabase() {
       const prefisso = randomElement(categoria.prefissi);
       const specifica = randomElement(config.specifiche);
       const dimensione = randomElement(config.dimensioni);
-      
+
       const nome = `${prefisso} ${specifica} ${dimensione} #${i}`;
-      const descrizione = `${categoria.categoria} - ${marcaNome} ${randomInt(2020, 2024)}`;
+      const descrizione = `${categoria.categoria} - ${marcaNome} ${randomInt(
+        2020,
+        2024
+      )}`;
       const dataCreazione = new Date().toISOString();
 
-      prodottiToInsert.push([nome, marcheIds[marcaNome], descrizione, dataCreazione]);
-      prodottiInfo.push({ 
-        nome, 
-        categoria, 
+      prodottiToInsert.push([
+        nome,
+        marcheIds[marcaNome],
+        descrizione,
+        dataCreazione,
+      ]);
+      prodottiInfo.push({
+        nome,
+        categoria,
         marcaNome,
         prezzoMin: categoria.prezzoMin,
-        prezzoMax: categoria.prezzoMax
+        prezzoMax: categoria.prezzoMax,
       });
     }
 
@@ -244,7 +307,7 @@ async function seedDatabase() {
     // Recupera gli ID dei prodotti creati
     const prodottiRows = await getAllQuery("SELECT id, nome FROM prodotti");
     const prodottiIds = {};
-    prodottiRows.forEach(row => {
+    prodottiRows.forEach((row) => {
       prodottiIds[row.nome] = row.id;
     });
     console.log(`✅ ${Object.keys(prodottiIds).length} prodotti creati!\n`);
@@ -274,7 +337,7 @@ async function seedDatabase() {
         dataMovimento,
         dataRegistrazione,
         fattura,
-        fornitore
+        fornitore,
       ]);
 
       carichiLotti.push([
@@ -286,7 +349,7 @@ async function seedDatabase() {
         dataRegistrazione,
         fattura,
         fornitore,
-        movimentoId
+        movimentoId,
       ]);
 
       movimentoId++;
@@ -354,7 +417,16 @@ async function seedDatabase() {
         `INSERT INTO dati (prodotto_id, tipo, quantita, prezzo, prezzo_totale_movimento, 
          data_movimento, data_registrazione, fattura_doc, fornitore_cliente_id) 
          VALUES (?, 'scarico', ?, ?, ?, ?, ?, ?, ?)`,
-        [prodottoId, quantita, prezzo, prezzoTotale, dataMovimento, dataRegistrazione, fattura, cliente]
+        [
+          prodottoId,
+          quantita,
+          prezzo,
+          prezzoTotale,
+          dataMovimento,
+          dataRegistrazione,
+          fattura,
+          cliente,
+        ]
       );
 
       // Aggiorna lotti FIFO
@@ -369,12 +441,16 @@ async function seedDatabase() {
 
         if (!lottoFifo) break;
 
-        const quantitaDaPrelevare = Math.min(quantitaDaScaricare, lottoFifo.quantita_rimanente);
-        const nuovaQuantita = lottoFifo.quantita_rimanente - quantitaDaPrelevare;
+        const quantitaDaPrelevare = Math.min(
+          quantitaDaScaricare,
+          lottoFifo.quantita_rimanente
+        );
+        const nuovaQuantita =
+          lottoFifo.quantita_rimanente - quantitaDaPrelevare;
 
         await runQuery("UPDATE lotti SET quantita_rimanente = ? WHERE id = ?", [
           nuovaQuantita,
-          lottoFifo.id
+          lottoFifo.id,
         ]);
 
         quantitaDaScaricare -= quantitaDaPrelevare;
@@ -385,7 +461,9 @@ async function seedDatabase() {
         process.stdout.write(`\r  Progress: ${scarichiCreati}/${numScarichi}`);
       }
     }
-    console.log(`\n✅ ${scarichiCreati} scarichi creati (${scarichiSaltati} saltati per mancanza giacenza)!\n`);
+    console.log(
+      `\n✅ ${scarichiCreati} scarichi creati (${scarichiSaltati} saltati per mancanza giacenza)!\n`
+    );
 
     const endTime = Date.now();
     const duration = ((endTime - startTime) / 1000).toFixed(2);
