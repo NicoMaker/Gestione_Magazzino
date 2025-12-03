@@ -221,8 +221,7 @@
             <input type="text" id="filterRiepilogo" class="filter-input" placeholder="Cerca prodotto...">
             <button class="btn btn-secondary" onclick="printRiepilogo()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
-                <path d="M6 14h12v8H6z"/>
+                <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
               </svg>
               Stampa
             </button>
@@ -277,8 +276,7 @@
             <input type="text" id="filterStorico" class="filter-input" placeholder="Cerca prodotto..." style="margin-left: 10px;">
             <button class="btn btn-secondary" onclick="printStorico()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
-                <path d="M6 14h12v8H6z"/>
+                <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
               </svg>
               Stampa
             </button>
@@ -366,7 +364,7 @@
         <input type="hidden" id="marcaId">
         <div class="form-group">
           <label for="marcaNome">Nome Marca *</label>
-          <input type="text" id="marcaNome" required>
+          <input type="text" id="marcaNome" required placeholder="es. Ducati, Honda, Yamaha...">
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" onclick="closeMarcaModal()">Annulla</button>
@@ -387,10 +385,9 @@
         <input type="hidden" id="prodottoId">
         <div class="form-group">
           <label for="prodottoNome">Nome Prodotto *</label>
-          <input type="text" id="prodottoNome" required>
+          <input type="text" id="prodottoNome" required placeholder="es. Olio motore, Filtro aria, Candele...">
         </div>
         <div class="form-group">
-          <!-- Marca obbligatoria con asterisco -->
           <label for="prodottoMarca">Marca *</label>
           <select id="prodottoMarca" required>
             <option value="">Seleziona marca...</option>
@@ -436,11 +433,14 @@
         <div class="form-row">
           <div class="form-group">
             <label for="movimentoQuantita">Quantità *</label>
-            <input type="number" id="movimentoQuantita" step="0.01" required>
+            <input type="number" id="movimentoQuantita" step="0.01" required placeholder="es. 10">
           </div>
           <div class="form-group" id="prezzoGroup">
             <label for="movimentoPrezzo">Prezzo Unitario *</label>
-            <input type="number" id="movimentoPrezzo" step="0.01">
+            <div class="input-with-currency">
+              <input type="number" id="movimentoPrezzo" step="0.01" placeholder="es. 25.50">
+              <span class="currency-symbol">€</span>
+            </div>
           </div>
         </div>
         <div class="form-row">
@@ -450,12 +450,12 @@
           </div>
           <div class="form-group">
             <label for="movimentoFattura">Documento/Fattura <span id="docOptional">*</span></label>
-            <input type="text" id="movimentoFattura">
+            <input type="text" id="movimentoFattura" placeholder="es. FT/2024/001">
           </div>
         </div>
         <div class="form-group" id="fornitoreGroup">
           <label for="movimentoFornitore">Fornitore <span id="fornitoreOptional">*</span></label>
-          <input type="text" id="movimentoFornitore" placeholder="Nome del fornitore">
+          <input type="text" id="movimentoFornitore" placeholder="es. Ricambi Moto S.r.l.">
         </div>
         <div class="form-group" id="giacenzaInfo" style="display: none; background: #f0f9ff; padding: 12px; border-radius: 8px; border: 1px solid #0ea5e9;">
           <label style="color: #0284c7; font-weight: 600; margin-bottom: 8px; display: block;">
@@ -485,11 +485,11 @@
         <input type="hidden" id="userId">
         <div class="form-group">
           <label for="userUsername">Username *</label>
-          <input type="text" id="userUsername" required minlength="3">
+          <input type="text" id="userUsername" required minlength="3" placeholder="es. mario.rossi">
         </div>
         <div class="form-group">
           <label for="userPassword">Password <span id="passwordOptional"></span></label>
-          <input type="password" id="userPassword" minlength="8">
+          <input type="password" id="userPassword" minlength="8" placeholder="Min. 8 caratteri">
           <small>Min. 8 caratteri, con maiuscola, minuscola e numero</small>
         </div>
         <div class="modal-footer">

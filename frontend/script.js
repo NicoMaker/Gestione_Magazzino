@@ -403,12 +403,12 @@ function renderMovimenti() {
       <td>${m.quantita} pz</td>
       <td>${
         m.tipo === "carico"
-          ? `€ ${Number.parseFloat(m.prezzo).toFixed(2)}`
+          ? formatCurrency(m.prezzo)
           : m.prezzo_unitario_scarico
-            ? `€ ${Number.parseFloat(m.prezzo_unitario_scarico).toFixed(2)}`
+            ? formatCurrency(m.prezzo_unitario_scarico)
             : "-"
       }</td>
-      <td><strong>€ ${Number.parseFloat(m.prezzo_totale || 0).toFixed(2)}</strong></td>
+      <td><strong>${formatCurrency(m.prezzo_totale || 0)}</strong></td>
       <td>${new Date(m.data_movimento).toLocaleDateString("it-IT")}</td>
       <td>${m.fattura_doc || '<span style="color: #999;">-</span>'}</td>
       <td class="text-right">
@@ -628,7 +628,7 @@ async function loadRiepilogo() {
 // CHANGE: Nuova funzione per aggiornare il totale del riepilogo
 function updateRiepilogoTotal() {
   const valoreTotaleFiltrato = riepilogo.reduce((sum, r) => sum + Number.parseFloat(r.valore_totale || 0), 0)
-  document.getElementById("valoreTotale").textContent = `€ ${valoreTotaleFiltrato.toFixed(2)}`
+  document.getElementById("valoreTotale").textContent = formatCurrency(valoreTotaleFiltrato)
 }
 
 function renderRiepilogo() {
@@ -652,8 +652,8 @@ function renderRiepilogo() {
           ? `<small>${r.descrizione.substring(0, 50)}${r.descrizione.length > 50 ? "..." : ""}</small>`
           : '<span style="color: #999;">-</span>'
       }</td>
-      <td><span class="badge badge-giacenza">${r.giacenza} pz</span></td>
-      <td><strong>€ ${Number.parseFloat(r.valore_totale).toFixed(2)}</strong></td>
+      <td><span class="badge-giacenza">${r.giacenza} pz</span></td>
+      <td><strong>${formatCurrency(r.valore_totale)}</strong></td>
     </tr>
     `
 
@@ -681,8 +681,8 @@ function renderRiepilogo() {
         html += `
                 <tr>
                   <td><strong>${lotto.quantita_rimanente} pz</strong></td>
-                  <td>€ ${Number.parseFloat(lotto.prezzo).toFixed(2)}</td>
-                  <td><strong>€ ${(lotto.quantita_rimanente * lotto.prezzo).toFixed(2)}</strong></td>
+                  <td>${formatCurrency(lotto.prezzo)}</td>
+                  <td><strong>${formatCurrency(lotto.quantita_rimanente * lotto.prezzo)}</strong></td>
                   <td>${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
                   <td>${lotto.fattura_doc || '<span style="color: #999;">-</span>'}</td>
                   <td>${lotto.fornitore || '<span style="color: #999;">-</span>'}</td>
@@ -750,7 +750,7 @@ function printRiepilogo() {
     <body>
       <h1>Riepilogo Giacenze Magazzino</h1>
       <div class="info">
-        <p><strong>Valore Totale (Filtrato):</strong> € ${valoreTotaleFiltrato.toFixed(2)}</p>
+        <p><strong>Valore Totale (Filtrato):</strong> ${formatCurrency(valoreTotaleFiltrato)}</p>
         <p><strong>Prodotti Visualizzati:</strong> ${riepilogo.length}</p>
         <p><strong>Data Stampa:</strong> ${new Date().toLocaleDateString(
           "it-IT",
@@ -769,7 +769,7 @@ function printRiepilogo() {
             </div>
             <div class="prodotto-info">
               <span><strong>Marca:</strong> ${prodotto.marca_nome || "-"}</span>
-              <span><strong>Valore Totale:</strong> € ${Number.parseFloat(prodotto.valore_totale).toFixed(2)}</span>
+              <span><strong>Valore Totale:</strong> ${formatCurrency(prodotto.valore_totale)}</span>
             </div>
             ${
               prodotto.descrizione
@@ -799,8 +799,8 @@ function printRiepilogo() {
           printContent += `
             <tr class="lotto-row">
               <td>${lotto.quantita_rimanente} pz</td>
-              <td>€ ${Number.parseFloat(lotto.prezzo).toFixed(2)}</td>
-              <td><strong>€ ${(lotto.quantita_rimanente * lotto.prezzo).toFixed(2)}</strong></td>
+              <td>${formatCurrency(lotto.prezzo)}</td>
+              <td><strong>${formatCurrency(lotto.quantita_rimanente * lotto.prezzo)}</strong></td>
               <td>${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
               <td>${lotto.fattura_doc || "-"}</td>
               <td>${lotto.fornitore || "-"}</td>
@@ -858,7 +858,7 @@ async function loadStorico() {
 // CHANGE: Nuova funzione per aggiornare il totale dello storico
 function updateStoricoTotal() {
   const valoreStoricoFiltrato = storico.reduce((sum, s) => sum + Number.parseFloat(s.valore_totale || 0), 0)
-  document.getElementById("valoreStorico").textContent = `€ ${valoreStoricoFiltrato.toFixed(2)}`
+  document.getElementById("valoreStorico").textContent = formatCurrency(valoreStoricoFiltrato)
 }
 
 function renderStorico(storico) {
@@ -883,7 +883,7 @@ function renderStorico(storico) {
           : '<span style="color: #999;">-</span>'
       }</td>
       <td><span class="badge-giacenza">${s.giacenza} pz</span></td>
-      <td><strong>€ ${Number.parseFloat(s.valore_totale).toFixed(2)}</strong></td>
+      <td><strong>${formatCurrency(s.valore_totale)}</strong></td>
     </tr>
     `
 
@@ -911,8 +911,8 @@ function renderStorico(storico) {
         html += `
                 <tr>
                   <td><strong>${lotto.quantita_rimanente} pz</strong></td>
-                  <td>€ ${Number.parseFloat(lotto.prezzo).toFixed(2)}</td>
-                  <td><strong>€ ${(lotto.quantita_rimanente * lotto.prezzo).toFixed(2)}</strong></td>
+                  <td>${formatCurrency(lotto.prezzo)}</td>
+                  <td><strong>${formatCurrency(lotto.quantita_rimanente * lotto.prezzo)}</strong></td>
                   <td>${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
                   <td>${lotto.fattura_doc || '<span style="color: #999;">-</span>'}</td>
                   <td>${lotto.fornitore || '<span style="color: #999;">-</span>'}</td>
@@ -983,7 +983,7 @@ function printStorico() {
       <h1>Storico Giacenze Magazzino</h1>
       <div class="info">
         <p><strong>Data Selezionata:</strong> ${document.getElementById("storicoDate").value}</p>
-        <p><strong>Valore Totale (Filtrato):</strong> € ${valoreStoricoFiltrato.toFixed(2)}</p>
+        <p><strong>Valore Totale (Filtrato):</strong> ${formatCurrency(valoreStoricoFiltrato)}</p>
         <p><strong>Prodotti Visualizzati:</strong> ${storico.length}</p>
         <p><strong>Data Stampa:</strong> ${new Date().toLocaleDateString(
           "it-IT",
@@ -1002,7 +1002,7 @@ function printStorico() {
             </div>
             <div class="prodotto-info">
               <span><strong>Marca:</strong> ${prodotto.marca_nome || "-"}</span>
-              <span><strong>Valore Totale:</strong> € ${Number.parseFloat(prodotto.valore_totale).toFixed(2)}</span>
+              <span><strong>Valore Totale:</strong> ${formatCurrency(prodotto.valore_totale)}</span>
             </div>
             ${
               prodotto.descrizione
@@ -1032,8 +1032,8 @@ function printStorico() {
           printContent += `
             <tr class="lotto-row">
               <td>${lotto.quantita_rimanente} pz</td>
-              <td>€ ${Number.parseFloat(lotto.prezzo).toFixed(2)}</td>
-              <td><strong>€ ${(lotto.quantita_rimanente * lotto.prezzo).toFixed(2)}</strong></td>
+              <td>${formatCurrency(lotto.prezzo)}</td>
+              <td><strong>${formatCurrency(lotto.quantita_rimanente * lotto.prezzo)}</strong></td>
               <td>${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
               <td>${lotto.fattura_doc || "-"}</td>
               <td>${lotto.fornitore || "-"}</td>
@@ -1200,3 +1200,23 @@ document.getElementById("formUser").addEventListener("submit", async (e) => {
     alert("Errore di connessione")
   }
 })
+
+// ==================== FUNZIONI DI UTILITA ====================
+// CHANGE: Aggiunta funzione per formattare i numeri in stile italiano (1.000, 10.000, ecc.)
+function formatNumber(num) {
+  const n = Number.parseFloat(num)
+  if (isNaN(n)) return "0"
+
+  // Separa parte intera e decimali
+  const parts = n.toFixed(2).split(".")
+
+  // Aggiungi il punto ogni 3 cifre nella parte intera
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+
+  return parts.join(",")
+}
+
+// CHANGE: Funzione helper per formattare valuta con simbolo €
+function formatCurrency(num) {
+  return `€ ${formatNumber(num)}`
+}
