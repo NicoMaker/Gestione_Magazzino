@@ -525,6 +525,10 @@ async function openMovimentoModal(movimento = null) {
 
   title.textContent = "Nuovo Movimento";
   document.getElementById("movimentoId").value = "";
+  // CHANGE: Nascondi info giacenza all'apertura del modale se non è in modalità modifica
+  if (!movimento) {
+    document.getElementById("giacenzaInfo").style.display = "none";
+  }
 
   togglePrezzoField();
 

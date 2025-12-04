@@ -10,7 +10,11 @@
   <body>
     <div class="app-container">
       <!-- Added mobile menu toggle button with X animation -->
-      <button class="mobile-menu-toggle" id="mobileMenuToggle">
+      <button
+        class="mobile-menu-toggle"
+        id="mobileMenuToggle"
+        aria-label="Toggle menu"
+      >
         <div class="hamburger">
           <span class="line"></span>
           <span class="line"></span>
@@ -21,7 +25,6 @@
       <!-- Sidebar -->
       <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-          <!-- Replaced SVG with image logo -->
           <img
             src="/placeholder.svg?height=56&width=56"
             alt="Logo Magazzino Moto"
@@ -42,7 +45,7 @@
                 d="M20 7h-9M14 17H5M3 7h2M21 17h-4M15 12h6M9 12H3M15 6v12M9 6v12"
               />
             </svg>
-            Marche
+            <span>Marche</span>
           </a>
           <a href="#" class="nav-item" data-section="prodotti">
             <svg
@@ -51,11 +54,16 @@
               stroke="currentColor"
               stroke-width="2"
             >
-              <path
+              <!-- <path
                 d="M21 16V8a2 2 0 00-4-4H8a4 4 0 00-4 4v8a2 2 0 004 4h4M16 17l5-5-5-5M21 12H9"
+              /> -->
+              <path
+                d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"
               />
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+              <line x1="12" y1="22.08" x2="12" y2="12" />
             </svg>
-            Prodotti
+            <span>Prodotti</span>
           </a>
           <a href="#" class="nav-item" data-section="movimenti">
             <svg
@@ -64,9 +72,11 @@
               stroke="currentColor"
               stroke-width="2"
             >
-              <path d="M17 8l4 4m0 0l-4 4m4-4H3M7 16l-4-4m0 0l4-4" />
+              <!-- <path d="M17 8l4 4m0 0l-4 4m4-4H3M7 16l-4-4m0 0l4-4" /> -->
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+              <polyline points="17 6 23 6 23 12" />
             </svg>
-            Movimenti
+            <span>Movimenti</span>
           </a>
           <a href="#" class="nav-item" data-section="riepilogo">
             <svg
@@ -75,11 +85,15 @@
               stroke="currentColor"
               stroke-width="2"
             >
-              <path
+              <!-- <path
                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002 0l-7 4A2 2 0 00 21 16z"
+              /> -->
+              <path
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
               />
+              <path d="M9 12h6m-6 4h6" />
             </svg>
-            Riepilogo
+            <span>Riepilogo</span>
           </a>
           <a href="#" class="nav-item" data-section="storico">
             <svg
@@ -91,7 +105,7 @@
               <circle cx="12" cy="12" r="10" />
               <path d="M12 6v6l4 2" />
             </svg>
-            Storico
+            <span>Storico</span>
           </a>
           <a href="#" class="nav-item" data-section="utenti">
             <svg
@@ -100,16 +114,19 @@
               stroke="currentColor"
               stroke-width="2"
             >
-              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
+              <!-- <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+              <circle cx="12" cy="7" r="4" /> -->
+              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
             </svg>
-            Utenti
+            <span>Utenti</span>
           </a>
         </nav>
 
         <div class="sidebar-footer">
           <div class="user-info">
-            <svg
+            <!-- <svg
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -117,8 +134,23 @@
             >
               <circle cx="12" cy="12" r="10" />
               <path d="M12 16v-4M12 8h.01" />
-            </svg>
-            <span id="currentUser">Admin</span>
+            </svg> -->
+            <div class="user-avatar">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </div>
+            <!-- <span id="currentUser">Admin</span> -->
+            <div class="user-details">
+              <span class="user-name" id="currentUser">Admin</span>
+              <span class="user-role">Amministratore</span>
+            </div>
           </div>
           <button id="logoutBtn" class="btn-logout">
             <svg
@@ -131,7 +163,7 @@
                 d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"
               />
             </svg>
-            Esci
+            <span>Esci</span>
           </button>
         </div>
       </aside>
@@ -147,12 +179,20 @@
             </div>
             <div class="filter-controls">
               <!-- Aggiunto filtro per marche -->
-              <input
+              <!-- <input
                 type="text"
                 id="filterMarche"
                 class="filter-input"
                 placeholder="Cerca marca..."
-              />
+              /> -->
+              <div class="search-wrapper">
+                <input
+                  type="text"
+                  id="filterMarche"
+                  class="filter-input"
+                  placeholder="Cerca marca..."
+                />
+              </div>
               <button class="btn btn-primary" onclick="openMarcaModal()">
                 <svg
                   viewBox="0 0 24 24"
@@ -163,7 +203,7 @@
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
-                Nuova Marca
+                <span>Nuova Marca</span>
               </button>
             </div>
           </div>
@@ -179,7 +219,10 @@
                 </thead>
                 <tbody id="marcheTableBody">
                   <tr>
-                    <td colspan="2" class="text-center">Caricamento...</td>
+                    <td colspan="2" class="text-center">
+                      <!-- <div class="loading-spinner"></div> -->
+                      <span>Caricamento...</span>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -211,7 +254,7 @@
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
-                Nuovo Prodotto
+                <span>Nuovo Prodotto</span>
               </button>
             </div>
           </div>
@@ -230,7 +273,10 @@
                 </thead>
                 <tbody id="prodottiTableBody">
                   <tr>
-                    <td colspan="5" class="text-center">Caricamento...</td>
+                    <td colspan="5" class="text-center">
+                      <!-- <div class="loading-spinner"></div> -->
+                      <span>Caricamento...</span>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -263,7 +309,7 @@
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
-                Nuovo Movimento
+                <span>Nuovo Movimento</span>
               </button>
             </div>
           </div>
@@ -287,7 +333,10 @@
                 </thead>
                 <tbody id="movimentiTableBody">
                   <tr>
-                    <td colspan="10" class="text-center">Caricamento...</td>
+                    <td colspan="10" class="text-center">
+                      <!-- <div class="loading-spinner"></div> -->
+                      <span>Caricamento...</span>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -310,13 +359,28 @@
                 placeholder="Cerca prodotto..."
               />
               <button class="btn btn-secondary" onclick="printRiepilogo()">
-                Stampa
+                <!-- Stampa -->
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <polyline points="6 9 6 2 18 2 18 9" />
+                  <path
+                    d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"
+                  />
+                  <rect x="6" y="14" width="12" height="8" />
+                </svg>
+                <span>Stampa</span>
               </button>
             </div>
           </div>
 
           <div class="stats-grid">
             <div class="stat-card">
+              <!-- <p class="stat-label">Valore Totale Magazzino</p>
+              <p class="stat-value" id="valoreTotale">€ 0.00</p> -->
               <div>
                 <p class="stat-label">Valore Totale Magazzino</p>
                 <p class="stat-value" id="valoreTotale">€ 0.00</p>
@@ -337,7 +401,10 @@
                 </thead>
                 <tbody id="riepilogoTableBody">
                   <tr>
-                    <td colspan="4" class="text-center">Caricamento...</td>
+                    <td colspan="4" class="text-center">
+                      <!-- <div class="loading-spinner"></div> -->
+                      <span>Caricamento...</span>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -364,23 +431,46 @@
                   <circle cx="11" cy="11" r="8" />
                   <path d="M21 21l-4.35-4.35" />
                 </svg>
-                Cerca
+                <span>Cerca</span>
               </button>
-              <input
+              <!-- <input
                 type="text"
                 id="filterStorico"
                 class="filter-input"
                 placeholder="Cerca prodotto..."
                 style="margin-left: 10px"
-              />
+              /> -->
+              <div class="search-wrapper">
+                <input
+                  type="text"
+                  id="filterStorico"
+                  class="filter-input"
+                  placeholder="Cerca prodotto..."
+                />
+              </div>
               <button class="btn btn-secondary" onclick="printStorico()">
-                Stampa
+                <!-- Stampa -->
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <polyline points="6 9 6 2 18 2 18 9" />
+                  <path
+                    d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"
+                  />
+                  <rect x="6" y="14" width="12" height="8" />
+                </svg>
+                <span>Stampa</span>
               </button>
             </div>
           </div>
 
           <div class="stats-grid">
             <div class="stat-card">
+              <!-- <p class="stat-label">Valore Storico</p>
+              <p class="stat-value" id="valoreStorico">€ 0.00</p> -->
               <div>
                 <p class="stat-label">Valore Storico</p>
                 <p class="stat-value" id="valoreStorico">€ 0.00</p>
@@ -420,12 +510,20 @@
             </div>
             <div class="filter-controls">
               <!-- Aggiunto filtro per utenti -->
-              <input
+              <!-- <input
                 type="text"
                 id="filterUtenti"
                 class="filter-input"
                 placeholder="Cerca utente..."
-              />
+              /> -->
+              <div class="search-wrapper">
+                <input
+                  type="text"
+                  id="filterUtenti"
+                  class="filter-input"
+                  placeholder="Cerca utente..."
+                />
+              </div>
               <button class="btn btn-primary" onclick="openUserModal()">
                 <svg
                   viewBox="0 0 24 24"
@@ -436,7 +534,7 @@
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
-                Nuovo Utente
+                <span>Nuovo Utente</span>
               </button>
             </div>
           </div>
@@ -452,7 +550,10 @@
                 </thead>
                 <tbody id="utentiTableBody">
                   <tr>
-                    <td colspan="2" class="text-center">Caricamento...</td>
+                    <td colspan="2" class="text-center">
+                      <!-- <div class="loading-spinner"></div> -->
+                      <span>Caricamento...</span>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -467,20 +568,26 @@
       <div class="modal-content">
         <div class="modal-header">
           <h2 id="modalMarcaTitle">Nuova Marca</h2>
-          <button class="modal-close" onclick="closeMarcaModal()">
+          <button
+            class="modal-close"
+            onclick="closeMarcaModal()"
+            aria-label="Chiudi"
+          >
             &times;
           </button>
         </div>
         <form id="formMarca">
           <input type="hidden" id="marcaId" />
-          <div class="form-group">
-            <label for="marcaNome">Nome Marca *</label>
-            <input
-              type="text"
-              id="marcaNome"
-              required
-              placeholder="es. Ducati, Honda, Yamaha..."
-            />
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="marcaNome">Nome Marca *</label>
+              <input
+                type="text"
+                id="marcaNome"
+                required
+                placeholder="es. Ducati, Honda, Yamaha..."
+              />
+            </div>
           </div>
           <div class="modal-footer">
             <button
@@ -488,9 +595,11 @@
               class="btn btn-secondary"
               onclick="closeMarcaModal()"
             >
-              Annulla
+              <span>Annulla</span>
             </button>
-            <button type="submit" class="btn btn-primary">Salva</button>
+            <button type="submit" class="btn btn-primary">
+              <span>Salva</span>
+            </button>
           </div>
         </form>
       </div>
@@ -501,34 +610,40 @@
       <div class="modal-content">
         <div class="modal-header">
           <h2 id="modalProdottoTitle">Nuovo Prodotto</h2>
-          <button class="modal-close" onclick="closeProdottoModal()">
+          <button
+            class="modal-close"
+            onclick="closeProdottoModal()"
+            aria-label="Chiudi"
+          >
             &times;
           </button>
         </div>
         <form id="formProdotto">
           <input type="hidden" id="prodottoId" />
-          <div class="form-group">
-            <label for="prodottoNome">Nome Prodotto *</label>
-            <input
-              type="text"
-              id="prodottoNome"
-              required
-              placeholder="es. Olio motore, Filtro aria, Candele..."
-            />
-          </div>
-          <div class="form-group">
-            <label for="prodottoMarca">Marca *</label>
-            <select id="prodottoMarca" required>
-              <option value="">Seleziona marca...</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="prodottoDescrizione">Descrizione</label>
-            <textarea
-              id="prodottoDescrizione"
-              rows="3"
-              placeholder="Inserisci una descrizione dettagliata del prodotto..."
-            ></textarea>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="prodottoNome">Nome Prodotto *</label>
+              <input
+                type="text"
+                id="prodottoNome"
+                required
+                placeholder="es. Olio motore, Filtro aria, Candele..."
+              />
+            </div>
+            <div class="form-group">
+              <label for="prodottoMarca">Marca *</label>
+              <select id="prodottoMarca" required>
+                <option value="">Seleziona marca...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="prodottoDescrizione">Descrizione</label>
+              <textarea
+                id="prodottoDescrizione"
+                rows="3"
+                placeholder="Inserisci una descrizione dettagliata del prodotto..."
+              ></textarea>
+            </div>
           </div>
           <div class="modal-footer">
             <button
@@ -536,9 +651,11 @@
               class="btn btn-secondary"
               onclick="closeProdottoModal()"
             >
-              Annulla
+              <span>Annulla</span>
             </button>
-            <button type="submit" class="btn btn-primary">Salva</button>
+            <button type="submit" class="btn btn-primary">
+              <span>Salva</span>
+            </button>
           </div>
         </form>
       </div>
@@ -549,130 +666,107 @@
       <div class="modal-content modal-large">
         <div class="modal-header">
           <h2 id="modalMovimentoTitle">Nuovo Movimento</h2>
-          <button class="modal-close" onclick="closeMovimentoModal()">
+          <button
+            class="modal-close"
+            onclick="closeMovimentoModal()"
+            aria-label="Chiudi"
+          >
             &times;
           </button>
         </div>
         <form id="formMovimento">
           <input type="hidden" id="movimentoId" />
-          <div class="form-row">
-            <div class="form-group">
-              <label for="movimentoProdotto">Prodotto *</label>
-              <select id="movimentoProdotto" required>
-                <option value="">Seleziona prodotto...</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="movimentoTipo">Tipo *</label>
-              <select
-                id="movimentoTipo"
-                required
-                onchange="togglePrezzoField()"
-              >
-                <option value="">Seleziona tipo...</option>
-                <option value="carico">Carico</option>
-                <option value="scarico">Scarico</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="movimentoQuantita">Quantità *</label>
-              <input
-                type="number"
-                id="movimentoQuantita"
-                step="0.01"
-                required
-                placeholder="es. 10"
-              />
-            </div>
-            <div class="form-group" id="prezzoGroup">
-              <label for="movimentoPrezzo">Prezzo Unitario *</label>
-              <div class="input-with-currency">
-                <input
-                  type="number"
-                  id="movimentoPrezzo"
-                  step="0.01"
-                  placeholder="es. 25.50"
-                />
-                <span class="currency-symbol">€</span>
+          <div class="modal-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="movimentoProdotto">Prodotto *</label>
+                <select id="movimentoProdotto" required>
+                  <option value="">Seleziona prodotto...</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="movimentoTipo">Tipo *</label>
+                <select
+                  id="movimentoTipo"
+                  required
+                  onchange="togglePrezzoField()"
+                >
+                  <option value="">Seleziona tipo...</option>
+                  <option value="carico">Carico</option>
+                  <option value="scarico">Scarico</option>
+                </select>
               </div>
             </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="movimentoData">Data Movimento *</label>
-              <input type="date" id="movimentoData" required />
+
+            <!-- <div class="form-group" id="giacenzaInfo"
+                 style="display: none; background: #f0f9ff; padding: 12px; border-radius: 8px; border: 1px solid #0ea5e9;">
+              <label style="color: #0284c7; font-weight: 600; margin-bottom: 8px; display: block;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     style="width: 18px; height: 18px; display: inline-block; margin-right: 4px; vertical-align: middle;">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 16v-4M12 8h.01"/>
+                </svg>
+                Giacenza Attuale
+              </label>
+              <p style="font-size: 24px; font-weight: bold; color: #0284c7; margin: 0;" id="giacenzaValue">-</p>
+            </div> -->
+            <div id="giacenzaInfo" class="stock-info">
+              <strong>Giacenza attuale:</strong>
+              <span id="giacenzaValue">-</span>
             </div>
-            <div class="form-group">
-              <label for="movimentoFattura"
-                >Documento/Fattura <span id="docOptional">*</span></label
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="movimentoQuantita">Quantità *</label>
+                <input
+                  type="number"
+                  id="movimentoQuantita"
+                  step="0.01"
+                  required
+                  placeholder="es. 10"
+                />
+              </div>
+              <div class="form-group" id="prezzoGroup" style="display: none">
+                <label for="movimentoPrezzo">Prezzo Unitario *</label>
+                <div class="input-with-currency">
+                  <input
+                    type="number"
+                    id="movimentoPrezzo"
+                    step="0.01"
+                    placeholder="es. 25.50"
+                  />
+                  <span class="currency-symbol">€</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="movimentoData">Data Movimento *</label>
+                <input type="date" id="movimentoData" required />
+              </div>
+              <div class="form-group">
+                <label for="movimentoFattura"
+                  >Documento/Fattura <span id="docOptional">*</span></label
+                >
+                <input
+                  type="text"
+                  id="movimentoFattura"
+                  placeholder="es. FT/2024/001"
+                />
+              </div>
+            </div>
+
+            <div class="form-group" id="fornitoreGroup" style="display: none">
+              <label for="movimentoFornitore"
+                >Fornitore <span id="fornitoreOptional">*</span></label
               >
               <input
                 type="text"
-                id="movimentoFattura"
-                placeholder="es. FT/2024/001"
+                id="movimentoFornitore"
+                placeholder="es. Fornitore SRL"
               />
             </div>
-          </div>
-          <div class="form-group" id="fornitoreGroup">
-            <label for="movimentoFornitore"
-              >Fornitore <span id="fornitoreOptional">*</span></label
-            >
-            <input
-              type="text"
-              id="movimentoFornitore"
-              placeholder="es. Ricambi Moto S.r.l."
-            />
-          </div>
-          <div
-            class="form-group"
-            id="giacenzaInfo"
-            style="
-              display: none;
-              background: #f0f9ff;
-              padding: 12px;
-              border-radius: 8px;
-              border: 1px solid #0ea5e9;
-            "
-          >
-            <label
-              style="
-                color: #0284c7;
-                font-weight: 600;
-                margin-bottom: 8px;
-                display: block;
-              "
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                style="
-                  width: 18px;
-                  height: 18px;
-                  display: inline-block;
-                  margin-right: 4px;
-                  vertical-align: middle;
-                "
-              >
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 16v-4M12 8h.01" />
-              </svg>
-              Giacenza Attuale
-            </label>
-            <p
-              style="
-                font-size: 24px;
-                font-weight: bold;
-                color: #0284c7;
-                margin: 0;
-              "
-              id="giacenzaValue"
-            >
-              -
-            </p>
           </div>
           <div class="modal-footer">
             <button
@@ -680,9 +774,11 @@
               class="btn btn-secondary"
               onclick="closeMovimentoModal()"
             >
-              Annulla
+              <span>Annulla</span>
             </button>
-            <button type="submit" class="btn btn-primary">Salva</button>
+            <button type="submit" class="btn btn-primary">
+              <span>Salva</span>
+            </button>
           </div>
         </form>
       </div>
@@ -693,33 +789,36 @@
       <div class="modal-content">
         <div class="modal-header">
           <h2 id="modalUserTitle">Nuovo Utente</h2>
-          <button class="modal-close" onclick="closeUserModal()">
+          <button
+            class="modal-close"
+            onclick="closeUserModal()"
+            aria-label="Chiudi"
+          >
             &times;
           </button>
         </div>
         <form id="formUser">
           <input type="hidden" id="userId" />
-          <div class="form-group">
-            <label for="userUsername">Username *</label>
-            <input
-              type="text"
-              id="userUsername"
-              required
-              minlength="3"
-              placeholder="es. mario.rossi"
-            />
-          </div>
-          <div class="form-group">
-            <label for="userPassword"
-              >Password <span id="passwordOptional"></span
-            ></label>
-            <input
-              type="password"
-              id="userPassword"
-              minlength="8"
-              placeholder="Min. 8 caratteri"
-            />
-            <small>Min. 8 caratteri, con maiuscola, minuscola e numero</small>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="userUsername">Username *</label>
+              <input
+                type="text"
+                id="userUsername"
+                required
+                placeholder="es. admin, utente1..."
+              />
+            </div>
+            <div class="form-group">
+              <label for="userPassword">Password *</label>
+              <input
+                type="password"
+                id="userPassword"
+                required
+                placeholder="Inserisci una password sicura"
+              />
+              <small>Minimo 6 caratteri</small>
+            </div>
           </div>
           <div class="modal-footer">
             <button
@@ -727,9 +826,11 @@
               class="btn btn-secondary"
               onclick="closeUserModal()"
             >
-              Annulla
+              <span>Annulla</span>
             </button>
-            <button type="submit" class="btn btn-primary">Salva</button>
+            <button type="submit" class="btn btn-primary">
+              <span>Salva</span>
+            </button>
           </div>
         </form>
       </div>

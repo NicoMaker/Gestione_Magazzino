@@ -21,8 +21,16 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     const data = await response.json();
 
     if (response.ok) {
-      localStorage.setItem("loggedUser", username);
-      window.location.href = "home.html";
+      localStorage.setItem("username", username);
+
+      // Success animation before redirect
+      btnLogin.style.background =
+        "linear-gradient(135deg, #10b981 0%, #059669 100%)";
+      btnLogin.innerHTML = "<span>✓ Accesso effettuato!</span>";
+
+      setTimeout(() => {
+        window.location.href = "home.html";
+      }, 800);
     } else {
       errorMessage.textContent = data.error || "Errore durante il login";
       errorMessage.classList.add("show");
@@ -31,6 +39,17 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     errorMessage.textContent = "Errore di connessione al server";
     errorMessage.classList.add("show");
   } finally {
-    btnLogin.classList.remove("loading");
+    setTimeout(() => {
+      btnLogin.classList.remove("loading");
+    }, 500);
   }
+});
+
+// Add enter key support
+document.querySelectorAll("input").forEach((input) => {
+  input.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      document.getElementById("loginForm").dispatchEvent(new Event("submit"));
+    }
+  });
 });
