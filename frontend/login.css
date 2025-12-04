@@ -59,6 +59,9 @@ body::before {
   padding: 48px 40px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.5);
   animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden !important;
+  width: 100% !important;
+  position: relative !important;
 }
 
 @keyframes slideUp {
@@ -74,29 +77,35 @@ body::before {
 
 .login-header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 35px;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  padding: 0 !important;
 }
 
 .logo-wrapper {
-  display: inline-block;
-  margin-bottom: 24px;
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-bottom: 20px !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  position: relative !important;
+  z-index: 1 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
 }
 
 .logo-icon {
-  width: 72px;
-  height: 72px;
-  filter: drop-shadow(0 8px 16px rgba(99, 102, 241, 0.4));
+  width: 100% !important;
+  height: auto !important;
+  max-width: 350px !important;
+  max-height: 200px !important;
+  display: block !important;
+  object-fit: contain !important;
+  filter: drop-shadow(0 4px 8px rgba(99, 102, 241, 0.3)) !important;
+  position: relative !important;
 }
 
 .login-header h1 {
@@ -136,12 +145,17 @@ body::before {
 .input-icon {
   position: absolute;
   left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
   width: 20px;
   height: 20px;
   stroke: #a0aec0;
   pointer-events: none;
   transition: stroke 0.3s ease;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .input-wrapper:focus-within .input-icon {
@@ -246,7 +260,7 @@ body::before {
 }
 
 .error-message::before {
-  content: "⚠";
+  content: "⚠️";
   font-size: 18px;
 }
 
@@ -280,22 +294,22 @@ body::before {
 /* Responsive */
 @media (max-width: 480px) {
   .login-box {
-    padding: 36px 28px;
-    border-radius: 20px;
+    padding: 36px 28px !important;
+    border-radius: 20px !important;
   }
 
   .login-header h1 {
-    font-size: 22px;
+    font-size: 22px !important;
   }
 
   .logo-icon {
-    width: 64px;
-    height: 64px;
+    max-width: 300px !important;
+    max-height: 170px !important;
   }
 
   .btn-login {
-    padding: 14px;
-    font-size: 15px;
+    padding: 14px !important;
+    font-size: 15px !important;
   }
 }
 
