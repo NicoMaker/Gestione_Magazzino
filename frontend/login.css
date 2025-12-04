@@ -1,3 +1,10 @@
+/*
+|--------------------------------------------------------------------------
+| login.css - Completo, Scrollabile con Scroll Limitato
+|--------------------------------------------------------------------------
+| Il padding-bottom (40px) del body è stato ridotto per limitare lo scroll finale.
+*/
+
 * {
   margin: 0;
   padding: 0;
@@ -7,18 +14,30 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto,
     Oxygen, Ubuntu, Cantarell, sans-serif;
+  
   background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  
   min-height: 100vh;
   display: flex;
-  align-items: center;
   justify-content: center;
-  padding: 20px;
+  
+  /* ✔️ LAYOUT PER LO SCROLL: Il contenuto parte dall'alto */
+  align-items: flex-start;
+  
+  /* ⚙️ MODIFICATO: 40px padding in alto, 20px padding in basso, 20px ai lati. */
+  padding: 40px 20px 20px 20px; 
+  
+  overflow-y: auto;
+  overflow-x: hidden;
+  
   position: relative;
-  overflow: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Animated background effect */
+/* -------------------------------------------------- */
+/* EFFETTO SFONDO ANIMATO */
+/* -------------------------------------------------- */
+
 body::before {
   content: "";
   position: absolute;
@@ -45,6 +64,10 @@ body::before {
   }
 }
 
+/* -------------------------------------------------- */
+/* CONTENITORE PRINCIPALE DEL LOGIN */
+/* -------------------------------------------------- */
+
 .login-container {
   width: 100%;
   max-width: 440px;
@@ -59,9 +82,9 @@ body::before {
   padding: 48px 40px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.5);
   animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-  overflow: hidden !important;
-  width: 100% !important;
-  position: relative !important;
+  overflow: initial;
+  width: 100%;
+  position: relative;
 }
 
 @keyframes slideUp {
@@ -75,37 +98,30 @@ body::before {
   }
 }
 
+/* -------------------------------------------------- */
+/* HEADER E LOGO */
+/* -------------------------------------------------- */
+
 .login-header {
   text-align: center;
   margin-bottom: 35px;
-  width: 100% !important;
-  max-width: 100% !important;
-  overflow: hidden !important;
-  padding: 0 !important;
 }
 
 .logo-wrapper {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  margin-bottom: 20px !important;
-  max-width: 100% !important;
-  width: 100% !important;
-  position: relative !important;
-  z-index: 1 !important;
-  padding: 0 !important;
-  overflow: hidden !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
 }
 
 .logo-icon {
-  width: 100% !important;
-  height: auto !important;
-  max-width: 350px !important;
-  max-height: 200px !important;
-  display: block !important;
-  object-fit: contain !important;
-  filter: drop-shadow(0 4px 8px rgba(99, 102, 241, 0.3)) !important;
-  position: relative !important;
+  width: 100%;
+  height: auto;
+  max-width: 350px;
+  max-height: 200px;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(99, 102, 241, 0.3));
 }
 
 .login-header h1 {
@@ -121,6 +137,10 @@ body::before {
   font-size: 15px;
   font-weight: 500;
 }
+
+/* -------------------------------------------------- */
+/* CAMPI DI INPUT */
+/* -------------------------------------------------- */
 
 .input-group {
   margin-bottom: 24px;
@@ -184,6 +204,10 @@ body::before {
   transform: translateY(-1px);
 }
 
+/* -------------------------------------------------- */
+/* PULSANTE DI LOGIN E CARICAMENTO */
+/* -------------------------------------------------- */
+
 .btn-login {
   width: 100%;
   padding: 16px;
@@ -240,6 +264,10 @@ body::before {
   }
 }
 
+/* -------------------------------------------------- */
+/* MESSAGGIO DI ERRORE */
+/* -------------------------------------------------- */
+
 .error-message {
   margin-top: 20px;
   padding: 14px 16px;
@@ -277,6 +305,10 @@ body::before {
   }
 }
 
+/* -------------------------------------------------- */
+/* FOOTER DEL LOGIN */
+/* -------------------------------------------------- */
+
 .login-footer {
   margin-top: 32px;
   padding-top: 24px;
@@ -291,29 +323,35 @@ body::before {
   font-weight: 500;
 }
 
-/* Responsive */
+/* -------------------------------------------------- */
+/* RESPONSIVE DESIGN (Mobile First) */
+/* -------------------------------------------------- */
+
 @media (max-width: 480px) {
   .login-box {
-    padding: 36px 28px !important;
-    border-radius: 20px !important;
+    padding: 36px 28px;
+    border-radius: 20px;
   }
 
   .login-header h1 {
-    font-size: 22px !important;
+    font-size: 22px;
   }
 
   .logo-icon {
-    max-width: 300px !important;
-    max-height: 170px !important;
+    max-width: 300px;
+    max-height: 170px;
   }
 
   .btn-login {
-    padding: 14px !important;
-    font-size: 15px !important;
+    padding: 14px;
+    font-size: 15px;
   }
 }
 
-/* Dark mode support */
+/* -------------------------------------------------- */
+/* DARK MODE SUPPORT */
+/* -------------------------------------------------- */
+
 @media (prefers-color-scheme: dark) {
   body {
     background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
