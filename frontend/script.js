@@ -1358,3 +1358,563 @@ function formatNumber(num) {
 
   return parts.join(",");
 }
+
+// ==================== MOVIMENTI ====================
+async function loadMovimenti() {
+  try {
+    const res = await fetch(`${API_URL}/dati`);
+    allMovimenti = await res.json();
+    movimenti = allMovimenti;
+    renderMovimenti();
+  } catch (error) {
+    console.error("Errore caricamento movimenti:", error);
+  }
+}
+
+function renderMovimenti() {
+  const tbody = document.getElementById("movimentiTableBody");
+
+  if (movimenti.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="10" class="text-center">Nessun movimento presente</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = movimenti
+    .map((m) => {
+      const prefix = m.tipo === "scarico" ? "- " : "";
+
+      // Calcolo prezzo unitario con 2 decimali
+      let prezzoUnitarioRaw = "-";
+      if (m.tipo === "carico" && m.prezzo) {
+        prezzoUnitarioRaw = formatCurrency(parseFloat(m.prezzo).toFixed(2));
+      } else if (m.tipo === "scarico" && m.prezzo_unitario_scarico) {
+        prezzoUnitarioRaw = formatCurrency(parseFloat(m.prezzo_unitario_scarico).toFixed(2));
+      }
+
+      const prezzoUnitarioHtml =
+        prezzoUnitarioRaw !== "-"
+          ? prezzoUnitarioRaw.replace("€ ", `${prefix}€ `)
+          : "-";
+
+      const prezzoTotaleRaw = formatCurrency(parseFloat(m.prezzo_totale || 0).toFixed(2));
+      const prezzoTotaleHtml = prezzoTotaleRaw.replace(
+        "€ ",
+        `${prefix}€ `
+      );
+
+      const colorClass = m.tipo === "carico" ? "text-green" : "text-red";
+
+      // Formatta quantità con 2 decimali
+      const quantitaFormatted = parseFloat(m.quantita).toFixed(2);
+
+      return `
+    <tr>
+      <td><strong>${m.prodotto_nome}</strong></td>
+      <td>${m.marca_nome || '<span style="color: #999;">-</span>'}</td>
+      <td>${
+        m.prodotto_descrizione
+          ? `<small>${m.prodotto_descrizione.substring(0, 30)}${
+              m.prodotto_descrizione.length > 30 ? "..." : ""
+            }</small>`
+          : '<span style="color: #999;">-</span>'
+      }</td>
+      <td><span class="badge ${
+        m.tipo === "carico" ? "badge-success" : "badge-danger"
+      }">${m.tipo.toUpperCase()}</span></td>
+
+      <td class="${colorClass}">${quantitaFormatted} pz</td>
+      <td class="${colorClass}">${prezzoUnitarioHtml}</td>
+      <td class="${colorClass}"><strong>${prezzoTotaleHtml}</strong></td>
+
+      <td>${new Date(m.data_movimento).toLocaleDateString("it-IT")}</td>
+      <td>${m.fattura_doc || '<span style="color: #999;">-</span>'}</td>
+      <td class="text-right">
+        <button class="btn-icon" onclick="deleteMovimento(${m.id})" title="Elimina">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+        </button>
+      </td>
+    </tr>
+  `;
+    })
+    .join("");
+}
+
+document.getElementById("filterMovimenti")?.addEventListener("input", (e) => {
+  const searchTerm = e.target.value.toLowerCase();
+  movimenti = allMovimenti.filter(
+    (m) =>
+      m.prodotto_nome.toLowerCase().includes(searchTerm) ||
+      (m.marca_nome && m.marca_nome.toLowerCase().includes(searchTerm)) ||
+      m.tipo.toLowerCase().includes(searchTerm) ||
+      (m.prodotto_descrizione &&
+        m.prodotto_descrizione.toLowerCase().includes(searchTerm))
+  );
+  renderMovimenti();
+});
+
+function togglePrezzoField() {
+  const tipo = document.getElementById("movimentoTipo").value;
+  const prezzoGroup = document.getElementById("prezzoGroup");
+  const prezzoInput = document.getElementById("movimentoPrezzo");
+  const fornitoreGroup = document.getElementById("fornitoreGroup");
+  const fatturaInput = document.getElementById("movimentoFattura");
+  const fornitoreInput = document.getElementById("movimentoFornitore");
+  const docOptional = document.getElementById("docOptional");
+  const fornitoreOptional = document.getElementById("fornitoreOptional");
+  const fatturaGroup = fatturaInput.closest(".form-group");
+
+  if (tipo === "carico") {
+    prezzoGroup.style.display = "block";
+    prezzoInput.required = true;
+    fornitoreGroup.style.display = "block";
+    fatturaGroup.style.display = "block";
+    fatturaInput.required = true;
+    fornitoreInput.required = true;
+    docOptional.textContent = "*";
+    fornitoreOptional.textContent = "*";
+  } else {
+    prezzoGroup.style.display = "none";
+    prezzoInput.required = false;
+    prezzoInput.value = "";
+    fornitoreGroup.style.display = "none";
+    fatturaGroup.style.display = "none";
+    fornitoreInput.value = "";
+    fatturaInput.value = "";
+    fatturaInput.required = false;
+    fornitoreInput.required = false;
+    docOptional.textContent = "";
+    fornitoreOptional.textContent = "";
+  }
+}
+
+async function openMovimentoModal(movimento = null) {
+  if (prodotti.length === 0) {
+    const res = await fetch(`${API_URL}/prodotti`);
+    prodotti = await res.json();
+  }
+
+  const modal = document.getElementById("modalMovimento");
+  const title = document.getElementById("modalMovimentoTitle");
+  const form = document.getElementById("formMovimento");
+  const selectProdotto = document.getElementById("movimentoProdotto");
+
+  form.reset();
+
+  selectProdotto.innerHTML =
+    '<option value="">Seleziona prodotto...</option>' +
+    prodotti
+      .map((p) => {
+        const marcaNome = p.marca_nome
+          ? ` (${p.marca_nome.toUpperCase()})`
+          : "";
+        return `<option value="${p.id}">${p.nome}${marcaNome}</option>`;
+      })
+      .join("");
+
+  title.textContent = "Nuovo Movimento";
+  document.getElementById("movimentoId").value = "";
+  
+  if (!movimento) {
+    document.getElementById("giacenzaInfo").style.display = "none";
+  }
+
+  togglePrezzoField();
+
+  modal.classList.add("active");
+}
+
+function closeMovimentoModal() {
+  document.getElementById("modalMovimento").classList.remove("active");
+}
+
+function editMovimento(id) {
+  const movimento = movimenti.find((m) => m.id === id);
+  if (movimento) openMovimentoModal(movimento);
+}
+
+async function deleteMovimento(id) {
+  if (!confirm("Sei sicuro di voler eliminare questo movimento?")) return;
+
+  try {
+    const res = await fetch(`${API_URL}/dati/${id}`, { method: "DELETE" });
+    const data = await res.json();
+
+    if (res.ok) {
+      alert("Movimento eliminato con successo!");
+      loadMovimenti();
+      loadProdotti();
+    } else {
+      alert(data.error || "Errore durante l'eliminazione");
+    }
+  } catch (error) {
+    alert("Errore di connessione");
+  }
+}
+
+// CHANGE: Funzione migliorata per limitare i decimali permettendo di inserire la virgola in qualsiasi momento
+function limitDecimals(input, maxDecimals = 2) {
+  let value = input.value;
+  
+  // Salva la posizione del cursore
+  const cursorPosition = input.selectionStart;
+  const originalLength = value.length;
+  
+  // Permetti solo numeri, punto e virgola
+  value = value.replace(/[^0-9.,]/g, '');
+  
+  // Sostituisci tutte le virgole con punti
+  value = value.replace(/,/g, '.');
+  
+  // Permetti solo un punto decimale
+  const parts = value.split('.');
+  if (parts.length > 2) {
+    // Mantieni solo il primo punto
+    value = parts[0] + '.' + parts.slice(1).join('');
+  }
+  
+  // Limita i decimali a maxDecimals cifre
+  if (parts.length === 2) {
+    const integerPart = parts[0];
+    let decimalPart = parts[1];
+    
+    if (decimalPart.length > maxDecimals) {
+      decimalPart = decimalPart.substring(0, maxDecimals);
+    }
+    
+    value = integerPart + '.' + decimalPart;
+  }
+  
+  // Aggiorna il valore
+  input.value = value;
+  
+  // Ripristina la posizione del cursore
+  const newLength = value.length;
+  const diff = newLength - originalLength;
+  input.setSelectionRange(cursorPosition + diff, cursorPosition + diff);
+}
+
+// CHANGE: Event listener che permettono di inserire la virgola in qualsiasi momento
+document.getElementById("movimentoQuantita")?.addEventListener("input", function(e) {
+  limitDecimals(e.target, 2);
+});
+
+document.getElementById("movimentoPrezzo")?.addEventListener("input", function(e) {
+  limitDecimals(e.target, 2);
+});
+
+// CHANGE: Validazione aggiuntiva al blur per formattare correttamente
+document.getElementById("movimentoQuantita")?.addEventListener("blur", function(e) {
+  if (e.target.value && !isNaN(parseFloat(e.target.value))) {
+    const value = parseFloat(e.target.value);
+    e.target.value = value.toFixed(2).replace('.', ',');
+  }
+});
+
+document.getElementById("movimentoPrezzo")?.addEventListener("blur", function(e) {
+  if (e.target.value && !isNaN(parseFloat(e.target.value))) {
+    const value = parseFloat(e.target.value);
+    e.target.value = value.toFixed(2).replace('.', ',');
+  }
+});
+
+document
+  .getElementById("formMovimento")
+  .addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const id = document.getElementById("movimentoId").value;
+    const prodotto_id = document.getElementById("movimentoProdotto").value;
+    const tipo = document.getElementById("movimentoTipo").value;
+    
+    // CHANGE: Parse con supporto virgola e arrotondamento a 2 decimali
+    const quantitaRaw = document.getElementById("movimentoQuantita").value.replace(',', '.');
+    const quantita = Math.round(parseFloat(quantitaRaw) * 100) / 100;
+    
+    const data_movimento = document.getElementById("movimentoData").value;
+    
+    let prezzo = null;
+    if (tipo === "carico") {
+      const prezzoRaw = document.getElementById("movimentoPrezzo").value.replace(',', '.');
+      prezzo = Math.round(parseFloat(prezzoRaw) * 100) / 100;
+    }
+    
+    const fattura_doc =
+      tipo === "carico"
+        ? document.getElementById("movimentoFattura").value.trim() || null
+        : null;
+    const fornitore =
+      tipo === "carico"
+        ? document.getElementById("movimentoFornitore").value.trim() || null
+        : null;
+
+    // CHANGE: Validazione decimali
+    if (isNaN(quantita) || quantita <= 0) {
+      alert("Inserisci una quantità valida!");
+      return;
+    }
+
+    if (tipo === "carico") {
+      if (isNaN(prezzo) || prezzo <= 0) {
+        alert("Inserisci un prezzo valido!");
+        return;
+      }
+      if (!fattura_doc || !fornitore) {
+        alert("Documento e Fornitore sono obbligatori per i carichi!");
+        return;
+      }
+    }
+
+    const method = id ? "PUT" : "POST";
+    const url = id ? `${API_URL}/dati/${id}` : `${API_URL}/dati`;
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prodotto_id,
+          tipo,
+          quantita,
+          prezzo,
+          data_movimento,
+          fattura_doc,
+          fornitore,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert(id ? "Movimento aggiornato!" : "Movimento registrato!");
+        closeMovimentoModal();
+        loadMovimenti();
+        loadProdotti();
+      } else {
+        alert(data.error || "Errore durante il salvataggio");
+      }
+    } catch (error) {
+      alert("Errore di connessione");
+    }
+  });
+
+document
+  .getElementById("movimentoProdotto")
+  ?.addEventListener("change", async (e) => {
+    const prodottoId = e.target.value;
+    if (prodottoId) {
+      await showGiacenzaInfo(prodottoId);
+    } else {
+      document.getElementById("giacenzaInfo").style.display = "none";
+    }
+  });
+
+async function showGiacenzaInfo(prodottoId) {
+  try {
+    const prodotto = prodotti.find((p) => p.id == prodottoId);
+    if (prodotto) {
+      const giacenzaInfo = document.getElementById("giacenzaInfo");
+      const giacenzaValue = document.getElementById("giacenzaValue");
+
+      // Formatta giacenza con 2 decimali
+      const giacenzaFormatted = parseFloat(prodotto.giacenza || 0).toFixed(2);
+
+      giacenzaValue.textContent = `${prodotto.nome} ${
+        prodotto.marca_nome ? `(${prodotto.marca_nome})` : ""
+      } - Giacenza: ${giacenzaFormatted} pz`;
+      giacenzaInfo.style.display = "block";
+    }
+  } catch (error) {
+    console.error("Errore caricamento giacenza:", error);
+  }
+}
+
+// CHANGE: Funzione che permette di inserire la virgola in qualsiasi posizione
+function limitDecimals(input, maxDecimals = 2) {
+  let value = input.value;
+  
+  // Salva la posizione del cursore
+  const cursorPosition = input.selectionStart;
+  
+  // Permetti solo numeri, punto e virgola
+  value = value.replace(/[^0-9.,]/g, '');
+  
+  // Sostituisci tutte le virgole con punti
+  value = value.replace(/,/g, '.');
+  
+  // Gestisci punti multipli: mantieni solo il primo
+  const firstDotIndex = value.indexOf('.');
+  if (firstDotIndex !== -1) {
+    const beforeDot = value.substring(0, firstDotIndex);
+    const afterDot = value.substring(firstDotIndex + 1).replace(/\./g, '');
+    value = beforeDot + '.' + afterDot;
+  }
+  
+  // Limita i decimali a maxDecimals cifre
+  const parts = value.split('.');
+  if (parts.length === 2 && parts[1].length > maxDecimals) {
+    parts[1] = parts[1].substring(0, maxDecimals);
+    value = parts.join('.');
+  }
+  
+  // Aggiorna il valore
+  const oldValue = input.value;
+  input.value = value;
+  
+  // Aggiusta la posizione del cursore
+  if (oldValue !== value) {
+    const lengthDiff = value.length - oldValue.length;
+    const newCursorPosition = cursorPosition + lengthDiff;
+    input.setSelectionRange(newCursorPosition, newCursorPosition);
+  } else {
+    input.setSelectionRange(cursorPosition, cursorPosition);
+  }
+}
+
+// Event listener che permettono di inserire la virgola in qualsiasi momento
+document.getElementById("movimentoQuantita")?.addEventListener("input", function(e) {
+  limitDecimals(e.target, 2);
+});
+
+document.getElementById("movimentoPrezzo")?.addEventListener("input", function(e) {
+  limitDecimals(e.target, 2);
+});
+
+// CHANGE: Al blur formatta con virgola italiana
+document.getElementById("movimentoQuantita")?.addEventListener("blur", function(e) {
+  if (e.target.value) {
+    const value = parseFloat(e.target.value.replace(',', '.'));
+    if (!isNaN(value)) {
+      e.target.value = value.toFixed(2).replace('.', ',');
+    }
+  }
+});
+
+document.getElementById("movimentoPrezzo")?.addEventListener("blur", function(e) {
+  if (e.target.value) {
+    const value = parseFloat(e.target.value.replace(',', '.'));
+    if (!isNaN(value)) {
+      e.target.value = value.toFixed(2).replace('.', ',');
+    }
+  }
+});
+
+// CHANGE: Al focus rimuovi gli zeri inutili per facilitare la modifica
+document.getElementById("movimentoQuantita")?.addEventListener("focus", function(e) {
+  if (e.target.value) {
+    const value = parseFloat(e.target.value.replace(',', '.'));
+    if (!isNaN(value)) {
+      e.target.value = value.toString().replace('.', ',');
+    }
+  }
+});
+
+document.getElementById("movimentoPrezzo")?.addEventListener("focus", function(e) {
+  if (e.target.value) {
+    const value = parseFloat(e.target.value.replace(',', '.'));
+    if (!isNaN(value)) {
+      e.target.value = value.toString().replace('.', ',');
+    }
+  }
+});
+
+// CHANGE: Funzione che permette di inserire la virgola mantenendo la posizione del cursore
+function limitDecimals(input, maxDecimals = 2) {
+  // Salva la posizione del cursore PRIMA di modificare il valore
+  const cursorPosition = input.selectionStart;
+  const oldValue = input.value;
+  let value = input.value;
+  
+  // Permetti solo numeri, punto e virgola
+  const cleaned = value.replace(/[^0-9.,]/g, '');
+  
+  // Sostituisci tutte le virgole con punti
+  let withDots = cleaned.replace(/,/g, '.');
+  
+  // Gestisci punti multipli: mantieni solo il primo
+  const firstDotIndex = withDots.indexOf('.');
+  if (firstDotIndex !== -1) {
+    const beforeDot = withDots.substring(0, firstDotIndex);
+    const afterDot = withDots.substring(firstDotIndex + 1).replace(/\./g, '');
+    withDots = beforeDot + '.' + afterDot;
+  }
+  
+  // Limita i decimali a maxDecimals cifre
+  const parts = withDots.split('.');
+  if (parts.length === 2 && parts[1].length > maxDecimals) {
+    parts[1] = parts[1].substring(0, maxDecimals);
+    withDots = parts.join('.');
+  }
+  
+  // Aggiorna il valore dell'input
+  input.value = withDots;
+  
+  // Calcola la nuova posizione del cursore
+  let newCursorPosition = cursorPosition;
+  
+  // Se il valore è cambiato, aggiusta la posizione
+  if (oldValue !== withDots) {
+    const diff = withDots.length - oldValue.length;
+    newCursorPosition = cursorPosition + diff;
+  }
+  
+  // Ripristina la posizione del cursore
+  input.setSelectionRange(newCursorPosition, newCursorPosition);
+}
+
+// Event listener che permettono di inserire la virgola in qualsiasi momento
+document.getElementById("movimentoQuantita")?.addEventListener("input", function(e) {
+  limitDecimals(e.target, 2);
+});
+
+document.getElementById("movimentoPrezzo")?.addEventListener("input", function(e) {
+  limitDecimals(e.target, 2);
+});
+
+// CHANGE: Al blur formatta con virgola italiana e 2 decimali
+document.getElementById("movimentoQuantita")?.addEventListener("blur", function(e) {
+  if (e.target.value) {
+    const value = parseFloat(e.target.value.replace(',', '.'));
+    if (!isNaN(value) && value > 0) {
+      e.target.value = value.toFixed(2).replace('.', ',');
+    } else if (e.target.value && (isNaN(value) || value <= 0)) {
+      e.target.value = '';
+    }
+  }
+});
+
+document.getElementById("movimentoPrezzo")?.addEventListener("blur", function(e) {
+  if (e.target.value) {
+    const value = parseFloat(e.target.value.replace(',', '.'));
+    if (!isNaN(value) && value > 0) {
+      e.target.value = value.toFixed(2).replace('.', ',');
+    } else if (e.target.value && (isNaN(value) || value <= 0)) {
+      e.target.value = '';
+    }
+  }
+});
+
+// CHANGE: Al focus rimuovi formattazione per facilitare modifica
+document.getElementById("movimentoQuantita")?.addEventListener("focus", function(e) {
+  if (e.target.value) {
+    const value = parseFloat(e.target.value.replace(',', '.'));
+    if (!isNaN(value)) {
+      // Rimuovi zeri decimali inutili ma mantieni la virgola se presente
+      let formatted = value.toString().replace('.', ',');
+      e.target.value = formatted;
+    }
+  }
+});
+
+document.getElementById("movimentoPrezzo")?.addEventListener("focus", function(e) {
+  if (e.target.value) {
+    const value = parseFloat(e.target.value.replace(',', '.'));
+    if (!isNaN(value)) {
+      // Rimuovi zeri decimali inutili ma mantieni la virgola se presente
+      let formatted = value.toString().replace('.', ',');
+      e.target.value = formatted;
+    }
+  }
+});
