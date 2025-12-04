@@ -408,7 +408,33 @@ function renderMovimenti() {
 
   tbody.innerHTML = movimenti
     .map(
-      (m) => `
+      (m) => {
+        // Determina il prefisso per gli scarichi: "-" se scarico, "" altrimenti.
+        const prefix = m.tipo === "scarico" ? "- " : "";
+        
+        // Calcola il prezzo unitario
+        let prezzoUnitarioRaw = "-";
+        if (m.tipo === "carico" && m.prezzo) {
+            prezzoUnitarioRaw = formatCurrency(m.prezzo);
+        } else if (m.tipo === "scarico" && m.prezzo_unitario_scarico) {
+            prezzoUnitarioRaw = formatCurrency(m.prezzo_unitario_scarico);
+        }
+        
+        // Applica il prefisso "-" e il simbolo "€" al prezzo unitario
+        // Sostituiamo l' "€ " di default con l'eventuale prefisso + "€ "
+        const prezzoUnitarioHtml = prezzoUnitarioRaw !== "-" 
+            ? prezzoUnitarioRaw.replace('€ ', `${prefix}€ `) 
+            : "-";
+
+        // Calcola il prezzo totale
+        const prezzoTotaleRaw = formatCurrency(m.prezzo_totale || 0);
+        
+        // Applica il prefisso "-" e il simbolo "€" al prezzo totale
+        // Sostituiamo l' "€ " di default con l'eventuale prefisso + "€ "
+        const prezzoTotaleHtml = prezzoTotaleRaw.replace('€ ', `${prefix}€ `);
+
+
+        return `
     <tr>
       <td><strong>${m.prodotto_nome}</strong></td>
       <td>${m.marca_nome || '<span style="color: #999;">-</span>'}</td>
@@ -423,14 +449,8 @@ function renderMovimenti() {
         m.tipo === "carico" ? "badge-success" : "badge-danger"
       }">${m.tipo.toUpperCase()}</span></td>
       <td>${m.quantita} pz</td>
-      <td>${
-        m.tipo === "carico"
-          ? formatCurrency(m.prezzo)
-          : m.prezzo_unitario_scarico
-          ? formatCurrency(m.prezzo_unitario_scarico)
-          : "-"
-      }</td>
-      <td><strong>${formatCurrency(m.prezzo_totale || 0)}</strong></td>
+      <td>${prezzoUnitarioHtml}</td> 
+      <td><strong>${prezzoTotaleHtml}</strong></td> 
       <td>${new Date(m.data_movimento).toLocaleDateString("it-IT")}</td>
       <td>${m.fattura_doc || '<span style="color: #999;">-</span>'}</td>
       <td class="text-right">
@@ -443,7 +463,8 @@ function renderMovimenti() {
         </button>
       </td>
     </tr>
-  `
+  `;
+      }
     )
     .join("");
 }
