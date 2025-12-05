@@ -1,5 +1,30 @@
 const API_URL = "api";
 
+// Toggle password visibility
+const passwordInput = document.getElementById("password");
+const togglePassword = document.getElementById("togglePassword");
+const eyeIcon = document.getElementById("eyeIcon");
+
+togglePassword.addEventListener("click", function () {
+  const type =
+    passwordInput.getAttribute("type") === "password" ? "text" : "password";
+  passwordInput.setAttribute("type", type);
+
+  if (type === "text") {
+    eyeIcon.innerHTML = `
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.08 2.58"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                    <circle cx="12" cy="12" r="3"/>
+                `;
+  } else {
+    eyeIcon.innerHTML = `
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                `;
+  }
+});
+
+// Login form submission
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -21,12 +46,11 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     const data = await response.json();
 
     if (response.ok) {
-      localStorage.setItem("username", username);
-
-      // Success animation before redirect
+      // Success animation
       btnLogin.style.background =
         "linear-gradient(135deg, #10b981 0%, #059669 100%)";
-      btnLogin.innerHTML = "<span>✓ Accesso effettuato!</span>";
+      btnLogin.querySelector(".btn-text").textContent = "✓ Accesso effettuato!";
+      btnLogin.classList.remove("loading");
 
       setTimeout(() => {
         window.location.href = "home.html";
@@ -34,39 +58,11 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     } else {
       errorMessage.textContent = data.error || "Errore durante il login";
       errorMessage.classList.add("show");
+      btnLogin.classList.remove("loading");
     }
   } catch (error) {
     errorMessage.textContent = "Errore di connessione al server";
     errorMessage.classList.add("show");
-  } finally {
-    setTimeout(() => {
-      btnLogin.classList.remove("loading");
-    }, 500);
+    btnLogin.classList.remove("loading");
   }
-});
-
-// Add enter key support
-document.querySelectorAll("input").forEach((input) => {
-  input.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-      document.getElementById("loginForm").dispatchEvent(new Event("submit"));
-    }
-  });
-});
-
-// 🔑 NUOVO: LOGICA MOSTRA/NASCONDI PASSWORD
-
-const passwordInput = document.getElementById("password");
-const togglePassword = document.getElementById("togglePassword");
-
-togglePassword.addEventListener("click", function () {
-  // Controlla il tipo attuale dell'input
-  const type =
-    passwordInput.getAttribute("type") === "password" ? "text" : "password";
-  
-  // Cambia il tipo
-  passwordInput.setAttribute("type", type);
-
-  // Aggiorna l'icona
-  this.classList.toggle("visible");
 });

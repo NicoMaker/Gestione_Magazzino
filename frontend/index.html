@@ -8,23 +8,23 @@
   </head>
   <body>
     <div class="login-container">
-      <div class="login-box">
-        <div class="login-header">
+      <div class="login-card">
+        <div class="logo-section">
           <div class="logo-wrapper">
             <img
               src="https://tse3.mm.bing.net/th/id/OIP.1bOjmRFgsQybRGw4fXsZQAHaE8?cb=ucfimg2&ucfimg=1&rs=1&pid=ImgDetMain&o=7&rm=3"
               alt="Logo Magazzino Moto"
-              class="logo-icon"
+              class="logo-img"
             />
           </div>
-          <h1>Gestione Magazzino Moto</h1>
-          <p>Accedi al sistema di gestione</p>
+          <h1 class="login-title">Gestione Magazzino Moto</h1>
+          <p class="login-subtitle">Accedi al sistema di gestione</p>
         </div>
 
         <form id="loginForm">
-          <div class="input-group">
-            <label for="username">Username</label>
-            <div class="input-wrapper">
+          <div class="form-group">
+            <label class="form-label" for="username">Username</label>
+            <div class="input-container">
               <svg
                 class="input-icon"
                 viewBox="0 0 24 24"
@@ -38,17 +38,17 @@
               <input
                 type="text"
                 id="username"
-                name="username"
+                class="form-input"
+                placeholder="Inserisci username"
                 required
                 autocomplete="username"
-                placeholder="Inserisci username"
               />
             </div>
           </div>
 
-          <div class="input-group">
-            <label for="password">Password</label>
-            <div class="input-wrapper">
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <div class="input-container">
               <svg
                 class="input-icon"
                 viewBox="0 0 24 24"
@@ -62,14 +62,14 @@
               <input
                 type="password"
                 id="password"
-                name="password"
+                class="form-input"
+                placeholder="Inserisci password"
                 required
                 autocomplete="current-password"
-                placeholder="Inserisci password"
               />
               <div class="toggle-password" id="togglePassword">
                 <svg
-                  class="icon-visible"
+                  id="eyeIcon"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -78,41 +78,22 @@
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                   <circle cx="12" cy="12" r="3" />
                 </svg>
-                <svg
-                  class="icon-hidden"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.08 2.58" />
-                  <line x1="1" y1="1" x2="23" y2="23" />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
               </div>
             </div>
           </div>
 
           <button type="submit" class="btn-login">
-            <span id="btnText">Accedi</span>
-            <svg
-              id="btnLoader"
-              class="loader"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <circle cx="12" cy="12" r="10" opacity="0.25" />
-              <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round" />
-            </svg>
+            <span class="btn-text">Accedi</span>
+            <div class="loader"></div>
           </button>
         </form>
 
         <div id="errorMessage" class="error-message"></div>
 
         <div class="login-footer">
-          <p>Credenziali di accesso fornite dall'amministratore</p>
+          <p class="footer-text">
+            Credenziali di accesso fornite dall'amministratore
+          </p>
         </div>
       </div>
     </div>
