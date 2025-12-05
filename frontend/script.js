@@ -90,16 +90,17 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.href = "index.html";
   });
 
-// =======================================================
-    // 🎯 NUOVO LISTENER PER CAMBIO CARICO/SCARICO
-    // =======================================================
-    const movimentoTipoSelect = document.getElementById("movimentoTipo");
-    
-    if (movimentoTipoSelect) {
-        // Quando il valore del campo 'movimentoTipo' cambia,
-        // esegui la funzione per mostrare/nascondere i campi.
-        movimentoTipoSelect.addEventListener("change", togglePrezzoField);
-    }});
+  // =======================================================
+  // 🎯 NUOVO LISTENER PER CAMBIO CARICO/SCARICO
+  // =======================================================
+  const movimentoTipoSelect = document.getElementById("movimentoTipo");
+
+  if (movimentoTipoSelect) {
+    // Quando il valore del campo 'movimentoTipo' cambia,
+    // esegui la funzione per mostrare/nascondere i campi.
+    movimentoTipoSelect.addEventListener("change", togglePrezzoField);
+  }
+});
 
 // ==================== MARCHE ====================
 async function loadMarche() {
@@ -283,13 +284,21 @@ function renderProdotti() {
 }
 
 document.getElementById("filterProdotti")?.addEventListener("input", (e) => {
-  const searchTerm = e.target.value.toLowerCase();
-  prodotti = allProdotti.filter(
-    (p) =>
-      p.nome.toLowerCase().includes(searchTerm) ||
-      (p.marca_nome && p.marca_nome.toLowerCase().includes(searchTerm)) ||
-      (p.descrizione && p.descrizione.toLowerCase().includes(searchTerm))
-  );
+  const searchTerm = e.target.value.toLowerCase().trim();
+
+  if (!searchTerm) {
+    // Nessun testo: mostra tutti i prodotti
+    prodotti = [...allProdotti];
+  } else {
+    // Testo presente: applica il filtro
+    prodotti = allProdotti.filter(
+      (p) =>
+        p.nome.toLowerCase().includes(searchTerm) ||
+        (p.marcanome && p.marcanome.toLowerCase().includes(searchTerm)) ||
+        (p.descrizione && p.descrizione.toLowerCase().includes(searchTerm))
+    );
+  }
+
   renderProdotti();
 });
 
@@ -434,10 +443,7 @@ function renderMovimenti() {
           : "-";
 
       const prezzoTotaleRaw = formatCurrency(m.prezzo_totale || 0);
-      const prezzoTotaleHtml = prezzoTotaleRaw.replace(
-        "€ ",
-        `${prefix}€ `
-      );
+      const prezzoTotaleHtml = prezzoTotaleRaw.replace("€ ", `${prefix}€ `);
 
       // 🎨 Classe colore: verde per carico, rosso per scarico
       const colorClass = m.tipo === "carico" ? "text-green" : "text-red";
@@ -465,7 +471,9 @@ function renderMovimenti() {
       <td>${new Date(m.data_movimento).toLocaleDateString("it-IT")}</td>
       <td>${m.fattura_doc || '<span style="color: #999;">-</span>'}</td>
       <td class="text-right">
-        <button class="btn-icon" onclick="deleteMovimento(${m.id})" title="Elimina">
+        <button class="btn-icon" onclick="deleteMovimento(${
+          m.id
+        })" title="Elimina">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
           </svg>
@@ -476,7 +484,6 @@ function renderMovimenti() {
     })
     .join("");
 }
-
 
 document.getElementById("filterMovimenti")?.addEventListener("input", (e) => {
   const searchTerm = e.target.value.toLowerCase();
@@ -601,20 +608,20 @@ document
     const id = document.getElementById("movimentoId").value;
     const prodotto_id = document.getElementById("movimentoProdotto").value;
     const tipo = document.getElementById("movimentoTipo").value;
-    
+
     // ⭐ USA LA NUOVA FUNZIONE DI PARSING
     const quantitaValue = document.getElementById("movimentoQuantita").value;
     const quantita = parseDecimalInput(quantitaValue);
-    
+
     const data_movimento = document.getElementById("movimentoData").value;
-    
+
     // ⭐ USA LA NUOVA FUNZIONE DI PARSING PER IL PREZZO
     let prezzo = null;
     if (tipo === "carico") {
       const prezzoValue = document.getElementById("movimentoPrezzo").value;
       prezzo = parseDecimalInput(prezzoValue);
     }
-    
+
     const fattura_doc =
       tipo === "carico"
         ? document.getElementById("movimentoFattura").value.trim() || null
@@ -640,7 +647,7 @@ document
         alert("Il prezzo deve essere maggiore di 0 per i carichi!");
         return;
       }
-      
+
       if (!fattura_doc || !fornitore) {
         alert("Documento e Fornitore sono obbligatori per i carichi!");
         return;
@@ -1397,52 +1404,52 @@ function formatNumber(num) {
 
 // Funzione per limitare a 2 decimali durante la digitazione
 function limitToTwoDecimals(inputElement) {
-  inputElement.addEventListener('input', function(e) {
+  inputElement.addEventListener("input", function (e) {
     let value = this.value;
-    
+
     // Sostituisci virgola con punto
-    value = value.replace(',', '.');
-    
+    value = value.replace(",", ".");
+
     // Rimuovi caratteri non validi (solo numeri, punto e virgola)
-    value = value.replace(/[^\d.,]/g, '');
-    
+    value = value.replace(/[^\d.,]/g, "");
+
     // Gestisci multipli punti/virgole
-    const parts = value.split('.');
+    const parts = value.split(".");
     if (parts.length > 2) {
-      value = parts[0] + '.' + parts.slice(1).join('');
+      value = parts[0] + "." + parts.slice(1).join("");
     }
-    
+
     // Limita a 2 decimali
     if (parts.length === 2 && parts[1].length > 2) {
-      value = parts[0] + '.' + parts[1].substring(0, 2);
+      value = parts[0] + "." + parts[1].substring(0, 2);
     }
-    
+
     this.value = value;
   });
-  
+
   // Formatta al blur (quando l'utente esce dal campo)
-  inputElement.addEventListener('blur', function(e) {
+  inputElement.addEventListener("blur", function (e) {
     let value = this.value;
-    if (value === '' || value === '.') {
-      this.value = '';
+    if (value === "" || value === ".") {
+      this.value = "";
       return;
     }
-    
-    value = value.replace(',', '.');
+
+    value = value.replace(",", ".");
     const num = parseFloat(value);
-    
+
     if (!isNaN(num)) {
       // Formatta con 2 decimali
-      this.value = num.toFixed(2).replace('.', ',');
+      this.value = num.toFixed(2).replace(".", ",");
     }
   });
 }
 
 // Applica la limitazione agli input quando si apre il modal
 function setupDecimalInputs() {
-  const quantitaInput = document.getElementById('movimentoQuantita');
-  const prezzoInput = document.getElementById('movimentoPrezzo');
-  
+  const quantitaInput = document.getElementById("movimentoQuantita");
+  const prezzoInput = document.getElementById("movimentoPrezzo");
+
   if (quantitaInput) limitToTwoDecimals(quantitaInput);
   if (prezzoInput) limitToTwoDecimals(prezzoInput);
 }
@@ -1473,13 +1480,13 @@ async function openMovimentoModal(movimento = null) {
 
   title.textContent = "Nuovo Movimento";
   document.getElementById("movimentoId").value = "";
-  
+
   if (!movimento) {
     document.getElementById("giacenzaInfo").style.display = "none";
   }
 
   togglePrezzoField();
-  
+
   // ⭐ AGGIUNGI QUESTA RIGA
   setupDecimalInputs();
 
@@ -1513,10 +1520,7 @@ function renderMovimenti() {
           : "-";
 
       const prezzoTotaleRaw = formatCurrency(m.prezzo_totale || 0);
-      const prezzoTotaleHtml = prezzoTotaleRaw.replace(
-        "€ ",
-        `${prefix}€ `
-      );
+      const prezzoTotaleHtml = prezzoTotaleRaw.replace("€ ", `${prefix}€ `);
 
       const colorClass = m.tipo === "carico" ? "text-green" : "text-red";
 
@@ -1541,9 +1545,13 @@ function renderMovimenti() {
 
       <td>${new Date(m.data_movimento).toLocaleDateString("it-IT")}</td>
       <td>${m.fattura_doc || '<span style="color: #999;">-</span>'}</td>
-      <td>${m.fornitore_cliente_id || '<span style="color: #999;">-</span>'}</td>
+      <td>${
+        m.fornitore_cliente_id || '<span style="color: #999;">-</span>'
+      }</td>
       <td class="text-right">
-        <button class="btn-icon" onclick="deleteMovimento(${m.id})" title="Elimina">
+        <button class="btn-icon" onclick="deleteMovimento(${
+          m.id
+        })" title="Elimina">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
           </svg>
@@ -1568,15 +1576,15 @@ function getDecimalSeparator() {
 function formatNumberWithLocale(num) {
   const n = parseFloat(num);
   if (isNaN(n)) return "0";
-  
+
   const separator = getDecimalSeparator();
   const formatted = n.toFixed(2);
-  
+
   // Se il separatore locale è virgola, sostituisci il punto
-  if (separator === ',') {
-    return formatted.replace('.', ',');
+  if (separator === ",") {
+    return formatted.replace(".", ",");
   }
-  
+
   return formatted;
 }
 
@@ -1600,7 +1608,7 @@ function formatNumber(num) {
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
   // Usa il separatore decimale corretto
-  if (separator === ',') {
+  if (separator === ",") {
     return parts.join(",");
   } else {
     return parts.join(".");
@@ -1614,64 +1622,66 @@ function formatNumber(num) {
  * Accetta sia punto che virgola come separatore
  */
 function limitToTwoDecimals(inputElement) {
-  inputElement.addEventListener('input', function(e) {
+  inputElement.addEventListener("input", function (e) {
     let value = this.value;
-    
+
     // Permetti solo numeri, punto e virgola
-    value = value.replace(/[^\d.,]/g, '');
-    
+    value = value.replace(/[^\d.,]/g, "");
+
     // Sostituisci virgola con punto per gestione interna
-    value = value.replace(',', '.');
-    
+    value = value.replace(",", ".");
+
     // Rimuovi punti multipli (mantieni solo il primo)
-    const parts = value.split('.');
+    const parts = value.split(".");
     if (parts.length > 2) {
-      value = parts[0] + '.' + parts.slice(1).join('');
+      value = parts[0] + "." + parts.slice(1).join("");
     }
-    
+
     // Limita i decimali a 2 cifre
     if (parts.length === 2) {
       if (parts[1].length > 2) {
         parts[1] = parts[1].substring(0, 2);
-        value = parts.join('.');
+        value = parts.join(".");
       }
     }
-    
+
     // Aggiorna il valore con virgola per visualizzazione italiana
-    this.value = value.replace('.', ',');
+    this.value = value.replace(".", ",");
   });
-  
+
   // Formatta correttamente quando l'utente esce dal campo
-  inputElement.addEventListener('blur', function(e) {
+  inputElement.addEventListener("blur", function (e) {
     let value = this.value;
-    
+
     // Campo vuoto o solo separatore
-    if (value === '' || value === ',' || value === '.') {
-      this.value = '';
+    if (value === "" || value === "," || value === ".") {
+      this.value = "";
       return;
     }
-    
+
     // Converti in numero
-    value = value.replace(',', '.');
+    value = value.replace(",", ".");
     const num = parseFloat(value);
-    
+
     if (!isNaN(num) && num >= 0) {
       // Formatta con esattamente 2 decimali e virgola
-      this.value = num.toFixed(2).replace('.', ',');
+      this.value = num.toFixed(2).replace(".", ",");
     } else {
-      this.value = '';
+      this.value = "";
     }
   });
-  
+
   // Previeni incolla di testo non valido
-  inputElement.addEventListener('paste', function(e) {
+  inputElement.addEventListener("paste", function (e) {
     e.preventDefault();
-    const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-    const cleaned = pastedText.replace(/[^\d.,]/g, '').replace(',', '.');
+    const pastedText = (e.clipboardData || window.clipboardData).getData(
+      "text"
+    );
+    const cleaned = pastedText.replace(/[^\d.,]/g, "").replace(",", ".");
     const num = parseFloat(cleaned);
-    
+
     if (!isNaN(num) && num >= 0) {
-      this.value = num.toFixed(2).replace('.', ',');
+      this.value = num.toFixed(2).replace(".", ",");
     }
   });
 }
@@ -1681,8 +1691,8 @@ function limitToTwoDecimals(inputElement) {
  * Gestisce sia punto che virgola
  */
 function parseDecimalInput(value) {
-  if (!value || value === '') return 0;
-  const cleaned = String(value).replace(',', '.');
+  if (!value || value === "") return 0;
+  const cleaned = String(value).replace(",", ".");
   const num = parseFloat(cleaned);
   return isNaN(num) ? 0 : num;
 }
@@ -1691,16 +1701,16 @@ function parseDecimalInput(value) {
  * Applica la limitazione decimale agli input quantità e prezzo
  */
 function setupDecimalInputs() {
-  const quantitaInput = document.getElementById('movimentoQuantita');
-  const prezzoInput = document.getElementById('movimentoPrezzo');
-  
+  const quantitaInput = document.getElementById("movimentoQuantita");
+  const prezzoInput = document.getElementById("movimentoPrezzo");
+
   if (quantitaInput) {
     // Rimuovi listener esistenti per evitare duplicati
     const newQuantitaInput = quantitaInput.cloneNode(true);
     quantitaInput.parentNode.replaceChild(newQuantitaInput, quantitaInput);
     limitToTwoDecimals(newQuantitaInput);
   }
-  
+
   if (prezzoInput) {
     // Rimuovi listener esistenti per evitare duplicati
     const newPrezzoInput = prezzoInput.cloneNode(true);
@@ -1735,13 +1745,13 @@ async function openMovimentoModal(movimento = null) {
 
   title.textContent = "Nuovo Movimento";
   document.getElementById("movimentoId").value = "";
-  
+
   if (!movimento) {
     document.getElementById("giacenzaInfo").style.display = "none";
   }
 
   togglePrezzoField();
-  
+
   // ⭐ APPLICA I CONTROLLI DECIMALI
   setTimeout(() => {
     setupDecimalInputs();
@@ -1764,7 +1774,7 @@ async function openMovimentoModal(movimento = null) {
 
   title.textContent = "Nuovo Movimento";
   document.getElementById("movimentoId").value = "";
-  
+
   if (!movimento) {
     document.getElementById("giacenzaInfo").style.display = "none";
   }
@@ -1775,7 +1785,7 @@ async function openMovimentoModal(movimento = null) {
   document.getElementById("prodottoSearchResults").classList.remove("show");
 
   togglePrezzoField();
-  
+
   setTimeout(() => {
     setupDecimalInputs();
     setupProductSearch(); // 🎯 NUOVA FUNZIONE
@@ -1800,7 +1810,7 @@ function setupProductSearch() {
   searchInput.classList.remove("has-selection");
 
   // Ricerca mentre digiti
-  searchInput.addEventListener("input", function(e) {
+  searchInput.addEventListener("input", function (e) {
     const searchTerm = e.target.value.toLowerCase().trim();
 
     // Se l'utente modifica dopo aver selezionato, resetta la selezione
@@ -1818,28 +1828,33 @@ function setupProductSearch() {
     }
 
     // Filtra i prodotti
-    const filtered = prodotti.filter(p => {
+    const filtered = prodotti.filter((p) => {
       const nome = p.nome.toLowerCase();
       const marca = (p.marca_nome || "").toLowerCase();
       const descrizione = (p.descrizione || "").toLowerCase();
-      
-      return nome.includes(searchTerm) || 
-             marca.includes(searchTerm) || 
-             descrizione.includes(searchTerm);
+
+      return (
+        nome.includes(searchTerm) ||
+        marca.includes(searchTerm) ||
+        descrizione.includes(searchTerm)
+      );
     });
 
     renderProductSearchResults(filtered, searchTerm);
   });
 
   // Chiudi risultati cliccando fuori
-  document.addEventListener("click", function(e) {
-    if (!searchInput.contains(e.target) && !resultsContainer.contains(e.target)) {
+  document.addEventListener("click", function (e) {
+    if (
+      !searchInput.contains(e.target) &&
+      !resultsContainer.contains(e.target)
+    ) {
       resultsContainer.classList.remove("show");
     }
   });
 
   // Focus apre i risultati se c'è testo
-  searchInput.addEventListener("focus", function() {
+  searchInput.addEventListener("focus", function () {
     if (this.value.trim().length > 0 && resultsContainer.children.length > 0) {
       resultsContainer.classList.add("show");
     }
@@ -1863,28 +1878,44 @@ function renderProductSearchResults(filtered, searchTerm) {
     return;
   }
 
-  resultsContainer.innerHTML = filtered.map(p => {
-    const marcaBadge = p.marca_nome 
-      ? `<span class="search-result-marca">${p.marca_nome.toUpperCase()}</span>` 
-      : '';
-    
-    const giacenzaBadge = `<span class="search-result-giacenza">${p.giacenza || 0} pz</span>`;
+  resultsContainer.innerHTML = filtered
+    .map((p) => {
+      const marcaBadge = p.marca_nome
+        ? `<span class="search-result-marca">${p.marca_nome.toUpperCase()}</span>`
+        : "";
 
-    return `
-      <div class="search-result-item" data-id="${p.id}" data-nome="${p.nome}" data-marca="${p.marca_nome || ''}" data-giacenza="${p.giacenza || 0}">
-        <div class="search-result-name">${highlightMatch(p.nome, searchTerm)}</div>
+      const giacenzaBadge = `<span class="search-result-giacenza">${
+        p.giacenza || 0
+      } pz</span>`;
+
+      return `
+      <div class="search-result-item" data-id="${p.id}" data-nome="${
+        p.nome
+      }" data-marca="${p.marca_nome || ""}" data-giacenza="${p.giacenza || 0}">
+        <div class="search-result-name">${highlightMatch(
+          p.nome,
+          searchTerm
+        )}</div>
         <div class="search-result-meta">
           ${marcaBadge}
           ${giacenzaBadge}
-          ${p.descrizione ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(0, 40)}${p.descrizione.length > 40 ? '...' : ''}</span>` : ''}
+          ${
+            p.descrizione
+              ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
+                  0,
+                  40
+                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
+              : ""
+          }
         </div>
       </div>
     `;
-  }).join("");
+    })
+    .join("");
 
   // Aggiungi event listener ai risultati
-  resultsContainer.querySelectorAll(".search-result-item").forEach(item => {
-    item.addEventListener("click", function() {
+  resultsContainer.querySelectorAll(".search-result-item").forEach((item) => {
+    item.addEventListener("click", function () {
       selectProduct(
         this.dataset.id,
         this.dataset.nome,
@@ -1899,9 +1930,12 @@ function renderProductSearchResults(filtered, searchTerm) {
 
 function highlightMatch(text, searchTerm) {
   if (!searchTerm) return text;
-  
-  const regex = new RegExp(`(${searchTerm})`, 'gi');
-  return text.replace(regex, '<mark style="background: #fef08a; padding: 2px 4px; border-radius: 3px; font-weight: 700;">$1</mark>');
+
+  const regex = new RegExp(`(${searchTerm})`, "gi");
+  return text.replace(
+    regex,
+    '<mark style="background: #fef08a; padding: 2px 4px; border-radius: 3px; font-weight: 700;">$1</mark>'
+  );
 }
 
 function selectProduct(id, nome, marca, giacenza) {
@@ -1930,16 +1964,16 @@ function togglePrezzoField() {
   const tipoElement = document.getElementById("movimentoTipo");
 
   if (!tipoElement) {
-    // L'elemento non è stato trovato (è null). 
+    // L'elemento non è stato trovato (è null).
     // Interrompi la funzione per evitare il crash.
     // Puoi anche aggiungere un console.error per debugging.
     console.error("Elemento 'movimentoTipo' non trovato.");
     return;
   }
-  
+
   // Usa il valore solo dopo aver verificato che l'elemento esiste
-  const tipo = tipoElement.value; 
-  
+  const tipo = tipoElement.value;
+
   const prezzoGroup = document.getElementById("prezzoGroup");
   const prezzoInput = document.getElementById("movimentoPrezzo");
   const fornitoreGroup = document.getElementById("fornitoreGroup");
@@ -1947,9 +1981,11 @@ function togglePrezzoField() {
   const fornitoreInput = document.getElementById("movimentoFornitore");
   const docOptional = document.getElementById("docOptional");
   const fornitoreOptional = document.getElementById("fornitoreOptional");
-  
+
   // Utilizzo di closest() per trovare l'antenato .form-group
-  const fatturaGroup = fatturaInput ? fatturaInput.closest(".form-group") : null; 
+  const fatturaGroup = fatturaInput
+    ? fatturaInput.closest(".form-group")
+    : null;
 
   // CHANGE: Gestione anche dell'opzione vuota (nessuna selezione)
   if (tipo === "carico") {
@@ -1965,8 +2001,8 @@ function togglePrezzoField() {
     // Per 'scarico' o valore vuoto, nascondi i campi
     if (prezzoGroup) prezzoGroup.style.display = "none";
     if (prezzoInput) {
-        prezzoInput.required = false;
-        prezzoInput.value = "";
+      prezzoInput.required = false;
+      prezzoInput.value = "";
     }
     if (fornitoreGroup) fornitoreGroup.style.display = "none";
     if (fatturaGroup) fatturaGroup.style.display = "none";
@@ -1986,16 +2022,18 @@ function searchProducts() {
   const searchTerm = searchInput.value.toLowerCase().trim();
 
   // 🎯 CORREZIONE: Se il termine di ricerca è vuoto, mostra TUTTI i prodotti.
-  const filteredProducts = allProdotti.filter(p => {
+  const filteredProducts = allProdotti.filter((p) => {
     if (!searchTerm) {
       // Se la ricerca è vuota, includi tutti i prodotti (pulisci il filtro)
-      return true; 
+      return true;
     }
-    
+
     // Logica di ricerca esistente (cerca in nome, marca, descrizione)
     const matchesNome = p.nome.toLowerCase().includes(searchTerm);
     const matchesMarca = p.marca.toLowerCase().includes(searchTerm);
-    const matchesDescrizione = p.descrizione ? p.descrizione.toLowerCase().includes(searchTerm) : false;
+    const matchesDescrizione = p.descrizione
+      ? p.descrizione.toLowerCase().includes(searchTerm)
+      : false;
 
     return matchesNome || matchesMarca || matchesDescrizione;
   });
@@ -2007,11 +2045,12 @@ function searchProducts() {
   }
 
   // Costruisci l'HTML per i risultati
-  resultsContainer.innerHTML = filteredProducts.map(p => {
-    const nomeHighlighted = highlightMatch(p.nome, searchTerm);
-    const marcaHighlighted = highlightMatch(p.marca, searchTerm);
+  resultsContainer.innerHTML = filteredProducts
+    .map((p) => {
+      const nomeHighlighted = highlightMatch(p.nome, searchTerm);
+      const marcaHighlighted = highlightMatch(p.marca, searchTerm);
 
-    return `
+      return `
       <div 
         class="search-result-item" 
         data-id="${p.id}" 
@@ -2027,15 +2066,23 @@ function searchProducts() {
           </div>
         </div>
         <div class="search-result-body">
-          ${p.descrizione ? `<span style="opacity: 0.7; font-size: 13px;">• ${p.descrizione.substring(0, 40)}${p.descrizione.length > 40 ? '...' : ''}</span>` : ''}
+          ${
+            p.descrizione
+              ? `<span style="opacity: 0.7; font-size: 13px;">• ${p.descrizione.substring(
+                  0,
+                  40
+                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
+              : ""
+          }
         </div>
       </div>
     `;
-  }).join("");
+    })
+    .join("");
 
   // Aggiungi event listener ai risultati
-  resultsContainer.querySelectorAll(".search-result-item").forEach(item => {
-    item.addEventListener("click", function() {
+  resultsContainer.querySelectorAll(".search-result-item").forEach((item) => {
+    item.addEventListener("click", function () {
       selectProduct(
         this.dataset.id,
         this.dataset.nome,
@@ -2052,35 +2099,39 @@ function togglePrezzoField() {
   const tipoElement = document.getElementById("movimentoTipo");
 
   if (!tipoElement) {
-      console.error("Elemento 'movimentoTipo' non trovato.");
-      return; 
+    console.error("Elemento 'movimentoTipo' non trovato.");
+    return;
   }
-  
-  const tipo = tipoElement.value; 
-  
-  const prezzoGroup = document.getElementById("prezzoGroup");       // 👈 Gruppo Prezzo Unitario
+
+  const tipo = tipoElement.value;
+
+  const prezzoGroup = document.getElementById("prezzoGroup"); // 👈 Gruppo Prezzo Unitario
   const prezzoInput = document.getElementById("movimentoPrezzo");
   const fornitoreGroup = document.getElementById("fornitoreGroup"); // 👈 Gruppo Fornitore
   const fatturaInput = document.getElementById("movimentoFattura");
   const fornitoreInput = document.getElementById("movimentoFornitore");
   const docOptional = document.getElementById("docOptional");
-  const fornitoreOptional = document.getElementById("movimentoFornitoreOptional");
-  
-  const fatturaGroup = fatturaInput ? fatturaInput.closest(".form-group") : null; // 👈 Gruppo Documento (Fattura)
+  const fornitoreOptional = document.getElementById(
+    "movimentoFornitoreOptional"
+  );
+
+  const fatturaGroup = fatturaInput
+    ? fatturaInput.closest(".form-group")
+    : null; // 👈 Gruppo Documento (Fattura)
 
   // =================================================================
   // LOGICA CARICO (tutti i campi visibili e richiesti)
   // =================================================================
   if (tipo === "carico") {
-    if (prezzoGroup) prezzoGroup.style.display = "block";       // ✅ MOSTRA Prezzo Unitario
+    if (prezzoGroup) prezzoGroup.style.display = "block"; // ✅ MOSTRA Prezzo Unitario
     if (prezzoInput) prezzoInput.required = true;
     if (fornitoreGroup) fornitoreGroup.style.display = "block"; // ✅ MOSTRA Fornitore
-    if (fatturaGroup) fatturaGroup.style.display = "block";     // ✅ MOSTRA Documento
+    if (fatturaGroup) fatturaGroup.style.display = "block"; // ✅ MOSTRA Documento
     if (fatturaInput) fatturaInput.required = true;
     if (fornitoreInput) fornitoreInput.required = true;
     if (docOptional) docOptional.textContent = "*";
     if (fornitoreOptional) fornitoreOptional.textContent = "*";
-  } 
+  }
   // =================================================================
   // LOGICA SCARICO (campi nascosti, non richiesti e resettati)
   // =================================================================
@@ -2088,8 +2139,8 @@ function togglePrezzoField() {
     // Per 'scarico' o valore vuoto, nascondi i campi
     if (prezzoGroup) prezzoGroup.style.display = "none";
     if (prezzoInput) {
-        prezzoInput.required = false;
-        prezzoInput.value = "";
+      prezzoInput.required = false;
+      prezzoInput.value = "";
     }
     if (fornitoreGroup) fornitoreGroup.style.display = "none";
     if (fatturaGroup) fatturaGroup.style.display = "none";
@@ -2100,4 +2151,491 @@ function togglePrezzoField() {
     if (docOptional) docOptional.textContent = "";
     if (fornitoreOptional) fornitoreOptional.textContent = "";
   }
+}
+function searchProducts() {
+  const searchInput = document.getElementById("movimentoProdottoSearch");
+  const resultsContainer = document.getElementById("prodottoSearchResults");
+  const searchTerm = searchInput.value.toLowerCase().trim();
+
+  // 🎯 LOGICA CHIAVE: Filtra i prodotti. Se la ricerca è vuota, include TUTTI i prodotti.
+  const filteredProducts = allProdotti.filter((p) => {
+    // Se la stringa di ricerca è vuota (searchTerm === ""),
+    // l'espressione !searchTerm è true e restituisce tutti gli elementi.
+    if (!searchTerm) {
+      return true;
+    }
+
+    // Logica di ricerca esistente (solo quando c'è un termine inserito)
+    const matchesNome = p.nome.toLowerCase().includes(searchTerm);
+    const matchesMarca = p.marca.toLowerCase().includes(searchTerm);
+    const matchesDescrizione = p.descrizione
+      ? p.descrizione.toLowerCase().includes(searchTerm)
+      : false;
+
+    return matchesNome || matchesMarca || matchesDescrizione;
+  });
+
+  // Se non ci sono prodotti filtrati (e non erano tutti i prodotti)
+  if (filteredProducts.length === 0) {
+    resultsContainer.innerHTML = `<div class="search-no-results">Nessun prodotto trovato.</div>`;
+    resultsContainer.classList.add("show");
+    return;
+  }
+
+  // Costruisci l'HTML per i risultati
+  resultsContainer.innerHTML = filteredProducts
+    .map((p) => {
+      // highlightMatch è una funzione di supporto che probabilmente hai già
+      const nomeHighlighted = highlightMatch(p.nome, searchTerm);
+      const marcaHighlighted = highlightMatch(p.marca, searchTerm);
+
+      return `
+      <div 
+        class="search-result-item" 
+        data-id="${p.id}" 
+        data-nome="${p.nome}" 
+        data-marca="${p.marca}" 
+        data-giacenza="${p.giacenza}"
+      >
+        <div class="search-result-header">
+          <div class="search-result-title">${nomeHighlighted}</div>
+          <div class="search-result-meta">
+            <span class="search-result-marca">${marcaHighlighted}</span>
+            <span class="search-result-giacenza">Giacenza: ${p.giacenza}</span>
+          </div>
+        </div>
+        <div class="search-result-body">
+          ${
+            p.descrizione
+              ? `<span style="opacity: 0.7; font-size: 13px;">• ${p.descrizione.substring(
+                  0,
+                  40
+                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
+              : ""
+          }
+        </div>
+      </div>
+    `;
+    })
+    .join("");
+
+  // Aggiungi event listener ai risultati
+  resultsContainer.querySelectorAll(".search-result-item").forEach((item) => {
+    item.addEventListener("click", function () {
+      selectProduct(
+        this.dataset.id,
+        this.dataset.nome,
+        this.dataset.marca,
+        this.dataset.giacenza
+      );
+    });
+  });
+
+  // Assicura che il contenitore dei risultati sia visibile
+  resultsContainer.classList.add("show");
+}
+
+function searchProducts() {
+  const searchInput = document.getElementById("movimentoProdottoSearch");
+  const resultsContainer = document.getElementById("prodottoSearchResults");
+  const searchTerm = searchInput.value.toLowerCase().trim();
+
+  // 🎯 Filtra i prodotti: se vuoto mostra TUTTI, altrimenti filtra
+  const filteredProducts = allProdotti.filter((p) => {
+    // Se non c'è testo di ricerca, mostra tutti i prodotti
+    if (!searchTerm) {
+      return true;
+    }
+
+    // Altrimenti filtra in base al termine di ricerca
+    const matchesNome = p.nome.toLowerCase().includes(searchTerm);
+    const matchesMarca = (p.marca_nome || "")
+      .toLowerCase()
+      .includes(searchTerm);
+    const matchesDescrizione = p.descrizione
+      ? p.descrizione.toLowerCase().includes(searchTerm)
+      : false;
+
+    return matchesNome || matchesMarca || matchesDescrizione;
+  });
+
+  // Se nessun prodotto trovato
+  if (filteredProducts.length === 0) {
+    resultsContainer.innerHTML = `
+      <div class="search-no-results">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 32px; height: 32px; margin: 0 auto 8px; opacity: 0.5;">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+        </svg>
+        Nessun prodotto trovato per "<strong>${searchTerm}</strong>"
+      </div>
+    `;
+    resultsContainer.classList.add("show");
+    return;
+  }
+
+  // Costruisci l'HTML per i risultati
+  resultsContainer.innerHTML = filteredProducts
+    .map((p) => {
+      const nomeHighlighted = highlightMatch(p.nome, searchTerm);
+      const marcaHighlighted = highlightMatch(p.marca_nome || "", searchTerm);
+
+      return `
+      <div 
+        class="search-result-item" 
+        data-id="${p.id}" 
+        data-nome="${p.nome}" 
+        data-marca="${p.marca_nome || ""}" 
+        data-giacenza="${p.giacenza || 0}"
+      >
+        <div class="search-result-name">${nomeHighlighted}</div>
+        <div class="search-result-meta">
+          ${
+            p.marca_nome
+              ? `<span class="search-result-marca">${marcaHighlighted}</span>`
+              : ""
+          }
+          <span class="search-result-giacenza">${p.giacenza || 0} pz</span>
+          ${
+            p.descrizione
+              ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
+                  0,
+                  40
+                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
+              : ""
+          }
+        </div>
+      </div>
+    `;
+    })
+    .join("");
+
+  // Aggiungi event listener ai risultati
+  resultsContainer.querySelectorAll(".search-result-item").forEach((item) => {
+    item.addEventListener("click", function () {
+      selectProduct(
+        this.dataset.id,
+        this.dataset.nome,
+        this.dataset.marca,
+        this.dataset.giacenza
+      );
+    });
+  });
+
+  resultsContainer.classList.add("show");
+}
+
+function searchProducts() {
+  const searchInput = document.getElementById("movimentoProdottoSearch");
+  const resultsContainer = document.getElementById("prodottoSearchResults");
+  const searchTerm = searchInput.value.toLowerCase().trim();
+
+  // 🎯 Filtra i prodotti: se vuoto mostra TUTTI, altrimenti filtra
+  const filteredProducts = allProdotti.filter((p) => {
+    // Se non c'è testo di ricerca, mostra tutti i prodotti
+    if (!searchTerm) {
+      return true;
+    }
+
+    // Altrimenti filtra in base al termine di ricerca
+    const matchesNome = p.nome.toLowerCase().includes(searchTerm);
+    const matchesMarca = (p.marca_nome || "")
+      .toLowerCase()
+      .includes(searchTerm);
+    const matchesDescrizione = p.descrizione
+      ? p.descrizione.toLowerCase().includes(searchTerm)
+      : false;
+
+    return matchesNome || matchesMarca || matchesDescrizione;
+  });
+
+  // Se nessun prodotto trovato
+  if (filteredProducts.length === 0) {
+    resultsContainer.innerHTML = `
+      <div class="search-no-results">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 32px; height: 32px; margin: 0 auto 8px; opacity: 0.5;">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+        </svg>
+        Nessun prodotto trovato per "<strong>${searchTerm}</strong>"
+      </div>
+    `;
+    resultsContainer.classList.add("show");
+    return;
+  }
+
+  // Costruisci l'HTML per i risultati
+  resultsContainer.innerHTML = filteredProducts
+    .map((p) => {
+      const nomeHighlighted = highlightMatch(p.nome, searchTerm);
+      const marcaHighlighted = highlightMatch(p.marca_nome || "", searchTerm);
+
+      return `
+      <div 
+        class="search-result-item" 
+        data-id="${p.id}" 
+        data-nome="${p.nome}" 
+        data-marca="${p.marca_nome || ""}" 
+        data-giacenza="${p.giacenza || 0}"
+      >
+        <div class="search-result-name">${nomeHighlighted}</div>
+        <div class="search-result-meta">
+          ${
+            p.marca_nome
+              ? `<span class="search-result-marca">${marcaHighlighted}</span>`
+              : ""
+          }
+          <span class="search-result-giacenza">${p.giacenza || 0} pz</span>
+          ${
+            p.descrizione
+              ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
+                  0,
+                  40
+                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
+              : ""
+          }
+        </div>
+      </div>
+    `;
+    })
+    .join("");
+
+  // Aggiungi event listener ai risultati
+  resultsContainer.querySelectorAll(".search-result-item").forEach((item) => {
+    item.addEventListener("click", function () {
+      selectProduct(
+        this.dataset.id,
+        this.dataset.nome,
+        this.dataset.marca,
+        this.dataset.giacenza
+      );
+    });
+  });
+
+  resultsContainer.classList.add("show");
+}
+
+function searchProducts() {
+  const searchInput = document.getElementById("movimentoProdottoSearch");
+  const resultsContainer = document.getElementById("prodottoSearchResults");
+
+  if (!searchInput || !resultsContainer) return;
+
+  const searchTerm = searchInput.value.toLowerCase().trim();
+
+  // 🎯 Filtra i prodotti: se vuoto mostra TUTTI, altrimenti filtra
+  const filteredProducts = allProdotti.filter((p) => {
+    // Se non c'è testo di ricerca, mostra tutti i prodotti
+    if (!searchTerm) {
+      return true;
+    }
+
+    // Altrimenti filtra in base al termine di ricerca
+    const matchesNome = p.nome.toLowerCase().includes(searchTerm);
+    const matchesMarca = (p.marca_nome || "")
+      .toLowerCase()
+      .includes(searchTerm);
+    const matchesDescrizione = p.descrizione
+      ? p.descrizione.toLowerCase().includes(searchTerm)
+      : false;
+
+    return matchesNome || matchesMarca || matchesDescrizione;
+  });
+
+  // Se nessun prodotto trovato (solo quando c'è una ricerca attiva)
+  if (filteredProducts.length === 0 && searchTerm) {
+    resultsContainer.innerHTML = `
+      <div class="search-no-results">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 32px; height: 32px; margin: 0 auto 8px; opacity: 0.5;">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+        </svg>
+        Nessun prodotto trovato per "<strong>${searchTerm}</strong>"
+      </div>
+    `;
+    resultsContainer.classList.add("show");
+    return;
+  }
+
+  // Se non ci sono prodotti in assoluto nel sistema
+  if (filteredProducts.length === 0 && !searchTerm) {
+    resultsContainer.innerHTML = `
+      <div class="search-no-results">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 32px; height: 32px; margin: 0 auto 8px; opacity: 0.5;">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+        </svg>
+        Nessun prodotto disponibile
+      </div>
+    `;
+    resultsContainer.classList.add("show");
+    return;
+  }
+
+  // Costruisci l'HTML per i risultati
+  resultsContainer.innerHTML = filteredProducts
+    .map((p) => {
+      const nomeHighlighted = highlightMatch(p.nome, searchTerm);
+      const marcaHighlighted = highlightMatch(p.marca_nome || "", searchTerm);
+
+      return `
+      <div 
+        class="search-result-item" 
+        data-id="${p.id}" 
+        data-nome="${p.nome}" 
+        data-marca="${p.marca_nome || ""}" 
+        data-giacenza="${p.giacenza || 0}"
+      >
+        <div class="search-result-name">${nomeHighlighted}</div>
+        <div class="search-result-meta">
+          ${
+            p.marca_nome
+              ? `<span class="search-result-marca">${marcaHighlighted}</span>`
+              : ""
+          }
+          <span class="search-result-giacenza">${p.giacenza || 0} pz</span>
+          ${
+            p.descrizione
+              ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
+                  0,
+                  40
+                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
+              : ""
+          }
+        </div>
+      </div>
+    `;
+    })
+    .join("");
+
+  // Aggiungi event listener ai risultati
+  resultsContainer.querySelectorAll(".search-result-item").forEach((item) => {
+    item.addEventListener("click", function () {
+      selectProduct(
+        this.dataset.id,
+        this.dataset.nome,
+        this.dataset.marca,
+        this.dataset.giacenza
+      );
+    });
+  });
+
+  resultsContainer.classList.add("show");
+}
+
+function searchProducts() {
+  const searchInput = document.getElementById("movimentoProdottoSearch");
+  const resultsContainer = document.getElementById("prodottoSearchResults");
+
+  if (!searchInput || !resultsContainer) {
+    console.error("Elementi search non trovati");
+    return;
+  }
+
+  const searchTerm = searchInput.value.toLowerCase().trim();
+
+  console.log("searchProducts chiamata - searchTerm:", searchTerm);
+  console.log("allProdotti disponibili:", allProdotti ? allProdotti.length : 0);
+
+  // Verifica che allProdotti sia definito e non vuoto
+  if (!allProdotti || allProdotti.length === 0) {
+    resultsContainer.innerHTML = `
+      <div class="search-no-results">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 32px; height: 32px; margin: 0 auto 8px; opacity: 0.5;">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+        </svg>
+        Nessun prodotto disponibile nel sistema
+      </div>
+    `;
+    resultsContainer.classList.add("show");
+    return;
+  }
+
+  // 🎯 Filtra i prodotti: se vuoto mostra TUTTI, altrimenti filtra
+  const filteredProducts = allProdotti.filter((p) => {
+    // Se non c'è testo di ricerca, mostra tutti i prodotti
+    if (!searchTerm || searchTerm === "") {
+      return true;
+    }
+
+    // Altrimenti filtra in base al termine di ricerca
+    const matchesNome = p.nome.toLowerCase().includes(searchTerm);
+    const matchesMarca = (p.marca_nome || "")
+      .toLowerCase()
+      .includes(searchTerm);
+    const matchesDescrizione = p.descrizione
+      ? p.descrizione.toLowerCase().includes(searchTerm)
+      : false;
+
+    return matchesNome || matchesMarca || matchesDescrizione;
+  });
+
+  console.log("Prodotti filtrati:", filteredProducts.length);
+
+  // Se nessun prodotto trovato dopo il filtro
+  if (filteredProducts.length === 0) {
+    resultsContainer.innerHTML = `
+      <div class="search-no-results">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 32px; height: 32px; margin: 0 auto 8px; opacity: 0.5;">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+        </svg>
+        Nessun prodotto trovato per "<strong>${searchTerm}</strong>"
+      </div>
+    `;
+    resultsContainer.classList.add("show");
+    return;
+  }
+
+  // Costruisci l'HTML per i risultati
+  resultsContainer.innerHTML = filteredProducts
+    .map((p) => {
+      const nomeHighlighted = highlightMatch(p.nome, searchTerm);
+      const marcaHighlighted = highlightMatch(p.marca_nome || "", searchTerm);
+
+      return `
+      <div 
+        class="search-result-item" 
+        data-id="${p.id}" 
+        data-nome="${p.nome}" 
+        data-marca="${p.marca_nome || ""}" 
+        data-giacenza="${p.giacenza || 0}"
+      >
+        <div class="search-result-name">${nomeHighlighted}</div>
+        <div class="search-result-meta">
+          ${
+            p.marca_nome
+              ? `<span class="search-result-marca">${marcaHighlighted}</span>`
+              : ""
+          }
+          <span class="search-result-giacenza">${p.giacenza || 0} pz</span>
+          ${
+            p.descrizione
+              ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
+                  0,
+                  40
+                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
+              : ""
+          }
+        </div>
+      </div>
+    `;
+    })
+    .join("");
+
+  // Aggiungi event listener ai risultati
+  resultsContainer.querySelectorAll(".search-result-item").forEach((item) => {
+    item.addEventListener("click", function () {
+      selectProduct(
+        this.dataset.id,
+        this.dataset.nome,
+        this.dataset.marca,
+        this.dataset.giacenza
+      );
+    });
+  });
+
+  resultsContainer.classList.add("show");
+  console.log("Dropdown mostrato con", filteredProducts.length, "prodotti");
 }
