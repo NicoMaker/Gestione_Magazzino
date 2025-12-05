@@ -2995,3 +2995,263 @@ function formatCurrency(num) {
   if (isNaN(n)) return "€ 0,00";
   return `€ ${formatNumber(n)}`;
 }
+
+// ==================== GESTIONE DECIMALI A 2 CIFRE ====================
+
+/**
+ * Determina il separatore decimale in base alle impostazioni locali
+ * @returns {string} ',' o '.'
+ */
+function getDecimalSeparator() {
+  const num = 1.1;
+  const formatted = num.toLocaleString(undefined, { minimumFractionDigits: 1 });
+  return formatted.includes(',') ? ',' : '.';
+}
+
+/**
+ * Converte stringa input in numero float
+ * Accetta sia virgola che punto come separatore decimale
+ * @param {string} value - Valore da convertire
+ * @returns {number} - Numero convertito o 0 se non valido
+ */
+function parseDecimalInput(value) {
+  if (!value || value === '') return 0;
+  // Converte virgola in punto per parseFloat
+  const cleaned = String(value).replace(',', '.');
+  const num = parseFloat(cleaned);
+  return isNaN(num) ? 0 : num;
+}
+
+/**
+ * Applica limitazione decimali a 2 cifre su un input
+ * Gestisce input in tempo reale e formattazione al blur
+ * @param {HTMLElement} inputElement - Elemento input da limitare
+ */
+function limitToTwoDecimals(inputElement) {
+  if (!inputElement) {
+    console.error('Input element non trovato per limitToTwoDecimals');
+    return;
+  }
+
+  const separator = getDecimalSeparator();
+
+  // ========== EVENTO INPUT (durante la digitazione) ==========
+  const handleInput = function(e) {
+    let value = this.value;
+    
+    // Rimuovi tutti i caratteri non validi (solo numeri, punto e virgola)
+    value = value.replace(/[^\d.,]/g, '');
+    
+    // Sostituisci virgola con punto per gestione interna
+    value = value.replace(',', '.');
+    
+    // Gestisci separatori multipli (mantieni solo il primo)
+    const parts = value.split('.');
+    if (parts.length > 2) {
+      value = parts[0] + '.' + parts.slice(1).join('');
+    }
+    
+    // Limita decimali a 2 cifre SENZA applicare toFixed
+    if (parts.length === 2 && parts[1].length > 2) {
+      parts[1] = parts[1].substring(0, 2);
+      value = parts.join('.');
+    }
+    
+    // Mostra con separatore locale
+    this.value = value.replace('.', separator);
+  };
+
+  // ========== EVENTO BLUR (quando si esce dal campo) ==========
+  const handleBlur = function(e) {
+    let value = this.value;
+    
+    // Se vuoto, imposta a 0.00
+    if (value === '' || value === separator) {
+      this.value = `0${separator}00`;
+      return;
+    }
+    
+    // Converte in numero
+    const num = parseDecimalInput(value);
+    
+    if (!isNaN(num)) {
+      // APPLICA toFixed(2) per forzare 2 decimali
+      this.value = num.toFixed(2).replace('.', separator);
+    } else {
+      this.value = `0${separator}00`;
+    }
+  };
+
+  // ========== EVENTO PASTE (incolla) ==========
+  const handlePaste = function(e) {
+    e.preventDefault();
+    const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+    const cleaned = pastedText.replace(/[^\d.,]/g, '').replace(',', '.');
+    const num = parseFloat(cleaned);
+    
+    if (!isNaN(num) && num >= 0) {
+      this.value = num.toFixed(2).replace('.', separator);
+    }
+  };
+
+  // ========== EVENTO KEYDOWN (previeni caratteri non validi) ==========
+  const handleKeydown = function(e) {
+    const separator = getDecimalSeparator();
+    const allowedKeys = [
+      'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
+      'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+      'Home', 'End'
+    ];
+    
+    // Permetti tasti di controllo
+    if (allowedKeys.includes(e.key) || 
+        (e.ctrlKey || e.metaKey) || // Ctrl/Cmd per copia/incolla
+        e.key === 'a' || e.key === 'A') {
+      return;
+    }
+    
+    // Permetti numeri
+    if (/^\d$/.test(e.key)) {
+      return;
+    }
+    
+    // Permetti separatore decimale (solo uno)
+    if ((e.key === separator || e.key === '.' || e.key === ',') && 
+        !this.value.includes(separator)) {
+      return;
+    }
+    
+    // Blocca tutto il resto
+    e.preventDefault();
+  };
+
+  // Rimuovi listener esistenti (clonando e sostituendo l'elemento)
+  const newInput = inputElement.cloneNode(true);
+  inputElement.parentNode.replaceChild(newInput, inputElement);
+  
+  // Aggiungi i nuovi listener
+  newInput.addEventListener('input', handleInput);
+  newInput.addEventListener('blur', handleBlur);
+  newInput.addEventListener('paste', handlePaste);
+  newInput.addEventListener('keydown', handleKeydown);
+  
+  return newInput;
+}
+
+/**
+ * Applica limitazione decimali agli input Quantità e Prezzo
+ * Chiamare questa funzione all'apertura del modal Movimento
+ */
+function setupDecimalInputs() {
+  console.log('🔧 Setup decimal inputs chiamato');
+  
+  const quantitaInput = document.getElementById('movimentoQuantita');
+  const prezzoInput = document.getElementById('movimentoPrezzo');
+  
+  if (quantitaInput) {
+    console.log('✅ Applicando limitazione decimali a Quantità');
+    limitToTwoDecimals(quantitaInput);
+  } else {
+    console.error('❌ Input movimentoQuantita non trovato');
+  }
+  
+  if (prezzoInput) {
+    console.log('✅ Applicando limitazione decimali a Prezzo');
+    limitToTwoDecimals(prezzoInput);
+  } else {
+    console.error('❌ Input movimentoPrezzo non trovato');
+  }
+}
+
+/**
+ * Formatta numero con separatore locale e 2 decimali
+ * @param {number} num - Numero da formattare
+ * @returns {string} - Numero formattato (es. "1.234,56")
+ */
+function formatNumber(num) {
+  const n = parseFloat(num);
+  if (isNaN(n)) return '0,00';
+  
+  const separator = getDecimalSeparator();
+  // toFixed(2) garantisce sempre 2 decimali
+  const parts = n.toFixed(2).split('.');
+  
+  // Aggiungi punto ogni 3 cifre nella parte intera
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  
+  // Unisci con separatore locale
+  return separator === ',' ? parts.join(',') : parts.join('.');
+}
+
+/**
+ * Formatta numero come valuta con simbolo €
+ * @param {number} num - Numero da formattare
+ * @returns {string} - Valuta formattata (es. "€ 1.234,56")
+ */
+function formatCurrency(num) {
+  const n = parseFloat(num);
+  if (isNaN(n)) return '€ 0,00';
+  return `€ ${formatNumber(n)}`;
+}
+
+// ==================== MODIFICA FUNZIONE openMovimentoModal ====================
+
+/**
+ * Apre il modal per inserire un nuovo movimento
+ * IMPORTANTE: Chiama setupDecimalInputs() dopo un breve timeout
+ */
+async function openMovimentoModal(movimento = null) {
+  console.log('📂 Apertura modal movimento...');
+  
+  // Carica prodotti se necessario
+  if (prodotti.length === 0) {
+    const res = await fetch(`${API_URL}/prodotti`);
+    prodotti = await res.json();
+  }
+
+  const modal = document.getElementById('modalMovimento');
+  const title = document.getElementById('modalMovimentoTitle');
+  const form = document.getElementById('formMovimento');
+
+  form.reset();
+  title.textContent = 'Nuovo Movimento';
+  document.getElementById('movimentoId').value = '';
+  
+  if (!movimento) {
+    document.getElementById('giacenzaInfo').style.display = 'none';
+  }
+
+  // Resetta ricerca prodotto
+  const searchInput = document.getElementById('movimentoProdottoSearch');
+  const hiddenInput = document.getElementById('movimentoProdotto');
+  const resultsContainer = document.getElementById('prodottoSearchResults');
+  
+  if (searchInput) searchInput.value = '';
+  if (hiddenInput) hiddenInput.value = '';
+  if (resultsContainer) resultsContainer.classList.remove('show');
+
+  // Resetta campi prezzo/fornitore
+  togglePrezzoField();
+
+  // Mostra modal
+  modal.classList.add('active');
+
+  // ⭐ IMPORTANTE: Applica setup decimali dopo breve timeout
+  setTimeout(() => {
+    console.log('⏱️ Timeout scaduto, applico setup decimali...');
+    setupDecimalInputs();
+    setupProductSearch();
+  }, 150); // 150ms di attesa per assicurarsi che il DOM sia pronto
+}
+
+// ==================== ESPORTA FUNZIONI (se usi moduli) ====================
+// Se usi ES6 modules, decommenta:
+// export { 
+//   getDecimalSeparator, 
+//   parseDecimalInput, 
+//   limitToTwoDecimals, 
+//   setupDecimalInputs,
+//   formatNumber,
+//   formatCurrency,
+//   openMovimentoModal
+// };
