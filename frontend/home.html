@@ -678,26 +678,29 @@
         <form id="formMovimento">
           <input type="hidden" id="movimentoId" />
           <div class="modal-body">
-            <div class="form-row">
-              <div class="form-group">
-                <label for="movimentoProdotto">Prodotto *</label>
-                <select id="movimentoProdotto" required>
-                  <option value="">Seleziona prodotto...</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="movimentoTipo">Tipo *</label>
-                <select
-                  id="movimentoTipo"
-                  required
-                  onchange="togglePrezzoField()"
-                >
-                  <option value="">Seleziona tipo...</option>
-                  <option value="carico">Carico</option>
-                  <option value="scarico">Scarico</option>
-                </select>
-              </div>
-            </div>
+<div class="form-group">
+  <label for="movimentoProdotto">Prodotto *</label>
+  <div class="search-select-wrapper">
+    <input
+      type="text"
+      id="movimentoProdottoSearch"
+      class="search-select-input"
+      placeholder="Cerca prodotto per nome o marca..."
+      autocomplete="off"
+      required
+    />
+    <input type="hidden" id="movimentoProdotto" required />
+    <div id="prodottoSearchResults" class="search-results"></div>
+  </div>
+  <div class="form-group">
+  <label for="movimentoTipo">Tipo Movimento</label>
+  <select id="movimentoTipo" class="form-input" required>
+    <option value="">Seleziona...</option>
+    <option value="carico">Carico</option>
+    <option value="scarico">Scarico</option>
+  </select>
+</div>
+</div>
 
             <!-- <div class="form-group" id="giacenzaInfo"
                  style="display: none; background: #f0f9ff; padding: 12px; border-radius: 8px; border: 1px solid #0ea5e9;">

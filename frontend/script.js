@@ -89,7 +89,17 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.removeItem("activeSection");
     window.location.href = "index.html";
   });
-});
+
+// =======================================================
+    // 🎯 NUOVO LISTENER PER CAMBIO CARICO/SCARICO
+    // =======================================================
+    const movimentoTipoSelect = document.getElementById("movimentoTipo");
+    
+    if (movimentoTipoSelect) {
+        // Quando il valore del campo 'movimentoTipo' cambia,
+        // esegui la funzione per mostrare/nascondere i campi.
+        movimentoTipoSelect.addEventListener("change", togglePrezzoField);
+    }});
 
 // ==================== MARCHE ====================
 async function loadMarche() {
@@ -1738,4 +1748,356 @@ async function openMovimentoModal(movimento = null) {
   }, 100);
 
   modal.classList.add("active");
+}
+
+async function openMovimentoModal(movimento = null) {
+  if (prodotti.length === 0) {
+    const res = await fetch(`${API_URL}/prodotti`);
+    prodotti = await res.json();
+  }
+
+  const modal = document.getElementById("modalMovimento");
+  const title = document.getElementById("modalMovimentoTitle");
+  const form = document.getElementById("formMovimento");
+
+  form.reset();
+
+  title.textContent = "Nuovo Movimento";
+  document.getElementById("movimentoId").value = "";
+  
+  if (!movimento) {
+    document.getElementById("giacenzaInfo").style.display = "none";
+  }
+
+  // Reset search input
+  document.getElementById("movimentoProdottoSearch").value = "";
+  document.getElementById("movimentoProdotto").value = "";
+  document.getElementById("prodottoSearchResults").classList.remove("show");
+
+  togglePrezzoField();
+  
+  setTimeout(() => {
+    setupDecimalInputs();
+    setupProductSearch(); // 🎯 NUOVA FUNZIONE
+  }, 100);
+
+  modal.classList.add("active");
+}
+
+// ==================== RICERCA PRODOTTI NEL MOVIMENTO ====================
+
+let selectedProdottoId = null;
+
+function setupProductSearch() {
+  const searchInput = document.getElementById("movimentoProdottoSearch");
+  const hiddenInput = document.getElementById("movimentoProdotto");
+  const resultsContainer = document.getElementById("prodottoSearchResults");
+
+  if (!searchInput || !resultsContainer) return;
+
+  // Reset selezione
+  selectedProdottoId = null;
+  searchInput.classList.remove("has-selection");
+
+  // Ricerca mentre digiti
+  searchInput.addEventListener("input", function(e) {
+    const searchTerm = e.target.value.toLowerCase().trim();
+
+    // Se l'utente modifica dopo aver selezionato, resetta la selezione
+    if (selectedProdottoId !== null) {
+      selectedProdottoId = null;
+      hiddenInput.value = "";
+      searchInput.classList.remove("has-selection");
+      document.getElementById("giacenzaInfo").style.display = "none";
+    }
+
+    if (searchTerm.length === 0) {
+      resultsContainer.classList.remove("show");
+      resultsContainer.innerHTML = "";
+      return;
+    }
+
+    // Filtra i prodotti
+    const filtered = prodotti.filter(p => {
+      const nome = p.nome.toLowerCase();
+      const marca = (p.marca_nome || "").toLowerCase();
+      const descrizione = (p.descrizione || "").toLowerCase();
+      
+      return nome.includes(searchTerm) || 
+             marca.includes(searchTerm) || 
+             descrizione.includes(searchTerm);
+    });
+
+    renderProductSearchResults(filtered, searchTerm);
+  });
+
+  // Chiudi risultati cliccando fuori
+  document.addEventListener("click", function(e) {
+    if (!searchInput.contains(e.target) && !resultsContainer.contains(e.target)) {
+      resultsContainer.classList.remove("show");
+    }
+  });
+
+  // Focus apre i risultati se c'è testo
+  searchInput.addEventListener("focus", function() {
+    if (this.value.trim().length > 0 && resultsContainer.children.length > 0) {
+      resultsContainer.classList.add("show");
+    }
+  });
+}
+
+function renderProductSearchResults(filtered, searchTerm) {
+  const resultsContainer = document.getElementById("prodottoSearchResults");
+
+  if (filtered.length === 0) {
+    resultsContainer.innerHTML = `
+      <div class="search-no-results">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 32px; height: 32px; margin: 0 auto 8px; opacity: 0.5;">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+        </svg>
+        Nessun prodotto trovato per "<strong>${searchTerm}</strong>"
+      </div>
+    `;
+    resultsContainer.classList.add("show");
+    return;
+  }
+
+  resultsContainer.innerHTML = filtered.map(p => {
+    const marcaBadge = p.marca_nome 
+      ? `<span class="search-result-marca">${p.marca_nome.toUpperCase()}</span>` 
+      : '';
+    
+    const giacenzaBadge = `<span class="search-result-giacenza">${p.giacenza || 0} pz</span>`;
+
+    return `
+      <div class="search-result-item" data-id="${p.id}" data-nome="${p.nome}" data-marca="${p.marca_nome || ''}" data-giacenza="${p.giacenza || 0}">
+        <div class="search-result-name">${highlightMatch(p.nome, searchTerm)}</div>
+        <div class="search-result-meta">
+          ${marcaBadge}
+          ${giacenzaBadge}
+          ${p.descrizione ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(0, 40)}${p.descrizione.length > 40 ? '...' : ''}</span>` : ''}
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  // Aggiungi event listener ai risultati
+  resultsContainer.querySelectorAll(".search-result-item").forEach(item => {
+    item.addEventListener("click", function() {
+      selectProduct(
+        this.dataset.id,
+        this.dataset.nome,
+        this.dataset.marca,
+        this.dataset.giacenza
+      );
+    });
+  });
+
+  resultsContainer.classList.add("show");
+}
+
+function highlightMatch(text, searchTerm) {
+  if (!searchTerm) return text;
+  
+  const regex = new RegExp(`(${searchTerm})`, 'gi');
+  return text.replace(regex, '<mark style="background: #fef08a; padding: 2px 4px; border-radius: 3px; font-weight: 700;">$1</mark>');
+}
+
+function selectProduct(id, nome, marca, giacenza) {
+  const searchInput = document.getElementById("movimentoProdottoSearch");
+  const hiddenInput = document.getElementById("movimentoProdotto");
+  const resultsContainer = document.getElementById("prodottoSearchResults");
+
+  selectedProdottoId = id;
+  hiddenInput.value = id;
+
+  // Mostra il nome selezionato nell'input
+  const displayText = marca ? `${nome} (${marca.toUpperCase()})` : nome;
+  searchInput.value = displayText;
+  searchInput.classList.add("has-selection");
+
+  // Chiudi risultati
+  resultsContainer.classList.remove("show");
+
+  // Mostra giacenza
+  showGiacenzaInfo(id);
+}
+
+// script.js (Intorno a riga 485)
+function togglePrezzoField() {
+  // 🎯 CORREZIONE: Controlla se l'elemento esiste prima di usarlo
+  const tipoElement = document.getElementById("movimentoTipo");
+
+  if (!tipoElement) {
+    // L'elemento non è stato trovato (è null). 
+    // Interrompi la funzione per evitare il crash.
+    // Puoi anche aggiungere un console.error per debugging.
+    console.error("Elemento 'movimentoTipo' non trovato.");
+    return;
+  }
+  
+  // Usa il valore solo dopo aver verificato che l'elemento esiste
+  const tipo = tipoElement.value; 
+  
+  const prezzoGroup = document.getElementById("prezzoGroup");
+  const prezzoInput = document.getElementById("movimentoPrezzo");
+  const fornitoreGroup = document.getElementById("fornitoreGroup");
+  const fatturaInput = document.getElementById("movimentoFattura");
+  const fornitoreInput = document.getElementById("movimentoFornitore");
+  const docOptional = document.getElementById("docOptional");
+  const fornitoreOptional = document.getElementById("fornitoreOptional");
+  
+  // Utilizzo di closest() per trovare l'antenato .form-group
+  const fatturaGroup = fatturaInput ? fatturaInput.closest(".form-group") : null; 
+
+  // CHANGE: Gestione anche dell'opzione vuota (nessuna selezione)
+  if (tipo === "carico") {
+    if (prezzoGroup) prezzoGroup.style.display = "block";
+    if (prezzoInput) prezzoInput.required = true;
+    if (fornitoreGroup) fornitoreGroup.style.display = "block";
+    if (fatturaGroup) fatturaGroup.style.display = "block";
+    if (fatturaInput) fatturaInput.required = true;
+    if (fornitoreInput) fornitoreInput.required = true;
+    if (docOptional) docOptional.textContent = "*";
+    if (fornitoreOptional) fornitoreOptional.textContent = "*";
+  } else {
+    // Per 'scarico' o valore vuoto, nascondi i campi
+    if (prezzoGroup) prezzoGroup.style.display = "none";
+    if (prezzoInput) {
+        prezzoInput.required = false;
+        prezzoInput.value = "";
+    }
+    if (fornitoreGroup) fornitoreGroup.style.display = "none";
+    if (fatturaGroup) fatturaGroup.style.display = "none";
+    if (fornitoreInput) fornitoreInput.value = "";
+    if (fatturaInput) fatturaInput.value = "";
+    if (fatturaInput) fatturaInput.required = false;
+    if (fornitoreInput) fornitoreInput.required = false;
+    if (docOptional) docOptional.textContent = "";
+    if (fornitoreOptional) fornitoreOptional.textContent = "";
+  }
+}
+
+// script.js (Intorno a riga 1120, o dove si trova la tua funzione searchProducts)
+function searchProducts() {
+  const searchInput = document.getElementById("movimentoProdottoSearch");
+  const resultsContainer = document.getElementById("prodottoSearchResults");
+  const searchTerm = searchInput.value.toLowerCase().trim();
+
+  // 🎯 CORREZIONE: Se il termine di ricerca è vuoto, mostra TUTTI i prodotti.
+  const filteredProducts = allProdotti.filter(p => {
+    if (!searchTerm) {
+      // Se la ricerca è vuota, includi tutti i prodotti (pulisci il filtro)
+      return true; 
+    }
+    
+    // Logica di ricerca esistente (cerca in nome, marca, descrizione)
+    const matchesNome = p.nome.toLowerCase().includes(searchTerm);
+    const matchesMarca = p.marca.toLowerCase().includes(searchTerm);
+    const matchesDescrizione = p.descrizione ? p.descrizione.toLowerCase().includes(searchTerm) : false;
+
+    return matchesNome || matchesMarca || matchesDescrizione;
+  });
+
+  if (filteredProducts.length === 0) {
+    resultsContainer.innerHTML = `<div class="search-no-results">Nessun prodotto trovato.</div>`;
+    resultsContainer.classList.add("show");
+    return;
+  }
+
+  // Costruisci l'HTML per i risultati
+  resultsContainer.innerHTML = filteredProducts.map(p => {
+    const nomeHighlighted = highlightMatch(p.nome, searchTerm);
+    const marcaHighlighted = highlightMatch(p.marca, searchTerm);
+
+    return `
+      <div 
+        class="search-result-item" 
+        data-id="${p.id}" 
+        data-nome="${p.nome}" 
+        data-marca="${p.marca}" 
+        data-giacenza="${p.giacenza}"
+      >
+        <div class="search-result-header">
+          <div class="search-result-title">${nomeHighlighted}</div>
+          <div class="search-result-meta">
+            <span class="search-result-marca">${marcaHighlighted}</span>
+            <span class="search-result-giacenza">Giacenza: ${p.giacenza}</span>
+          </div>
+        </div>
+        <div class="search-result-body">
+          ${p.descrizione ? `<span style="opacity: 0.7; font-size: 13px;">• ${p.descrizione.substring(0, 40)}${p.descrizione.length > 40 ? '...' : ''}</span>` : ''}
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  // Aggiungi event listener ai risultati
+  resultsContainer.querySelectorAll(".search-result-item").forEach(item => {
+    item.addEventListener("click", function() {
+      selectProduct(
+        this.dataset.id,
+        this.dataset.nome,
+        this.dataset.marca,
+        this.dataset.giacenza
+      );
+    });
+  });
+
+  resultsContainer.classList.add("show");
+}
+
+function togglePrezzoField() {
+  const tipoElement = document.getElementById("movimentoTipo");
+
+  if (!tipoElement) {
+      console.error("Elemento 'movimentoTipo' non trovato.");
+      return; 
+  }
+  
+  const tipo = tipoElement.value; 
+  
+  const prezzoGroup = document.getElementById("prezzoGroup");       // 👈 Gruppo Prezzo Unitario
+  const prezzoInput = document.getElementById("movimentoPrezzo");
+  const fornitoreGroup = document.getElementById("fornitoreGroup"); // 👈 Gruppo Fornitore
+  const fatturaInput = document.getElementById("movimentoFattura");
+  const fornitoreInput = document.getElementById("movimentoFornitore");
+  const docOptional = document.getElementById("docOptional");
+  const fornitoreOptional = document.getElementById("movimentoFornitoreOptional");
+  
+  const fatturaGroup = fatturaInput ? fatturaInput.closest(".form-group") : null; // 👈 Gruppo Documento (Fattura)
+
+  // =================================================================
+  // LOGICA CARICO (tutti i campi visibili e richiesti)
+  // =================================================================
+  if (tipo === "carico") {
+    if (prezzoGroup) prezzoGroup.style.display = "block";       // ✅ MOSTRA Prezzo Unitario
+    if (prezzoInput) prezzoInput.required = true;
+    if (fornitoreGroup) fornitoreGroup.style.display = "block"; // ✅ MOSTRA Fornitore
+    if (fatturaGroup) fatturaGroup.style.display = "block";     // ✅ MOSTRA Documento
+    if (fatturaInput) fatturaInput.required = true;
+    if (fornitoreInput) fornitoreInput.required = true;
+    if (docOptional) docOptional.textContent = "*";
+    if (fornitoreOptional) fornitoreOptional.textContent = "*";
+  } 
+  // =================================================================
+  // LOGICA SCARICO (campi nascosti, non richiesti e resettati)
+  // =================================================================
+  else {
+    // Per 'scarico' o valore vuoto, nascondi i campi
+    if (prezzoGroup) prezzoGroup.style.display = "none";
+    if (prezzoInput) {
+        prezzoInput.required = false;
+        prezzoInput.value = "";
+    }
+    if (fornitoreGroup) fornitoreGroup.style.display = "none";
+    if (fatturaGroup) fatturaGroup.style.display = "none";
+    if (fornitoreInput) fornitoreInput.value = "";
+    if (fatturaInput) fatturaInput.value = "";
+    if (fatturaInput) fatturaInput.required = false;
+    if (fornitoreInput) fornitoreInput.required = false;
+    if (docOptional) docOptional.textContent = "";
+    if (fornitoreOptional) fornitoreOptional.textContent = "";
+  }
 }
