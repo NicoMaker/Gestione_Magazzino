@@ -475,44 +475,66 @@
   </div>
 
   <!-- Modal Prodotto -->
-  <div id="modalProdotto" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 id="modalProdottoTitle">Nuovo Prodotto</h2>
-        <button class="modal-close" onclick="closeProdottoModal()" aria-label="Chiudi">
-          &times;
+<!-- Modal Prodotto con Ricerca Marca -->
+<div id="modalProdotto" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modalProdottoTitle">Nuovo Prodotto</h2>
+      <button class="modal-close" onclick="closeProdottoModal()" aria-label="Chiudi">
+        &times;
+      </button>
+    </div>
+    <form id="formProdotto">
+      <input type="hidden" id="prodottoId" />
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="prodottoNome">Nome Prodotto *</label>
+          <input 
+            type="text" 
+            id="prodottoNome" 
+            required 
+            placeholder="es. Olio motore, Filtro aria, Candele..." 
+          />
+        </div>
+        
+        <!-- 🎯 NUOVO CAMPO DI RICERCA MARCA -->
+        <div class="form-group">
+          <label for="prodottoMarcaSearch">Marca *</label>
+          <div class="search-select-wrapper">
+            <input 
+              type="text" 
+              id="prodottoMarcaSearch" 
+              class="form-input"
+              placeholder="Cerca Marca (Nome)" 
+              oninput="searchMarche()"
+              onfocus="searchMarche()" 
+              autocomplete="off" 
+            />
+            <input type="hidden" id="prodottoMarca" required />
+            <div id="marcaSearchResults" class="search-results"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="prodottoDescrizione">Descrizione</label>
+          <textarea 
+            id="prodottoDescrizione" 
+            rows="3"
+            placeholder="Inserisci una descrizione dettagliata del prodotto..."
+          ></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeProdottoModal()">
+          <span>Annulla</span>
+        </button>
+        <button type="submit" class="btn btn-primary">
+          <span>Salva</span>
         </button>
       </div>
-      <form id="formProdotto">
-        <input type="hidden" id="prodottoId" />
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="prodottoNome">Nome Prodotto *</label>
-            <input type="text" id="prodottoNome" required placeholder="es. Olio motore, Filtro aria, Candele..." />
-          </div>
-          <div class="form-group">
-            <label for="prodottoMarca">Marca *</label>
-            <select id="prodottoMarca" required>
-              <option value="">Seleziona marca...</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="prodottoDescrizione">Descrizione</label>
-            <textarea id="prodottoDescrizione" rows="3"
-              placeholder="Inserisci una descrizione dettagliata del prodotto..."></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeProdottoModal()">
-            <span>Annulla</span>
-          </button>
-          <button type="submit" class="btn btn-primary">
-            <span>Salva</span>
-          </button>
-        </div>
-      </form>
-    </div>
+    </form>
   </div>
+</div>
 
   <!-- Modal Movimento -->
   <div id="modalMovimento" class="modal">

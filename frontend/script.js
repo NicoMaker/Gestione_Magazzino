@@ -3269,3 +3269,333 @@ async function openMovimentoModal(movimento = null) {
 //   formatCurrency,
 //   openMovimentoModal
 // };
+
+// ==================== RICERCA MARCHE NEL MODAL PRODOTTO ====================
+// 🎯 GRAFICA IDENTICA ALLA RICERCA PRODOTTI NEI MOVIMENTI
+
+let selectedMarcaId = null;
+
+/**
+ * Setup della ricerca marche nel modal prodotto
+ * Chiamare questa funzione all'apertura del modal
+ */
+function setupMarcaSearch() {
+  const searchInput = document.getElementById("prodottoMarcaSearch");
+  const hiddenInput = document.getElementById("prodottoMarca");
+  const resultsContainer = document.getElementById("marcaSearchResults");
+
+  if (!searchInput || !resultsContainer) {
+    console.error("❌ Elementi ricerca marca non trovati");
+    return;
+  }
+
+  console.log("✅ Setup ricerca marca inizializzato");
+
+  // Reset selezione
+  selectedMarcaId = null;
+  searchInput.classList.remove("has-selection");
+
+  // Chiudi risultati cliccando fuori
+  document.addEventListener("click", function (e) {
+    if (
+      !searchInput.contains(e.target) &&
+      !resultsContainer.contains(e.target)
+    ) {
+      resultsContainer.classList.remove("show");
+    }
+  });
+
+  // Focus apre i risultati
+  searchInput.addEventListener("focus", function () {
+    if (this.value.trim().length > 0 && resultsContainer.children.length > 0) {
+      resultsContainer.classList.add("show");
+    }
+  });
+}
+
+/**
+ * Funzione di ricerca marche (chiamata dall'evento oninput/onfocus)
+ * 🎯 IDENTICA ALLA LOGICA DI searchProducts()
+ */
+function searchMarche() {
+  const searchInput = document.getElementById("prodottoMarcaSearch");
+  const resultsContainer = document.getElementById("marcaSearchResults");
+  const hiddenInput = document.getElementById("prodottoMarca");
+
+  if (!searchInput || !resultsContainer) {
+    console.error("❌ Elementi search non trovati");
+    return;
+  }
+
+  const searchTerm = searchInput.value.toLowerCase().trim();
+
+  console.log("🔍 searchMarche chiamata - searchTerm:", searchTerm);
+  console.log("📦 allMarche disponibili:", allMarche ? allMarche.length : 0);
+
+  // Se l'utente modifica dopo aver selezionato, resetta la selezione
+  if (selectedMarcaId !== null && searchInput.classList.contains("has-selection")) {
+    const currentMarca = allMarche.find(m => m.id == selectedMarcaId);
+    if (currentMarca && searchInput.value !== currentMarca.nome.toUpperCase()) {
+      selectedMarcaId = null;
+      hiddenInput.value = "";
+      searchInput.classList.remove("has-selection");
+      console.log("🔄 Selezione resettata");
+    }
+  }
+
+  // Verifica che allMarche sia definito e non vuoto
+  if (!allMarche || allMarche.length === 0) {
+    resultsContainer.innerHTML = `
+      <div class="search-no-results">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+        </svg>
+        Nessuna marca disponibile nel sistema
+      </div>
+    `;
+    resultsContainer.classList.add("show");
+    return;
+  }
+
+  // 🎯 Filtra le marche: se vuoto mostra TUTTE, altrimenti filtra
+  const filteredMarche = allMarche.filter((m) => {
+    // Se non c'è testo di ricerca, mostra tutte le marche
+    if (!searchTerm || searchTerm === "") {
+      return true;
+    }
+
+    // Altrimenti filtra in base al termine di ricerca
+    const matchesNome = m.nome.toLowerCase().includes(searchTerm);
+    return matchesNome;
+  });
+
+  console.log("📋 Marche filtrate:", filteredMarche.length);
+
+  // Se nessuna marca trovata dopo il filtro
+  if (filteredMarche.length === 0 && searchTerm) {
+    resultsContainer.innerHTML = `
+      <div class="search-no-results">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+        </svg>
+        Nessuna marca trovata per "<strong>${searchTerm}</strong>"
+      </div>
+    `;
+    resultsContainer.classList.add("show");
+    return;
+  }
+
+  // Costruisci l'HTML per i risultati (🎯 IDENTICO AI PRODOTTI)
+  resultsContainer.innerHTML = filteredMarche
+    .map((m) => {
+      const nomeHighlighted = highlightMatch(m.nome, searchTerm);
+
+      return `
+      <div 
+        class="search-result-item marca-result-item" 
+        data-id="${m.id}" 
+        data-nome="${m.nome}"
+      >
+        <div class="search-result-name">${nomeHighlighted}</div>
+      </div>
+    `;
+    })
+    .join("");
+
+  // Aggiungi event listener ai risultati
+  resultsContainer.querySelectorAll(".marca-result-item").forEach((item) => {
+    item.addEventListener("click", function () {
+      selectMarca(this.dataset.id, this.dataset.nome);
+    });
+  });
+
+  resultsContainer.classList.add("show");
+  console.log("✅ Dropdown mostrato con", filteredMarche.length, "marche");
+}
+
+/**
+ * Seleziona una marca dalla lista dei risultati
+ * 🎯 IDENTICA ALLA LOGICA DI selectProduct()
+ */
+function selectMarca(id, nome) {
+  const searchInput = document.getElementById("prodottoMarcaSearch");
+  const hiddenInput = document.getElementById("prodottoMarca");
+  const resultsContainer = document.getElementById("marcaSearchResults");
+
+  selectedMarcaId = id;
+  hiddenInput.value = id;
+
+  // Mostra il nome selezionato nell'input
+  searchInput.value = nome.toUpperCase();
+  searchInput.classList.add("has-selection");
+
+  // Chiudi risultati
+  resultsContainer.classList.remove("show");
+
+  console.log("✅ Marca selezionata:", { id, nome });
+}
+
+/**
+ * Funzione di evidenziazione del testo cercato
+ * 🎯 IDENTICA A highlightMatch() usata per i prodotti
+ */
+function highlightMatch(text, searchTerm) {
+  if (!searchTerm) return text;
+
+  const regex = new RegExp(`(${searchTerm})`, "gi");
+  return text.replace(
+    regex,
+    '<mark style="background: #fef08a; padding: 2px 4px; border-radius: 3px; font-weight: 700;">$1</mark>'
+  );
+}
+
+// ==================== MODIFICA FUNZIONE openProdottoModal ====================
+
+/**
+ * Apre il modal per inserire/modificare un prodotto
+ * 🎯 IDENTICA ALLA LOGICA DI openMovimentoModal()
+ */
+async function openProdottoModal(prodotto = null) {
+  console.log("📂 Apertura modal prodotto...");
+
+  // Carica marche se necessario
+  if (!allMarche || allMarche.length === 0) {
+    try {
+      const res = await fetch(`${API_URL}/marche`);
+      allMarche = await res.json();
+      console.log("📦 Marche caricate:", allMarche.length);
+    } catch (error) {
+      console.error("❌ Errore caricamento marche:", error);
+      alert("Errore nel caricamento delle marche");
+      return;
+    }
+  }
+
+  const modal = document.getElementById("modalProdotto");
+  const title = document.getElementById("modalProdottoTitle");
+  const form = document.getElementById("formProdotto");
+
+  form.reset();
+
+  // Resetta ricerca marca
+  const searchInput = document.getElementById("prodottoMarcaSearch");
+  const hiddenInput = document.getElementById("prodottoMarca");
+  const resultsContainer = document.getElementById("marcaSearchResults");
+
+  if (searchInput) {
+    searchInput.value = "";
+    searchInput.classList.remove("has-selection");
+  }
+  if (hiddenInput) hiddenInput.value = "";
+  if (resultsContainer) resultsContainer.classList.remove("show");
+  selectedMarcaId = null;
+
+  if (prodotto) {
+    // Modalità modifica
+    title.textContent = "Modifica Prodotto";
+    document.getElementById("prodottoId").value = prodotto.id;
+    document.getElementById("prodottoNome").value = prodotto.nome;
+    document.getElementById("prodottoDescrizione").value =
+      prodotto.descrizione || "";
+
+    // Pre-seleziona la marca
+    if (prodotto.marca_id) {
+      const marca = allMarche.find((m) => m.id == prodotto.marca_id);
+      if (marca) {
+        selectedMarcaId = prodotto.marca_id;
+        hiddenInput.value = prodotto.marca_id;
+        searchInput.value = marca.nome.toUpperCase();
+        searchInput.classList.add("has-selection");
+        console.log("✅ Marca pre-selezionata:", marca.nome);
+      }
+    }
+  } else {
+    // Modalità creazione
+    title.textContent = "Nuovo Prodotto";
+    document.getElementById("prodottoId").value = "";
+  }
+
+  // Mostra modal
+  modal.classList.add("active");
+
+  // ⏱️ IMPORTANTE: Setup ricerca marca dopo breve timeout
+  setTimeout(() => {
+    console.log("⏱️ Timeout scaduto, applico setup ricerca marca...");
+    setupMarcaSearch();
+  }, 150);
+}
+
+/**
+ * Chiude il modal prodotto
+ */
+function closeProdottoModal() {
+  const modal = document.getElementById("modalProdotto");
+  modal.classList.remove("active");
+  selectedMarcaId = null;
+  console.log("❌ Modal prodotto chiuso");
+}
+
+// ==================== SUBMIT FORM PRODOTTO ====================
+
+/**
+ * Submit del form prodotto con validazione marca
+ */
+document.getElementById("formProdotto")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const id = document.getElementById("prodottoId").value;
+  const nome = document.getElementById("prodottoNome").value.trim();
+  const marca_id = document.getElementById("prodottoMarca").value;
+  const descrizione =
+    document.getElementById("prodottoDescrizione").value.trim() || null;
+
+  // Validazione nome
+  if (!nome) {
+    alert("⚠️ Il nome del prodotto è obbligatorio!");
+    document.getElementById("prodottoNome").focus();
+    return;
+  }
+
+  // Validazione marca
+  if (!marca_id || marca_id === "") {
+    alert("⚠️ Seleziona una marca dalla lista!");
+    document.getElementById("prodottoMarcaSearch").focus();
+    return;
+  }
+
+  const method = id ? "PUT" : "POST";
+  const url = id ? `${API_URL}/prodotti/${id}` : `${API_URL}/prodotti`;
+
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome, marca_id, descrizione }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert(id ? "✅ Prodotto aggiornato!" : "✅ Prodotto creato!");
+      closeProdottoModal();
+      loadProdotti(); // Ricarica la lista prodotti
+    } else {
+      alert(data.error || "❌ Errore durante il salvataggio");
+    }
+  } catch (error) {
+    console.error("❌ Errore connessione:", error);
+    alert("❌ Errore di connessione al server");
+  }
+});
+
+// ==================== ESPORTA FUNZIONI (opzionale) ====================
+// export {
+//   setupMarcaSearch,
+//   searchMarche,
+//   selectMarca,
+//   openProdottoModal,
+//   closeProdottoModal,
+//   highlightMatch
+// };

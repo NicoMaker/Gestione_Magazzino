@@ -1264,3 +1264,172 @@ tbody tr:hover {
     padding: 10px 14px;
   }
 }
+
+/* ==================== STILI RICERCA MARCHE (IDENTICI AI PRODOTTI NEI MOVIMENTI) ==================== */
+
+/* Wrapper per il campo di ricerca marca */
+.search-select-wrapper {
+  position: relative;
+}
+
+/* Input di ricerca marca */
+#prodottoMarcaSearch {
+  width: 100%;
+  padding: 12px 18px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  font-size: 15px;
+  font-family: inherit;
+  transition: all 0.25s ease;
+  background: white;
+}
+
+#prodottoMarcaSearch:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+/* Stile quando una marca è selezionata */
+#prodottoMarcaSearch.has-selection {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border-color: #10b981;
+  font-weight: 600;
+  color: #065f46;
+}
+
+/* Container risultati ricerca marca */
+#marcaSearchResults {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 2px solid var(--primary);
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  max-height: 280px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  display: none;
+  margin-top: -2px;
+}
+
+#marcaSearchResults.show {
+  display: block;
+  animation: slideDown 0.2s ease;
+}
+
+/* Singolo risultato marca */
+.marca-result-item {
+  padding: 12px 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.marca-result-item:last-child {
+  border-bottom: none;
+}
+
+.marca-result-item:hover {
+  background: var(--bg-main);
+  padding-left: 22px;
+}
+
+.marca-result-item.selected {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border-left: 4px solid var(--primary);
+  font-weight: 600;
+}
+
+/* Nome marca nel risultato */
+.marca-result-item .search-result-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Evidenziazione del testo cercato */
+.marca-result-item mark {
+  background: #fef08a;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-weight: 700;
+}
+
+/* Messaggio "nessun risultato" */
+.search-no-results {
+  padding: 20px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-no-results svg {
+  width: 32px;
+  height: 32px;
+  opacity: 0.5;
+}
+
+.search-no-results strong {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+/* Scrollbar personalizzata */
+#marcaSearchResults::-webkit-scrollbar {
+  width: 8px;
+}
+
+#marcaSearchResults::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+#marcaSearchResults::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+#marcaSearchResults::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Animazione slide down */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive per mobile */
+@media (max-width: 768px) {
+  #marcaSearchResults {
+    max-height: 200px;
+  }
+  
+  .marca-result-item {
+    padding: 10px 14px;
+  }
+
+  .marca-result-item:hover {
+    padding-left: 18px;
+  }
+
+  .marca-result-item .search-result-name {
+    font-size: 14px;
+  }
+}
