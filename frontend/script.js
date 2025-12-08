@@ -3627,3 +3627,54 @@ function openUserModal(user = null) {
 
   modal.classList.add("active");
 }
+
+// ========== EVENTO KEYDOWN (previeni caratteri non validi) ==========
+  const handleKeydown = function (e) {
+    const separator = getDecimalSeparator();
+    const allowedKeys = [
+      "Backspace",
+      "Delete",
+      "Tab",
+      "Escape",
+      "Enter",
+      "ArrowLeft",
+      "ArrowRight",
+      "ArrowUp",
+      "ArrowDown",
+      "Home",
+      "End",
+    ];
+
+    // Permetti tasti di controllo
+    if (
+      allowedKeys.includes(e.key) ||
+      e.ctrlKey ||
+      e.metaKey || // Ctrl/Cmd per copia/incolla
+      e.key === "a" ||
+      e.key === "A"
+    ) {
+      return;
+    }
+
+    // ⛔ BLOCCA SEGNO MENO (valori negativi non permessi)
+    if (e.key === "-" || e.key === "_") {
+      e.preventDefault();
+      return;
+    }
+
+    // Permetti numeri
+    if (/^\d$/.test(e.key)) {
+      return;
+    }
+
+    // Permetti separatore decimale (solo uno)
+    if (
+      (e.key === separator || e.key === "." || e.key === ",") &&
+      !this.value.includes(separator)
+    ) {
+      return;
+    }
+
+    // Blocca tutto il resto
+    e.preventDefault();
+  };
