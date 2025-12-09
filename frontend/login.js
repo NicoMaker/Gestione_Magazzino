@@ -45,6 +45,9 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     const data = await response.json();
 
     if (response.ok) {
+      // 🟢 FIX APPLICATO: Salva lo username in localStorage per la home page
+      localStorage.setItem("username", username);
+
       // Success animation
       btnLogin.style.background =
         "linear-gradient(135deg, #10b981 0%, #059669 100%)";
@@ -57,11 +60,30 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     } else {
       errorMessage.textContent = data.error || "Errore durante il login";
       errorMessage.classList.add("show");
+      // Error animation
+      btnLogin.style.background =
+        "linear-gradient(135deg, #f87171 0%, #ef4444 100%)";
+      btnLogin.querySelector(".btn-text").textContent = "Accesso fallito";
       btnLogin.classList.remove("loading");
+
+      setTimeout(() => {
+        btnLogin.style.background = ""; // Reset background
+        btnLogin.querySelector(".btn-text").textContent = "Accedi";
+      }, 1500);
     }
   } catch (error) {
-    errorMessage.textContent = "Errore di connessione al server";
+    console.error("Login Error:", error);
+    errorMessage.textContent =
+      "Impossibile connettersi al server. Riprova più tardi.";
     errorMessage.classList.add("show");
+    btnLogin.style.background =
+      "linear-gradient(135deg, #f87171 0%, #ef4444 100%)";
+    btnLogin.querySelector(".btn-text").textContent = "Errore di rete";
     btnLogin.classList.remove("loading");
+
+    setTimeout(() => {
+      btnLogin.style.background = ""; // Reset background
+      btnLogin.querySelector(".btn-text").textContent = "Accedi";
+    }, 1500);
   }
 });
