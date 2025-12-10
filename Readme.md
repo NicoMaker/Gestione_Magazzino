@@ -8,7 +8,7 @@ Questo documento ti guiderà attraverso le funzionalità principali dell'applica
 
 ### 1. Pagina di Login
 
-- **URL:** Accedi all'applicazione tramite l'indirizzo fornito (es. `http://localhost:3000/index.html`).
+- **URL:** Accedi all'applicazione tramite l'indirizzo fornito.
 - **Credenziali:** Inserisci il tuo **Username** e la **Password** forniti dall'amministratore.
   - **Nota per il primo accesso:** L'utente predefinito è `Admin` con password `Admin123!`. È fortemente raccomandato cambiarla dopo il primo login.
 - **Accesso:** Clicca sul pulsante **"Accedi"** per entrare nella dashboard principale.
