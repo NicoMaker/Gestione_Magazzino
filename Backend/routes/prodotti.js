@@ -113,7 +113,7 @@ router.delete("/:id", (req, res) => {
         if (row.giacenza > 0) {
           db.run("ROLLBACK;");
           return res.status(400).json({
-            error: `Impossibile eliminare: giacenza residua di ${row.giacenza} unità.`,
+            error: `Impossibile eliminare: giacenza residua di ${row.giacenza} pezzi.`,
           });
         }
 
