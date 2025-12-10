@@ -3333,8 +3333,11 @@ function searchMarche() {
   console.log("📦 allMarche disponibili:", allMarche ? allMarche.length : 0);
 
   // Se l'utente modifica dopo aver selezionato, resetta la selezione
-  if (selectedMarcaId !== null && searchInput.classList.contains("has-selection")) {
-    const currentMarca = allMarche.find(m => m.id == selectedMarcaId);
+  if (
+    selectedMarcaId !== null &&
+    searchInput.classList.contains("has-selection")
+  ) {
+    const currentMarca = allMarche.find((m) => m.id == selectedMarcaId);
     if (currentMarca && searchInput.value !== currentMarca.nome.toUpperCase()) {
       selectedMarcaId = null;
       hiddenInput.value = "";
@@ -3542,53 +3545,55 @@ function closeProdottoModal() {
 /**
  * Submit del form prodotto con validazione marca
  */
-document.getElementById("formProdotto")?.addEventListener("submit", async (e) => {
-  e.preventDefault();
+document
+  .getElementById("formProdotto")
+  ?.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  const id = document.getElementById("prodottoId").value;
-  const nome = document.getElementById("prodottoNome").value.trim();
-  const marca_id = document.getElementById("prodottoMarca").value;
-  const descrizione =
-    document.getElementById("prodottoDescrizione").value.trim() || null;
+    const id = document.getElementById("prodottoId").value;
+    const nome = document.getElementById("prodottoNome").value.trim();
+    const marca_id = document.getElementById("prodottoMarca").value;
+    const descrizione =
+      document.getElementById("prodottoDescrizione").value.trim() || null;
 
-  // Validazione nome
-  if (!nome) {
-    alert("⚠️ Il nome del prodotto è obbligatorio!");
-    document.getElementById("prodottoNome").focus();
-    return;
-  }
-
-  // Validazione marca
-  if (!marca_id || marca_id === "") {
-    alert("⚠️ Seleziona una marca dalla lista!");
-    document.getElementById("prodottoMarcaSearch").focus();
-    return;
-  }
-
-  const method = id ? "PUT" : "POST";
-  const url = id ? `${API_URL}/prodotti/${id}` : `${API_URL}/prodotti`;
-
-  try {
-    const res = await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nome, marca_id, descrizione }),
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      alert(id ? "✅ Prodotto aggiornato!" : "✅ Prodotto creato!");
-      closeProdottoModal();
-      loadProdotti(); // Ricarica la lista prodotti
-    } else {
-      alert(data.error || "❌ Errore durante il salvataggio");
+    // Validazione nome
+    if (!nome) {
+      alert("⚠️ Il nome del prodotto è obbligatorio!");
+      document.getElementById("prodottoNome").focus();
+      return;
     }
-  } catch (error) {
-    console.error("❌ Errore connessione:", error);
-    alert("❌ Errore di connessione al server");
-  }
-});
+
+    // Validazione marca
+    if (!marca_id || marca_id === "") {
+      alert("⚠️ Seleziona una marca dalla lista!");
+      document.getElementById("prodottoMarcaSearch").focus();
+      return;
+    }
+
+    const method = id ? "PUT" : "POST";
+    const url = id ? `${API_URL}/prodotti/${id}` : `${API_URL}/prodotti`;
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome, marca_id, descrizione }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert(id ? "✅ Prodotto aggiornato!" : "✅ Prodotto creato!");
+        closeProdottoModal();
+        loadProdotti(); // Ricarica la lista prodotti
+      } else {
+        alert(data.error || "❌ Errore durante il salvataggio");
+      }
+    } catch (error) {
+      console.error("❌ Errore connessione:", error);
+      alert("❌ Errore di connessione al server");
+    }
+  });
 
 // ==================== ESPORTA FUNZIONI (opzionale) ====================
 // export {
@@ -3613,14 +3618,15 @@ function openUserModal(user = null) {
     document.getElementById("userId").value = user.id;
     document.getElementById("userUsername").value = user.username;
     if (passwordLabel) {
-      passwordLabel.innerHTML = 'Password <span style="opacity: 0.6;">(opzionale)</span>';
+      passwordLabel.innerHTML =
+        'Password <span style="opacity: 0.6;">(opzionale)</span>';
     }
     passwordInput.required = false;
   } else {
     title.textContent = "Nuovo Utente";
     document.getElementById("userId").value = "";
     if (passwordLabel) {
-      passwordLabel.innerHTML = 'Password *';
+      passwordLabel.innerHTML = "Password *";
     }
     passwordInput.required = true;
   }
@@ -3629,52 +3635,52 @@ function openUserModal(user = null) {
 }
 
 // ========== EVENTO KEYDOWN (previeni caratteri non validi) ==========
-  const handleKeydown = function (e) {
-    const separator = getDecimalSeparator();
-    const allowedKeys = [
-      "Backspace",
-      "Delete",
-      "Tab",
-      "Escape",
-      "Enter",
-      "ArrowLeft",
-      "ArrowRight",
-      "ArrowUp",
-      "ArrowDown",
-      "Home",
-      "End",
-    ];
+const handleKeydown = function (e) {
+  const separator = getDecimalSeparator();
+  const allowedKeys = [
+    "Backspace",
+    "Delete",
+    "Tab",
+    "Escape",
+    "Enter",
+    "ArrowLeft",
+    "ArrowRight",
+    "ArrowUp",
+    "ArrowDown",
+    "Home",
+    "End",
+  ];
 
-    // Permetti tasti di controllo
-    if (
-      allowedKeys.includes(e.key) ||
-      e.ctrlKey ||
-      e.metaKey || // Ctrl/Cmd per copia/incolla
-      e.key === "a" ||
-      e.key === "A"
-    ) {
-      return;
-    }
+  // Permetti tasti di controllo
+  if (
+    allowedKeys.includes(e.key) ||
+    e.ctrlKey ||
+    e.metaKey || // Ctrl/Cmd per copia/incolla
+    e.key === "a" ||
+    e.key === "A"
+  ) {
+    return;
+  }
 
-    // ⛔ BLOCCA SEGNO MENO (valori negativi non permessi)
-    if (e.key === "-" || e.key === "_") {
-      e.preventDefault();
-      return;
-    }
-
-    // Permetti numeri
-    if (/^\d$/.test(e.key)) {
-      return;
-    }
-
-    // Permetti separatore decimale (solo uno)
-    if (
-      (e.key === separator || e.key === "." || e.key === ",") &&
-      !this.value.includes(separator)
-    ) {
-      return;
-    }
-
-    // Blocca tutto il resto
+  // ⛔ BLOCCA SEGNO MENO (valori negativi non permessi)
+  if (e.key === "-" || e.key === "_") {
     e.preventDefault();
-  };
+    return;
+  }
+
+  // Permetti numeri
+  if (/^\d$/.test(e.key)) {
+    return;
+  }
+
+  // Permetti separatore decimale (solo uno)
+  if (
+    (e.key === separator || e.key === "." || e.key === ",") &&
+    !this.value.includes(separator)
+  ) {
+    return;
+  }
+
+  // Blocca tutto il resto
+  e.preventDefault();
+};
