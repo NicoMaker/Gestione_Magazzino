@@ -3684,3 +3684,1211 @@ const handleKeydown = function (e) {
   // Blocca tutto il resto
   e.preventDefault();
 };
+
+// ==================== FORMATTAZIONE QUANTITÀ ====================
+
+/**
+ * Formatta quantità con regole specifiche:
+ * - Numeri interi: senza decimali (es. 12 invece di 12,00)
+ * - Numeri con decimali: sempre 2 cifre (es. 10,56 o 10,50)
+ * - Separatore migliaia: punto (es. 1.000 o 1.234.567)
+ * - Separatore decimale: virgola (es. 10,56)
+ *
+ * @param {number} num - Numero da formattare
+ * @returns {string} - Quantità formattata
+ */
+function formatQuantita(num) {
+  const n = parseFloat(num);
+  if (isNaN(n)) return "0";
+
+  // Controlla se il numero è intero
+  const isInteger = n % 1 === 0;
+
+  if (isInteger) {
+    // Numero intero: formatta solo la parte intera con separatore migliaia
+    const integerPart = Math.floor(n).toString();
+    // Aggiungi punto ogni 3 cifre
+    const formatted = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    return formatted;
+  } else {
+    // Numero con decimali: usa toFixed(2) per garantire 2 decimali
+    const parts = n.toFixed(2).split(".");
+
+    // Aggiungi punto ogni 3 cifre nella parte intera
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+    // Usa virgola come separatore decimale
+    return parts.join(",");
+  }
+}
+
+/**
+ * Formatta quantità con unità di misura
+ * @param {number} num - Numero da formattare
+ * @returns {string} - Quantità formattata con "pz"
+ */
+function formatQuantitaConUnita(num) {
+  return `${formatQuantita(num)} pz`;
+}
+
+/**
+ * Converte stringa quantità in numero (per parsing da input)
+ * Gestisce sia punto che virgola come separatori
+ * @param {string} value - Valore da convertire
+ * @returns {number} - Numero convertito
+ */
+function parseQuantitaInput(value) {
+  if (!value || value === "") return 0;
+
+  // Rimuovi i punti (separatori migliaia)
+  let cleaned = String(value).replace(/\./g, "");
+
+  // Converti virgola in punto per parseFloat
+  cleaned = cleaned.replace(",", ".");
+
+  const num = parseFloat(cleaned);
+  return isNaN(num) ? 0 : num;
+}
+
+/**
+ * Valida che una quantità sia valida (positiva, max 2 decimali)
+ * @param {string|number} value - Valore da validare
+ * @returns {boolean} - true se valida
+ */
+function isValidQuantita(value) {
+  const num = parseQuantitaInput(value);
+
+  if (isNaN(num) || num < 0) return false;
+
+  // Verifica che non ci siano più di 2 decimali
+  const str = String(value).replace(",", ".");
+  const parts = str.split(".");
+
+  if (parts.length > 1 && parts[1].length > 2) {
+    return false;
+  }
+
+  return true;
+}
+
+// ==================== AGGIORNA FUNZIONI DI RENDERING ====================
+
+/**
+ * Aggiorna renderProdotti() per usare formatQuantita()
+ */
+function renderProdotti() {
+  const tbody = document.getElementById("prodottiTableBody");
+
+  if (prodotti.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="5" class="text-center">Nessun prodotto presente</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = prodotti
+    .map(
+      (p) => `
+    <tr>
+      <td><strong>${p.nome}</strong></td>
+      <td><span class="badge badge-marca">${
+        p.marca_nome ? p.marca_nome.toUpperCase() : "N/A"
+      }</span></td>
+      <td><span class="badge-giacenza">${formatQuantitaConUnita(
+        p.giacenza || 0
+      )}</span></td>
+      <td>${p.descrizione || "-"}</td>
+      <td class="text-right">
+        <button class="btn-icon" onclick="editProdotto(${
+          p.id
+        })" title="Modifica">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </button>
+        <button class="btn-icon" onclick="deleteProdotto(${
+          p.id
+        })" title="Elimina">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+        </button>
+      </td>
+    </tr>
+  `
+    )
+    .join("");
+}
+
+/**
+ * Aggiorna renderMovimenti() per usare formatQuantita()
+ */
+function renderMovimenti() {
+  const tbody = document.getElementById("movimentiTableBody");
+
+  if (movimenti.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="10" class="text-center">Nessun movimento presente</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = movimenti
+    .map((m) => {
+      const prefix = m.tipo === "scarico" ? "- " : "";
+
+      // Calcolo prezzo unitario
+      let prezzoUnitarioRaw = "-";
+      if (m.tipo === "carico" && m.prezzo) {
+        prezzoUnitarioRaw = formatCurrency(m.prezzo);
+      } else if (m.tipo === "scarico" && m.prezzo_unitario_scarico) {
+        prezzoUnitarioRaw = formatCurrency(m.prezzo_unitario_scarico);
+      }
+
+      const prezzoUnitarioHtml =
+        prezzoUnitarioRaw !== "-"
+          ? prezzoUnitarioRaw.replace("€ ", `${prefix}€ `)
+          : "-";
+
+      const prezzoTotaleRaw = formatCurrency(m.prezzo_totale || 0);
+      const prezzoTotaleHtml = prezzoTotaleRaw.replace("€ ", `${prefix}€ `);
+
+      const colorClass = m.tipo === "carico" ? "text-green" : "text-red";
+
+      return `
+    <tr>
+      <td><strong>${m.prodotto_nome}</strong></td>
+      <td>${m.marca_nome || '<span style="color: #999;">-</span>'}</td>
+      <td>${
+        m.prodotto_descrizione
+          ? `<small>${m.prodotto_descrizione.substring(0, 30)}${
+              m.prodotto_descrizione.length > 30 ? "..." : ""
+            }</small>`
+          : '<span style="color: #999;">-</span>'
+      }</td>
+      <td><span class="badge ${
+        m.tipo === "carico" ? "badge-success" : "badge-danger"
+      }">${m.tipo.toUpperCase()}</span></td>
+
+      <td class="${colorClass}">${formatQuantitaConUnita(m.quantita)}</td>
+      <td class="${colorClass}">${prezzoUnitarioHtml}</td>
+      <td class="${colorClass}"><strong>${prezzoTotaleHtml}</strong></td>
+
+      <td>${new Date(m.data_movimento).toLocaleDateString("it-IT")}</td>
+      <td>${m.fattura_doc || '<span style="color: #999;">-</span>'}</td>
+      <td class="text-right">
+        <button class="btn-icon" onclick="deleteMovimento(${
+          m.id
+        })" title="Elimina">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+        </button>
+      </td>
+    </tr>
+  `;
+    })
+    .join("");
+}
+
+/**
+ * Aggiorna renderRiepilogo() per usare formatQuantita()
+ */
+function renderRiepilogo() {
+  const tbody = document.getElementById("riepilogoTableBody");
+
+  if (riepilogo.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="4" class="text-center">Nessun prodotto in magazzino</td></tr>';
+    return;
+  }
+
+  let html = "";
+
+  riepilogo.forEach((r) => {
+    html += `
+    <tr class="product-main-row">
+      <td><strong>${r.nome}</strong>${
+      r.marca_nome
+        ? ` <span class="badge-marca">(${r.marca_nome.toUpperCase()})</span>`
+        : ""
+    }</td>
+      <td>${
+        r.descrizione
+          ? `<small>${r.descrizione.substring(0, 50)}${
+              r.descrizione.length > 50 ? "..." : ""
+            }</small>`
+          : '<span style="color: #999;">-</span>'
+      }</td>
+      <td><span class="badge-giacenza">${formatQuantitaConUnita(
+        r.giacenza
+      )}</span></td>
+      <td><strong>${formatCurrency(r.valore_totale)}</strong></td>
+    </tr>
+    `;
+
+    if (r.giacenza > 0 && r.lotti && r.lotti.length > 0) {
+      html += `
+      <tr class="lotti-row">
+        <td colspan="4" class="lotti-container">
+          <div class="lotti-header">Dettaglio Lotti</div>
+          <div class="lotti-table-wrapper">
+            <table class="lotti-table">
+              <thead>
+                <tr>
+                  <th>Quantità</th>
+                  <th>Prezzo Unit.</th>
+                  <th>Valore</th>
+                  <th>Data Carico</th>
+                  <th>Documento</th>
+                  <th>Fornitore</th>
+                </tr>
+              </thead>
+              <tbody>
+      `;
+
+      r.lotti.forEach((lotto) => {
+        html += `
+                <tr>
+                  <td><strong>${formatQuantitaConUnita(
+                    lotto.quantita_rimanente
+                  )}</strong></td>
+                  <td>${formatCurrency(lotto.prezzo)}</td>
+                  <td><strong>${formatCurrency(
+                    lotto.quantita_rimanente * lotto.prezzo
+                  )}</strong></td>
+                  <td>${new Date(lotto.data_carico).toLocaleDateString(
+                    "it-IT"
+                  )}</td>
+                  <td>${
+                    lotto.fattura_doc || '<span style="color: #999;">-</span>'
+                  }</td>
+                  <td>${
+                    lotto.fornitore || '<span style="color: #999;">-</span>'
+                  }</td>
+                </tr>
+        `;
+      });
+
+      html += `
+              </tbody>
+            </table>
+          </div>
+        </td>
+      </tr>
+      `;
+    }
+  });
+
+  tbody.innerHTML = html;
+}
+
+/**
+ * Aggiorna renderStorico() per usare formatQuantita()
+ */
+function renderStorico(storico) {
+  const tbody = document.getElementById("storicoTableBody");
+
+  if (storico.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="4" class="text-center">Nessun dato disponibile</td></tr>';
+    return;
+  }
+
+  let html = "";
+
+  storico.forEach((s) => {
+    html += `
+    <tr class="product-main-row">
+      <td><strong>${s.nome}</strong>${
+      s.marca_nome
+        ? ` <span class="badge-marca">(${s.marca_nome.toUpperCase()})</span>`
+        : ""
+    }</td>
+      <td>${
+        s.descrizione
+          ? `<small>${s.descrizione.substring(0, 50)}${
+              s.descrizione.length > 50 ? "..." : ""
+            }</small>`
+          : '<span style="color: #999;">-</span>'
+      }</td>
+      <td><span class="badge-giacenza">${formatQuantitaConUnita(
+        s.giacenza
+      )}</span></td>
+      <td><strong>${formatCurrency(s.valore_totale)}</strong></td>
+    </tr>
+    `;
+
+    if (s.giacenza > 0 && s.lotti && s.lotti.length > 0) {
+      html += `
+      <tr class="lotti-row">
+        <td colspan="4" class="lotti-container">
+          <div class="lotti-header">Dettaglio Lotti</div>
+          <div class="lotti-table-wrapper">
+            <table class="lotti-table">
+              <thead>
+                <tr>
+                  <th>Quantità</th>
+                  <th>Prezzo Unit.</th>
+                  <th>Valore</th>
+                  <th>Data Carico</th>
+                  <th>Documento</th>
+                  <th>Fornitore</th>
+                </tr>
+              </thead>
+              <tbody>
+      `;
+
+      s.lotti.forEach((lotto) => {
+        html += `
+                <tr>
+                  <td><strong>${formatQuantitaConUnita(
+                    lotto.quantita_rimanente
+                  )}</strong></td>
+                  <td>${formatCurrency(lotto.prezzo)}</td>
+                  <td><strong>${formatCurrency(
+                    lotto.quantita_rimanente * lotto.prezzo
+                  )}</strong></td>
+                  <td>${new Date(lotto.data_carico).toLocaleDateString(
+                    "it-IT"
+                  )}</td>
+                  <td>${
+                    lotto.fattura_doc || '<span style="color: #999;">-</span>'
+                  }</td>
+                  <td>${
+                    lotto.fornitore || '<span style="color: #999;">-</span>'
+                  }</td>
+                </tr>
+        `;
+      });
+
+      html += `
+              </tbody>
+            </table>
+          </div>
+        </td>
+      </tr>
+      `;
+    }
+  });
+
+  tbody.innerHTML = html;
+}
+
+/**
+ * Aggiorna showGiacenzaInfo() per usare formatQuantita()
+ */
+async function showGiacenzaInfo(prodottoId) {
+  try {
+    const prodotto = prodotti.find((p) => p.id == prodottoId);
+    if (prodotto) {
+      const giacenzaInfo = document.getElementById("giacenzaInfo");
+      const giacenzaValue = document.getElementById("giacenzaValue");
+
+      giacenzaValue.textContent = `${prodotto.nome} ${
+        prodotto.marca_nome ? `(${prodotto.marca_nome})` : ""
+      } - Giacenza: ${formatQuantitaConUnita(prodotto.giacenza || 0)}`;
+      giacenzaInfo.style.display = "block";
+    }
+  } catch (error) {
+    console.error("Errore caricamento giacenza:", error);
+  }
+}
+
+/**
+ * Aggiorna searchProducts() per mostrare giacenza formattata
+ */
+function searchProducts() {
+  const searchInput = document.getElementById("movimentoProdottoSearch");
+  const resultsContainer = document.getElementById("prodottoSearchResults");
+
+  if (!searchInput || !resultsContainer) {
+    console.error("Elementi search non trovati");
+    return;
+  }
+
+  const searchTerm = searchInput.value.toLowerCase().trim();
+
+  if (!allProdotti || allProdotti.length === 0) {
+    resultsContainer.innerHTML = `
+      <div class="search-no-results">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 32px; height: 32px; margin: 0 auto 8px; opacity: 0.5;">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+        </svg>
+        Nessun prodotto disponibile nel sistema
+      </div>
+    `;
+    resultsContainer.classList.add("show");
+    return;
+  }
+
+  const filteredProducts = allProdotti.filter((p) => {
+    if (!searchTerm || searchTerm === "") {
+      return true;
+    }
+
+    const matchesNome = p.nome.toLowerCase().includes(searchTerm);
+    const matchesMarca = (p.marca_nome || "")
+      .toLowerCase()
+      .includes(searchTerm);
+    const matchesDescrizione = p.descrizione
+      ? p.descrizione.toLowerCase().includes(searchTerm)
+      : false;
+
+    return matchesNome || matchesMarca || matchesDescrizione;
+  });
+
+  if (filteredProducts.length === 0) {
+    resultsContainer.innerHTML = `
+      <div class="search-no-results">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 32px; height: 32px; margin: 0 auto 8px; opacity: 0.5;">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+        </svg>
+        Nessun prodotto trovato per "<strong>${searchTerm}</strong>"
+      </div>
+    `;
+    resultsContainer.classList.add("show");
+    return;
+  }
+
+  resultsContainer.innerHTML = filteredProducts
+    .map((p) => {
+      const nomeHighlighted = highlightMatch(p.nome, searchTerm);
+      const marcaHighlighted = highlightMatch(p.marca_nome || "", searchTerm);
+
+      return `
+      <div 
+        class="search-result-item" 
+        data-id="${p.id}" 
+        data-nome="${p.nome}" 
+        data-marca="${p.marca_nome || ""}" 
+        data-giacenza="${p.giacenza || 0}"
+      >
+        <div class="search-result-name">${nomeHighlighted}</div>
+        <div class="search-result-meta">
+          ${
+            p.marca_nome
+              ? `<span class="search-result-marca">${marcaHighlighted}</span>`
+              : ""
+          }
+          <span class="search-result-giacenza">${formatQuantitaConUnita(
+            p.giacenza || 0
+          )}</span>
+          ${
+            p.descrizione
+              ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
+                  0,
+                  40
+                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
+              : ""
+          }
+        </div>
+      </div>
+    `;
+    })
+    .join("");
+
+  resultsContainer.querySelectorAll(".search-result-item").forEach((item) => {
+    item.addEventListener("click", function () {
+      selectProduct(
+        this.dataset.id,
+        this.dataset.nome,
+        this.dataset.marca,
+        this.dataset.giacenza
+      );
+    });
+  });
+
+  resultsContainer.classList.add("show");
+}
+
+// ==================== AGGIORNA FUNZIONI DI STAMPA ====================
+
+/**
+ * Aggiorna printRiepilogo() per usare formatQuantita()
+ */
+function printRiepilogo() {
+  if (riepilogo.length === 0) {
+    alert("Nessun prodotto da stampare");
+    return;
+  }
+
+  const valoreTotaleFiltrato = riepilogo.reduce(
+    (sum, r) => sum + parseFloat(r.valore_totale || 0),
+    0
+  );
+
+  let printContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Riepilogo Magazzino</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; border-bottom: 2px solid #4F46E5; padding-bottom: 10px; }
+        .info { margin: 20px 0; font-size: 14px; }
+        .prodotto-block { margin-bottom: 30px; page-break-inside: avoid; }
+        .prodotto-header { 
+          background-color: #e0e7ff; 
+          padding: 10px; 
+          margin-bottom: 10px;
+          border-left: 4px solid #4F46E5;
+        }
+        .prodotto-info { display: flex; justify-content: space-between; margin: 5px 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
+        th { background-color: #6366f1; color: white; }
+        .lotto-row { background-color: #f9fafb; }
+        .no-lotti { text-align: center; color: #999; padding: 10px; }
+      </style>
+    </head>
+    <body>
+      <h1>Riepilogo Giacenze Magazzino</h1>
+      <div class="info">
+        <p><strong>Valore Totale (Filtrato):</strong> ${formatCurrency(
+          valoreTotaleFiltrato
+        )}</p>
+        <p><strong>Prodotti Visualizzati:</strong> ${riepilogo.length}</p>
+        <p><strong>Data Stampa:</strong> ${new Date().toLocaleDateString(
+          "it-IT"
+        )} ${new Date().toLocaleTimeString("it-IT")}</p>
+      </div>
+  `;
+
+  riepilogo.forEach((prodotto) => {
+    if (prodotto.giacenza > 0) {
+      printContent += `
+        <div class="prodotto-block">
+          <div class="prodotto-header">
+            <div class="prodotto-info">
+              <span><strong>Prodotto:</strong> ${prodotto.nome}</span>
+              <span><strong>Giacenza Totale:</strong> ${formatQuantitaConUnita(
+                prodotto.giacenza
+              )}</span>
+            </div>
+            <div class="prodotto-info">
+              <span><strong>Marca:</strong> ${prodotto.marca_nome || "-"}</span>
+              <span><strong>Valore Totale:</strong> ${formatCurrency(
+                prodotto.valore_totale
+              )}</span>
+            </div>
+            ${
+              prodotto.descrizione
+                ? `<div class="prodotto-info"><span><strong>Descrizione:</strong> ${prodotto.descrizione}</span></div>`
+                : ""
+            }
+          </div>
+      `;
+
+      if (prodotto.lotti && prodotto.lotti.length > 0) {
+        printContent += `
+          <table>
+            <thead>
+              <tr>
+                <th>Quantità</th>
+                <th>Prezzo Unit.</th>
+                <th>Valore</th>
+                <th>Data Carico</th>
+                <th>Documento</th>
+                <th>Fornitore</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        prodotto.lotti.forEach((lotto) => {
+          printContent += `
+            <tr class="lotto-row">
+              <td>${formatQuantitaConUnita(lotto.quantita_rimanente)}</td>
+              <td>${formatCurrency(lotto.prezzo)}</td>
+              <td><strong>${formatCurrency(
+                lotto.quantita_rimanente * lotto.prezzo
+              )}</strong></td>
+              <td>${new Date(lotto.data_carico).toLocaleDateString(
+                "it-IT"
+              )}</td>
+              <td>${lotto.fattura_doc || "-"}</td>
+              <td>${lotto.fornitore || "-"}</td>
+            </tr>
+          `;
+        });
+
+        printContent += `
+            </tbody>
+          </table>
+        `;
+      } else {
+        printContent += '<p class="no-lotti">Nessun lotto disponibile</p>';
+      }
+
+      printContent += `</div>`;
+    }
+  });
+
+  printContent += `</body></html>`;
+
+  const printFrame = document.createElement("iframe");
+  printFrame.style.display = "none";
+  document.body.appendChild(printFrame);
+  printFrame.contentDocument.write(printContent);
+  printFrame.contentDocument.close();
+  printFrame.contentWindow.print();
+  setTimeout(() => document.body.removeChild(printFrame), 1000);
+}
+
+/**
+ * Aggiorna printStorico() per usare formatQuantita()
+ */
+function printStorico() {
+  if (storico.length === 0) {
+    alert("Nessun prodotto da stampare");
+    return;
+  }
+
+  const valoreStoricoFiltrato = storico.reduce(
+    (sum, s) => sum + parseFloat(s.valore_totale || 0),
+    0
+  );
+
+  const dataSelezionata = document.getElementById("storicoDate").value;
+  const dataItalianaSelezionata = dataSelezionata
+    ? new Date(dataSelezionata + "T00:00:00").toLocaleDateString("it-IT")
+    : "Non selezionata";
+
+  let printContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Storico Giacenze</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; border-bottom: 2px solid #4F46E5; padding-bottom: 10px; }
+        .info { margin: 20px 0; font-size: 14px; }
+        .prodotto-block { margin-bottom: 30px; page-break-inside: avoid; }
+        .prodotto-header { 
+          background-color: #e0e7ff; 
+          padding: 10px; 
+          margin-bottom: 10px;
+          border-left: 4px solid #4F46E5;
+        }
+        .prodotto-info { display: flex; justify-content: space-between; margin: 5px 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
+        th { background-color: #6366f1; color: white; }
+        .lotto-row { background-color: #f9fafb; }
+        .no-lotti { text-align: center; color: #999; padding: 10px; }
+      </style>
+    </head>
+    <body>
+      <h1>Storico Giacenze Magazzino</h1>
+      <div class="info">
+        <p><strong>Data Selezionata:</strong> ${dataItalianaSelezionata}</p>
+        <p><strong>Valore Totale (Filtrato):</strong> ${formatCurrency(
+          valoreStoricoFiltrato
+        )}</p>
+        <p><strong>Prodotti Visualizzati:</strong> ${storico.length}</p>
+        <p><strong>Data Stampa:</strong> ${new Date().toLocaleDateString(
+          "it-IT"
+        )} ${new Date().toLocaleTimeString("it-IT")}</p>
+      </div>
+  `;
+
+  storico.forEach((prodotto) => {
+    if (prodotto.giacenza > 0) {
+      printContent += `
+        <div class="prodotto-block">
+          <div class="prodotto-header">
+            <div class="prodotto-info">
+              <span><strong>Prodotto:</strong> ${prodotto.nome}</span>
+              <span><strong>Giacenza Totale:</strong> ${formatQuantitaConUnita(
+                prodotto.giacenza
+              )}</span>
+            </div>
+            <div class="prodotto-info">
+              <span><strong>Marca:</strong> ${prodotto.marca_nome || "-"}</span>
+              <span><strong>Valore Totale:</strong> ${formatCurrency(
+                prodotto.valore_totale
+              )}</span>
+            </div>
+            ${
+              prodotto.descrizione
+                ? `<div class="prodotto-info"><span><strong>Descrizione:</strong> ${prodotto.descrizione}</span></div>`
+                : ""
+            }
+          </div>
+      `;
+
+      if (prodotto.lotti && prodotto.lotti.length > 0) {
+        printContent += `
+          <table>
+            <thead>
+              <tr>
+                <th>Quantità</th>
+                <th>Prezzo Unit.</th>
+                <th>Valore</th>
+                <th>Data Carico</th>
+                <th>Documento</th>
+                <th>Fornitore</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        prodotto.lotti.forEach((lotto) => {
+          printContent += `
+            <tr class="lotto-row">
+              <td>${formatQuantitaConUnita(lotto.quantita_rimanente)}</td>
+              <td>${formatCurrency(lotto.prezzo)}</td>
+              <td><strong>${formatCurrency(
+                lotto.quantita_rimanente * lotto.prezzo
+              )}</strong></td>
+              <td>${new Date(lotto.data_carico).toLocaleDateString(
+                "it-IT"
+              )}</td>
+              <td>${lotto.fattura_doc || "-"}</td>
+              <td>${lotto.fornitore || "-"}</td>
+            </tr>
+          `;
+        });
+
+        printContent += `
+            </tbody>
+          </table>
+        `;
+      } else {
+        printContent += '<p class="no-lotti">Nessun lotto disponibile</p>';
+      }
+
+      printContent += `</div>`;
+    }
+  });
+
+  printContent += `</body></html>`;
+
+  const printFrame = document.createElement("iframe");
+  printFrame.style.display = "none";
+  document.body.appendChild(printFrame);
+  printFrame.contentDocument.write(printContent);
+  printFrame.contentDocument.close();
+  printFrame.contentWindow.print();
+  setTimeout(() => document.body.removeChild(printFrame), 1000);
+}
+
+// ==================== TEST FUNZIONI FORMATQUANTITA ====================
+
+/**
+ * Funzione di test per verificare la formattazione quantità
+ * Puoi eseguirla nella console per verificare il comportamento
+ */
+function testFormatQuantita() {
+  console.log("=== TEST FORMATQUANTITA ===");
+
+  const testCases = [
+    { input: 0, expected: "0" },
+    { input: 1, expected: "1" },
+    { input: 12, expected: "12" },
+    { input: 100, expected: "100" },
+    { input: 1000, expected: "1.000" },
+    { input: 1234, expected: "1.234" },
+    { input: 12345, expected: "12.345" },
+    { input: 123456, expected: "123.456" },
+    { input: 1234567, expected: "1.234.567" },
+    { input: 0.5, expected: "0,50" },
+    { input: 1.5, expected: "1,50" },
+    { input: 10.56, expected: "10,56" },
+    { input: 123.45, expected: "123,45" },
+    { input: 1234.56, expected: "1.234,56" },
+    { input: 12345.67, expected: "12.345,67" },
+    { input: 0.1, expected: "0,10" },
+    { input: 0.01, expected: "0,01" },
+    { input: 1000.5, expected: "1.000,50" },
+  ];
+
+  let allPassed = true;
+
+  testCases.forEach((test, index) => {
+    const result = formatQuantita(test.input);
+    const passed = result === test.expected;
+
+    if (!passed) {
+      console.error(`❌ Test ${index + 1} FALLITO:`);
+      console.error(`   Input: ${test.input}`);
+      console.error(`   Atteso: "${test.expected}"`);
+      console.error(`   Ottenuto: "${result}"`);
+      allPassed = false;
+    } else {
+      console.log(`✅ Test ${index + 1} PASSATO: ${test.input} → "${result}"`);
+    }
+  });
+
+  if (allPassed) {
+    console.log("\n🎉 TUTTI I TEST SONO PASSATI!");
+  } else {
+    console.error("\n❌ ALCUNI TEST SONO FALLITI");
+  }
+
+  return allPassed;
+}
+
+// ==================== ESEMPI DI UTILIZZO ====================
+
+/**
+ * Esempi di come usare le funzioni:
+ *
+ * 1. Formattare una quantità semplice:
+ *    formatQuantita(12) → "12"
+ *    formatQuantita(12.5) → "12,50"
+ *    formatQuantita(1234.56) → "1.234,56"
+ *
+ * 2. Formattare con unità di misura:
+ *    formatQuantitaConUnita(12) → "12 pz"
+ *    formatQuantitaConUnita(12.5) → "12,50 pz"
+ *
+ * 3. Parsare input dell'utente:
+ *    parseQuantitaInput("1.234,56") → 1234.56
+ *    parseQuantitaInput("12,5") → 12.5
+ *    parseQuantitaInput("12") → 12
+ *
+ * 4. Validare una quantità:
+ *    isValidQuantita("12,50") → true
+ *    isValidQuantita("12,567") → false (troppi decimali)
+ *    isValidQuantita("-5") → false (negativa)
+ */
+
+// ==================== AGGIORNAMENTO INPUT QUANTITÀ NEL MODAL ====================
+
+/**
+ * Applica formattazione quantità all'input quantità nel modal movimento
+ * Questa funzione sostituisce/integra limitToTwoDecimals() per l'input quantità
+ */
+function setupQuantitaInput() {
+  const quantitaInput = document.getElementById("movimentoQuantita");
+
+  if (!quantitaInput) {
+    console.error("❌ Input movimentoQuantita non trovato");
+    return;
+  }
+
+  console.log("✅ Setup input quantità inizializzato");
+
+  const separator = getDecimalSeparator();
+
+  // ========== EVENTO INPUT (durante la digitazione) ==========
+  const handleInput = function (e) {
+    let value = this.value;
+
+    // Rimuovi tutti i caratteri non validi (solo numeri, punto e virgola)
+    value = value.replace(/[^\d.,]/g, "");
+
+    // Sostituisci virgola con punto per gestione interna
+    value = value.replace(",", ".");
+
+    // Gestisci separatori multipli (mantieni solo il primo)
+    const parts = value.split(".");
+    if (parts.length > 2) {
+      value = parts[0] + "." + parts.slice(1).join("");
+    }
+
+    // Limita decimali a 2 cifre SENZA applicare toFixed
+    if (parts.length === 2 && parts[1].length > 2) {
+      parts[1] = parts[1].substring(0, 2);
+      value = parts.join(".");
+    }
+
+    // Mostra con separatore locale
+    this.value = value.replace(".", separator);
+  };
+
+  // ========== EVENTO BLUR (quando si esce dal campo) ==========
+  const handleBlur = function (e) {
+    let value = this.value;
+
+    // Se vuoto, lascia vuoto (non forzare 0,00)
+    if (value === "" || value === separator) {
+      this.value = "";
+      return;
+    }
+
+    // Converte in numero
+    const num = parseQuantitaInput(value);
+
+    if (!isNaN(num) && num > 0) {
+      // Applica formattazione intelligente
+      this.value = formatQuantitaForInput(num);
+    } else {
+      this.value = "";
+    }
+  };
+
+  // ========== EVENTO PASTE (incolla) ==========
+  const handlePaste = function (e) {
+    e.preventDefault();
+    const pastedText = (e.clipboardData || window.clipboardData).getData(
+      "text"
+    );
+    const cleaned = pastedText.replace(/[^\d.,]/g, "").replace(",", ".");
+    const num = parseFloat(cleaned);
+
+    if (!isNaN(num) && num >= 0) {
+      this.value = formatQuantitaForInput(num);
+    }
+  };
+
+  // ========== EVENTO KEYDOWN (previeni caratteri non validi) ==========
+  const handleKeydown = function (e) {
+    const allowedKeys = [
+      "Backspace",
+      "Delete",
+      "Tab",
+      "Escape",
+      "Enter",
+      "ArrowLeft",
+      "ArrowRight",
+      "ArrowUp",
+      "ArrowDown",
+      "Home",
+      "End",
+    ];
+
+    // Permetti tasti di controllo
+    if (
+      allowedKeys.includes(e.key) ||
+      e.ctrlKey ||
+      e.metaKey ||
+      e.key === "a" ||
+      e.key === "A"
+    ) {
+      return;
+    }
+
+    // ⛔ BLOCCA SEGNO MENO (valori negativi non permessi)
+    if (e.key === "-" || e.key === "_") {
+      e.preventDefault();
+      return;
+    }
+
+    // Permetti numeri
+    if (/^\d$/.test(e.key)) {
+      return;
+    }
+
+    // Permetti separatore decimale (solo uno)
+    if (
+      (e.key === separator || e.key === "." || e.key === ",") &&
+      !this.value.includes(separator)
+    ) {
+      return;
+    }
+
+    // Blocca tutto il resto
+    e.preventDefault();
+  };
+
+  // Rimuovi listener esistenti (clonando e sostituendo l'elemento)
+  const newInput = quantitaInput.cloneNode(true);
+  quantitaInput.parentNode.replaceChild(newInput, quantitaInput);
+
+  // Aggiungi i nuovi listener
+  newInput.addEventListener("input", handleInput);
+  newInput.addEventListener("blur", handleBlur);
+  newInput.addEventListener("paste", handlePaste);
+  newInput.addEventListener("keydown", handleKeydown);
+
+  return newInput;
+}
+
+/**
+ * Formatta quantità per l'input (usato nel blur e paste)
+ * Applica le regole: interi senza decimali, decimali con 2 cifre
+ */
+function formatQuantitaForInput(num) {
+  const n = parseFloat(num);
+  if (isNaN(n)) return "";
+
+  const separator = getDecimalSeparator();
+
+  // Controlla se il numero è intero
+  const isInteger = n % 1 === 0;
+
+  if (isInteger) {
+    // Numero intero: ritorna solo la parte intera (senza decimali)
+    return Math.floor(n).toString();
+  } else {
+    // Numero con decimali: usa toFixed(2) e separatore locale
+    return n.toFixed(2).replace(".", separator);
+  }
+}
+
+/**
+ * Aggiorna setupDecimalInputs() per gestire separatamente quantità e prezzo
+ */
+function setupDecimalInputs() {
+  console.log("🔧 Setup decimal inputs chiamato");
+
+  // Setup input quantità con logica speciale
+  const quantitaInput = setupQuantitaInput();
+
+  if (quantitaInput) {
+    console.log("✅ Input quantità configurato");
+  } else {
+    console.error("❌ Errore configurazione input quantità");
+  }
+
+  // Setup input prezzo con logica standard (sempre 2 decimali)
+  const prezzoInput = document.getElementById("movimentoPrezzo");
+
+  if (prezzoInput) {
+    console.log("✅ Applicando limitazione decimali a Prezzo");
+    limitToTwoDecimals(prezzoInput);
+  } else {
+    console.error("❌ Input movimentoPrezzo non trovato");
+  }
+}
+
+// ==================== AGGIORNAMENTO SUBMIT FORM MOVIMENTO ====================
+
+/**
+ * Aggiorna il submit del form movimento per usare parseQuantitaInput()
+ */
+document
+  .getElementById("formMovimento")
+  ?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const id = document.getElementById("movimentoId").value;
+    const prodotto_id = document.getElementById("movimentoProdotto").value;
+    const tipo = document.getElementById("movimentoTipo").value;
+
+    // ⭐ USA parseQuantitaInput per parsare la quantità
+    const quantitaValue = document.getElementById("movimentoQuantita").value;
+    const quantita = parseQuantitaInput(quantitaValue);
+
+    const data_movimento = document.getElementById("movimentoData").value;
+
+    // ⭐ USA parseDecimalInput per parsare il prezzo
+    let prezzo = null;
+    if (tipo === "carico") {
+      const prezzoValue = document.getElementById("movimentoPrezzo").value;
+      prezzo = parseDecimalInput(prezzoValue);
+    }
+
+    const fattura_doc =
+      tipo === "carico"
+        ? document.getElementById("movimentoFattura").value.trim() || null
+        : null;
+    const fornitore =
+      tipo === "carico"
+        ? document.getElementById("movimentoFornitore").value.trim() || null
+        : null;
+
+    // Validazioni
+    if (!prodotto_id || !tipo || !quantita || !data_movimento) {
+      alert("⚠️ Compila tutti i campi obbligatori!");
+      return;
+    }
+
+    if (quantita <= 0) {
+      alert("⚠️ La quantità deve essere maggiore di 0!");
+      return;
+    }
+
+    // Valida che la quantità non abbia più di 2 decimali
+    if (!isValidQuantita(quantitaValue)) {
+      alert("⚠️ La quantità può avere massimo 2 decimali!");
+      return;
+    }
+
+    if (tipo === "carico") {
+      if (!prezzo || prezzo <= 0) {
+        alert("⚠️ Il prezzo deve essere maggiore di 0 per i carichi!");
+        return;
+      }
+
+      if (!fattura_doc || !fornitore) {
+        alert("⚠️ Documento e Fornitore sono obbligatori per i carichi!");
+        return;
+      }
+    }
+
+    const method = id ? "PUT" : "POST";
+    const url = id ? `${API_URL}/dati/${id}` : `${API_URL}/dati`;
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prodotto_id,
+          tipo,
+          quantita: parseFloat(quantita.toFixed(2)), // Assicura 2 decimali max
+          prezzo: prezzo ? parseFloat(prezzo.toFixed(2)) : null,
+          data_movimento,
+          fattura_doc,
+          fornitore,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert(id ? "✅ Movimento aggiornato!" : "✅ Movimento registrato!");
+        closeMovimentoModal();
+        loadMovimenti();
+        loadProdotti();
+      } else {
+        alert(data.error || "❌ Errore durante il salvataggio");
+      }
+    } catch (error) {
+      console.error("❌ Errore:", error);
+      alert("❌ Errore di connessione");
+    }
+  });
+
+// ==================== RIEPILOGO FUNZIONI ESPORTATE ====================
+
+/**
+ * FUNZIONI PRINCIPALI PER LA FORMATTAZIONE QUANTITÀ:
+ *
+ * 1. formatQuantita(num) - Formatta numero secondo le regole specificate
+ * 2. formatQuantitaConUnita(num) - Formatta con "pz" alla fine
+ * 3. formatQuantitaForInput(num) - Formatta per input form (blur/paste)
+ * 4. parseQuantitaInput(value) - Converte stringa input in numero
+ * 5. isValidQuantita(value) - Valida che la quantità sia corretta
+ * 6. setupQuantitaInput() - Configura l'input quantità nel modal
+ * 7. setupDecimalInputs() - Configura sia quantità che prezzo
+ * 8. testFormatQuantita() - Test completo delle funzioni
+ *
+ * LOGICA DI FORMATTAZIONE:
+ * - Numeri interi: nessun decimale (es. 12, 1.000, 1.234.567)
+ * - Numeri decimali: sempre 2 cifre (es. 12,50, 1.234,56)
+ * - Separatore migliaia: punto (.)
+ * - Separatore decimale: virgola (,)
+ * - Validazione: massimo 2 decimali, solo positivi
+ *
+ * DIFFERENZE CON FORMATCURRENCY:
+ * - formatCurrency: SEMPRE 2 decimali (€ 12,00)
+ * - formatQuantita: decimali SOLO se necessari (12 invece di 12,00)
+ */
+
+// ==================== LOG DI DEBUG ====================
+
+console.log(`
+╔════════════════════════════════════════════════════════════╗
+║  MODULO FORMATTAZIONE QUANTITÀ CARICATO                    ║
+╠════════════════════════════════════════════════════════════╣
+║  Funzioni disponibili:                                     ║
+║  • formatQuantita(num)                                     ║
+║  • formatQuantitaConUnita(num)                             ║
+║  • formatQuantitaForInput(num)                             ║
+║  • parseQuantitaInput(value)                               ║
+║  • isValidQuantita(value)                                  ║
+║  • setupQuantitaInput()                                    ║
+║  • testFormatQuantita()                                    ║
+║                                                            ║
+║  Per testare: esegui testFormatQuantita() nella console   ║
+╚════════════════════════════════════════════════════════════╝
+`);
+
+// Esegui test automatico in modalità sviluppo (commentare in produzione)
+// testFormatQuantita();
