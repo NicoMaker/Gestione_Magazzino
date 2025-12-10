@@ -1,632 +1,848 @@
 <!DOCTYPE html>
 <html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestione Magazzino Moto</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gestione Magazzino Moto</title>
-  <link rel="stylesheet" href="styles.css" />
-</head>
+  <body>
+    <div class="app-container">
+      <!-- Added mobile menu toggle button with X animation -->
+      <button
+        class="mobile-menu-toggle"
+        id="mobileMenuToggle"
+        aria-label="Toggle menu"
+      >
+        <div class="hamburger">
+          <span class="line"></span>
+          <span class="line"></span>
+          <span class="line"></span>
+        </div>
+      </button>
 
-<body>
-  <div class="app-container">
-    <!-- Added mobile menu toggle button with X animation -->
-    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
-      <div class="hamburger">
-        <span class="line"></span>
-        <span class="line"></span>
-        <span class="line"></span>
-      </div>
-    </button>
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <img src="img/logo.jpeg" alt="Logo Magazzino Moto" class="logo" />
+          <h2>Magazzino Moto</h2>
+        </div>
 
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <img
-          src="img/logo.jpeg"
-          alt="Logo Magazzino Moto" class="logo" />
-        <h2>Magazzino Moto</h2>
-      </div>
-
-      <nav class="sidebar-nav">
-        <a href="#" class="nav-item active" data-section="marche">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M20 7h-9M14 17H5M3 7h2M21 17h-4M15 12h6M9 12H3M15 6v12M9 6v12" />
-          </svg>
-          <span>Marche</span>
-        </a>
-        <a href="#" class="nav-item" data-section="prodotti">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path
-              d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
-            <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-            <line x1="12" y1="22.08" x2="12" y2="12" />
-          </svg>
-          <span>Prodotti</span>
-        </a>
-        <a href="#" class="nav-item" data-section="movimenti">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-            <polyline points="17 6 23 6 23 12" />
-          </svg>
-          <span>Movimenti</span>
-        </a>
-        <a href="#" class="nav-item" data-section="riepilogo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path
-              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            <path d="M9 12h6m-6 4h6" />
-          </svg>
-          <span>Riepilogo</span>
-        </a>
-        <a href="#" class="nav-item" data-section="storico">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 6v6l4 2" />
-          </svg>
-          <span>Storico</span>
-        </a>
-        <a href="#" class="nav-item" data-section="utenti">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
-          </svg>
-          <span>Utenti</span>
-        </a>
-      </nav>
-
-      <div class="sidebar-footer">
-        <div class="user-info">
-          <div class="user-avatar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
+        <nav class="sidebar-nav">
+          <a href="#" class="nav-item active" data-section="marche">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M20 7h-9M14 17H5M3 7h2M21 17h-4M15 12h6M9 12H3M15 6v12M9 6v12"
+              />
             </svg>
-          </div>
-          <div class="user-details">
-            <span class="user-name" id="currentUser">Admin</span>
-            <span class="user-role">Amministratore</span>
-          </div>
-        </div>
+            <span>Marche</span>
+          </a>
+          <a href="#" class="nav-item" data-section="prodotti">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"
+              />
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+              <line x1="12" y1="22.08" x2="12" y2="12" />
+            </svg>
+            <span>Prodotti</span>
+          </a>
+          <a href="#" class="nav-item" data-section="movimenti">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+              <polyline points="17 6 23 6 23 12" />
+            </svg>
+            <span>Movimenti</span>
+          </a>
+          <a href="#" class="nav-item" data-section="riepilogo">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+              />
+              <path d="M9 12h6m-6 4h6" />
+            </svg>
+            <span>Riepilogo</span>
+          </a>
+          <a href="#" class="nav-item" data-section="storico">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 6v6l4 2" />
+            </svg>
+            <span>Storico</span>
+          </a>
+          <a href="#" class="nav-item" data-section="utenti">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+            </svg>
+            <span>Utenti</span>
+          </a>
+        </nav>
 
-        <!-- ✅ SEZIONE P.IVA (PRIMA DEL LOGOUT) -->
-        <div class="piva-info">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-            <line x1="3" y1="9" x2="21" y2="9"/>
-            <line x1="9" y1="21" x2="9" y2="9"/>
-          </svg>
-          <div class="piva-details">
-            <span class="piva-label-sidebar">Partita IVA</span>
-            <span class="piva-number">12345678901</span>
-          </div>
-        </div>
-
-        <button id="logoutBtn" class="btn-logout">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
-          </svg>
-          <span>Esci</span>
-        </button>
-      </div>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="main-content">
-      <!-- Sezione MARCHE -->
-      <section id="section-marche" class="content-section active">
-        <div class="section-header">
-          <div>
-            <h1>Gestione Marche</h1>
-            <p>Crea e gestisci le marche dei prodotti</p>
-          </div>
-          <div class="filter-controls">
-            <div class="search-wrapper">
-              <input type="text" id="filterMarche" class="filter-input" placeholder="Cerca marca..." />
-            </div>
-            <button class="btn btn-primary" onclick="openMarcaModal()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
+        <div class="sidebar-footer">
+          <div class="user-info">
+            <div class="user-avatar">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
               </svg>
-              <span>Nuova Marca</span>
-            </button>
+            </div>
+            <div class="user-details">
+              <span class="user-name" id="currentUser">Admin</span>
+              <span class="user-role">Amministratore</span>
+            </div>
           </div>
-        </div>
 
-        <div class="card">
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Nome Marca</th>
-                  <th class="text-right">Azioni</th>
-                </tr>
-              </thead>
-              <tbody id="marcheTableBody">
-                <tr>
-                  <td colspan="2" class="text-center">
-                    <span>Caricamento...</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- Sezione PRODOTTI -->
-      <section id="section-prodotti" class="content-section">
-        <div class="section-header">
-          <div>
-            <h1>Gestione Prodotti</h1>
-            <p>Visualizza e gestisci i prodotti del magazzino</p>
-          </div>
-          <div class="filter-controls">
-            <input type="text" id="filterProdotti" class="filter-input" placeholder="Cerca prodotto, marca..." />
-            <button class="btn btn-primary" onclick="openProdottoModal()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
+          <!-- ✅ INDIRIZZO E SEZIONE P.IVA (PRIMA DEL LOGOUT) -->
+          <div class="company-info-sidebar">
+            <p class="company-address-sidebar">
+              Via Roma, 123 - 34100 Trieste (TS)
+            </p>
+            <br />
+            <div class="piva-info">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <line x1="3" y1="9" x2="21" y2="9" />
+                <line x1="9" y1="21" x2="9" y2="9" />
               </svg>
-              <span>Nuovo Prodotto</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Nome Prodotto</th>
-                  <th>Marca</th>
-                  <th>Giacenza</th>
-                  <th>Descrizione</th>
-                  <th class="text-right">Azioni</th>
-                </tr>
-              </thead>
-              <tbody id="prodottiTableBody">
-                <tr>
-                  <td colspan="5" class="text-center">
-                    <span>Caricamento...</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- Sezione MOVIMENTI -->
-      <section id="section-movimenti" class="content-section">
-        <div class="section-header">
-          <div>
-            <h1>Movimenti di Magazzino</h1>
-            <p>Registra carichi e scarichi</p>
-          </div>
-          <div class="filter-controls">
-            <input type="text" id="filterMovimenti" class="filter-input"
-              placeholder="Cerca per prodotto, marca, tipo..." />
-            <button class="btn btn-primary" onclick="openMovimentoModal()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              <span>Nuovo Movimento</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Prodotto</th>
-                  <th>Marca</th>
-                  <th>Descrizione</th>
-                  <th>Tipo</th>
-                  <th>Quantità</th>
-                  <th>Prezzo Unit.</th>
-                  <th>Totale</th>
-                  <th>Data</th>
-                  <th>Doc/Fatt</th>
-                  <th>Fornitore</th>
-                  <th class="text-right">Azioni</th>
-                </tr>
-              </thead>
-              <tbody id="movimentiTableBody">
-                <tr>
-                  <td colspan="11" class="text-center">
-                    <span>Caricamento...</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- Sezione RIEPILOGO -->
-      <section id="section-riepilogo" class="content-section">
-        <div class="section-header">
-          <div>
-            <h1>Riepilogo Magazzino</h1>
-            <p>Giacenze e valorizzazione FIFO</p>
-          </div>
-          <div class="filter-controls">
-            <input type="text" id="filterRiepilogo" class="filter-input" placeholder="Cerca prodotto..." />
-            <button class="btn btn-secondary" onclick="printRiepilogo()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="6 9 6 2 18 2 18 9" />
-                <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
-                <rect x="6" y="14" width="12" height="8" />
-              </svg>
-              <span>Stampa</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div>
-              <p class="stat-label">Valore Totale Magazzino</p>
-              <p class="stat-value" id="valoreTotale">€ 0.00</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Prodotto / Marca</th>
-                  <th>Descrizione</th>
-                  <th>Giacenza</th>
-                  <th>Valore Totale</th>
-                </tr>
-              </thead>
-              <tbody id="riepilogoTableBody">
-                <tr>
-                  <td colspan="4" class="text-center">
-                    <span>Caricamento...</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- Sezione STORICO -->
-      <section id="section-storico" class="content-section">
-        <div class="section-header">
-          <div>
-            <h1>Storico Giacenza</h1>
-            <p>Visualizza giacenze a una data specifica</p>
-          </div>
-          <div class="date-filter">
-            <input type="date" id="storicoDate" class="input-date" />
-            <button class="btn btn-primary" onclick="loadStorico()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8" />
-                <path d="M21 21l-4.35-4.35" />
-              </svg>
-              <span>Cerca</span>
-            </button>
-            <div class="search-wrapper">
-              <input type="text" id="filterStorico" class="filter-input" placeholder="Cerca prodotto..." />
-            </div>
-            <button class="btn btn-secondary" onclick="printStorico()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="6 9 6 2 18 2 18 9" />
-                <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
-                <rect x="6" y="14" width="12" height="8" />
-              </svg>
-              <span>Stampa</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div>
-              <p class="stat-label">Valore Storico</p>
-              <p class="stat-value" id="valoreStorico">€ 0.00</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Prodotto / Marca</th>
-                  <th>Descrizione</th>
-                  <th>Giacenza</th>
-                  <th>Valore Totale</th>
-                </tr>
-              </thead>
-              <tbody id="storicoTableBody">
-                <tr>
-                  <td colspan="4" class="text-center">
-                    Seleziona una data per visualizzare lo storico
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- Sezione UTENTI -->
-      <section id="section-utenti" class="content-section">
-        <div class="section-header">
-          <div>
-            <h1>Gestione Utenti</h1>
-            <p>Crea e gestisci gli utenti del sistema</p>
-          </div>
-          <div class="filter-controls">
-            <div class="search-wrapper">
-              <input type="text" id="filterUtenti" class="filter-input" placeholder="Cerca utente..." />
-            </div>
-            <button class="btn btn-primary" onclick="openUserModal()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              <span>Nuovo Utente</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Username</th>
-                  <th class="text-right">Azioni</th>
-                </tr>
-              </thead>
-              <tbody id="utentiTableBody">
-                <tr>
-                  <td colspan="2" class="text-center">
-                    <span>Caricamento...</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <!-- Modal Marca -->
-  <div id="modalMarca" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 id="modalMarcaTitle">Nuova Marca</h2>
-        <button class="modal-close" onclick="closeMarcaModal()" aria-label="Chiudi">
-          &times;
-        </button>
-      </div>
-      <form id="formMarca">
-        <input type="hidden" id="marcaId" />
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="marcaNome">Nome Marca *</label>
-            <input type="text" id="marcaNome" required placeholder="es. Ducati, Honda, Yamaha..." />
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeMarcaModal()">
-            <span>Annulla</span>
-          </button>
-          <button type="submit" class="btn btn-primary">
-            <span>Salva</span>
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modal Prodotto -->
-  <div id="modalProdotto" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 id="modalProdottoTitle">Nuovo Prodotto</h2>
-        <button class="modal-close" onclick="closeProdottoModal()" aria-label="Chiudi">
-          &times;
-        </button>
-      </div>
-      <form id="formProdotto">
-        <input type="hidden" id="prodottoId" />
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="prodottoNome">Nome Prodotto *</label>
-            <input type="text" id="prodottoNome" required placeholder="es. Olio motore, Filtro aria, Candele..." />
-          </div>
-
-          <div class="form-group">
-            <label for="prodottoMarcaSearch">Marca *</label>
-            <div class="search-select-wrapper">
-              <input type="text" id="prodottoMarcaSearch" class="form-input" placeholder="Cerca Marca (Nome)"
-                oninput="searchMarche()" onfocus="searchMarche()" autocomplete="off" />
-              <input type="hidden" id="prodottoMarca" required />
-              <div id="marcaSearchResults" class="search-results"></div>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="prodottoDescrizione">Descrizione</label>
-            <textarea id="prodottoDescrizione" rows="3"
-              placeholder="Inserisci una descrizione dettagliata del prodotto..."></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeProdottoModal()">
-            <span>Annulla</span>
-          </button>
-          <button type="submit" class="btn btn-primary">
-            <span>Salva</span>
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modal Movimento -->
-  <div id="modalMovimento" class="modal">
-    <div class="modal-content modal-large">
-      <div class="modal-header">
-        <h2 id="modalMovimentoTitle">Nuovo Movimento</h2>
-        <button class="modal-close" onclick="closeMovimentoModal()" aria-label="Chiudi">
-          &times;
-        </button>
-      </div>
-      <form id="formMovimento">
-        <input type="hidden" id="movimentoId" />
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="movimentoProdotto">Prodotto *</label>
-            <div class="search-select-wrapper">
-              <input type="text" id="movimentoProdottoSearch" class="form-input"
-                placeholder="Cerca Prodotto (Nome, Marca, Descrizione)" oninput="searchProducts()"
-                onfocus="searchProducts()" autocomplete="off" />
-              <input type="hidden" id="movimentoProdotto" required />
-              <div id="prodottoSearchResults" class="search-results"></div>
-            </div>
-            <div class="form-group">
-              <label for="movimentoTipo">Tipo Movimento</label>
-              <select id="movimentoTipo" class="form-input" required>
-                <option value="carico">Carico</option>
-                <option value="scarico">Scarico</option>
-              </select>
-            </div>
-          </div>
-
-          <div id="giacenzaInfo" class="stock-info">
-            <strong>Giacenza attuale:</strong>
-            <span id="giacenzaValue">-</span>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="movimentoQuantita">Quantità *</label>
-              <input type="text" id="movimentoQuantita" inputmode="decimal" required placeholder="es. 10" />
-            </div>
-            <div class="form-group" id="prezzoGroup" style="display: none">
-              <label for="movimentoPrezzo">Prezzo Unitario *</label>
-              <div class="input-with-currency">
-                <input type="text" id="movimentoPrezzo" inputmode="decimal" placeholder="es. 25,50" />
-                <span class="currency-symbol">€</span>
+              <div class="piva-details">
+                <span class="piva-label-sidebar">Partita IVA</span>
+                <span class="piva-number">12345678901</span>
               </div>
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="movimentoData">Data Movimento *</label>
-              <input type="date" id="movimentoData" required />
+          <button id="logoutBtn" class="btn-logout">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"
+              />
+            </svg>
+            <span>Esci</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Sezione MARCHE -->
+        <section id="section-marche" class="content-section active">
+          <div class="section-header">
+            <div>
+              <h1>Gestione Marche</h1>
+              <p>Crea e gestisci le marche dei prodotti</p>
             </div>
-            <div class="form-group">
-              <label for="movimentoFattura">Documento/Fattura <span id="docOptional">*</span></label>
-              <input type="text" id="movimentoFattura" placeholder="es. FT/2024/001" />
+            <div class="filter-controls">
+              <div class="search-wrapper">
+                <input
+                  type="text"
+                  id="filterMarche"
+                  class="filter-input"
+                  placeholder="Cerca marca..."
+                />
+              </div>
+              <button class="btn btn-primary" onclick="openMarcaModal()">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span>Nuova Marca</span>
+              </button>
             </div>
           </div>
 
-          <div class="form-group" id="fornitoreGroup" style="display: none">
-            <label for="movimentoFornitore">Fornitore <span id="fornitoreOptional">*</span></label>
-            <input type="text" id="movimentoFornitore" placeholder="es. Fornitore SRL" />
+          <div class="card">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nome Marca</th>
+                    <th class="text-right">Azioni</th>
+                  </tr>
+                </thead>
+                <tbody id="marcheTableBody">
+                  <tr>
+                    <td colspan="2" class="text-center">
+                      <span>Caricamento...</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeMovimentoModal()">
-            <span>Annulla</span>
-          </button>
-          <button type="submit" class="btn btn-primary">
-            <span>Salva</span>
-          </button>
-        </div>
-      </form>
+        </section>
+
+        <!-- Sezione PRODOTTI -->
+        <section id="section-prodotti" class="content-section">
+          <div class="section-header">
+            <div>
+              <h1>Gestione Prodotti</h1>
+              <p>Visualizza e gestisci i prodotti del magazzino</p>
+            </div>
+            <div class="filter-controls">
+              <input
+                type="text"
+                id="filterProdotti"
+                class="filter-input"
+                placeholder="Cerca prodotto, marca..."
+              />
+              <button class="btn btn-primary" onclick="openProdottoModal()">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span>Nuovo Prodotto</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nome Prodotto</th>
+                    <th>Marca</th>
+                    <th>Giacenza</th>
+                    <th>Descrizione</th>
+                    <th class="text-right">Azioni</th>
+                  </tr>
+                </thead>
+                <tbody id="prodottiTableBody">
+                  <tr>
+                    <td colspan="5" class="text-center">
+                      <span>Caricamento...</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Sezione MOVIMENTI -->
+        <section id="section-movimenti" class="content-section">
+          <div class="section-header">
+            <div>
+              <h1>Movimenti di Magazzino</h1>
+              <p>Registra carichi e scarichi</p>
+            </div>
+            <div class="filter-controls">
+              <input
+                type="text"
+                id="filterMovimenti"
+                class="filter-input"
+                placeholder="Cerca per prodotto, marca, tipo..."
+              />
+              <button class="btn btn-primary" onclick="openMovimentoModal()">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span>Nuovo Movimento</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Prodotto</th>
+                    <th>Marca</th>
+                    <th>Descrizione</th>
+                    <th>Tipo</th>
+                    <th>Quantità</th>
+                    <th>Prezzo Unit.</th>
+                    <th>Totale</th>
+                    <th>Data</th>
+                    <th>Doc/Fatt</th>
+                    <th>Fornitore</th>
+                    <th class="text-right">Azioni</th>
+                  </tr>
+                </thead>
+                <tbody id="movimentiTableBody">
+                  <tr>
+                    <td colspan="11" class="text-center">
+                      <span>Caricamento...</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Sezione RIEPILOGO -->
+        <section id="section-riepilogo" class="content-section">
+          <div class="section-header">
+            <div>
+              <h1>Riepilogo Magazzino</h1>
+              <p>Giacenze e valorizzazione FIFO</p>
+            </div>
+            <div class="filter-controls">
+              <input
+                type="text"
+                id="filterRiepilogo"
+                class="filter-input"
+                placeholder="Cerca prodotto..."
+              />
+              <button class="btn btn-secondary" onclick="printRiepilogo()">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <polyline points="6 9 6 2 18 2 18 9" />
+                  <path
+                    d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"
+                  />
+                  <rect x="6" y="14" width="12" height="8" />
+                </svg>
+                <span>Stampa</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div>
+                <p class="stat-label">Valore Totale Magazzino</p>
+                <p class="stat-value" id="valoreTotale">€ 0.00</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Prodotto / Marca</th>
+                    <th>Descrizione</th>
+                    <th>Giacenza</th>
+                    <th>Valore Totale</th>
+                  </tr>
+                </thead>
+                <tbody id="riepilogoTableBody">
+                  <tr>
+                    <td colspan="4" class="text-center">
+                      <span>Caricamento...</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Sezione STORICO -->
+        <section id="section-storico" class="content-section">
+          <div class="section-header">
+            <div>
+              <h1>Storico Giacenza</h1>
+              <p>Visualizza giacenze a una data specifica</p>
+            </div>
+            <div class="date-filter">
+              <input type="date" id="storicoDate" class="input-date" />
+              <button class="btn btn-primary" onclick="loadStorico()">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="M21 21l-4.35-4.35" />
+                </svg>
+                <span>Cerca</span>
+              </button>
+              <div class="search-wrapper">
+                <input
+                  type="text"
+                  id="filterStorico"
+                  class="filter-input"
+                  placeholder="Cerca prodotto..."
+                />
+              </div>
+              <button class="btn btn-secondary" onclick="printStorico()">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <polyline points="6 9 6 2 18 2 18 9" />
+                  <path
+                    d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"
+                  />
+                  <rect x="6" y="14" width="12" height="8" />
+                </svg>
+                <span>Stampa</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div>
+                <p class="stat-label">Valore Storico</p>
+                <p class="stat-value" id="valoreStorico">€ 0.00</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Prodotto / Marca</th>
+                    <th>Descrizione</th>
+                    <th>Giacenza</th>
+                    <th>Valore Totale</th>
+                  </tr>
+                </thead>
+                <tbody id="storicoTableBody">
+                  <tr>
+                    <td colspan="4" class="text-center">
+                      Seleziona una data per visualizzare lo storico
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Sezione UTENTI -->
+        <section id="section-utenti" class="content-section">
+          <div class="section-header">
+            <div>
+              <h1>Gestione Utenti</h1>
+              <p>Crea e gestisci gli utenti del sistema</p>
+            </div>
+            <div class="filter-controls">
+              <div class="search-wrapper">
+                <input
+                  type="text"
+                  id="filterUtenti"
+                  class="filter-input"
+                  placeholder="Cerca utente..."
+                />
+              </div>
+              <button class="btn btn-primary" onclick="openUserModal()">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span>Nuovo Utente</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Username</th>
+                    <th class="text-right">Azioni</th>
+                  </tr>
+                </thead>
+                <tbody id="utentiTableBody">
+                  <tr>
+                    <td colspan="2" class="text-center">
+                      <span>Caricamento...</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
-  </div>
 
-  <!-- Modal Utente -->
-  <div id="modalUser" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 id="modalUserTitle">Nuovo Utente</h2>
-        <button class="modal-close" onclick="closeUserModal()" aria-label="Chiudi">
-          &times;
-        </button>
+    <!-- Modal Marca -->
+    <div id="modalMarca" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modalMarcaTitle">Nuova Marca</h2>
+          <button
+            class="modal-close"
+            onclick="closeMarcaModal()"
+            aria-label="Chiudi"
+          >
+            &times;
+          </button>
+        </div>
+        <form id="formMarca">
+          <input type="hidden" id="marcaId" />
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="marcaNome">Nome Marca *</label>
+              <input
+                type="text"
+                id="marcaNome"
+                required
+                placeholder="es. Ducati, Honda, Yamaha..."
+              />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeMarcaModal()"
+            >
+              <span>Annulla</span>
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <span>Salva</span>
+            </button>
+          </div>
+        </form>
       </div>
-      <form id="formUser">
-        <input type="hidden" id="userId" />
+    </div>
+
+    <!-- Modal Prodotto -->
+    <div id="modalProdotto" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modalProdottoTitle">Nuovo Prodotto</h2>
+          <button
+            class="modal-close"
+            onclick="closeProdottoModal()"
+            aria-label="Chiudi"
+          >
+            &times;
+          </button>
+        </div>
+        <form id="formProdotto">
+          <input type="hidden" id="prodottoId" />
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="prodottoNome">Nome Prodotto *</label>
+              <input
+                type="text"
+                id="prodottoNome"
+                required
+                placeholder="es. Olio motore, Filtro aria, Candele..."
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="prodottoMarcaSearch">Marca *</label>
+              <div class="search-select-wrapper">
+                <input
+                  type="text"
+                  id="prodottoMarcaSearch"
+                  class="form-input"
+                  placeholder="Cerca Marca (Nome)"
+                  oninput="searchMarche()"
+                  onfocus="searchMarche()"
+                  autocomplete="off"
+                />
+                <input type="hidden" id="prodottoMarca" required />
+                <div id="marcaSearchResults" class="search-results"></div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="prodottoDescrizione">Descrizione</label>
+              <textarea
+                id="prodottoDescrizione"
+                rows="3"
+                placeholder="Inserisci una descrizione dettagliata del prodotto..."
+              ></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeProdottoModal()"
+            >
+              <span>Annulla</span>
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <span>Salva</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal Movimento -->
+    <div id="modalMovimento" class="modal">
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h2 id="modalMovimentoTitle">Nuovo Movimento</h2>
+          <button
+            class="modal-close"
+            onclick="closeMovimentoModal()"
+            aria-label="Chiudi"
+          >
+            &times;
+          </button>
+        </div>
+        <form id="formMovimento">
+          <input type="hidden" id="movimentoId" />
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="movimentoProdotto">Prodotto *</label>
+              <div class="search-select-wrapper">
+                <input
+                  type="text"
+                  id="movimentoProdottoSearch"
+                  class="form-input"
+                  placeholder="Cerca Prodotto (Nome, Marca, Descrizione)"
+                  oninput="searchProducts()"
+                  onfocus="searchProducts()"
+                  autocomplete="off"
+                />
+                <input type="hidden" id="movimentoProdotto" required />
+                <div id="prodottoSearchResults" class="search-results"></div>
+              </div>
+              <div class="form-group">
+                <label for="movimentoTipo">Tipo Movimento</label>
+                <select id="movimentoTipo" class="form-input" required>
+                  <option value="carico">Carico</option>
+                  <option value="scarico">Scarico</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="giacenzaInfo" class="stock-info">
+              <strong>Giacenza attuale:</strong>
+              <span id="giacenzaValue">-</span>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="movimentoQuantita">Quantità *</label>
+                <input
+                  type="text"
+                  id="movimentoQuantita"
+                  inputmode="decimal"
+                  required
+                  placeholder="es. 10"
+                />
+              </div>
+              <div class="form-group" id="prezzoGroup" style="display: none">
+                <label for="movimentoPrezzo">Prezzo Unitario *</label>
+                <div class="input-with-currency">
+                  <input
+                    type="text"
+                    id="movimentoPrezzo"
+                    inputmode="decimal"
+                    placeholder="es. 25,50"
+                  />
+                  <span class="currency-symbol">€</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="movimentoData">Data Movimento *</label>
+                <input type="date" id="movimentoData" required />
+              </div>
+              <div class="form-group">
+                <label for="movimentoFattura"
+                  >Documento/Fattura <span id="docOptional">*</span></label
+                >
+                <input
+                  type="text"
+                  id="movimentoFattura"
+                  placeholder="es. FT/2024/001"
+                />
+              </div>
+            </div>
+
+            <div class="form-group" id="fornitoreGroup" style="display: none">
+              <label for="movimentoFornitore"
+                >Fornitore <span id="fornitoreOptional">*</span></label
+              >
+              <input
+                type="text"
+                id="movimentoFornitore"
+                placeholder="es. Fornitore SRL"
+              />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeMovimentoModal()"
+            >
+              <span>Annulla</span>
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <span>Salva</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal Utente -->
+    <div id="modalUser" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modalUserTitle">Nuovo Utente</h2>
+          <button
+            class="modal-close"
+            onclick="closeUserModal()"
+            aria-label="Chiudi"
+          >
+            &times;
+          </button>
+        </div>
+        <form id="formUser">
+          <input type="hidden" id="userId" />
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="userUsername">Username *</label>
+              <input
+                type="text"
+                id="userUsername"
+                required
+                placeholder="es. admin, utente1..."
+              />
+            </div>
+            <div class="form-group">
+              <label for="userPassword">Password *</label>
+              <input
+                type="password"
+                id="userPassword"
+                required
+                placeholder="Inserisci una password sicura"
+              />
+              <small>Minimo 8 caratteri</small>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeUserModal()"
+            >
+              <span>Annulla</span>
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <span>Salva</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal Dettagli Lotti -->
+    <div id="modalDettagli" class="modal">
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h2 id="modalDettagliTitle">Dettagli Lotti</h2>
+          <button class="modal-close" onclick="closeDettagliModal()">
+            &times;
+          </button>
+        </div>
         <div class="modal-body">
-          <div class="form-group">
-            <label for="userUsername">Username *</label>
-            <input type="text" id="userUsername" required placeholder="es. admin, utente1..." />
-          </div>
-          <div class="form-group">
-            <label for="userPassword">Password *</label>
-            <input type="password" id="userPassword" required placeholder="Inserisci una password sicura" />
-            <small>Minimo 8 caratteri</small>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Quantità</th>
+                  <th>Prezzo</th>
+                  <th>Valore</th>
+                  <th>Data Carico</th>
+                  <th>Documento</th>
+                  <th>Fornitore</th>
+                </tr>
+              </thead>
+              <tbody id="dettagliTableBody"></tbody>
+            </table>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeUserModal()">
-            <span>Annulla</span>
-          </button>
-          <button type="submit" class="btn btn-primary">
-            <span>Salva</span>
+          <button class="btn btn-secondary" onclick="closeDettagliModal()">
+            Chiudi
           </button>
         </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modal Dettagli Lotti -->
-  <div id="modalDettagli" class="modal">
-    <div class="modal-content modal-large">
-      <div class="modal-header">
-        <h2 id="modalDettagliTitle">Dettagli Lotti</h2>
-        <button class="modal-close" onclick="closeDettagliModal()">
-          &times;
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Quantità</th>
-                <th>Prezzo</th>
-                <th>Valore</th>
-                <th>Data Carico</th>
-                <th>Documento</th>
-                <th>Fornitore</th>
-              </tr>
-            </thead>
-            <tbody id="dettagliTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeDettagliModal()">
-          Chiudi
-        </button>
       </div>
     </div>
-  </div>
 
-  <script src="script.js"></script>
-</body>
-
+    <script src="script.js"></script>
+  </body>
 </html>
