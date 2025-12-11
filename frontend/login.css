@@ -105,7 +105,6 @@ body::before {
   max-width: 280px;
   height: auto;
   border-radius: 16px;
-  filter: drop-shadow(0 4px 12px rgba(99, 102, 241, 0.3));
   position: relative;
 }
 
@@ -381,4 +380,8 @@ body::before {
   .form-input::placeholder {
     color: #64748b;
   }
+}
+
+.toggle-password{
+  display: none;
 }
