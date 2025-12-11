@@ -113,6 +113,25 @@ function randomFloat(min, max) {
   }
 }
 
+/**
+ * Genera una quantità casuale con virgola (circa 60% dei casi)
+ * o un numero intero (circa 40% dei casi).
+ * Restituisce sempre una stringa formattata con esattamente 2 decimali.
+ */
+function randomQuantity(min, max) {
+  const useDecimal = Math.random() < 0.6; // 60% con virgola, 40% senza
+
+  if (useDecimal) {
+    const value = Math.random() * (max - min) + min;
+    return value.toFixed(2);
+  } else {
+    const intValue =
+      Math.floor(Math.random() * (Math.floor(max) - Math.ceil(min) + 1)) +
+      Math.ceil(min);
+    return intValue.toFixed(2);
+  }
+}
+
 function randomDate(daysBack) {
   const today = new Date();
   const randomDays = Math.floor(Math.random() * daysBack);
@@ -359,13 +378,17 @@ async function seedDatabase() {
 
     for (let i = 0; i < numCarichi; i++) {
       const prodotto = randomElement(prodottiInfo);
-      const quantita = randomInt(10, 200);
+      
+      // MODIFICA: Quantità con virgola (60%) o intera (40%)
+      const quantitaString = randomQuantity(10, 200);
+      const quantitaFloat = parseFloat(quantitaString);
 
-      // Utilizza la stringa formattata con 2 decimali
+      // Utilizza la stringa formattata con 2 decimali per il prezzo
       const prezzoString = randomFloat(prodotto.prezzoMin, prodotto.prezzoMax);
-      // Calcola il totale usando il float per la matematica
       const prezzoFloat = parseFloat(prezzoString);
-      const prezzoTotale = (quantita * prezzoFloat).toFixed(2);
+      
+      // Calcola il totale
+      const prezzoTotale = (quantitaFloat * prezzoFloat).toFixed(2);
 
       const fornitore = randomElement(config.fornitori);
       const anno = new Date().getFullYear();
@@ -375,9 +398,9 @@ async function seedDatabase() {
 
       carichiMovimenti.push([
         prodottiIds[prodotto.nome],
-        quantita,
-        prezzoString, // Stringa formattata
-        prezzoTotale, // Stringa formattata del totale
+        quantitaString, // Quantità con virgola
+        prezzoString, // Prezzo con virgola
+        prezzoTotale, // Totale calcolato
         dataMovimento,
         dataRegistrazione,
         fattura,
@@ -386,9 +409,9 @@ async function seedDatabase() {
 
       carichiLotti.push([
         prodottiIds[prodotto.nome],
-        quantita,
-        quantita,
-        prezzoString, // Stringa formattata
+        quantitaString, // quantita_iniziale
+        quantitaString, // quantita_rimanente
+        prezzoString,
         dataMovimento,
         dataRegistrazione,
         fattura,
@@ -416,7 +439,6 @@ async function seedDatabase() {
 
     // 5. CREAZIONE SCARICHI (con controllo disponibilità)
     console.log("📤 Creazione scarichi...");
-    const scarichiMovimenti = [];
     let scarichiCreati = 0;
     let scarichiSaltati = 0;
 
@@ -435,12 +457,12 @@ async function seedDatabase() {
         continue;
       }
 
-      const quantita = Math.min(randomInt(1, 30), disponibilita.totale);
-      const tipoCliente = randomElement(config.clienti);
-      const numeroCliente = String(randomInt(1, 999)).padStart(3, "0");
-      const cliente = `${tipoCliente} ${numeroCliente}`;
-      const anno = new Date().getFullYear();
-      const fattura = `FS-${anno}-${String(i + 1).padStart(6, "0")}`;
+      // MODIFICA: Quantità scarico con virgola (60%) o intera (40%)
+      const quantitaMaxString = randomQuantity(1, 30);
+      const quantitaMaxFloat = parseFloat(quantitaMaxString);
+      const quantitaFloat = Math.min(quantitaMaxFloat, disponibilita.totale);
+      const quantitaString = quantitaFloat.toFixed(2);
+
       const dataMovimento = randomDate(Math.floor(giorniStorico / 2));
       const dataRegistrazione = new Date().toISOString();
 
@@ -452,21 +474,20 @@ async function seedDatabase() {
         [prodottoId]
       );
 
-      // Prezzo dal lotto è già una stringa formattata
       const prezzoString = lotto ? lotto.prezzo : "0.00";
       const prezzoFloat = parseFloat(prezzoString);
 
       // Calcolo e formattazione del totale
-      const prezzoTotale = (quantita * prezzoFloat).toFixed(2);
+      const prezzoTotale = (quantitaFloat * prezzoFloat).toFixed(2);
 
-      // MODIFICA: Per gli scarichi, fattura_doc e fornitore_cliente_id sono NULL
+      // Per gli scarichi, fattura_doc e fornitore_cliente_id sono NULL
       await runQuery(
         `INSERT INTO dati (prodotto_id, tipo, quantita, prezzo, prezzo_totale_movimento, 
           data_movimento, data_registrazione, fattura_doc, fornitore_cliente_id) 
           VALUES (?, 'scarico', ?, ?, ?, ?, ?, NULL, NULL)`,
         [
           prodottoId,
-          quantita,
+          quantitaString, // Quantità con virgola
           prezzoString,
           prezzoTotale,
           dataMovimento,
@@ -475,8 +496,8 @@ async function seedDatabase() {
       );
 
       // Aggiorna lotti FIFO
-      let quantitaDaScaricare = quantita;
-      while (quantitaDaScaricare > 0) {
+      let quantitaDaScaricare = quantitaFloat;
+      while (quantitaDaScaricare > 0.001) { // Tolleranza per errori di arrotondamento
         const lottoFifo = await getQuery(
           `SELECT id, quantita_rimanente FROM lotti 
             WHERE prodotto_id = ? AND quantita_rimanente > 0 
@@ -488,10 +509,11 @@ async function seedDatabase() {
 
         const quantitaDaPrelevare = Math.min(
           quantitaDaScaricare,
-          lottoFifo.quantita_rimanente
+          parseFloat(lottoFifo.quantita_rimanente)
         );
-        const nuovaQuantita =
-          lottoFifo.quantita_rimanente - quantitaDaPrelevare;
+        const nuovaQuantita = (
+          parseFloat(lottoFifo.quantita_rimanente) - quantitaDaPrelevare
+        ).toFixed(2);
 
         await runQuery("UPDATE lotti SET quantita_rimanente = ? WHERE id = ?", [
           nuovaQuantita,

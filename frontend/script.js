@@ -850,7 +850,6 @@ function printRiepilogo() {
         <p><strong>Valore Totale (Filtrato):</strong> ${formatCurrency(
           valoreTotaleFiltrato
         )}</p>
-        <p><strong>Prodotti Visualizzati:</strong> ${riepilogo.length}</p>
         <p><strong>Data Stampa:</strong> ${new Date().toLocaleDateString(
           "it-IT"
         )} ${new Date().toLocaleTimeString("it-IT")}</p>
@@ -1119,7 +1118,6 @@ function printStorico() {
         <p><strong>Valore Totale (Filtrato):</strong> ${formatCurrency(
           valoreStoricoFiltrato
         )}</p>
-        <p><strong>Prodotti Visualizzati:</strong> ${storico.length}</p>
         <p><strong>Data Stampa:</strong> ${new Date().toLocaleDateString(
           "it-IT"
         )} ${new Date().toLocaleTimeString("it-IT")}</p>
