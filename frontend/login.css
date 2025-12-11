@@ -87,7 +87,6 @@ body::before {
   background: linear-gradient(135deg, #667eea, #764ba2);
   border-radius: 20px;
   opacity: 0.1;
-  animation: pulse 3s ease-in-out infinite;
 }
 
 @keyframes pulse {
