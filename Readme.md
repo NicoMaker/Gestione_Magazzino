@@ -113,8 +113,6 @@ Gestione degli account utente (accessibile agli utenti con privilegi amministrat
 - **Eliminazione:**
   - È possibile eliminare un utente **solo se non è l'unico utente rimasto** nel sistema (per evitare di perdere l'accesso).
 
-- se elimini modifici o elimini utente che sono entrato esce in automatico.
-
 ## 🚪 Esci
 
 Per uscire dal sistema in modo sicuro, clicca sul pulsante **"Esci"** nella barra laterale. Questo cancella le tue informazioni di sessione salvate localmente.

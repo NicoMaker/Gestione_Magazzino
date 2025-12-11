@@ -1,27 +1,5 @@
 const API_URL = "api";
 
-// ✅ MOSTRA MESSAGGIO DI LOGOUT SE PRESENTE
-document.addEventListener("DOMContentLoaded", () => {
-  const logoutMessage = sessionStorage.getItem("logoutMessage");
-  if (logoutMessage) {
-    const errorMessage = document.getElementById("errorMessage");
-    errorMessage.textContent = logoutMessage;
-    errorMessage.classList.add("show");
-    
-    // Stile per messaggio informativo (blu)
-    errorMessage.style.background = "linear-gradient(135deg, #e3f2fd 0%, #90caf9 100%)";
-    errorMessage.style.color = "#1976d2";
-    errorMessage.style.borderLeft = "4px solid #2196f3";
-    
-    sessionStorage.removeItem("logoutMessage");
-    
-    // Rimuovi il messaggio dopo 6 secondi
-    setTimeout(() => {
-      errorMessage.classList.remove("show");
-    }, 6000);
-  }
-});
-
 // Toggle password visibility
 const passwordInput = document.getElementById("password");
 const togglePassword = document.getElementById("togglePassword");
@@ -67,11 +45,8 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     const data = await response.json();
 
     if (response.ok) {
-      // ✅ SALVA SESSIONE COMPLETA (username, userId, sessionToken)
-      sessionStorage.setItem("username", data.username);
-      sessionStorage.setItem("userId", data.userId);
-      sessionStorage.setItem("sessionToken", data.sessionToken);
-      sessionStorage.setItem("loginTime", new Date().toISOString());
+      // 🟢 FIX APPLICATO: Salva lo username in localStorage per la home page
+      localStorage.setItem("username", username);
 
       // Success animation
       btnLogin.style.background =
@@ -85,12 +60,6 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     } else {
       errorMessage.textContent = data.error || "Errore durante il login";
       errorMessage.classList.add("show");
-      
-      // Reset stile errore (rosso)
-      errorMessage.style.background = "linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)";
-      errorMessage.style.color = "#991b1b";
-      errorMessage.style.borderLeft = "4px solid #ef4444";
-      
       // Error animation
       btnLogin.style.background =
         "linear-gradient(135deg, #f87171 0%, #ef4444 100%)";
@@ -107,12 +76,6 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     errorMessage.textContent =
       "Impossibile connettersi al server. Riprova più tardi.";
     errorMessage.classList.add("show");
-    
-    // Reset stile errore (rosso)
-    errorMessage.style.background = "linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)";
-    errorMessage.style.color = "#991b1b";
-    errorMessage.style.borderLeft = "4px solid #ef4444";
-    
     btnLogin.style.background =
       "linear-gradient(135deg, #f87171 0%, #ef4444 100%)";
     btnLogin.querySelector(".btn-text").textContent = "Errore di rete";
