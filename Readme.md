@@ -78,7 +78,7 @@ Questa è la sezione principale per il controllo delle scorte.
   - Il **Prezzo di Acquisto** unitario del lotto.
   - Il **Documento/Fattura** e il **Fornitore** associati a quel carico.
 
-  - il bottone stampa vede quello che vedi nella tabella, con una stampa a schermo del riepilogo.
+- il bottone stampa vede quello che vedi nella tabella, con una stampa a schermo del riepilogo.
 
 ### 5. Magazzino - Riepilogo (Giacenze e Valore)
 
@@ -98,7 +98,7 @@ Questa è la sezione principale per il controllo delle scorte a una data specifi
   - Il **Prezzo di Acquisto** unitario del lotto.
   - Il **Documento/Fattura** e il **Fornitore** associati a quel carico.
 
-  - il bottone stampa vede quello che vedi nella tabella, con una stampa a schermo del riepilogo.
+- il bottone stampa vede quello che vedi nella tabella, con una stampa a schermo del riepilogo.
 
 ### 6. Utenti
 
@@ -112,6 +112,8 @@ Gestione degli account utente (accessibile agli utenti con privilegi amministrat
   - _Quando si modifica un utente, la password è opzionale: se lasciata vuota, non verrà cambiata._
 - **Eliminazione:**
   - È possibile eliminare un utente **solo se non è l'unico utente rimasto** nel sistema (per evitare di perdere l'accesso).
+
+- se elimini modifici o elimini utente che sono entrato esce in automatico.
 
 ## 🚪 Esci
 
