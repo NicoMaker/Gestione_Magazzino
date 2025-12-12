@@ -165,8 +165,12 @@ router.post("/", (req, res) => {
         if (err) return res.status(500).json({ error: err.message });
 
         if (lotti.length === 0) {
+          // Converti data da YYYY-MM-DD a gg/mm/aaaa
+          const [anno, mese, giorno] = data_movimento.split("-");
+          const dataItaliana = `${giorno}/${mese}/${anno}`;
+
           return res.status(400).json({
-            error: `Nessun carico disponibile alla data ${data_movimento}. Verifica di aver caricato il prodotto prima o nella stessa data dello scarico.`,
+            error: `Nessun carico disponibile alla data ${dataItaliana}. Verifica di aver caricato il prodotto prima o nella stessa data dello scarico.`,
           });
         }
 
@@ -178,7 +182,7 @@ router.post("/", (req, res) => {
 
         if (giacenzaTotale < qty) {
           return res.status(400).json({
-            error: `Giacenza insufficiente alla data ${data_movimento}. Disponibili: ${formatDecimal(
+            error: `Giacenza insufficiente alla data indicata. Disponibili: ${formatDecimal(
               giacenzaTotale
             )} - Richiesti: ${qty}`,
           });

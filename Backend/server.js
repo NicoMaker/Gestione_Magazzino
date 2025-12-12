@@ -3,8 +3,6 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-const os = require("os");
-const { exec } = require("child_process");
 const { initDatabase } = require("./db/init");
 
 const authRoutes = require("./routes/auth");
@@ -37,18 +35,4 @@ app.listen(PORT, () => {
   console.log(`✅ Backend avviato su http://localhost:${PORT}`);
 
   const url = `http://localhost:${PORT}/index.html`;
-  let cmd;
-
-  switch (os.platform()) {
-    case "win32":
-      cmd = `start ${url}`;
-      break;
-    case "darwin":
-      cmd = `open ${url}`;
-      break;
-    default:
-      cmd = `xdg-open ${url}`;
-      break;
-  }
-  exec(cmd);
 });
