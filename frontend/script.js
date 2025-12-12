@@ -3686,3 +3686,111 @@ const handleKeydown = function (e) {
   // Blocca tutto il resto
   e.preventDefault();
 };
+
+// ==================== VALIDAZIONE DATE ====================
+
+/**
+ * Imposta la data massima selezionabile come oggi
+ * Previene l'inserimento di date future
+ */
+function setupDateValidation() {
+  const dateInput = document.getElementById("movimentoData");
+  const storicoDateInput = document.getElementById("storicoDate");
+  
+  if (dateInput) {
+    // Imposta max date come oggi
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.setAttribute('max', today);
+    
+    // Validazione aggiuntiva on change
+    dateInput.addEventListener('change', function() {
+      const selectedDate = new Date(this.value);
+      const todayDate = new Date();
+      todayDate.setHours(0, 0, 0, 0);
+      
+      if (selectedDate > todayDate) {
+        alert('⚠️ Non puoi selezionare una data futura! Seleziona oggi o una data passata.');
+        this.value = today;
+      }
+    });
+    
+    // Validazione anche on input (per digitazione manuale)
+    dateInput.addEventListener('input', function() {
+      const selectedDate = new Date(this.value);
+      const todayDate = new Date();
+      todayDate.setHours(0, 0, 0, 0);
+      
+      if (selectedDate > todayDate) {
+        this.value = today;
+      }
+    });
+  }
+  
+  if (storicoDateInput) {
+    // Imposta max date come oggi per storico
+    const today = new Date().toISOString().split('T')[0];
+    storicoDateInput.setAttribute('max', today);
+    
+    storicoDateInput.addEventListener('change', function() {
+      const selectedDate = new Date(this.value);
+      const todayDate = new Date();
+      todayDate.setHours(0, 0, 0, 0);
+      
+      if (selectedDate > todayDate) {
+        alert('⚠️ Non puoi selezionare una data futura! Seleziona oggi o una data passata.');
+        this.value = today;
+      }
+    });
+  }
+}
+
+// ==================== MODIFICA FUNZIONE openMovimentoModal ====================
+
+/**
+ * Apre il modal per inserire un nuovo movimento
+ * IMPORTANTE: Chiama setupDecimalInputs() dopo un breve timeout
+ */
+async function openMovimentoModal(movimento = null) {
+  console.log("📂 Apertura modal movimento...");
+
+  // Carica prodotti se necessario
+  if (prodotti.length === 0) {
+    const res = await fetch(`${API_URL}/prodotti`);
+    prodotti = await res.json();
+  }
+
+  const modal = document.getElementById("modalMovimento");
+  const title = document.getElementById("modalMovimentoTitle");
+  const form = document.getElementById("formMovimento");
+
+  form.reset();
+  title.textContent = "Nuovo Movimento";
+  document.getElementById("movimentoId").value = "";
+
+  if (!movimento) {
+    document.getElementById("giacenzaInfo").style.display = "none";
+  }
+
+  // Resetta ricerca prodotto
+  const searchInput = document.getElementById("movimentoProdottoSearch");
+  const hiddenInput = document.getElementById("movimentoProdotto");
+  const resultsContainer = document.getElementById("prodottoSearchResults");
+
+  if (searchInput) searchInput.value = "";
+  if (hiddenInput) hiddenInput.value = "";
+  if (resultsContainer) resultsContainer.classList.remove("show");
+
+  // Resetta campi prezzo/fornitore
+  togglePrezzoField();
+
+  // Mostra modal
+  modal.classList.add("active");
+
+  // ⭐ IMPORTANTE: Applica setup decimali e validazione date dopo breve timeout
+  setTimeout(() => {
+    console.log("⏱️ Timeout scaduto, applico setup decimali e validazione date...");
+    setupDecimalInputs();
+    setupProductSearch();
+    setupDateValidation();
+  }, 150); // 150ms di attesa per assicurarsi che il DOM sia pronto
+}
