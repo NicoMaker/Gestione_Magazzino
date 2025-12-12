@@ -479,7 +479,3 @@ body::before {
     background: rgba(0, 0, 0, 0.2);
   }
 }
-
-.toggle-password{
-  display: none;
-}
