@@ -3820,3 +3820,90 @@ async function openMovimentoModal(movimento = null) {
     setupDateValidation();
   }, 150); // 150ms di attesa per assicurarsi che il DOM sia pronto
 }
+
+/**
+ * Inizializza la funzione di toggle visibilità password per un campo specifico.
+ * @param {string} inputId - L'ID del campo input (es. 'userPassword').
+ * @param {string} toggleId - L'ID dell'icona SVG (es. 'toggleUserPassword').
+ */
+function setupPasswordToggle(inputId, toggleId) {
+  const passwordInput = document.getElementById(inputId);
+  const togglePassword = document.getElementById(toggleId);
+
+  if (!passwordInput || !togglePassword) {
+    console.error(
+      `Elementi non trovati per il toggle: ${inputId} o ${toggleId}`
+    );
+    return;
+  }
+
+  // Icone SVG (occhio aperto = mostra, occhio sbarrato = nascondi)
+  const iconVisible = `
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+    <circle cx="12" cy="12" r="3"/>
+  `;
+  const iconHidden = `
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.08 2.58"/>
+    <line x1="1" y1="1" x2="23" y2="23"/>
+    <circle cx="12" cy="12" r="3"/>
+  `;
+
+  // La logica si basa sullo stato iniziale: input è type="password" e icona è iconVisible (occhio aperto)
+  togglePassword.addEventListener("click", function () {
+    // Determina il nuovo tipo
+    const type =
+      passwordInput.getAttribute("type") === "password" ? "text" : "password";
+    // Applica il nuovo tipo
+    passwordInput.setAttribute("type", type);
+
+    // Cambia l'icona in base al nuovo stato
+    if (type === "text") {
+      // Password visibile -> mostra icona 'nascondi' (occhio sbarrato)
+      togglePassword.innerHTML = iconHidden;
+    } else {
+      // Password nascosta -> mostra icona 'mostra' (occhio aperto)
+      togglePassword.innerHTML = iconVisible;
+    }
+  });
+}
+
+// ... (nel file script.js)
+
+function openUserModal(utente = null) {
+  const modal = document.getElementById("modalUser");
+  const title = document.getElementById("modalUserTitle");
+  const form = document.getElementById("formUser");
+  const passwordInput = document.getElementById("userPassword");
+  const passwordOptional = document.getElementById("passwordOptional");
+  // 🎯 NUOVA: Ottengo l'elemento toggle
+  const togglePassword = document.getElementById("toggleUserPassword");
+
+  form.reset();
+
+  // ⭐ AGGIUNTA: Reimposta l'icona a occhio aperto ogni volta che il modal si apre
+  // Questo è essenziale se il modal viene riaperto dopo aver attivato il toggle
+  if (togglePassword) {
+    togglePassword.innerHTML = `
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+        <circle cx="12" cy="12" r="3"/>
+      `;
+  }
+
+  if (utente) {
+    title.textContent = "Modifica Utente";
+    document.getElementById("userId").value = utente.id;
+    document.getElementById("userName").value = utente.username;
+    passwordInput.placeholder = "Lascia vuoto per non modificare";
+    passwordOptional.textContent = "(Opzionale)";
+  } else {
+    title.textContent = "Nuovo Utente";
+    document.getElementById("userId").value = "";
+    passwordInput.placeholder = "Inserisci password";
+    passwordOptional.textContent = "*";
+  }
+
+  modal.classList.add("active");
+
+  // ⭐ AGGIUNTA: Attiva la funzione di toggle password
+  setupPasswordToggle("userPassword", "toggleUserPassword");
+}

@@ -1096,7 +1096,6 @@ tbody tr:hover {
   }
 }
 
-
 .text-green {
   color: green !important;
 }
@@ -1104,7 +1103,6 @@ tbody tr:hover {
 .text-red {
   color: red !important;
 }
-
 
 /* ==================== SEARCH SELECT AUTOCOMPLETE ==================== */
 .search-select-wrapper {
@@ -1259,7 +1257,7 @@ tbody tr:hover {
   .search-results {
     max-height: 200px;
   }
-  
+
   .search-result-item {
     padding: 10px 14px;
   }
@@ -1420,7 +1418,7 @@ tbody tr:hover {
   #marcaSearchResults {
     max-height: 200px;
   }
-  
+
   .marca-result-item {
     padding: 10px 14px;
   }
@@ -1481,7 +1479,7 @@ tbody tr:hover {
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 1px;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1521,7 +1519,11 @@ tbody tr:hover {
    ============================================ */
 
 .company-info-sidebar {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.05) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.1) 0%,
+    rgba(168, 85, 247, 0.05) 100%
+  );
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 16px;
@@ -1587,10 +1589,11 @@ tbody tr:hover {
 
 .divider-line {
   height: 1px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(99, 102, 241, 0.2) 20%, 
-    rgba(99, 102, 241, 0.2) 80%, 
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(99, 102, 241, 0.2) 20%,
+    rgba(99, 102, 241, 0.2) 80%,
     transparent 100%
   );
   margin: 12px 0;
@@ -1636,25 +1639,25 @@ tbody tr:hover {
     padding: 12px;
     margin-bottom: 12px;
   }
-  
+
   .company-icon {
     width: 32px;
     height: 32px;
   }
-  
+
   .company-icon svg {
     width: 16px;
     height: 16px;
   }
-  
+
   .company-label {
     font-size: 10px;
   }
-  
+
   .company-value {
     font-size: 13px;
   }
-  
+
   .company-value-small {
     font-size: 12px;
   }
@@ -1663,14 +1666,18 @@ tbody tr:hover {
 /* Dark mode support (opzionale) */
 @media (prefers-color-scheme: dark) {
   .company-info-sidebar {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.1) 100%);
+    background: linear-gradient(
+      135deg,
+      rgba(99, 102, 241, 0.15) 0%,
+      rgba(168, 85, 247, 0.1) 100%
+    );
     border-color: rgba(99, 102, 241, 0.2);
   }
-  
+
   .company-value {
     color: #f1f5f9;
   }
-  
+
   .company-value-small {
     color: #94a3b8;
   }
@@ -1679,7 +1686,11 @@ tbody tr:hover {
 /* Variante alternativa con bordo colorato */
 .company-info-sidebar.bordered {
   border-left: 4px solid #6366f1;
-  background: linear-gradient(90deg, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.03) 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(99, 102, 241, 0.08) 0%,
+    rgba(168, 85, 247, 0.03) 100%
+  );
 }
 
 /* Effetto glassmorphism più pronunciato */
@@ -1690,6 +1701,44 @@ tbody tr:hover {
   box-shadow: 0 4px 16px rgba(99, 102, 241, 0.1);
 }
 
-.logo{
+.logo {
   width: fit-content !important;
+}
+/* ==================== STILI PER TOGGLE PASSWORD (home.html) ==================== */
+
+/* 1. Contenitore per il posizionamento */
+.input-container {
+  position: relative; /* Permette il posizionamento assoluto dell'icona */
+  display: flex;
+  align-items: center;
+}
+
+/* 2. Spazio a destra nell'input */
+/* Aggiunge spazio di padding a destra per non coprire il testo con l'icona */
+.input-container input[type="password"],
+.input-container input[type="text"] {
+  /* Assumi che questo selector sia valido per il tuo input, altrimenti usa il tuo selector generico per input */
+  padding-right: 40px !important;
+  width: 100%;
+}
+
+/* 3. Stile dell'icona (l'Occhio) */
+.toggle-password {
+  position: absolute;
+  right: 12px; /* Distanza dal bordo destro (regola questo valore se necessario) */
+  top: 50%; /* Centra verticalmente */
+  transform: translateY(-50%);
+  width: 20px; /* Dimensione piccola (20x20px) */
+  height: 20px;
+  cursor: pointer;
+  color: var(
+    --text-secondary,
+    #64748b
+  ); /* Usa il colore del testo secondario */
+  transition: color 0.2s ease;
+  z-index: 10; /* Assicura che sia cliccabile sopra l'input */
+}
+
+.toggle-password:hover {
+  color: var(--primary, #6366f1); /* Colore al passaggio del mouse */
 }

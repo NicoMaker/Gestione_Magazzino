@@ -783,14 +783,28 @@
               />
             </div>
             <div class="form-group">
-              <label for="userPassword">Password *</label>
-              <input
-                type="password"
-                id="userPassword"
-                required
-                placeholder="Inserisci una password sicura"
-              />
-              <small>Minimo 8 caratteri</small>
+              <label for="userPassword"
+                >Password <span id="passwordOptional"></span
+              ></label>
+              <div class="input-container">
+                <input
+                  type="password"
+                  id="userPassword"
+                  placeholder="Lascia vuoto per non modificare"
+                  autocomplete="new-password"
+                />
+                <svg
+                  class="toggle-password"
+                  id="toggleUserPassword"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              </div>
             </div>
           </div>
           <div class="modal-footer">
