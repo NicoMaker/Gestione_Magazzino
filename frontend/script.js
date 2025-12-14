@@ -386,75 +386,6 @@ async function loadMovimenti() {
   }
 }
 
-function renderMovimenti() {
-  const tbody = document.getElementById("movimentiTableBody");
-
-  if (movimenti.length === 0) {
-    tbody.innerHTML =
-      '<tr><td colspan="10" class="text-center">Nessun movimento presente</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = movimenti
-    .map((m) => {
-      const prefix = m.tipo === "scarico" ? "- " : "";
-
-      // Calcolo prezzo unitario
-      let prezzoUnitarioRaw = "-";
-      if (m.tipo === "carico" && m.prezzo) {
-        prezzoUnitarioRaw = formatCurrency(m.prezzo);
-      } else if (m.tipo === "scarico" && m.prezzo_unitario_scarico) {
-        prezzoUnitarioRaw = formatCurrency(m.prezzo_unitario_scarico);
-      }
-
-      const prezzoUnitarioHtml =
-        prezzoUnitarioRaw !== "-"
-          ? prezzoUnitarioRaw.replace("€ ", `${prefix}€ `)
-          : "-";
-
-      const prezzoTotaleRaw = formatCurrency(m.prezzo_totale || 0);
-      const prezzoTotaleHtml = prezzoTotaleRaw.replace("€ ", `${prefix}€ `);
-
-      // 🎨 Classe colore: verde per carico, rosso per scarico
-      const colorClass = m.tipo === "carico" ? "text-green" : "text-red";
-
-      return `
-    <tr>
-      <td><strong>${m.prodotto_nome}</strong></td>
-      <td>${m.marca_nome || '<span style="color: #999;">-</span>'}</td>
-      <td>${
-        m.prodotto_descrizione
-          ? `<small>${m.prodotto_descrizione.substring(0, 30)}${
-              m.prodotto_descrizione.length > 30 ? "..." : ""
-            }</small>`
-          : '<span style="color: #999;">-</span>'
-      }</td>
-      <td><span class="badge ${
-        m.tipo === "carico" ? "badge-success" : "badge-danger"
-      }">${m.tipo.toUpperCase()}</span></td>
-
-      <!-- 🎨 Colori dinamici -->
-      <td class="${colorClass}">${formatQuantity(m.quantita)} pz</td>
-      <td class="${colorClass}">${prezzoUnitarioHtml}</td>
-      <td class="${colorClass}"><strong>${prezzoTotaleHtml}</strong></td>
-
-      <td>${new Date(m.data_movimento).toLocaleDateString("it-IT")}</td>
-      <td>${m.fattura_doc || '<span style="color: #999;">-</span>'}</td>
-      <td class="text-right">
-        <button class="btn-icon" onclick="deleteMovimento(${
-          m.id
-        })" title="Elimina">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-          </svg>
-        </button>
-      </td>
-    </tr>
-  `;
-    })
-    .join("");
-}
-
 document.getElementById("filterMovimenti")?.addEventListener("input", (e) => {
   const searchTerm = e.target.value.toLowerCase();
   movimenti = allMovimenti.filter(
@@ -754,10 +685,10 @@ function renderRiepilogo() {
             <table class="lotti-table">
               <thead>
                 <tr>
+                  <th>Data Carico</th>
                   <th>Quantità</th>
                   <th>Prezzo Unit.</th>
                   <th>Valore</th>
-                  <th>Data Carico</th>
                   <th>Documento</th>
                   <th>Fornitore</th>
                 </tr>
@@ -768,6 +699,9 @@ function renderRiepilogo() {
       r.lotti.forEach((lotto) => {
         html += `
                 <tr>
+                  <td>${new Date(lotto.data_carico).toLocaleDateString(
+                    "it-IT"
+                  )}</td>
                   <td><strong>${formatQuantity(
                     lotto.quantita_rimanente
                   )} pz</strong></td>
@@ -775,9 +709,6 @@ function renderRiepilogo() {
                   <td><strong>${formatCurrency(
                     lotto.quantita_rimanente * lotto.prezzo
                   )}</strong></td>
-                  <td>${new Date(lotto.data_carico).toLocaleDateString(
-                    "it-IT"
-                  )}</td>
                   <td>${
                     lotto.fattura_doc || '<span style="color: #999;">-</span>'
                   }</td>
@@ -890,10 +821,10 @@ function printRiepilogo() {
           <table>
             <thead>
               <tr>
+                <th>Data Carico</th>
                 <th>Quantità</th>
                 <th>Prezzo Unit.</th>
                 <th>Valore</th>
-                <th>Data Carico</th>
                 <th>Documento</th>
                 <th>Fornitore</th>
               </tr>
@@ -904,14 +835,14 @@ function printRiepilogo() {
         prodotto.lotti.forEach((lotto) => {
           printContent += `
             <tr class="lotto-row">
+              <td>${new Date(lotto.data_carico).toLocaleDateString(
+                "it-IT"
+              )}</td>
               <td>${formatQuantity(lotto.quantita_rimanente)} pz</td>
               <td>${formatCurrency(lotto.prezzo)}</td>
               <td><strong>${formatCurrency(
                 lotto.quantita_rimanente * lotto.prezzo
               )}</strong></td>
-              <td>${new Date(lotto.data_carico).toLocaleDateString(
-                "it-IT"
-              )}</td>
               <td>${lotto.fattura_doc || "-"}</td>
               <td>${lotto.fornitore || "-"}</td>
             </tr>
@@ -1018,10 +949,10 @@ function renderStorico(storico) {
             <table class="lotti-table">
               <thead>
                 <tr>
+                  <th>Data Carico</th>
                   <th>Quantità</th>
                   <th>Prezzo Unit.</th>
                   <th>Valore</th>
-                  <th>Data Carico</th>
                   <th>Documento</th>
                   <th>Fornitore</th>
                 </tr>
@@ -1032,6 +963,9 @@ function renderStorico(storico) {
       s.lotti.forEach((lotto) => {
         html += `
                 <tr>
+                                  <td>${new Date(
+                                    lotto.data_carico
+                                  ).toLocaleDateString("it-IT")}</td>
                   <td><strong>${formatQuantity(
                     lotto.quantita_rimanente
                   )} pz</strong></td>
@@ -1039,9 +973,6 @@ function renderStorico(storico) {
                   <td><strong>${formatCurrency(
                     lotto.quantita_rimanente * lotto.prezzo
                   )}</strong></td>
-                  <td>${new Date(lotto.data_carico).toLocaleDateString(
-                    "it-IT"
-                  )}</td>
                   <td>${
                     lotto.fattura_doc || '<span style="color: #999;">-</span>'
                   }</td>
@@ -1162,10 +1093,10 @@ function printStorico() {
           <table>
             <thead>
               <tr>
+                <th>Data Carico</th>
                 <th>Quantità</th>
                 <th>Prezzo Unit.</th>
                 <th>Valore</th>
-                <th>Data Carico</th>
                 <th>Documento</th>
                 <th>Fornitore</th>
               </tr>
@@ -1176,14 +1107,14 @@ function printStorico() {
         prodotto.lotti.forEach((lotto) => {
           printContent += `
             <tr class="lotto-row">
+              <td>${new Date(lotto.data_carico).toLocaleDateString(
+                "it-IT"
+              )}</td>
               <td>${formatQuantity(lotto.quantita_rimanente)} pz</td>
               <td>${formatCurrency(lotto.prezzo)}</td>
               <td><strong>${formatCurrency(
                 lotto.quantita_rimanente * lotto.prezzo
               )}</strong></td>
-              <td>${new Date(lotto.data_carico).toLocaleDateString(
-                "it-IT"
-              )}</td>
               <td>${lotto.fattura_doc || "-"}</td>
               <td>${lotto.fornitore || "-"}</td>
             </tr>
@@ -1489,76 +1420,6 @@ async function openMovimentoModal(movimento = null) {
   setupDecimalInputs();
 
   modal.classList.add("active");
-}
-
-function renderMovimenti() {
-  const tbody = document.getElementById("movimentiTableBody");
-
-  if (movimenti.length === 0) {
-    tbody.innerHTML =
-      '<tr><td colspan="11" class="text-center">Nessun movimento presente</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = movimenti
-    .map((m) => {
-      const prefix = m.tipo === "scarico" ? "- " : "";
-
-      // Calcolo prezzo unitario
-      let prezzoUnitarioRaw = "-";
-      if (m.tipo === "carico" && m.prezzo) {
-        prezzoUnitarioRaw = formatCurrency(m.prezzo);
-      } else if (m.tipo === "scarico" && m.prezzo_unitario_scarico) {
-        prezzoUnitarioRaw = formatCurrency(m.prezzo_unitario_scarico);
-      }
-
-      const prezzoUnitarioHtml =
-        prezzoUnitarioRaw !== "-"
-          ? prezzoUnitarioRaw.replace("€ ", `${prefix}€ `)
-          : "-";
-
-      const prezzoTotaleRaw = formatCurrency(m.prezzo_totale || 0);
-      const prezzoTotaleHtml = prezzoTotaleRaw.replace("€ ", `${prefix}€ `);
-
-      const colorClass = m.tipo === "carico" ? "text-green" : "text-red";
-
-      return `
-    <tr>
-      <td><strong>${m.prodotto_nome}</strong></td>
-      <td>${m.marca_nome || '<span style="color: #999;">-</span>'}</td>
-      <td>${
-        m.prodotto_descrizione
-          ? `<small>${m.prodotto_descrizione.substring(0, 30)}${
-              m.prodotto_descrizione.length > 30 ? "..." : ""
-            }</small>`
-          : '<span style="color: #999;">-</span>'
-      }</td>
-      <td><span class="badge ${
-        m.tipo === "carico" ? "badge-success" : "badge-danger"
-      }">${m.tipo.toUpperCase()}</span></td>
-
-      <td class="${colorClass}">${formatQuantity(m.quantita)} pz</td>
-      <td class="${colorClass}">${prezzoUnitarioHtml}</td>
-      <td class="${colorClass}"><strong>${prezzoTotaleHtml}</strong></td>
-
-      <td>${new Date(m.data_movimento).toLocaleDateString("it-IT")}</td>
-      <td>${m.fattura_doc || '<span style="color: #999;">-</span>'}</td>
-      <td>${
-        m.fornitore_cliente_id || '<span style="color: #999;">-</span>'
-      }</td>
-      <td class="text-right">
-        <button class="btn-icon" onclick="deleteMovimento(${
-          m.id
-        })" title="Elimina">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-          </svg>
-        </button>
-      </td>
-    </tr>
-  `;
-    })
-    .join("");
 }
 
 // ==================== GESTIONE SEPARATORE DECIMALE ====================
@@ -3906,4 +3767,76 @@ function openUserModal(utente = null) {
 
   // ⭐ AGGIUNTA: Attiva la funzione di toggle password
   setupPasswordToggle("userPassword", "toggleUserPassword");
+}
+
+function renderMovimenti() {
+  const tbody = document.getElementById("movimentiTableBody");
+
+  if (movimenti.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="11" class="text-center">Nessun movimento presente</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = movimenti
+    .map((m) => {
+      const prefix = m.tipo === "scarico" ? "- " : "";
+
+      // Calcolo prezzo unitario
+      let prezzoUnitarioRaw = "-";
+      if (m.tipo === "carico" && m.prezzo) {
+        prezzoUnitarioRaw = formatCurrency(m.prezzo);
+      } else if (m.tipo === "scarico" && m.prezzo_unitario_scarico) {
+        prezzoUnitarioRaw = formatCurrency(m.prezzo_unitario_scarico);
+      }
+
+      const prezzoUnitarioHtml =
+        prezzoUnitarioRaw !== "-"
+          ? prezzoUnitarioRaw.replace("€ ", `${prefix}€ `)
+          : "-";
+
+      const prezzoTotaleRaw = formatCurrency(m.prezzo_totale || 0);
+      const prezzoTotaleHtml = prezzoTotaleRaw.replace("€ ", `${prefix}€ `);
+
+      // 🎨 Classe colore: verde per carico, rosso per scarico
+      const colorClass = m.tipo === "carico" ? "text-green" : "text-red";
+
+      return `
+    <tr>
+      <td>${new Date(m.data_movimento).toLocaleDateString("it-IT")}</td>
+      <td><strong>${m.prodotto_nome}</strong></td>
+      <td>${m.marca_nome || '<span style="color: #999;">-</span>'}</td>
+      <td>${
+        m.prodotto_descrizione
+          ? `<small>${m.prodotto_descrizione.substring(0, 30)}${
+              m.prodotto_descrizione.length > 30 ? "..." : ""
+            }</small>`
+          : '<span style="color: #999;">-</span>'
+      }</td>
+      <td><span class="badge ${
+        m.tipo === "carico" ? "badge-success" : "badge-danger"
+      }">${m.tipo.toUpperCase()}</span></td>
+
+      <!-- 🎨 Colori dinamici -->
+      <td class="${colorClass}">${formatQuantity(m.quantita)} pz</td>
+      <td class="${colorClass}">${prezzoUnitarioHtml}</td>
+      <td class="${colorClass}"><strong>${prezzoTotaleHtml}</strong></td>
+
+      <td>${m.fattura_doc || '<span style="color: #999;">-</span>'}</td>
+      <td>${
+        m.fornitore_cliente_id || '<span style="color: #999;">-</span>'
+      }</td>
+      <td class="text-right">
+        <button class="btn-icon" onclick="deleteMovimento(${
+          m.id
+        })" title="Elimina">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+        </button>
+      </td>
+    </tr>
+  `;
+    })
+    .join("");
 }
