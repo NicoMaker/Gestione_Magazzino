@@ -278,64 +278,64 @@
         </section>
 
         <!-- Sezione MOVIMENTI -->
-<!-- Sezione MOVIMENTI -->
-<section id="section-movimenti" class="content-section">
-  <div class="section-header">
-    <div>
-      <h1>Movimenti di Magazzino</h1>
-      <p>Registra carichi e scarichi</p>
-    </div>
-    <div class="filter-controls">
-      <input
-        type="text"
-        id="filterMovimenti"
-        class="filter-input"
-        placeholder="Cerca per prodotto, marca, tipo..."
-      />
-      <button class="btn btn-primary" onclick="openMovimentoModal()">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <line x1="12" y1="5" x2="12" y2="19" />
-          <line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
-        <span>Nuovo Movimento</span>
-      </button>
-    </div>
-  </div>
+        <!-- Sezione MOVIMENTI -->
+        <section id="section-movimenti" class="content-section">
+          <div class="section-header">
+            <div>
+              <h1>Movimenti di Magazzino</h1>
+              <p>Registra carichi e scarichi</p>
+            </div>
+            <div class="filter-controls">
+              <input
+                type="text"
+                id="filterMovimenti"
+                class="filter-input"
+                placeholder="Cerca per prodotto, marca, tipo..."
+              />
+              <button class="btn btn-primary" onclick="openMovimentoModal()">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span>Nuovo Movimento</span>
+              </button>
+            </div>
+          </div>
 
-  <div class="card">
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Prodotto</th>
-            <th>Marca</th>
-            <th>Descrizione</th>
-            <th>Tipo</th>
-            <th>Quantità</th>
-            <th>Prezzo Unit.</th>
-            <th>Totale</th>
-            <th>Doc/Fatt</th>
-            <th>Fornitore</th>
-            <th class="text-right">Azioni</th>
-          </tr>
-        </thead>
-        <tbody id="movimentiTableBody">
-          <tr>
-            <td colspan="11" class="text-center">
-              <span>Caricamento...</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
+          <div class="card">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Data carico/scarico</th>
+                    <th>Prodotto</th>
+                    <th>Marca</th>
+                    <th>Descrizione</th>
+                    <th>Tipo</th>
+                    <th>Quantità</th>
+                    <th>Prezzo Unit.</th>
+                    <th>Totale</th>
+                    <th>Doc/Fatt</th>
+                    <th>Fornitore</th>
+                    <th class="text-right">Azioni</th>
+                  </tr>
+                </thead>
+                <tbody id="movimentiTableBody">
+                  <tr>
+                    <td colspan="11" class="text-center">
+                      <span>Caricamento...</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
 
         <!-- Sezione RIEPILOGO -->
         <section id="section-riepilogo" class="content-section">
