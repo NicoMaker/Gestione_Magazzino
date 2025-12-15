@@ -802,7 +802,7 @@ function printRiepilogo() {
           <img class="logo-header" src="/img/Logo.png" alt="Logo Magazzino Moto">
         </div>
         <div class="header-right">
-          <p><strong>P. Iva 12345678901</strong></p>
+          <p><strong>P. Iva</strong> 12345678901</p>
           <p><strong>Posizione:</strong> Via Roma 123 - 34100 Trieste (TS)</p>
         </div>
       </div>
@@ -1118,7 +1118,7 @@ function printStorico() {
           <img class="logo-header" src="${logoSrc}" alt="Logo Magazzino Moto">
         </div>
         <div class="header-right">
-          <p><strong>P. Iva 12345678901</strong></p>
+          <p><strong>P. Iva</strong> 12345678901</p>
           <p><strong>Posizione:</strong> Via Roma 123 - 34100 Trieste (TS)</p>
         </div>
       </div>
