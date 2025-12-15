@@ -263,24 +263,21 @@ function renderProdotti() {
       (p) => `
     <tr>
       <td><strong>${p.nome}</strong></td>
-      <td><span class="badge badge-marca">${
-        p.marca_nome ? p.marca_nome.toUpperCase() : "N/A"
-      }</span></td>
+      <td><span class="badge badge-marca">${p.marca_nome ? p.marca_nome.toUpperCase() : "N/A"
+        }</span></td>
       <td><span class="badge-giacenza">${formatQuantity(
-        p.giacenza ?? 0
-      )} pz</span></td>
+          p.giacenza ?? 0
+        )} pz</span></td>
       <td>${p.descrizione || "-"}</td>
       <td class="text-right">
-        <button class="btn-icon" onclick="editProdotto(${
-          p.id
+        <button class="btn-icon" onclick="editProdotto(${p.id
         })" title="Modifica">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
           </svg>
         </button>
-        <button class="btn-icon" onclick="deleteProdotto(${
-          p.id
+        <button class="btn-icon" onclick="deleteProdotto(${p.id
         })" title="Elimina">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
@@ -606,9 +603,8 @@ async function showGiacenzaInfo(prodottoId) {
       const giacenzaInfo = document.getElementById("giacenzaInfo");
       const giacenzaValue = document.getElementById("giacenzaValue");
 
-      giacenzaValue.textContent = `${prodotto.nome} ${
-        prodotto.marca_nome ? `(${prodotto.marca_nome})` : ""
-      } - Giacenza: ${formatQuantity(prodotto.giacenza || 0)} pz`;
+      giacenzaValue.textContent = `${prodotto.nome} ${prodotto.marca_nome ? `(${prodotto.marca_nome})` : ""
+        } - Giacenza: ${formatQuantity(prodotto.giacenza || 0)} pz`;
       giacenzaInfo.style.display = "block";
     }
   } catch (error) {
@@ -657,17 +653,14 @@ function renderRiepilogo() {
   riepilogo.forEach((r) => {
     html += `
     <tr class="product-main-row">
-      <td><strong>${r.nome}</strong>${
-      r.marca_nome
+      <td><strong>${r.nome}</strong>${r.marca_nome
         ? ` <span class="badge-marca">(${r.marca_nome.toUpperCase()})</span>`
         : ""
-    }</td>
-      <td>${
-        r.descrizione
-          ? `<small>${r.descrizione.substring(0, 50)}${
-              r.descrizione.length > 50 ? "..." : ""
-            }</small>`
-          : '<span style="color: #999;">-</span>'
+      }</td>
+      <td>${r.descrizione
+        ? `<small>${r.descrizione.substring(0, 50)}${r.descrizione.length > 50 ? "..." : ""
+        }</small>`
+        : '<span style="color: #999;">-</span>'
       }</td>
       <td><span class="badge-giacenza">${formatQuantity(
         r.giacenza
@@ -700,21 +693,19 @@ function renderRiepilogo() {
         html += `
                 <tr>
                   <td>${new Date(lotto.data_carico).toLocaleDateString(
-                    "it-IT"
-                  )}</td>
+          "it-IT"
+        )}</td>
                   <td><strong>${formatQuantity(
-                    lotto.quantita_rimanente
-                  )} pz</strong></td>
+          lotto.quantita_rimanente
+        )} pz</strong></td>
                   <td>${formatCurrency(lotto.prezzo)}</td>
                   <td><strong>${formatCurrency(
-                    lotto.quantita_rimanente * lotto.prezzo
-                  )}</strong></td>
-                  <td>${
-                    lotto.fattura_doc || '<span style="color: #999;">-</span>'
-                  }</td>
-                  <td>${
-                    lotto.fornitore || '<span style="color: #999;">-</span>'
-                  }</td>
+          lotto.quantita_rimanente * lotto.prezzo
+        )}</strong></td>
+                  <td>${lotto.fattura_doc || '<span style="color: #999;">-</span>'
+          }</td>
+                  <td>${lotto.fornitore || '<span style="color: #999;">-</span>'
+          }</td>
                 </tr>
         `;
       });
@@ -802,19 +793,19 @@ function printRiepilogo() {
           <img class="logo-header" src="/img/Logo.png" alt="Logo Magazzino Moto">
         </div>
         <div class="header-right">
-          <p><strong>P. Iva</strong> 12345678901</p>
-          <p><strong>Posizione:</strong> Via Roma 123 - 34100 Trieste (TS)</p>
+          <p><strong>P. Iva</strong> 03141330302</p>
+          <p><strong>Posizione:</strong> Via Stradalta 27 Bertiolo (UD)</p>
         </div>
       </div>
 
       <h1>Riepilogo Giacenze Magazzino</h1>
       <div class="info">
         <p><strong>Valore Totale (Filtrato):</strong> ${formatCurrency(
-          valoreTotaleFiltrato
-        )}</p>
+    valoreTotaleFiltrato
+  )}</p>
         <p><strong>Data Stampa:</strong> ${new Date().toLocaleDateString(
-          "it-IT"
-        )} ${new Date().toLocaleTimeString("it-IT")}</p>
+    "it-IT"
+  )} ${new Date().toLocaleTimeString("it-IT")}</p>
       </div>
   `;
 
@@ -826,20 +817,19 @@ function printRiepilogo() {
             <div class="prodotto-info">
               <span><strong>Prodotto:</strong> ${prodotto.nome}</span>
               <span><strong>Giacenza Totale:</strong> ${formatQuantity(
-                prodotto.giacenza
-              )} pz</span>
+        prodotto.giacenza
+      )} pz</span>
             </div>
             <div class="prodotto-info">
               <span><strong>Marca:</strong> ${prodotto.marca_nome || "-"}</span>
               <span><strong>Valore Totale:</strong> ${formatCurrency(
-                prodotto.valore_totale
-              )}</span>
+        prodotto.valore_totale
+      )}</span>
             </div>
-            ${
-              prodotto.descrizione
-                ? `<div class="prodotto-info"><span><strong>Descrizione:</strong> ${prodotto.descrizione}</span></div>`
-                : ""
-            }
+            ${prodotto.descrizione
+          ? `<div class="prodotto-info"><span><strong>Descrizione:</strong> ${prodotto.descrizione}</span></div>`
+          : ""
+        }
           </div>
       `;
 
@@ -863,13 +853,13 @@ function printRiepilogo() {
           printContent += `
             <tr class="lotto-row">
               <td>${new Date(lotto.data_carico).toLocaleDateString(
-                "it-IT"
-              )}</td>
+            "it-IT"
+          )}</td>
               <td>${formatQuantity(lotto.quantita_rimanente)} pz</td>
               <td>${formatCurrency(lotto.prezzo)}</td>
               <td><strong>${formatCurrency(
-                lotto.quantita_rimanente * lotto.prezzo
-              )}</strong></td>
+            lotto.quantita_rimanente * lotto.prezzo
+          )}</strong></td>
               <td>${lotto.fattura_doc || "-"}</td>
               <td>${lotto.fornitore || "-"}</td>
             </tr>
@@ -963,17 +953,14 @@ function renderStorico(storico) {
   storico.forEach((s) => {
     html += `
     <tr class="product-main-row">
-      <td><strong>${s.nome}</strong>${
-      s.marca_nome
+      <td><strong>${s.nome}</strong>${s.marca_nome
         ? ` <span class="badge-marca">(${s.marca_nome.toUpperCase()})</span>`
         : ""
-    }</td>
-      <td>${
-        s.descrizione
-          ? `<small>${s.descrizione.substring(0, 50)}${
-              s.descrizione.length > 50 ? "..." : ""
-            }</small>`
-          : '<span style="color: #999;">-</span>'
+      }</td>
+      <td>${s.descrizione
+        ? `<small>${s.descrizione.substring(0, 50)}${s.descrizione.length > 50 ? "..." : ""
+        }</small>`
+        : '<span style="color: #999;">-</span>'
       }</td>
       <td><span class="badge-giacenza">${formatQuantity(
         s.giacenza
@@ -1006,21 +993,19 @@ function renderStorico(storico) {
         html += `
                 <tr>
                                   <td>${new Date(
-                                    lotto.data_carico
-                                  ).toLocaleDateString("it-IT")}</td>
+          lotto.data_carico
+        ).toLocaleDateString("it-IT")}</td>
                   <td><strong>${formatQuantity(
-                    lotto.quantita_rimanente
-                  )} pz</strong></td>
+          lotto.quantita_rimanente
+        )} pz</strong></td>
                   <td>${formatCurrency(lotto.prezzo)}</td>
                   <td><strong>${formatCurrency(
-                    lotto.quantita_rimanente * lotto.prezzo
-                  )}</strong></td>
-                  <td>${
-                    lotto.fattura_doc || '<span style="color: #999;">-</span>'
-                  }</td>
-                  <td>${
-                    lotto.fornitore || '<span style="color: #999;">-</span>'
-                  }</td>
+          lotto.quantita_rimanente * lotto.prezzo
+        )}</strong></td>
+                  <td>${lotto.fattura_doc || '<span style="color: #999;">-</span>'
+          }</td>
+                  <td>${lotto.fornitore || '<span style="color: #999;">-</span>'
+          }</td>
                 </tr>
         `;
       });
@@ -1118,8 +1103,8 @@ function printStorico() {
           <img class="logo-header" src="${logoSrc}" alt="Logo Magazzino Moto">
         </div>
         <div class="header-right">
-          <p><strong>P. Iva</strong> 12345678901</p>
-          <p><strong>Posizione:</strong> Via Roma 123 - 34100 Trieste (TS)</p>
+          <p><strong>P. Iva</strong> 03141330302</p>
+          <p><strong>Posizione:</strong> Via Stradalta 27 Bertiolo (UD)
         </div>
       </div>
 
@@ -1127,11 +1112,11 @@ function printStorico() {
       <div class="info">
         <p><strong>Data Selezionata:</strong> ${dataItalianaSelezionata}</p>
         <p><strong>Valore Totale (Filtrato):</strong> ${formatCurrency(
-          valoreStoricoFiltrato
-        )}</p>
+    valoreStoricoFiltrato
+  )}</p>
         <p><strong>Data Stampa:</strong> ${new Date().toLocaleDateString(
-          "it-IT"
-        )} ${new Date().toLocaleTimeString("it-IT")}</p>
+    "it-IT"
+  )} ${new Date().toLocaleTimeString("it-IT")}</p>
       </div>
   `;
 
@@ -1143,20 +1128,19 @@ function printStorico() {
             <div class="prodotto-info">
               <span><strong>Prodotto:</strong> ${prodotto.nome}</span>
               <span><strong>Giacenza Totale:</strong> ${formatQuantity(
-                prodotto.giacenza
-              )} pz</span>
+        prodotto.giacenza
+      )} pz</span>
             </div>
             <div class="prodotto-info">
               <span><strong>Marca:</strong> ${prodotto.marca_nome || "-"}</span>
               <span><strong>Valore Totale:</strong> ${formatCurrency(
-                prodotto.valore_totale
-              )}</span>
+        prodotto.valore_totale
+      )}</span>
             </div>
-            ${
-              prodotto.descrizione
-                ? `<div class="prodotto-info"><span><strong>Descrizione:</strong> ${prodotto.descrizione}</span></div>`
-                : ""
-            }
+            ${prodotto.descrizione
+          ? `<div class="prodotto-info"><span><strong>Descrizione:</strong> ${prodotto.descrizione}</span></div>`
+          : ""
+        }
           </div>
       `;
 
@@ -1180,13 +1164,13 @@ function printStorico() {
           printContent += `
             <tr class="lotto-row">
               <td>${new Date(lotto.data_carico).toLocaleDateString(
-                "it-IT"
-              )}</td>
+            "it-IT"
+          )}</td>
               <td>${formatQuantity(lotto.quantita_rimanente)} pz</td>
               <td>${formatCurrency(lotto.prezzo)}</td>
               <td><strong>${formatCurrency(
-                lotto.quantita_rimanente * lotto.prezzo
-              )}</strong></td>
+            lotto.quantita_rimanente * lotto.prezzo
+          )}</strong></td>
               <td>${lotto.fattura_doc || "-"}</td>
               <td>${lotto.fornitore || "-"}</td>
             </tr>
@@ -1835,9 +1819,8 @@ function renderProductSearchResults(filtered, searchTerm) {
       )} pz</span>`;
 
       return `
-      <div class="search-result-item" data-id="${p.id}" data-nome="${
-        p.nome
-      }" data-marca="${p.marca_nome || ""}" data-giacenza="${p.giacenza || 0}">
+      <div class="search-result-item" data-id="${p.id}" data-nome="${p.nome
+        }" data-marca="${p.marca_nome || ""}" data-giacenza="${p.giacenza || 0}">
         <div class="search-result-name">${highlightMatch(
           p.nome,
           searchTerm
@@ -1845,14 +1828,13 @@ function renderProductSearchResults(filtered, searchTerm) {
         <div class="search-result-meta">
           ${marcaBadge}
           ${giacenzaBadge}
-          ${
-            p.descrizione
-              ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
-                  0,
-                  40
-                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
-              : ""
-          }
+          ${p.descrizione
+          ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
+            0,
+            40
+          )}${p.descrizione.length > 40 ? "..." : ""}</span>`
+          : ""
+        }
         </div>
       </div>
     `;
@@ -2009,19 +1991,18 @@ function searchProducts() {
           <div class="search-result-meta">
             <span class="search-result-marca">${marcaHighlighted}</span>
             <span class="search-result-giacenza">Giacenza: ${formatQuantity(
-              p.giacenza
-            )} pz</span>
+        p.giacenza
+      )} pz</span>
           </div>
         </div>
         <div class="search-result-body">
-          ${
-            p.descrizione
-              ? `<span style="opacity: 0.7; font-size: 13px;">• ${p.descrizione.substring(
-                  0,
-                  40
-                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
-              : ""
-          }
+          ${p.descrizione
+          ? `<span style="opacity: 0.7; font-size: 13px;">• ${p.descrizione.substring(
+            0,
+            40
+          )}${p.descrizione.length > 40 ? "..." : ""}</span>`
+          : ""
+        }
         </div>
       </div>
     `;
@@ -2150,19 +2131,18 @@ function searchProducts() {
           <div class="search-result-meta">
             <span class="search-result-marca">${marcaHighlighted}</span>
             <span class="search-result-giacenza">Giacenza: ${formatQuantity(
-              p.giacenza
-            )} pz</span>
+        p.giacenza
+      )} pz</span>
           </div>
         </div>
         <div class="search-result-body">
-          ${
-            p.descrizione
-              ? `<span style="opacity: 0.7; font-size: 13px;">• ${p.descrizione.substring(
-                  0,
-                  40
-                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
-              : ""
-          }
+          ${p.descrizione
+          ? `<span style="opacity: 0.7; font-size: 13px;">• ${p.descrizione.substring(
+            0,
+            40
+          )}${p.descrizione.length > 40 ? "..." : ""}</span>`
+          : ""
+        }
         </div>
       </div>
     `;
@@ -2240,22 +2220,20 @@ function searchProducts() {
       >
         <div class="search-result-name">${nomeHighlighted}</div>
         <div class="search-result-meta">
-          ${
-            p.marca_nome
-              ? `<span class="search-result-marca">${marcaHighlighted}</span>`
-              : ""
-          }
+          ${p.marca_nome
+          ? `<span class="search-result-marca">${marcaHighlighted}</span>`
+          : ""
+        }
           <span class="search-result-giacenza">${formatQuantity(
-            p.giacenza || 0
-          )} pz</span>
-          ${
-            p.descrizione
-              ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
-                  0,
-                  40
-                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
-              : ""
-          }
+          p.giacenza || 0
+        )} pz</span>
+          ${p.descrizione
+          ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
+            0,
+            40
+          )}${p.descrizione.length > 40 ? "..." : ""}</span>`
+          : ""
+        }
         </div>
       </div>
     `;
@@ -2332,22 +2310,20 @@ function searchProducts() {
       >
         <div class="search-result-name">${nomeHighlighted}</div>
         <div class="search-result-meta">
-          ${
-            p.marca_nome
-              ? `<span class="search-result-marca">${marcaHighlighted}</span>`
-              : ""
-          }
+          ${p.marca_nome
+          ? `<span class="search-result-marca">${marcaHighlighted}</span>`
+          : ""
+        }
           <span class="search-result-giacenza">${formatQuantity(
-            p.giacenza || 0
-          )} pz</span>
-          ${
-            p.descrizione
-              ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
-                  0,
-                  40
-                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
-              : ""
-          }
+          p.giacenza || 0
+        )} pz</span>
+          ${p.descrizione
+          ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
+            0,
+            40
+          )}${p.descrizione.length > 40 ? "..." : ""}</span>`
+          : ""
+        }
         </div>
       </div>
     `;
@@ -2442,22 +2418,20 @@ function searchProducts() {
       >
         <div class="search-result-name">${nomeHighlighted}</div>
         <div class="search-result-meta">
-          ${
-            p.marca_nome
-              ? `<span class="search-result-marca">${marcaHighlighted}</span>`
-              : ""
-          }
+          ${p.marca_nome
+          ? `<span class="search-result-marca">${marcaHighlighted}</span>`
+          : ""
+        }
           <span class="search-result-giacenza">${formatQuantity(
-            p.giacenza || 0
-          )} pz</span>
-          ${
-            p.descrizione
-              ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
-                  0,
-                  40
-                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
-              : ""
-          }
+          p.giacenza || 0
+        )} pz</span>
+          ${p.descrizione
+          ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
+            0,
+            40
+          )}${p.descrizione.length > 40 ? "..." : ""}</span>`
+          : ""
+        }
         </div>
       </div>
     `;
@@ -2560,22 +2534,20 @@ function searchProducts() {
       >
         <div class="search-result-name">${nomeHighlighted}</div>
         <div class="search-result-meta">
-          ${
-            p.marca_nome
-              ? `<span class="search-result-marca">${marcaHighlighted}</span>`
-              : ""
-          }
+          ${p.marca_nome
+          ? `<span class="search-result-marca">${marcaHighlighted}</span>`
+          : ""
+        }
           <span class="search-result-giacenza">${formatQuantity(
-            p.giacenza || 0
-          )} pz</span>
-          ${
-            p.descrizione
-              ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
-                  0,
-                  40
-                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
-              : ""
-          }
+          p.giacenza || 0
+        )} pz</span>
+          ${p.descrizione
+          ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
+            0,
+            40
+          )}${p.descrizione.length > 40 ? "..." : ""}</span>`
+          : ""
+        }
         </div>
       </div>
     `;
@@ -3883,16 +3855,13 @@ function renderMovimenti() {
       <td>${new Date(m.data_movimento).toLocaleDateString("it-IT")}</td>
       <td><strong>${m.prodotto_nome}</strong></td>
       <td>${m.marca_nome || '<span style="color: #999;">-</span>'}</td>
-      <td>${
-        m.prodotto_descrizione
-          ? `<small>${m.prodotto_descrizione.substring(0, 30)}${
-              m.prodotto_descrizione.length > 30 ? "..." : ""
-            }</small>`
+      <td>${m.prodotto_descrizione
+          ? `<small>${m.prodotto_descrizione.substring(0, 30)}${m.prodotto_descrizione.length > 30 ? "..." : ""
+          }</small>`
           : '<span style="color: #999;">-</span>'
-      }</td>
-      <td><span class="badge ${
-        m.tipo === "carico" ? "badge-success" : "badge-danger"
-      }">${m.tipo.toUpperCase()}</span></td>
+        }</td>
+      <td><span class="badge ${m.tipo === "carico" ? "badge-success" : "badge-danger"
+        }">${m.tipo.toUpperCase()}</span></td>
 
       <!-- 🎨 Colori dinamici -->
       <td class="${colorClass}">${formatQuantity(m.quantita)} pz</td>
@@ -3900,12 +3869,10 @@ function renderMovimenti() {
       <td class="${colorClass}"><strong>${prezzoTotaleHtml}</strong></td>
 
       <td>${m.fattura_doc || '<span style="color: #999;">-</span>'}</td>
-      <td>${
-        m.fornitore_cliente_id || '<span style="color: #999;">-</span>'
-      }</td>
+      <td>${m.fornitore_cliente_id || '<span style="color: #999;">-</span>'
+        }</td>
       <td class="text-right">
-        <button class="btn-icon" onclick="deleteMovimento(${
-          m.id
+        <button class="btn-icon" onclick="deleteMovimento(${m.id
         })" title="Elimina">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>

@@ -1,110 +1,79 @@
 <!DOCTYPE html>
 <html lang="it">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login - Gestione Magazzino Moto</title>
-    <link rel="stylesheet" href="login.css" />
-  </head>
-  <body>
-    <div class="login-container">
-      <div class="login-card">
-        <div class="logo-section">
-          <div class="logo-wrapper">
-            <img
-              src="img/logo.png"
-              alt="Logo Magazzino Moto"
-              class="logo-img"
-            />
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Gestione Magazzino Moto</title>
+  <link rel="stylesheet" href="login.css" />
+</head>
+
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <div class="logo-section">
+        <div class="logo-wrapper">
+          <img src="img/logo.png" alt="Logo Magazzino Moto" class="logo-img" />
+        </div>
+        <h1 class="login-title">Gestione Magazzino Moto</h1>
+        <p class="login-subtitle">Accedi al sistema di gestione</p>
+      </div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label" for="username">Username</label>
+          <div class="input-container">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            <input type="text" id="username" class="form-input" placeholder="Inserisci username" required
+              autocomplete="username" />
           </div>
-          <h1 class="login-title">Gestione Magazzino Moto</h1>
-          <p class="login-subtitle">Accedi al sistema di gestione</p>
         </div>
 
-        <form id="loginForm">
-          <div class="form-group">
-            <label class="form-label" for="username">Username</label>
-            <div class="input-container">
-              <svg
-                class="input-icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-              <input
-                type="text"
-                id="username"
-                class="form-input"
-                placeholder="Inserisci username"
-                required
-                autocomplete="username"
-              />
-            </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <div class="input-container">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0110 0v4" />
+            </svg>
+            <input type="password" id="password" class="form-input" placeholder="Inserisci password" required
+              autocomplete="current-password" />
+            <svg class="toggle-password" id="togglePassword" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
           </div>
+        </div>
 
-          <div class="form-group">
-            <label class="form-label" for="password">Password</label>
-            <div class="input-container">
-              <svg
-                class="input-icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0110 0v4" />
-              </svg>
-              <input
-                type="password"
-                id="password"
-                class="form-input"
-                placeholder="Inserisci password"
-                required
-                autocomplete="current-password"
-              />
-              <svg
-                class="toggle-password"
-                id="togglePassword"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-            </div>
-          </div>
+        <button type="submit" class="btn-login">
+          <span class="btn-text">Accedi</span>
+          <div class="loader"></div>
+        </button>
+      </form>
 
-          <button type="submit" class="btn-login">
-            <span class="btn-text">Accedi</span>
-            <div class="loader"></div>
-          </button>
-        </form>
+      <div id="errorMessage" class="error-message"></div>
 
-        <div id="errorMessage" class="error-message"></div>
+      <div class="login-footer">
+        <p class="footer-text">
+          Credenziali di accesso fornite dall'amministratore
+        </p>
 
-        <div class="login-footer">
-          <p class="footer-text">
-            Credenziali di accesso fornite dall'amministratore
-          </p>
-
-          <!-- 🆕 INDIRIZZO E PARTITA IVA -->
-          <div class="company-info">
-            <p class="company-address">Via Roma, 123 - 34100 Trieste (TS)</p>
-            <div class="piva-container">
-              <p class="piva-label">Partita IVA</p>
-              <p class="piva-value">12345678901</p>
-            </div>
+        <!-- 🆕 INDIRIZZO E PARTITA IVA -->
+        <div class="company-info">
+          <p class="company-address">Via Stradalta 27 Bertiolo (UD)</p>
+          <div class="piva-container">
+            <p class="piva-label">Partita IVA</p>
+            <p class="piva-value">03141330302</p>
           </div>
         </div>
       </div>
     </div>
-    <script src="login.js"></script>
-  </body>
+  </div>
+  <script src="login.js"></script>
+</body>
+
 </html>
