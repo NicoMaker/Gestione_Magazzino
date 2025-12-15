@@ -93,9 +93,6 @@ body::before {
   position: relative;
 }
 
-.logo-wrapper:hover .logo-img {
-  transform: scale(1.02);
-}
 
 /* Modern gradient text */
 .login-title {
