@@ -777,9 +777,36 @@ function printRiepilogo() {
         th { background-color: #6366f1; color: white; }
         .lotto-row { background-color: #f9fafb; }
         .no-lotti { text-align: center; color: #999; padding: 10px; }
+
+        .header-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 10px;
+        }
+        .header-left img.logo-header {
+          width: 120px;
+          height: auto;
+          display: block;
+        }
+        .header-right {
+          text-align: right;
+          font-size: 12px;
+          line-height: 1.2;
+        }
       </style>
     </head>
     <body>
+      <div class="header-row">
+        <div class="header-left">
+          <img class="logo-header" src="/img/Logo.png" alt="Logo Magazzino Moto">
+        </div>
+        <div class="header-right">
+          <p><strong>P. Iva 12345678901</strong></p>
+          <p><strong>Posizione:</strong> Via Roma 123 - 34100 Trieste (TS)</p>
+        </div>
+      </div>
+
       <h1>Riepilogo Giacenze Magazzino</h1>
       <div class="info">
         <p><strong>Valore Totale (Filtrato):</strong> ${formatCurrency(
@@ -863,13 +890,28 @@ function printRiepilogo() {
 
   printContent += `</body></html>`;
 
+  // --- creazione iframe e stampa ---
   const printFrame = document.createElement("iframe");
-  printFrame.style.display = "none";
+  printFrame.style.position = "fixed";
+  printFrame.style.right = "0";
+  printFrame.style.bottom = "0";
+  printFrame.style.width = "0";
+  printFrame.style.height = "0";
+  printFrame.style.border = "0";
   document.body.appendChild(printFrame);
-  printFrame.contentDocument.write(printContent);
-  printFrame.contentDocument.close();
-  printFrame.contentWindow.print();
-  setTimeout(() => document.body.removeChild(printFrame), 1000);
+
+  const doc = printFrame.contentDocument || printFrame.contentWindow.document;
+  doc.open();
+  doc.write(printContent);
+  doc.close();
+
+  printFrame.onload = () => {
+    setTimeout(() => {
+      printFrame.contentWindow.focus();
+      printFrame.contentWindow.print();
+      setTimeout(() => document.body.removeChild(printFrame), 1000);
+    }, 500);
+  };
 }
 
 // ==================== STORICO ====================
@@ -1026,6 +1068,9 @@ function printStorico() {
     ? new Date(dataSelezionata + "T00:00:00").toLocaleDateString("it-IT")
     : "Non selezionata";
 
+  // Usa direttamente il path del logo (assicurati che sia corretto)
+  const logoSrc = "img/Logo.png";
+
   let printContent = `
     <!DOCTYPE html>
     <html>
@@ -1048,9 +1093,36 @@ function printStorico() {
         th { background-color: #6366f1; color: white; }
         .lotto-row { background-color: #f9fafb; }
         .no-lotti { text-align: center; color: #999; padding: 10px; }
+
+        .header-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 10px;
+        }
+        .header-left img.logo-header {
+          width: 120px;
+          height: auto;
+          display: block;
+        }
+        .header-right {
+          text-align: right;
+          font-size: 12px;
+          line-height: 1.2;
+        }
       </style>
     </head>
     <body>
+      <div class="header-row">
+        <div class="header-left">
+          <img class="logo-header" src="${logoSrc}" alt="Logo Magazzino Moto">
+        </div>
+        <div class="header-right">
+          <p><strong>P. Iva 12345678901</strong></p>
+          <p><strong>Posizione:</strong> Via Roma 123 - 34100 Trieste (TS)</p>
+        </div>
+      </div>
+
       <h1>Storico Giacenze Magazzino</h1>
       <div class="info">
         <p><strong>Data Selezionata:</strong> ${dataItalianaSelezionata}</p>
@@ -1140,8 +1212,13 @@ function printStorico() {
   document.body.appendChild(printFrame);
   printFrame.contentDocument.write(printContent);
   printFrame.contentDocument.close();
-  printFrame.contentWindow.print();
-  setTimeout(() => document.body.removeChild(printFrame), 1000);
+
+  // piccolo delay per dare il tempo al logo di caricarsi prima della stampa
+  setTimeout(() => {
+    printFrame.contentWindow.focus();
+    printFrame.contentWindow.print();
+    setTimeout(() => document.body.removeChild(printFrame), 1000);
+  }, 300);
 }
 
 // ==================== UTENTI ====================
