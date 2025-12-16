@@ -3884,3 +3884,43 @@ function renderMovimenti() {
     })
     .join("");
 }
+
+function openUserModal(utente = null) {
+  const modal = document.getElementById("modalUser");
+  const title = document.getElementById("modalUserTitle");
+  const form = document.getElementById("formUser");
+  const passwordInput = document.getElementById("userPassword");
+  const passwordOptional = document.getElementById("passwordOptional");
+  const togglePassword = document.getElementById("toggleUserPassword");
+
+  form.reset();
+
+  // ⭐ Reimposta l'icona a occhio aperto ogni volta che il modal si apre
+  if (togglePassword) {
+    togglePassword.innerHTML = `
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+      <circle cx="12" cy="12" r="3"/>
+    `;
+  }
+
+  if (utente) {
+    // ✅ CORREZIONE: Usa 'userUsername' invece di 'userName'
+    title.textContent = "Modifica Utente";
+    document.getElementById("userId").value = utente.id;
+    document.getElementById("userUsername").value = utente.username;  // 🎯 CORRETTO
+    passwordInput.placeholder = "Lascia vuoto per non modificare";
+    passwordInput.required = false;
+    if (passwordOptional) passwordOptional.textContent = "(Opzionale)";
+  } else {
+    title.textContent = "Nuovo Utente";
+    document.getElementById("userId").value = "";
+    passwordInput.placeholder = "Inserisci password";
+    passwordInput.required = true;
+    if (passwordOptional) passwordOptional.textContent = "*";
+  }
+
+  modal.classList.add("active");
+
+  // ⭐ Attiva la funzione di toggle password
+  setupPasswordToggle("userPassword", "toggleUserPassword");
+}
