@@ -794,7 +794,7 @@ function printRiepilogo() {
         </div>
         <div class="header-right">
           <p><strong>P. Iva</strong> 1234567890</p>
-          <p><strong>Posizione:</strong> Via prova 123)</p>
+          <p><strong>Posizione:</strong> Via prova 123</p>
         </div>
       </div>
 
@@ -1104,7 +1104,7 @@ function printStorico() {
         </div>
         <div class="header-right">
           <p><strong>P. Iva</strong> 1234567890</p>
-          <p><strong>Posizione:</strong> Via prova 123)
+          <p><strong>Posizione:</strong> Via prova 123
         </div>
       </div>
 
