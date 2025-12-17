@@ -793,8 +793,8 @@ function printRiepilogo() {
           <img class="logo-header" src="/img/Logo.png" alt="Logo Magazzino Moto">
         </div>
         <div class="header-right">
-          <p><strong>P. Iva</strong> 03141330302</p>
-          <p><strong>Posizione:</strong> Via Stradalta 27 Bertiolo (UD)</p>
+          <p><strong>P. Iva</strong> 1234567890</p>
+          <p><strong>Posizione:</strong> Via prova 123)</p>
         </div>
       </div>
 
@@ -1103,8 +1103,8 @@ function printStorico() {
           <img class="logo-header" src="${logoSrc}" alt="Logo Magazzino Moto">
         </div>
         <div class="header-right">
-          <p><strong>P. Iva</strong> 03141330302</p>
-          <p><strong>Posizione:</strong> Via Stradalta 27 Bertiolo (UD)
+          <p><strong>P. Iva</strong> 1234567890</p>
+          <p><strong>Posizione:</strong> Via prova 123)
         </div>
       </div>
 
