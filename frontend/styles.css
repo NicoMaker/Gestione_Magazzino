@@ -1742,3 +1742,288 @@ tbody tr:hover {
 .toggle-password:hover {
   color: var(--primary, #6366f1); /* Colore al passaggio del mouse */
 }
+
+/* ==================== STILI IMPORT PDF ==================== */
+/* Aggiungi questo CSS al file styles.css */
+
+/* Info Box */
+.info-box {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border-radius: 12px;
+  border-left: 4px solid #3b82f6;
+  margin-bottom: 24px;
+}
+
+.info-box svg {
+  width: 24px;
+  height: 24px;
+  color: #3b82f6;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.info-text {
+  flex: 1;
+}
+
+.info-text strong {
+  display: block;
+  color: #1e40af;
+  font-size: 15px;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.info-text p {
+  font-size: 14px;
+  color: #1e40af;
+  margin: 6px 0;
+  line-height: 1.5;
+}
+
+.info-text ul {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+}
+
+.info-text li {
+  font-size: 14px;
+  color: #1e40af;
+  padding: 4px 0;
+  font-weight: 500;
+}
+
+/* File Upload Custom */
+.file-upload-wrapper {
+  position: relative;
+}
+
+.file-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.file-upload-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 24px;
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  background: var(--bg-main);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.file-upload-label:hover {
+  border-color: var(--primary);
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.file-upload-label svg {
+  width: 32px;
+  height: 32px;
+  color: var(--primary);
+}
+
+.file-upload-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.file-input:focus + .file-upload-label {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+/* File Preview */
+.file-preview {
+  display: none;
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #065f46;
+  border-left: 3px solid #10b981;
+}
+
+/* Example Box */
+.example-box {
+  margin-top: 24px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.example-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: var(--bg-main);
+  border-bottom: 1px solid var(--border);
+}
+
+.example-header svg {
+  width: 20px;
+  height: 20px;
+  color: var(--text-secondary);
+}
+
+.example-header strong {
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.example-content {
+  padding: 18px;
+  background: #fafafa;
+}
+
+.example-content pre {
+  margin: 0;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Loading Spinner Inline */
+.loading-spinner-inline {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Alert Message (opzionale, per risultati inline) */
+.alert-message {
+  padding: 16px 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.alert-message svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.alert-message.success {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border-left: 4px solid #10b981;
+  color: #065f46;
+}
+
+.alert-message.warning {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-left: 4px solid #f59e0b;
+  color: #78350f;
+}
+
+.alert-message.error {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border-left: 4px solid #ef4444;
+  color: #991b1b;
+}
+
+/* Responsive per mobile */
+@media (max-width: 768px) {
+  .info-box {
+    flex-direction: column;
+    padding: 16px;
+  }
+  
+  .info-box svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .file-upload-label {
+    padding: 30px 20px;
+    flex-direction: column;
+  }
+  
+  .file-upload-label svg {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .file-upload-text {
+    font-size: 14px;
+    text-align: center;
+  }
+  
+  .example-content pre {
+    font-size: 12px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .info-box {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(30, 64, 175, 0.2) 100%);
+    border-left-color: #60a5fa;
+  }
+  
+  .info-text strong,
+  .info-text p,
+  .info-text li {
+    color: #93c5fd;
+  }
+  
+  .file-upload-label {
+    background: rgba(30, 41, 59, 0.5);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .file-upload-label:hover {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: var(--primary);
+  }
+  
+  .example-box {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .example-header {
+    background: rgba(30, 41, 59, 0.5);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .example-content {
+    background: rgba(15, 23, 42, 0.5);
+  }
+  
+  .example-content pre {
+    color: #e2e8f0;
+  }
+}
