@@ -4454,3 +4454,707 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+
+
+// ==================== 📄 IMPORT PDF SCARICHI - SISTEMA COMPLETO ====================
+
+/**
+ * 🔧 Carica PDF.js da CDN (Cloudflare)
+ * Versione: 3.11.174 (stabile e testata)
+ */
+async function loadPDFJS() {
+  return new Promise((resolve, reject) => {
+    // Se PDF.js è già caricato, esci
+    if (window.pdfjsLib) {
+      console.log('✅ PDF.js già caricato');
+      resolve();
+      return;
+    }
+    
+    console.log('⏳ Caricamento PDF.js da CDN...');
+    
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    
+    script.onload = () => {
+      // Configura il worker per PDF.js
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      console.log('✅ PDF.js caricato con successo');
+      resolve();
+    };
+    
+    script.onerror = () => {
+      console.error('❌ Errore caricamento PDF.js');
+      reject(new Error('Impossibile caricare la libreria PDF.js'));
+    };
+    
+    document.head.appendChild(script);
+  });
+}
+
+/**
+ * 📖 Estrae tutto il testo dal PDF
+ * @param {File} file - File PDF da leggere
+ * @returns {Promise<string>} - Testo completo estratto
+ */
+async function extractTextFromPDF(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    
+    reader.onload = async function(e) {
+      try {
+        console.log('📖 Inizio lettura PDF...');
+        
+        const typedarray = new Uint8Array(e.target.result);
+        
+        // Carica PDF.js se non è già presente
+        if (!window.pdfjsLib) {
+          await loadPDFJS();
+        }
+        
+        // Carica il documento PDF
+        const loadingTask = pdfjsLib.getDocument(typedarray);
+        const pdf = await loadingTask.promise;
+        
+        console.log(`📄 PDF caricato: ${pdf.numPages} pagine`);
+        
+        let fullText = '';
+        
+        // Estrai testo da ogni pagina
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+          const page = await pdf.getPage(pageNum);
+          const textContent = await page.getTextContent();
+          
+          // Unisci tutti gli elementi di testo
+          const pageText = textContent.items
+            .map(item => item.str)
+            .join(' ');
+          
+          fullText += pageText + '\n';
+          
+          console.log(`📄 Pagina ${pageNum}/${pdf.numPages} letta`);
+        }
+        
+        console.log('✅ Estrazione testo completata');
+        console.log('📝 Testo estratto:', fullText.substring(0, 500) + '...');
+        
+        resolve(fullText);
+        
+      } catch (error) {
+        console.error('❌ Errore estrazione PDF:', error);
+        reject(new Error('Errore durante la lettura del PDF: ' + error.message));
+      }
+    };
+    
+    reader.onerror = () => {
+      console.error('❌ Errore lettura file');
+      reject(new Error('Impossibile leggere il file PDF'));
+    };
+    
+    // Inizia la lettura del file
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+/**
+ * 📅 Estrae la DATA dal PDF (cerca "DATA___")
+ * @param {string} text - Testo completo del PDF
+ * @returns {string} - Data in formato YYYY-MM-DD
+ */
+function extractDateFromPDF(text) {
+  console.log('📅 Ricerca DATA nel PDF...');
+  
+  const lines = text.split('\n');
+  
+  // Cerca nelle prime 15 righe (la data dovrebbe essere in alto)
+  for (let i = 0; i < Math.min(15, lines.length); i++) {
+    const line = lines[i].trim();
+    
+    // Pattern principale: DATA______19/12/2025
+    const datePattern = /DATA[_\s]*(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/i;
+    const match = line.match(datePattern);
+    
+    if (match && match[1]) {
+      const normalizedDate = normalizeDate(match[1]);
+      console.log(`✅ Data trovata: ${match[1]} → ${normalizedDate}`);
+      return normalizedDate;
+    }
+  }
+  
+  // Fallback: cerca qualsiasi data nelle prime righe
+  console.log('⚠️ Pattern DATA___ non trovato, cerco date generiche...');
+  
+  for (let i = 0; i < Math.min(15, lines.length); i++) {
+    const line = lines[i];
+    const anyDatePattern = /(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/;
+    const match = line.match(anyDatePattern);
+    
+    if (match && match[1]) {
+      const normalizedDate = normalizeDate(match[1]);
+      console.log(`✅ Data trovata (generica): ${match[1]} → ${normalizedDate}`);
+      return normalizedDate;
+    }
+  }
+  
+  // Se non trova nessuna data, usa oggi
+  const today = new Date().toISOString().split('T')[0];
+  console.warn(`⚠️ Nessuna data trovata nel PDF, uso data odierna: ${today}`);
+  return today;
+}
+
+/**
+ * 📦 Estrae gli SCARICHI dalla sezione RICAMBI
+ * @param {string} text - Testo completo del PDF
+ * @param {string} date - Data degli scarichi
+ * @returns {Array} - Array di oggetti {code, quantity, date}
+ */
+function extractScarichiFromPDF(text, date) {
+  console.log('📦 Ricerca sezione RICAMBI...');
+  
+  const scarichi = [];
+  const lines = text.split('\n');
+  
+  // 1️⃣ TROVA LA SEZIONE "RICAMBI"
+  let ricambiStartIndex = -1;
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim().toUpperCase();
+    if (line.includes('RICAMBI')) {
+      ricambiStartIndex = i;
+      console.log(`✅ Sezione RICAMBI trovata alla riga ${i}: "${lines[i]}"`);
+      break;
+    }
+  }
+  
+  if (ricambiStartIndex === -1) {
+    console.warn('⚠️ Sezione RICAMBI non trovata nel PDF');
+    return scarichi;
+  }
+  
+  // 2️⃣ SALTA LE RIGHE DI INTESTAZIONE
+  // (CODICE RICAMBIO, DESCRIZIONE, QUANTITA', ecc.)
+  let dataStartIndex = ricambiStartIndex + 1;
+  
+  for (let i = ricambiStartIndex + 1; i < Math.min(ricambiStartIndex + 5, lines.length); i++) {
+    const line = lines[i].trim().toUpperCase();
+    
+    if (line.includes('CODICE') || 
+        line.includes('DESCRIZIONE') || 
+        line.includes('QUANTITA') ||
+        line.includes('PREZZO')) {
+      dataStartIndex = i + 1;
+      console.log(`⏭️  Riga intestazione saltata: "${lines[i]}"`);
+    }
+  }
+  
+  console.log(`🔍 Inizio analisi dati dalla riga ${dataStartIndex}`);
+  
+  // 3️⃣ ANALIZZA LE RIGHE SUCCESSIVE
+  for (let i = dataStartIndex; i < lines.length; i++) {
+    const line = lines[i].trim();
+    
+    // Stop se incontriamo una sezione diversa
+    if (!line || 
+        /MANODOPERA|TOTALE|IVA COMPRESA|DESCRIZIONE LAVORAZIONI|Descrizione Lavorazioni/i.test(line)) {
+      console.log(`🛑 Fine sezione RICAMBI alla riga ${i}: "${line}"`);
+      break;
+    }
+    
+    // 4️⃣ ESTRAI CODICE E QUANTITÀ
+    // Formato atteso: "ABC123 Descrizione... 2" oppure "ABC123  2"
+    const words = line.split(/\s+/).filter(w => w.length > 0);
+    
+    if (words.length < 2) {
+      console.log(`⏭️  Riga ignorata (troppo corta): "${line}"`);
+      continue;
+    }
+    
+    // Il primo elemento dovrebbe essere il CODICE
+    const potentialCode = words[0].toUpperCase();
+    
+    // Validazione codice: almeno 3 caratteri alfanumerici
+    if (!/^[A-Z0-9]{3,}$/i.test(potentialCode)) {
+      console.log(`⏭️  Codice non valido: "${potentialCode}" in "${line}"`);
+      continue;
+    }
+    
+    // L'ultimo elemento dovrebbe essere la QUANTITÀ
+    const potentialQty = words[words.length - 1];
+    
+    // Rimuovi eventuali simboli (es. "2," → "2")
+    const cleanQty = potentialQty.replace(/[^\d.,]/g, '');
+    const qty = parseFloat(cleanQty.replace(',', '.'));
+    
+    // Validazione quantità
+    if (isNaN(qty) || qty <= 0 || qty > 9999) {
+      console.log(`⏭️  Quantità non valida: "${potentialQty}" → ${qty} in "${line}"`);
+      continue;
+    }
+    
+    // ✅ SUCCESSO: abbiamo trovato un codice e una quantità validi
+    scarichi.push({
+      code: potentialCode,
+      quantity: qty,
+      date: date
+    });
+    
+    console.log(`✅ Scarico trovato: ${potentialCode} - ${qty} pz (riga ${i})`);
+  }
+  
+  console.log(`📊 Totale scarichi trovati: ${scarichi.length}`);
+  
+  return scarichi;
+}
+
+/**
+ * 📅 Normalizza data in formato ISO (YYYY-MM-DD)
+ * @param {string} dateStr - Data in formato DD/MM/YYYY, DD-MM-YYYY, ecc.
+ * @returns {string} - Data in formato YYYY-MM-DD
+ */
+function normalizeDate(dateStr) {
+  dateStr = dateStr.trim();
+  
+  // Determina il separatore (/, -, .)
+  const separator = dateStr.includes('/') ? '/' : 
+                   (dateStr.includes('-') ? '-' : '.');
+  
+  const parts = dateStr.split(separator);
+  
+  if (parts.length === 3) {
+    // Formato DD/MM/YYYY o YYYY/MM/DD
+    if (parts[0].length === 4) {
+      // YYYY-MM-DD (già corretto)
+      return dateStr.replace(/\./g, '-').replace(/\//g, '-');
+    } else {
+      // DD-MM-YYYY → YYYY-MM-DD
+      const day = parts[0].padStart(2, '0');
+      const month = parts[1].padStart(2, '0');
+      const year = parts[2].length === 2 ? '20' + parts[2] : parts[2];
+      return `${year}-${month}-${day}`;
+    }
+  }
+  
+  // Fallback: usa data odierna
+  console.warn(`⚠️ Formato data non riconosciuto: "${dateStr}", uso data odierna`);
+  return new Date().toISOString().split('T')[0];
+}
+
+/**
+ * 🔍 Verifica se un prodotto esiste nel database
+ * @param {string} code - Codice prodotto da cercare
+ * @returns {Promise<Object|null>} - Oggetto prodotto o null
+ */
+async function checkProductExists(code) {
+  try {
+    const res = await fetch(`${API_URL}/prodotti`);
+    
+    if (!res.ok) {
+      throw new Error('Errore caricamento prodotti dal server');
+    }
+    
+    const prodotti = await res.json();
+    
+    // Cerca il prodotto confrontando il codice (case-insensitive)
+    const prodotto = prodotti.find(p => 
+      p.nome.toUpperCase() === code.toUpperCase()
+    );
+    
+    if (prodotto) {
+      console.log(`✅ Prodotto trovato: ${code} → ${prodotto.nome} (ID: ${prodotto.id})`);
+    } else {
+      console.warn(`⚠️ Prodotto NON trovato: ${code}`);
+    }
+    
+    return prodotto;
+    
+  } catch (error) {
+    console.error('❌ Errore verifica prodotto:', error);
+    return null;
+  }
+}
+
+/**
+ * ✅ Crea gli SCARICHI nel database
+ * @param {Array} scarichi - Array di oggetti {code, quantity, date}
+ * @returns {Promise<Object>} - Risultati {success, failed, notFound, insufficientStock}
+ */
+async function processScarichi(scarichi) {
+  console.log(`🚀 Inizio elaborazione ${scarichi.length} scarichi...`);
+  
+  const results = {
+    success: [],
+    failed: [],
+    notFound: [],
+    insufficientStock: []
+  };
+  
+  for (let i = 0; i < scarichi.length; i++) {
+    const scarico = scarichi[i];
+    
+    console.log(`📦 [${i + 1}/${scarichi.length}] Elaborazione: ${scarico.code} - ${scarico.quantity} pz`);
+    
+    try {
+      // 1️⃣ Verifica se il prodotto esiste
+      const prodotto = await checkProductExists(scarico.code);
+      
+      if (!prodotto) {
+        results.notFound.push({
+          code: scarico.code,
+          quantity: scarico.quantity,
+          date: scarico.date,
+          reason: 'Prodotto non trovato nel database'
+        });
+        console.warn(`⚠️ Prodotto non trovato: ${scarico.code}`);
+        continue;
+      }
+      
+      // 2️⃣ Verifica giacenza disponibile
+      if (prodotto.giacenza < scarico.quantity) {
+        results.insufficientStock.push({
+          code: scarico.code,
+          nome: prodotto.nome,
+          quantity: scarico.quantity,
+          available: prodotto.giacenza,
+          date: scarico.date
+        });
+        console.warn(`⚠️ Giacenza insufficiente: ${scarico.code} (richiesto: ${scarico.quantity}, disponibile: ${prodotto.giacenza})`);
+        continue;
+      }
+      
+      // 3️⃣ Crea lo SCARICO
+      const movementData = {
+        prodotto_id: prodotto.id,
+        tipo: 'scarico',
+        quantita: scarico.quantity,
+        data_movimento: scarico.date,
+        fattura_doc: null,
+        fornitore: null,
+        prezzo: null
+      };
+      
+      console.log('📤 Invio scarico al server:', movementData);
+      
+      const res = await fetch(`${API_URL}/dati`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(movementData)
+      });
+      
+      if (res.ok) {
+        results.success.push({
+          code: scarico.code,
+          nome: prodotto.nome,
+          quantity: scarico.quantity,
+          date: scarico.date
+        });
+        console.log(`✅ Scarico creato: ${scarico.code} - ${scarico.quantity} pz`);
+      } else {
+        const error = await res.json();
+        results.failed.push({
+          code: scarico.code,
+          quantity: scarico.quantity,
+          date: scarico.date,
+          reason: error.error || 'Errore sconosciuto dal server'
+        });
+        console.error(`❌ Errore creazione scarico: ${error.error}`);
+      }
+      
+    } catch (error) {
+      results.failed.push({
+        code: scarico.code,
+        quantity: scarico.quantity,
+        date: scarico.date,
+        reason: error.message
+      });
+      console.error(`❌ Errore elaborazione: ${error.message}`);
+    }
+  }
+  
+  console.log('📊 Elaborazione completata:', results);
+  
+  return results;
+}
+
+/**
+ * 🚀 Funzione principale per gestire l'import PDF
+ * @param {File} file - File PDF da importare
+ * @returns {Promise<Object>} - Risultati dell'importazione
+ */
+async function handlePDFImport(file) {
+  try {
+    console.log('🚀 Inizio importazione PDF:', file.name);
+    
+    showImportLoading();
+    
+    // 1️⃣ Estrai testo dal PDF
+    const text = await extractTextFromPDF(file);
+    
+    // 2️⃣ Estrai la DATA
+    const date = extractDateFromPDF(text);
+    
+    // 3️⃣ Estrai gli SCARICHI
+    const scarichi = extractScarichiFromPDF(text, date);
+    
+    console.log(`📦 ${scarichi.length} scarichi trovati per la data ${date}`);
+    
+    if (scarichi.length === 0) {
+      throw new Error(
+        '❌ Nessun prodotto trovato nel PDF.\n\n' +
+        'Verifica che il PDF contenga:\n' +
+        '• Sezione "RICAMBI"\n' +
+        '• CODICE RICAMBIO (es. ABC123)\n' +
+        '• QUANTITÀ (es. 2)\n\n' +
+        'Formato atteso:\n' +
+        'RICAMBI\n' +
+        'CODICE RICAMBIO   DESCRIZIONE   QUANTITA\'\n' +
+        'ABC123           Filtro Olio    2'
+      );
+    }
+    
+    // 4️⃣ Processa gli SCARICHI
+    const results = await processScarichi(scarichi);
+    
+    // 5️⃣ Mostra risultati
+    showImportResults(results);
+    
+    // 6️⃣ Ricarica le tabelle se ci sono stati successi
+    if (results.success.length > 0) {
+      console.log('🔄 Ricarico tabelle Movimenti e Prodotti...');
+      await loadMovimenti();
+      await loadProdotti();
+      console.log('✅ Tabelle ricaricate');
+    }
+    
+    return results;
+    
+  } catch (error) {
+    console.error('❌ Errore import PDF:', error);
+    alert('❌ Errore durante l\'importazione:\n\n' + error.message);
+    hideImportLoading();
+    throw error;
+  }
+}
+
+/**
+ * ⏳ Mostra loading durante l'import
+ */
+function showImportLoading() {
+  const modal = document.getElementById('modalImportPDF');
+  const importBtn = modal.querySelector('.btn-import-confirm');
+  
+  if (!importBtn) {
+    console.error('❌ Bottone import non trovato');
+    return;
+  }
+  
+  const originalHTML = importBtn.innerHTML;
+  
+  importBtn.disabled = true;
+  importBtn.dataset.originalHTML = originalHTML;
+  importBtn.innerHTML = `
+    <div class="loading-spinner-inline"></div>
+    <span>⏳ Elaborazione in corso...</span>
+  `;
+  
+  console.log('⏳ Loading mostrato');
+}
+
+/**
+ * ✅ Nasconde loading
+ */
+function hideImportLoading() {
+  const modal = document.getElementById('modalImportPDF');
+  const importBtn = modal.querySelector('.btn-import-confirm');
+  
+  if (!importBtn) {
+    console.error('❌ Bottone import non trovato');
+    return;
+  }
+  
+  if (importBtn.dataset.originalHTML) {
+    importBtn.innerHTML = importBtn.dataset.originalHTML;
+    importBtn.disabled = false;
+    delete importBtn.dataset.originalHTML;
+  }
+  
+  console.log('✅ Loading nascosto');
+}
+
+/**
+ * 📊 Mostra i risultati dell'import in un alert dettagliato
+ * @param {Object} results - Risultati {success, failed, notFound, insufficientStock}
+ */
+function showImportResults(results) {
+  hideImportLoading();
+  
+  const total = results.success.length + results.failed.length + 
+                results.notFound.length + results.insufficientStock.length;
+  
+  let message = `📊 IMPORT COMPLETATO\n`;
+  message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+  message += `✅ Scarichi importati: ${results.success.length}/${total}\n\n`;
+  
+  // ✅ SUCCESSI
+  if (results.success.length > 0) {
+    message += `✅ SCARICHI CREATI CON SUCCESSO:\n`;
+    results.success.forEach(r => {
+      const dateFormatted = new Date(r.date).toLocaleDateString('it-IT');
+      message += `  • ${r.code} (${r.nome})\n`;
+      message += `    Quantità: ${formatQuantity(r.quantity)} pz | Data: ${dateFormatted}\n`;
+    });
+    message += `\n`;
+  }
+  
+  // ⚠️ PRODOTTI NON TROVATI
+  if (results.notFound.length > 0) {
+    message += `⚠️ PRODOTTI NON TROVATI (${results.notFound.length}):\n`;
+    results.notFound.forEach(r => {
+      const dateFormatted = new Date(r.date).toLocaleDateString('it-IT');
+      message += `  • ${r.code} - ${formatQuantity(r.quantity)} pz (${dateFormatted})\n`;
+      message += `    → Crea prima il prodotto nella sezione "Prodotti"\n`;
+    });
+    message += `\n`;
+  }
+  
+  // ❌ GIACENZA INSUFFICIENTE
+  if (results.insufficientStock.length > 0) {
+    message += `❌ GIACENZA INSUFFICIENTE (${results.insufficientStock.length}):\n`;
+    results.insufficientStock.forEach(r => {
+      const dateFormatted = new Date(r.date).toLocaleDateString('it-IT');
+      message += `  • ${r.code} (${r.nome})\n`;
+      message += `    Richiesto: ${formatQuantity(r.quantity)} pz | `;
+      message += `Disponibile: ${formatQuantity(r.available)} pz\n`;
+      message += `    Data: ${dateFormatted}\n`;
+    });
+    message += `\n`;
+  }
+  
+  // ❌ ERRORI
+  if (results.failed.length > 0) {
+    message += `❌ ERRORI (${results.failed.length}):\n`;
+    results.failed.forEach(r => {
+      message += `  • ${r.code}: ${r.reason}\n`;
+    });
+  }
+  
+  alert(message);
+  
+  // Chiudi il modal solo se tutto è andato bene
+  if (results.failed.length === 0 && 
+      results.notFound.length === 0 && 
+      results.insufficientStock.length === 0) {
+    closeImportPDFModal();
+  }
+}
+
+/**
+ * 🔄 Apertura modal import PDF
+ */
+function openImportPDFModal() {
+  console.log('🔄 Apertura modal import PDF');
+  
+  const modal = document.getElementById('modalImportPDF');
+  const form = document.getElementById('formImportPDF');
+  
+  if (!modal || !form) {
+    console.error('❌ Modal o form non trovati');
+    return;
+  }
+  
+  form.reset();
+  
+  const filePreview = document.getElementById('filePreviewBox');
+  if (filePreview) {
+    filePreview.style.display = 'none';
+    filePreview.textContent = '';
+  }
+  
+  modal.classList.add('active');
+}
+
+/**
+ * ❌ Chiusura modal import PDF
+ */
+function closeImportPDFModal() {
+  console.log('❌ Chiusura modal import PDF');
+  
+  const modal = document.getElementById('modalImportPDF');
+  
+  if (!modal) {
+    console.error('❌ Modal non trovato');
+    return;
+  }
+  
+  modal.classList.remove('active');
+}
+
+// ==================== 🎯 EVENT LISTENERS ====================
+
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('🎯 Inizializzazione event listeners import PDF');
+  
+  // 1️⃣ SUBMIT FORM
+  const form = document.getElementById('formImportPDF');
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      console.log('📤 Submit form import PDF');
+      
+      const fileInput = document.getElementById('importPDFFile');
+      const file = fileInput.files[0];
+      
+      // Validazioni
+      if (!file) {
+        alert('⚠️ Seleziona un file PDF');
+        return;
+      }
+      
+      if (file.type !== 'application/pdf') {
+        alert('⚠️ Il file deve essere un PDF');
+        return;
+      }
+      
+      if (file.size > 10 * 1024 * 1024) {
+        alert('⚠️ Il file è troppo grande (max 10MB)');
+        return;
+      }
+      
+      try {
+        await handlePDFImport(file);
+      } catch (error) {
+        // Errore già gestito in handlePDFImport
+        console.error('❌ Errore gestione import:', error);
+      }
+    });
+    
+    console.log('✅ Event listener submit form registrato');
+  } else {
+    console.warn('⚠️ Form import PDF non trovato');
+  }
+  
+  // 2️⃣ PREVIEW FILE SELEZIONATO
+  const fileInput = document.getElementById('importPDFFile');
+  if (fileInput) {
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      const preview = document.getElementById('filePreviewBox');
+      
+      if (file && preview) {
+        const sizeKB = (file.size / 1024).toFixed(1);
+        preview.textContent = `📄 ${file.name} (${sizeKB} KB)`;
+        preview.style.display = 'block';
+        
+        console.log(`📄 File selezionato: ${file.name} (${sizeKB} KB)`);
+      }
+    });
+    
+    console.log('✅ Event listener preview file registrato');
+  } else {
+    console.warn('⚠️ Input file PDF non trovato');
+  }
+});
+
+// ==================== 🎉 FINE SEZIONE IMPORT PDF ====================
+console.log('✅ Script import PDF caricato correttamente');
