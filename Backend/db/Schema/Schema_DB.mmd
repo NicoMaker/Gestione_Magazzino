@@ -1,0 +1,52 @@
+erDiagram
+    USERS {
+        int id PK
+        text username UK
+        text password
+        text createdat
+    }
+
+    MARCHE {
+        int id PK
+        text nome UK
+        text data_creazione
+    }
+
+    PRODOTTI {
+        int id PK
+        text nome UK
+        int marca_id FK
+        text descrizione
+        text data_creazione
+    }
+
+    DATI {
+        int id PK
+        int prodotto_id FK
+        text tipo
+        real quantita
+        real prezzo
+        real prezzo_totale_movimento
+        text data_movimento
+        text data_registrazione
+        text fattura_doc
+        text fornitore_cliente_id
+    }
+
+    LOTTI {
+        int id PK
+        int prodotto_id FK
+        real quantita_iniziale
+        real quantita_rimanente
+        real prezzo
+        text data_carico
+        text data_registrazione
+        text fattura_doc
+        text fornitore
+        int dati_id FK
+    }
+
+    MARCHE ||--o{ PRODOTTI : "ha"
+    PRODOTTI ||--o{ DATI : "registra movimenti"
+    PRODOTTI ||--o{ LOTTI : "ha lotti FIFO"
+    DATI ||--o| LOTTI : "genera lotto (se carico)"
