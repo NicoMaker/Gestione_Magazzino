@@ -1,0 +1,18 @@
+{
+  "company": {
+    "address": "Via prova 123",
+    "city": "Roma",
+    "cap": "20100",
+    "province": "MI",
+    "country": "Italia",
+    "piva": "1234567890",
+    "logo": "img/Logo.png"
+  },
+  "settings": {
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "dateFormat": "DD/MM/YYYY",
+    "decimalSeparator": ",",
+    "thousandsSeparator": "."
+  }
+}
