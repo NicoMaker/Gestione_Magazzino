@@ -46,7 +46,7 @@ erDiagram
         int dati_id FK
     }
 
-    MARCHE ||--o{ PRODOTTI : "ha"
-    PRODOTTI ||--o{ DATI : "registra movimenti"
-    PRODOTTI ||--o{ LOTTI : "ha lotti FIFO"
+    MARCHE ||--o{ PRODOTTI : "ha (1:N)"
+    PRODOTTI ||--o{ DATI : "registra movimenti (1:N)"
+    PRODOTTI ||--o{ LOTTI : "ha lotti FIFO (1:N)"
     DATI ||--o| LOTTI : "genera lotto (se carico)"
