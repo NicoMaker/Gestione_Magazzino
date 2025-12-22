@@ -5221,12 +5221,15 @@ function printRiepilogo() {
     <body>
       <div class="header-row">
         <div class="header-left">
-          <img class="logo-header" src="{{company.logo}}" alt="Logo Azienda">
+          <img class="logo-header" src="img/Logo.png" alt="Logo Azienda">
         </div>
         <div class="header-right">
+          <p> {{company.name}}</p>
           <p> <strong> Indirizzo </strong> {{company.address}}</p>
           <p>{{company.cap}} {{company.city}} ({{company.province}})</p>
           <p><strong>P. IVA:</strong> {{company.piva}}</p>
+          <p> <strong> Email </strong> {{company.email}}</p>
+          <p> <strong> Tel </strong> {{company.phone}} </p>
         </div>
       </div>
 
@@ -5324,10 +5327,6 @@ function printRiepilogo() {
     }, 500);
   };
 }
-
-/**
- * 🖨️ STAMPA STORICO GIACENZE - Usa dati da JSON
- */
 function printStorico() {
   if (storico.length === 0) {
     alert('Nessun prodotto da stampare');
@@ -5389,12 +5388,15 @@ function printStorico() {
     <body>
       <div class="header-row">
         <div class="header-left">
-          <img class="logo-header" src="{{company.logo}}" alt="Logo Azienda">
+          <img class="logo-header" src="img/Logo.png" alt="Logo Azienda">
         </div>
         <div class="header-right">
+          <p> {{company.name}}</p>
           <p> <strong> Indirizzo </strong> {{company.address}}</p>
           <p>{{company.cap}} {{company.city}} ({{company.province}})</p>
           <p><strong>P. IVA:</strong> {{company.piva}}</p>
+          <p> <strong> Email </strong> {{company.email}}</p>
+          <p> <strong> Tel </strong> {{company.phone}} </p>
         </div>
       </div>
 

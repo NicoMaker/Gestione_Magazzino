@@ -1,12 +1,14 @@
 {
   "company": {
+    "name":"nome azienda",
     "address": "Via Nazionale 1",
     "city": "Roma",
     "cap": "20100",
     "province": "MI",
     "country": "Italia",
     "piva": "1234567890",
-    "logo": "img/Logo.png"
+    "email":"prova@prova.com",
+    "phone":"+39 1234567890"
   },
   "settings": {
     "currency": "EUR",
