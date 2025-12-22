@@ -735,174 +735,6 @@ document.getElementById("filterRiepilogo")?.addEventListener("input", (e) => {
   renderRiepilogo();
 });
 
-function printRiepilogo() {
-  if (riepilogo.length === 0) {
-    alert("Nessun prodotto da stampare");
-    return;
-  }
-
-  const valoreTotaleFiltrato = riepilogo.reduce(
-    (sum, r) => sum + Number.parseFloat(r.valore_totale || 0),
-    0
-  );
-
-  let printContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Riepilogo Magazzino</title>
-      <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { color: #333; border-bottom: 2px solid #4F46E5; padding-bottom: 10px; }
-        .info { margin: 20px 0; font-size: 14px; }
-        .prodotto-block { margin-bottom: 30px; page-break-inside: avoid; }
-        .prodotto-header { 
-          background-color: #e0e7ff; 
-          padding: 10px; 
-          margin-bottom: 10px;
-          border-left: 4px solid #4F46E5;
-        }
-        .prodotto-info { display: flex; justify-content: space-between; margin: 5px 0; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
-        th { background-color: #6366f1; color: white; }
-        .lotto-row { background-color: #f9fafb; }
-        .no-lotti { text-align: center; color: #999; padding: 10px; }
-
-        .header-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          margin-bottom: 10px;
-        }
-        .header-left img.logo-header {
-          width: 120px;
-          height: auto;
-          display: block;
-        }
-        .header-right {
-          text-align: right;
-          font-size: 12px;
-          line-height: 1.2;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="header-row">
-        <div class="header-left">
-          <img class="logo-header" src="/img/Logo.png" alt="Logo Magazzino Moto">
-        </div>
-        <div class="header-right">
-          <p><strong>P. Iva</strong> 1234567890</p>
-          <p><strong>Posizione:</strong> Via prova 123</p>
-        </div>
-      </div>
-
-      <h1>Riepilogo Giacenze Magazzino</h1>
-      <div class="info">
-        <p><strong>Valore Totale (Filtrato):</strong> ${formatCurrency(
-    valoreTotaleFiltrato
-  )}</p>
-        <p><strong>Data Stampa:</strong> ${new Date().toLocaleDateString(
-    "it-IT"
-  )} ${new Date().toLocaleTimeString("it-IT")}</p>
-      </div>
-  `;
-
-  riepilogo.forEach((prodotto) => {
-    if (prodotto.giacenza > 0) {
-      printContent += `
-        <div class="prodotto-block">
-          <div class="prodotto-header">
-            <div class="prodotto-info">
-              <span><strong>Prodotto:</strong> ${prodotto.nome}</span>
-              <span><strong>Giacenza Totale:</strong> ${formatQuantity(
-        prodotto.giacenza
-      )} pz</span>
-            </div>
-            <div class="prodotto-info">
-              <span><strong>Marca:</strong> ${prodotto.marca_nome || "-"}</span>
-              <span><strong>Valore Totale:</strong> ${formatCurrency(
-        prodotto.valore_totale
-      )}</span>
-            </div>
-            ${prodotto.descrizione
-          ? `<div class="prodotto-info"><span><strong>Descrizione:</strong> ${prodotto.descrizione}</span></div>`
-          : ""
-        }
-          </div>
-      `;
-
-      if (prodotto.lotti && prodotto.lotti.length > 0) {
-        printContent += `
-          <table>
-            <thead>
-              <tr>
-                <th>Data Carico</th>
-                <th>Quantità</th>
-                <th>Prezzo Unit.</th>
-                <th>Valore</th>
-                <th>Documento</th>
-                <th>Fornitore</th>
-              </tr>
-            </thead>
-            <tbody>
-        `;
-
-        prodotto.lotti.forEach((lotto) => {
-          printContent += `
-            <tr class="lotto-row">
-              <td>${new Date(lotto.data_carico).toLocaleDateString(
-            "it-IT"
-          )}</td>
-              <td>${formatQuantity(lotto.quantita_rimanente)} pz</td>
-              <td>${formatCurrency(lotto.prezzo)}</td>
-              <td><strong>${formatCurrency(
-            lotto.quantita_rimanente * lotto.prezzo
-          )}</strong></td>
-              <td>${lotto.fattura_doc || "-"}</td>
-              <td>${lotto.fornitore || "-"}</td>
-            </tr>
-          `;
-        });
-
-        printContent += `
-            </tbody>
-          </table>
-        `;
-      } else {
-        printContent += '<p class="no-lotti">Nessun lotto disponibile</p>';
-      }
-
-      printContent += `</div>`;
-    }
-  });
-
-  printContent += `</body></html>`;
-
-  // --- creazione iframe e stampa ---
-  const printFrame = document.createElement("iframe");
-  printFrame.style.position = "fixed";
-  printFrame.style.right = "0";
-  printFrame.style.bottom = "0";
-  printFrame.style.width = "0";
-  printFrame.style.height = "0";
-  printFrame.style.border = "0";
-  document.body.appendChild(printFrame);
-
-  const doc = printFrame.contentDocument || printFrame.contentWindow.document;
-  doc.open();
-  doc.write(printContent);
-  doc.close();
-
-  printFrame.onload = () => {
-    setTimeout(() => {
-      printFrame.contentWindow.focus();
-      printFrame.contentWindow.print();
-      setTimeout(() => document.body.removeChild(printFrame), 1000);
-    }, 500);
-  };
-}
 
 // ==================== STORICO ====================
 async function loadStorico() {
@@ -1036,174 +868,6 @@ document.getElementById("filterStorico")?.addEventListener("input", (e) => {
   renderStorico(storico);
 });
 
-// CHANGE: Corretta la funzione printStorico per usare la struttura dati corretta
-function printStorico() {
-  if (storico.length === 0) {
-    alert("Nessun prodotto da stampare");
-    return;
-  }
-
-  const valoreStoricoFiltrato = storico.reduce(
-    (sum, s) => sum + Number.parseFloat(s.valore_totale || 0),
-    0
-  );
-
-  const dataSelezionata = document.getElementById("storicoDate").value;
-  const dataItalianaSelezionata = dataSelezionata
-    ? new Date(dataSelezionata + "T00:00:00").toLocaleDateString("it-IT")
-    : "Non selezionata";
-
-  // Usa direttamente il path del logo (assicurati che sia corretto)
-  const logoSrc = "img/Logo.png";
-
-  let printContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Storico Giacenze</title>
-      <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { color: #333; border-bottom: 2px solid #4F46E5; padding-bottom: 10px; }
-        .info { margin: 20px 0; font-size: 14px; }
-        .prodotto-block { margin-bottom: 30px; page-break-inside: avoid; }
-        .prodotto-header { 
-          background-color: #e0e7ff; 
-          padding: 10px; 
-          margin-bottom: 10px;
-          border-left: 4px solid #4F46E5;
-        }
-        .prodotto-info { display: flex; justify-content: space-between; margin: 5px 0; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
-        th { background-color: #6366f1; color: white; }
-        .lotto-row { background-color: #f9fafb; }
-        .no-lotti { text-align: center; color: #999; padding: 10px; }
-
-        .header-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          margin-bottom: 10px;
-        }
-        .header-left img.logo-header {
-          width: 120px;
-          height: auto;
-          display: block;
-        }
-        .header-right {
-          text-align: right;
-          font-size: 12px;
-          line-height: 1.2;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="header-row">
-        <div class="header-left">
-          <img class="logo-header" src="${logoSrc}" alt="Logo Magazzino Moto">
-        </div>
-        <div class="header-right">
-          <p><strong>P. Iva</strong> 1234567890</p>
-          <p><strong>Posizione:</strong> Via prova 123
-        </div>
-      </div>
-
-      <h1>Storico Giacenze Magazzino</h1>
-      <div class="info">
-        <p><strong>Data Selezionata:</strong> ${dataItalianaSelezionata}</p>
-        <p><strong>Valore Totale (Filtrato):</strong> ${formatCurrency(
-    valoreStoricoFiltrato
-  )}</p>
-        <p><strong>Data Stampa:</strong> ${new Date().toLocaleDateString(
-    "it-IT"
-  )} ${new Date().toLocaleTimeString("it-IT")}</p>
-      </div>
-  `;
-
-  storico.forEach((prodotto) => {
-    if (prodotto.giacenza > 0) {
-      printContent += `
-        <div class="prodotto-block">
-          <div class="prodotto-header">
-            <div class="prodotto-info">
-              <span><strong>Prodotto:</strong> ${prodotto.nome}</span>
-              <span><strong>Giacenza Totale:</strong> ${formatQuantity(
-        prodotto.giacenza
-      )} pz</span>
-            </div>
-            <div class="prodotto-info">
-              <span><strong>Marca:</strong> ${prodotto.marca_nome || "-"}</span>
-              <span><strong>Valore Totale:</strong> ${formatCurrency(
-        prodotto.valore_totale
-      )}</span>
-            </div>
-            ${prodotto.descrizione
-          ? `<div class="prodotto-info"><span><strong>Descrizione:</strong> ${prodotto.descrizione}</span></div>`
-          : ""
-        }
-          </div>
-      `;
-
-      if (prodotto.lotti && prodotto.lotti.length > 0) {
-        printContent += `
-          <table>
-            <thead>
-              <tr>
-                <th>Data Carico</th>
-                <th>Quantità</th>
-                <th>Prezzo Unit.</th>
-                <th>Valore</th>
-                <th>Documento</th>
-                <th>Fornitore</th>
-              </tr>
-            </thead>
-            <tbody>
-        `;
-
-        prodotto.lotti.forEach((lotto) => {
-          printContent += `
-            <tr class="lotto-row">
-              <td>${new Date(lotto.data_carico).toLocaleDateString(
-            "it-IT"
-          )}</td>
-              <td>${formatQuantity(lotto.quantita_rimanente)} pz</td>
-              <td>${formatCurrency(lotto.prezzo)}</td>
-              <td><strong>${formatCurrency(
-            lotto.quantita_rimanente * lotto.prezzo
-          )}</strong></td>
-              <td>${lotto.fattura_doc || "-"}</td>
-              <td>${lotto.fornitore || "-"}</td>
-            </tr>
-          `;
-        });
-
-        printContent += `
-            </tbody>
-          </table>
-        `;
-      } else {
-        printContent += '<p class="no-lotti">Nessun lotto disponibile</p>';
-      }
-
-      printContent += `</div>`;
-    }
-  });
-
-  printContent += `</body></html>`;
-
-  const printFrame = document.createElement("iframe");
-  printFrame.style.display = "none";
-  document.body.appendChild(printFrame);
-  printFrame.contentDocument.write(printContent);
-  printFrame.contentDocument.close();
-
-  // piccolo delay per dare il tempo al logo di caricarsi prima della stampa
-  setTimeout(() => {
-    printFrame.contentWindow.focus();
-    printFrame.contentWindow.print();
-    setTimeout(() => document.body.removeChild(printFrame), 1000);
-  }, 300);
-}
 
 // ==================== UTENTI ====================
 async function loadUtenti() {
@@ -5159,12 +4823,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ==================== 🎉 FINE SEZIONE IMPORT PDF ====================
 console.log('✅ Script import PDF caricato correttamente');
 
-// ==================== FUNZIONI STAMPA AGGIORNATE - script.js ====================
-// ✅ SOSTITUISCI le funzioni printRiepilogo() e printStorico() con queste versioni
 
-/**
- * 🖨️ STAMPA RIEPILOGO MAGAZZINO - Usa dati da JSON
- */
 function printRiepilogo() {
   if (riepilogo.length === 0) {
     alert('Nessun prodotto da stampare');
@@ -5225,12 +4884,12 @@ function printRiepilogo() {
         </div>
         <div class="header-right">
           <p> {{company.name}}</p>
-          <p> <strong> Indirizzo </strong> {{company.address}}</p>
-          <p>{{company.cap}} {{company.city}} ({{company.province}})</p>
+          <p> <strong> Indirizzo: </strong> {{company.address}} {{company.cap}} {{company.city}} ({{company.province}})
           <p><strong>P. IVA:</strong> {{company.piva}}</p>
-          <p> <strong> Email </strong> {{company.email}}</p>
-          <p> <strong> Tel </strong> {{company.phone}} </p>
+          <p> <strong> Email: </strong> {{company.email}}</p>
+          <p> <strong> Tel: </strong> {{company.phone}} </p>
         </div>
+      </div>
       </div>
 
       <h1>Riepilogo Giacenze Magazzino</h1>
@@ -5392,11 +5051,10 @@ function printStorico() {
         </div>
         <div class="header-right">
           <p> {{company.name}}</p>
-          <p> <strong> Indirizzo </strong> {{company.address}}</p>
-          <p>{{company.cap}} {{company.city}} ({{company.province}})</p>
+          <p> <strong> Indirizzo: </strong> {{company.address}} {{company.cap}} {{company.city}} ({{company.province}})
           <p><strong>P. IVA:</strong> {{company.piva}}</p>
-          <p> <strong> Email </strong> {{company.email}}</p>
-          <p> <strong> Tel </strong> {{company.phone}} </p>
+          <p> <strong> Email: </strong> {{company.email}}</p>
+          <p> <strong> Tel: </strong> {{company.phone}} </p>
         </div>
       </div>
 
