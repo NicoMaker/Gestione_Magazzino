@@ -263,21 +263,24 @@ function renderProdotti() {
       (p) => `
     <tr>
       <td><strong>${p.nome}</strong></td>
-      <td><span class="badge badge-marca">${p.marca_nome ? p.marca_nome.toUpperCase() : "N/A"
-        }</span></td>
+      <td><span class="badge badge-marca">${
+        p.marca_nome ? p.marca_nome.toUpperCase() : "N/A"
+      }</span></td>
       <td><span class="badge-giacenza">${formatQuantity(
-          p.giacenza ?? 0
-        )} pz</span></td>
+        p.giacenza ?? 0
+      )} pz</span></td>
       <td>${p.descrizione || "-"}</td>
       <td class="text-right">
-        <button class="btn-icon" onclick="editProdotto(${p.id
+        <button class="btn-icon" onclick="editProdotto(${
+          p.id
         })" title="Modifica">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
           </svg>
         </button>
-        <button class="btn-icon" onclick="deleteProdotto(${p.id
+        <button class="btn-icon" onclick="deleteProdotto(${
+          p.id
         })" title="Elimina">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
@@ -603,8 +606,9 @@ async function showGiacenzaInfo(prodottoId) {
       const giacenzaInfo = document.getElementById("giacenzaInfo");
       const giacenzaValue = document.getElementById("giacenzaValue");
 
-      giacenzaValue.textContent = `${prodotto.nome} ${prodotto.marca_nome ? `(${prodotto.marca_nome})` : ""
-        } - Giacenza: ${formatQuantity(prodotto.giacenza || 0)} pz`;
+      giacenzaValue.textContent = `${prodotto.nome} ${
+        prodotto.marca_nome ? `(${prodotto.marca_nome})` : ""
+      } - Giacenza: ${formatQuantity(prodotto.giacenza || 0)} pz`;
       giacenzaInfo.style.display = "block";
     }
   } catch (error) {
@@ -653,14 +657,17 @@ function renderRiepilogo() {
   riepilogo.forEach((r) => {
     html += `
     <tr class="product-main-row">
-      <td><strong>${r.nome}</strong>${r.marca_nome
+      <td><strong>${r.nome}</strong>${
+      r.marca_nome
         ? ` <span class="badge-marca">(${r.marca_nome.toUpperCase()})</span>`
         : ""
-      }</td>
-      <td>${r.descrizione
-        ? `<small>${r.descrizione.substring(0, 50)}${r.descrizione.length > 50 ? "..." : ""
-        }</small>`
-        : '<span style="color: #999;">-</span>'
+    }</td>
+      <td>${
+        r.descrizione
+          ? `<small>${r.descrizione.substring(0, 50)}${
+              r.descrizione.length > 50 ? "..." : ""
+            }</small>`
+          : '<span style="color: #999;">-</span>'
       }</td>
       <td><span class="badge-giacenza">${formatQuantity(
         r.giacenza
@@ -693,19 +700,21 @@ function renderRiepilogo() {
         html += `
                 <tr>
                   <td>${new Date(lotto.data_carico).toLocaleDateString(
-          "it-IT"
-        )}</td>
+                    "it-IT"
+                  )}</td>
                   <td><strong>${formatQuantity(
-          lotto.quantita_rimanente
-        )} pz</strong></td>
+                    lotto.quantita_rimanente
+                  )} pz</strong></td>
                   <td>${formatCurrency(lotto.prezzo)}</td>
                   <td><strong>${formatCurrency(
-          lotto.quantita_rimanente * lotto.prezzo
-        )}</strong></td>
-                  <td>${lotto.fattura_doc || '<span style="color: #999;">-</span>'
-          }</td>
-                  <td>${lotto.fornitore || '<span style="color: #999;">-</span>'
-          }</td>
+                    lotto.quantita_rimanente * lotto.prezzo
+                  )}</strong></td>
+                  <td>${
+                    lotto.fattura_doc || '<span style="color: #999;">-</span>'
+                  }</td>
+                  <td>${
+                    lotto.fornitore || '<span style="color: #999;">-</span>'
+                  }</td>
                 </tr>
         `;
       });
@@ -734,7 +743,6 @@ document.getElementById("filterRiepilogo")?.addEventListener("input", (e) => {
   updateRiepilogoTotal();
   renderRiepilogo();
 });
-
 
 // ==================== STORICO ====================
 async function loadStorico() {
@@ -785,14 +793,17 @@ function renderStorico(storico) {
   storico.forEach((s) => {
     html += `
     <tr class="product-main-row">
-      <td><strong>${s.nome}</strong>${s.marca_nome
+      <td><strong>${s.nome}</strong>${
+      s.marca_nome
         ? ` <span class="badge-marca">(${s.marca_nome.toUpperCase()})</span>`
         : ""
-      }</td>
-      <td>${s.descrizione
-        ? `<small>${s.descrizione.substring(0, 50)}${s.descrizione.length > 50 ? "..." : ""
-        }</small>`
-        : '<span style="color: #999;">-</span>'
+    }</td>
+      <td>${
+        s.descrizione
+          ? `<small>${s.descrizione.substring(0, 50)}${
+              s.descrizione.length > 50 ? "..." : ""
+            }</small>`
+          : '<span style="color: #999;">-</span>'
       }</td>
       <td><span class="badge-giacenza">${formatQuantity(
         s.giacenza
@@ -825,19 +836,21 @@ function renderStorico(storico) {
         html += `
                 <tr>
                                   <td>${new Date(
-          lotto.data_carico
-        ).toLocaleDateString("it-IT")}</td>
+                                    lotto.data_carico
+                                  ).toLocaleDateString("it-IT")}</td>
                   <td><strong>${formatQuantity(
-          lotto.quantita_rimanente
-        )} pz</strong></td>
+                    lotto.quantita_rimanente
+                  )} pz</strong></td>
                   <td>${formatCurrency(lotto.prezzo)}</td>
                   <td><strong>${formatCurrency(
-          lotto.quantita_rimanente * lotto.prezzo
-        )}</strong></td>
-                  <td>${lotto.fattura_doc || '<span style="color: #999;">-</span>'
-          }</td>
-                  <td>${lotto.fornitore || '<span style="color: #999;">-</span>'
-          }</td>
+                    lotto.quantita_rimanente * lotto.prezzo
+                  )}</strong></td>
+                  <td>${
+                    lotto.fattura_doc || '<span style="color: #999;">-</span>'
+                  }</td>
+                  <td>${
+                    lotto.fornitore || '<span style="color: #999;">-</span>'
+                  }</td>
                 </tr>
         `;
       });
@@ -867,7 +880,6 @@ document.getElementById("filterStorico")?.addEventListener("input", (e) => {
   updateStoricoTotal();
   renderStorico(storico);
 });
-
 
 // ==================== UTENTI ====================
 async function loadUtenti() {
@@ -1483,8 +1495,9 @@ function renderProductSearchResults(filtered, searchTerm) {
       )} pz</span>`;
 
       return `
-      <div class="search-result-item" data-id="${p.id}" data-nome="${p.nome
-        }" data-marca="${p.marca_nome || ""}" data-giacenza="${p.giacenza || 0}">
+      <div class="search-result-item" data-id="${p.id}" data-nome="${
+        p.nome
+      }" data-marca="${p.marca_nome || ""}" data-giacenza="${p.giacenza || 0}">
         <div class="search-result-name">${highlightMatch(
           p.nome,
           searchTerm
@@ -1492,13 +1505,14 @@ function renderProductSearchResults(filtered, searchTerm) {
         <div class="search-result-meta">
           ${marcaBadge}
           ${giacenzaBadge}
-          ${p.descrizione
-          ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
-            0,
-            40
-          )}${p.descrizione.length > 40 ? "..." : ""}</span>`
-          : ""
-        }
+          ${
+            p.descrizione
+              ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
+                  0,
+                  40
+                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
+              : ""
+          }
         </div>
       </div>
     `;
@@ -1655,18 +1669,19 @@ function searchProducts() {
           <div class="search-result-meta">
             <span class="search-result-marca">${marcaHighlighted}</span>
             <span class="search-result-giacenza">Giacenza: ${formatQuantity(
-        p.giacenza
-      )} pz</span>
+              p.giacenza
+            )} pz</span>
           </div>
         </div>
         <div class="search-result-body">
-          ${p.descrizione
-          ? `<span style="opacity: 0.7; font-size: 13px;">• ${p.descrizione.substring(
-            0,
-            40
-          )}${p.descrizione.length > 40 ? "..." : ""}</span>`
-          : ""
-        }
+          ${
+            p.descrizione
+              ? `<span style="opacity: 0.7; font-size: 13px;">• ${p.descrizione.substring(
+                  0,
+                  40
+                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
+              : ""
+          }
         </div>
       </div>
     `;
@@ -1795,18 +1810,19 @@ function searchProducts() {
           <div class="search-result-meta">
             <span class="search-result-marca">${marcaHighlighted}</span>
             <span class="search-result-giacenza">Giacenza: ${formatQuantity(
-        p.giacenza
-      )} pz</span>
+              p.giacenza
+            )} pz</span>
           </div>
         </div>
         <div class="search-result-body">
-          ${p.descrizione
-          ? `<span style="opacity: 0.7; font-size: 13px;">• ${p.descrizione.substring(
-            0,
-            40
-          )}${p.descrizione.length > 40 ? "..." : ""}</span>`
-          : ""
-        }
+          ${
+            p.descrizione
+              ? `<span style="opacity: 0.7; font-size: 13px;">• ${p.descrizione.substring(
+                  0,
+                  40
+                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
+              : ""
+          }
         </div>
       </div>
     `;
@@ -1884,20 +1900,22 @@ function searchProducts() {
       >
         <div class="search-result-name">${nomeHighlighted}</div>
         <div class="search-result-meta">
-          ${p.marca_nome
-          ? `<span class="search-result-marca">${marcaHighlighted}</span>`
-          : ""
-        }
+          ${
+            p.marca_nome
+              ? `<span class="search-result-marca">${marcaHighlighted}</span>`
+              : ""
+          }
           <span class="search-result-giacenza">${formatQuantity(
-          p.giacenza || 0
-        )} pz</span>
-          ${p.descrizione
-          ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
-            0,
-            40
-          )}${p.descrizione.length > 40 ? "..." : ""}</span>`
-          : ""
-        }
+            p.giacenza || 0
+          )} pz</span>
+          ${
+            p.descrizione
+              ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
+                  0,
+                  40
+                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
+              : ""
+          }
         </div>
       </div>
     `;
@@ -1974,20 +1992,22 @@ function searchProducts() {
       >
         <div class="search-result-name">${nomeHighlighted}</div>
         <div class="search-result-meta">
-          ${p.marca_nome
-          ? `<span class="search-result-marca">${marcaHighlighted}</span>`
-          : ""
-        }
+          ${
+            p.marca_nome
+              ? `<span class="search-result-marca">${marcaHighlighted}</span>`
+              : ""
+          }
           <span class="search-result-giacenza">${formatQuantity(
-          p.giacenza || 0
-        )} pz</span>
-          ${p.descrizione
-          ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
-            0,
-            40
-          )}${p.descrizione.length > 40 ? "..." : ""}</span>`
-          : ""
-        }
+            p.giacenza || 0
+          )} pz</span>
+          ${
+            p.descrizione
+              ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
+                  0,
+                  40
+                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
+              : ""
+          }
         </div>
       </div>
     `;
@@ -2082,20 +2102,22 @@ function searchProducts() {
       >
         <div class="search-result-name">${nomeHighlighted}</div>
         <div class="search-result-meta">
-          ${p.marca_nome
-          ? `<span class="search-result-marca">${marcaHighlighted}</span>`
-          : ""
-        }
+          ${
+            p.marca_nome
+              ? `<span class="search-result-marca">${marcaHighlighted}</span>`
+              : ""
+          }
           <span class="search-result-giacenza">${formatQuantity(
-          p.giacenza || 0
-        )} pz</span>
-          ${p.descrizione
-          ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
-            0,
-            40
-          )}${p.descrizione.length > 40 ? "..." : ""}</span>`
-          : ""
-        }
+            p.giacenza || 0
+          )} pz</span>
+          ${
+            p.descrizione
+              ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
+                  0,
+                  40
+                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
+              : ""
+          }
         </div>
       </div>
     `;
@@ -2198,20 +2220,22 @@ function searchProducts() {
       >
         <div class="search-result-name">${nomeHighlighted}</div>
         <div class="search-result-meta">
-          ${p.marca_nome
-          ? `<span class="search-result-marca">${marcaHighlighted}</span>`
-          : ""
-        }
+          ${
+            p.marca_nome
+              ? `<span class="search-result-marca">${marcaHighlighted}</span>`
+              : ""
+          }
           <span class="search-result-giacenza">${formatQuantity(
-          p.giacenza || 0
-        )} pz</span>
-          ${p.descrizione
-          ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
-            0,
-            40
-          )}${p.descrizione.length > 40 ? "..." : ""}</span>`
-          : ""
-        }
+            p.giacenza || 0
+          )} pz</span>
+          ${
+            p.descrizione
+              ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
+                  0,
+                  40
+                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
+              : ""
+          }
         </div>
       </div>
     `;
@@ -3281,8 +3305,6 @@ const handleKeydown = function (e) {
   e.preventDefault();
 };
 
-
-
 // ==================== MODIFICA FUNZIONE openMovimentoModal ====================
 
 /**
@@ -3459,13 +3481,16 @@ function renderMovimenti() {
       <td>${new Date(m.data_movimento).toLocaleDateString("it-IT")}</td>
       <td><strong>${m.prodotto_nome}</strong></td>
       <td>${m.marca_nome || '<span style="color: #999;">-</span>'}</td>
-      <td>${m.prodotto_descrizione
-          ? `<small>${m.prodotto_descrizione.substring(0, 30)}${m.prodotto_descrizione.length > 30 ? "..." : ""
-          }</small>`
+      <td>${
+        m.prodotto_descrizione
+          ? `<small>${m.prodotto_descrizione.substring(0, 30)}${
+              m.prodotto_descrizione.length > 30 ? "..." : ""
+            }</small>`
           : '<span style="color: #999;">-</span>'
-        }</td>
-      <td><span class="badge ${m.tipo === "carico" ? "badge-success" : "badge-danger"
-        }">${m.tipo.toUpperCase()}</span></td>
+      }</td>
+      <td><span class="badge ${
+        m.tipo === "carico" ? "badge-success" : "badge-danger"
+      }">${m.tipo.toUpperCase()}</span></td>
 
       <!-- 🎨 Colori dinamici -->
       <td class="${colorClass}">${formatQuantity(m.quantita)} pz</td>
@@ -3473,10 +3498,12 @@ function renderMovimenti() {
       <td class="${colorClass}"><strong>${prezzoTotaleHtml}</strong></td>
 
       <td>${m.fattura_doc || '<span style="color: #999;">-</span>'}</td>
-      <td>${m.fornitore_cliente_id || '<span style="color: #999;">-</span>'
-        }</td>
+      <td>${
+        m.fornitore_cliente_id || '<span style="color: #999;">-</span>'
+      }</td>
       <td class="text-right">
-        <button class="btn-icon" onclick="deleteMovimento(${m.id
+        <button class="btn-icon" onclick="deleteMovimento(${
+          m.id
         })" title="Elimina">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
@@ -3511,7 +3538,7 @@ function openUserModal(utente = null) {
     // ✅ CORREZIONE: Usa 'userUsername' invece di 'userName'
     title.textContent = "Modifica Utente";
     document.getElementById("userId").value = utente.id;
-    document.getElementById("userUsername").value = utente.username;  // 🎯 CORRETTO
+    document.getElementById("userUsername").value = utente.username; // 🎯 CORRETTO
     passwordInput.placeholder = "Lascia vuoto per non modificare";
     passwordInput.required = false;
     if (passwordOptional) passwordOptional.textContent = "(Opzionale)";
@@ -3538,33 +3565,33 @@ function openUserModal(utente = null) {
 async function extractTextFromPDF(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    
-    reader.onload = async function(e) {
+
+    reader.onload = async function (e) {
       try {
         const typedarray = new Uint8Array(e.target.result);
-        
+
         // Carica PDF.js da CDN se non è già caricato
         if (!window.pdfjsLib) {
           await loadPDFJS();
         }
-        
+
         const pdf = await pdfjsLib.getDocument(typedarray).promise;
-        let fullText = '';
-        
+        let fullText = "";
+
         // Estrai testo da ogni pagina
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
           const textContent = await page.getTextContent();
-          const pageText = textContent.items.map(item => item.str).join(' ');
-          fullText += pageText + '\n';
+          const pageText = textContent.items.map((item) => item.str).join(" ");
+          fullText += pageText + "\n";
         }
-        
+
         resolve(fullText);
       } catch (error) {
         reject(error);
       }
     };
-    
+
     reader.onerror = reject;
     reader.readAsArrayBuffer(file);
   });
@@ -3579,12 +3606,13 @@ async function loadPDFJS() {
       resolve();
       return;
     }
-    
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+
+    const script = document.createElement("script");
+    script.src =
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
     script.onload = () => {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 
-        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
       resolve();
     };
     script.onerror = reject;
@@ -3598,43 +3626,50 @@ async function loadPDFJS() {
  */
 function parseScarichiFromText(text) {
   const scarichi = [];
-  const lines = text.split('\n').filter(line => line.trim());
-  
+  const lines = text.split("\n").filter((line) => line.trim());
+
   let foundData = { code: null, quantity: null, date: null };
-  
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
-    
+
     // 1. CERCA DATA (priorità)
     const datePattern = /(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/g;
     const dateMatch = line.match(datePattern);
     if (dateMatch && dateMatch[0]) {
       foundData.date = normalizeDate(dateMatch[0]);
     }
-    
+
     // 2. CERCA CODICE PRODOTTO (alfanumerico 3+ caratteri)
     const words = line.split(/\s+/);
     for (const word of words) {
       // Pattern per codici: ABC123, ABC-123, ABC_123, ABC/123
       if (/^[A-Z0-9]{3,}[\-\_\/]?[A-Z0-9]*$/i.test(word) && word.length >= 3) {
         // Escludi parole comuni che non sono codici
-        const excluded = ['TOTALE', 'TOTALI', 'NUMERO', 'DATA', 'PEZZI', 'PREZZO'];
+        const excluded = [
+          "TOTALE",
+          "TOTALI",
+          "NUMERO",
+          "DATA",
+          "PEZZI",
+          "PREZZO",
+        ];
         if (!excluded.includes(word.toUpperCase())) {
           foundData.code = word.toUpperCase();
           break;
         }
       }
     }
-    
+
     // 3. CERCA QUANTITÀ (numero con/senza decimali)
     // Pattern: "5", "5.5", "5,5", "5 pz", "5 PZ", "n. 5"
     const qtyPattern = /(?:n\.?\s*)?(\d+[,\.]?\d*)\s*(?:pz|PZ|pezzi|pezzo)?/gi;
     const qtyMatches = [...line.matchAll(qtyPattern)];
-    
+
     if (qtyMatches.length > 0) {
       for (const match of qtyMatches) {
-        const qty = parseFloat(match[1].replace(',', '.'));
+        const qty = parseFloat(match[1].replace(",", "."));
         // Validazione: quantità ragionevole (non troppo grande, non zero)
         if (qty > 0 && qty <= 999999) {
           foundData.quantity = qty;
@@ -3642,27 +3677,27 @@ function parseScarichiFromText(text) {
         }
       }
     }
-    
+
     // 4. Se abbiamo CODICE + QUANTITÀ + DATA, crea scarico
     if (foundData.code && foundData.quantity !== null && foundData.date) {
       scarichi.push({
         code: foundData.code,
         quantity: foundData.quantity,
-        date: foundData.date
+        date: foundData.date,
       });
-      
+
       // Reset per il prossimo movimento (mantieni la data)
       const currentDate = foundData.date;
       foundData = { code: null, quantity: null, date: currentDate };
     }
   }
-  
+
   // Se non abbiamo trovato date, usa data odierna per tutti
   if (scarichi.length > 0 && !scarichi[0].date) {
-    const today = new Date().toISOString().split('T')[0];
-    scarichi.forEach(s => s.date = today);
+    const today = new Date().toISOString().split("T")[0];
+    scarichi.forEach((s) => (s.date = today));
   }
-  
+
   return scarichi;
 }
 
@@ -3671,28 +3706,32 @@ function parseScarichiFromText(text) {
  */
 function normalizeDate(dateStr) {
   dateStr = dateStr.trim();
-  
+
   // Formato DD/MM/YYYY o DD-MM-YYYY
-  if (dateStr.includes('/') || dateStr.includes('-') || dateStr.includes('.')) {
-    const separator = dateStr.includes('/') ? '/' : (dateStr.includes('-') ? '-' : '.');
+  if (dateStr.includes("/") || dateStr.includes("-") || dateStr.includes(".")) {
+    const separator = dateStr.includes("/")
+      ? "/"
+      : dateStr.includes("-")
+      ? "-"
+      : ".";
     const parts = dateStr.split(separator);
-    
+
     if (parts.length === 3) {
       if (parts[0].length === 4) {
         // YYYY-MM-DD (già corretto)
-        return dateStr.replace(/\./g, '-').replace(/\//g, '-');
+        return dateStr.replace(/\./g, "-").replace(/\//g, "-");
       } else {
         // DD-MM-YYYY
-        const day = parts[0].padStart(2, '0');
-        const month = parts[1].padStart(2, '0');
-        const year = parts[2].length === 2 ? '20' + parts[2] : parts[2];
+        const day = parts[0].padStart(2, "0");
+        const month = parts[1].padStart(2, "0");
+        const year = parts[2].length === 2 ? "20" + parts[2] : parts[2];
         return `${year}-${month}-${day}`;
       }
     }
   }
-  
+
   // Fallback: usa data odierna
-  return new Date().toISOString().split('T')[0];
+  return new Date().toISOString().split("T")[0];
 }
 
 /**
@@ -3702,9 +3741,9 @@ async function checkProductExists(code) {
   try {
     const res = await fetch(`${API_URL}/prodotti`);
     const prodotti = await res.json();
-    return prodotti.find(p => p.nome.toUpperCase() === code.toUpperCase());
+    return prodotti.find((p) => p.nome.toUpperCase() === code.toUpperCase());
   } catch (error) {
-    console.error('Errore verifica prodotto:', error);
+    console.error("Errore verifica prodotto:", error);
     return null;
   }
 }
@@ -3717,24 +3756,24 @@ async function processScarichi(scarichi) {
     success: [],
     failed: [],
     notFound: [],
-    insufficientStock: []
+    insufficientStock: [],
   };
-  
+
   for (const scarico of scarichi) {
     try {
       // 1. Verifica se il prodotto esiste
       const prodotto = await checkProductExists(scarico.code);
-      
+
       if (!prodotto) {
         results.notFound.push({
           code: scarico.code,
           quantity: scarico.quantity,
           date: scarico.date,
-          reason: 'Prodotto non trovato nel database'
+          reason: "Prodotto non trovato nel database",
         });
         continue;
       }
-      
+
       // 2. Verifica giacenza disponibile
       if (prodotto.giacenza < scarico.quantity) {
         results.insufficientStock.push({
@@ -3743,34 +3782,34 @@ async function processScarichi(scarichi) {
           quantity: scarico.quantity,
           available: prodotto.giacenza,
           date: scarico.date,
-          reason: `Giacenza insufficiente (disponibile: ${prodotto.giacenza}, richiesto: ${scarico.quantity})`
+          reason: `Giacenza insufficiente (disponibile: ${prodotto.giacenza}, richiesto: ${scarico.quantity})`,
         });
         continue;
       }
-      
+
       // 3. Crea lo SCARICO
       const movementData = {
         prodotto_id: prodotto.id,
-        tipo: 'scarico',
+        tipo: "scarico",
         quantita: scarico.quantity,
         data_movimento: scarico.date,
         fattura_doc: null,
         fornitore: null,
-        prezzo: null
+        prezzo: null,
       };
-      
+
       const res = await fetch(`${API_URL}/dati`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(movementData)
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(movementData),
       });
-      
+
       if (res.ok) {
         results.success.push({
           code: scarico.code,
           nome: prodotto.nome,
           quantity: scarico.quantity,
-          date: scarico.date
+          date: scarico.date,
         });
       } else {
         const error = await res.json();
@@ -3778,20 +3817,19 @@ async function processScarichi(scarichi) {
           code: scarico.code,
           quantity: scarico.quantity,
           date: scarico.date,
-          reason: error.error || 'Errore sconosciuto'
+          reason: error.error || "Errore sconosciuto",
         });
       }
-      
     } catch (error) {
       results.failed.push({
         code: scarico.code,
         quantity: scarico.quantity,
         date: scarico.date,
-        reason: error.message
+        reason: error.message,
       });
     }
   }
-  
+
   return results;
 }
 
@@ -3802,36 +3840,37 @@ async function handlePDFImport(file) {
   try {
     // Mostra loading
     showImportLoading();
-    
+
     // 1. Estrai testo dal PDF
     const text = await extractTextFromPDF(file);
-    console.log('📄 Testo estratto dal PDF:', text);
-    
+    console.log("📄 Testo estratto dal PDF:", text);
+
     // 2. Parsa gli SCARICHI
     const scarichi = parseScarichiFromText(text);
-    console.log('📦 Scarichi trovati:', scarichi);
-    
+    console.log("📦 Scarichi trovati:", scarichi);
+
     if (scarichi.length === 0) {
-      throw new Error('❌ Nessun prodotto trovato nel PDF.\n\nVerifica che il PDF contenga:\n• Codici prodotto (es. ABC123)\n• Quantità (es. 5 pz)\n• Date (es. 19/12/2025)');
+      throw new Error(
+        "❌ Nessun prodotto trovato nel PDF.\n\nVerifica che il PDF contenga:\n• Codici prodotto (es. ABC123)\n• Quantità (es. 5 pz)\n• Date (es. 19/12/2025)"
+      );
     }
-    
+
     // 3. Processa gli SCARICHI
     const results = await processScarichi(scarichi);
-    
+
     // 4. Mostra risultati
     showImportResults(results);
-    
+
     // 5. Ricarica le tabelle se ci sono stati successi
     if (results.success.length > 0) {
       await loadMovimenti();
       await loadProdotti();
     }
-    
+
     return results;
-    
   } catch (error) {
-    console.error('❌ Errore import PDF:', error);
-    alert('❌ Errore durante l\'importazione:\n\n' + error.message);
+    console.error("❌ Errore import PDF:", error);
+    alert("❌ Errore durante l'importazione:\n\n" + error.message);
     hideImportLoading();
     throw error;
   }
@@ -3841,10 +3880,10 @@ async function handlePDFImport(file) {
  * Mostra loading durante l'import
  */
 function showImportLoading() {
-  const modal = document.getElementById('modalImportPDF');
-  const importBtn = modal.querySelector('.btn-import-confirm');
+  const modal = document.getElementById("modalImportPDF");
+  const importBtn = modal.querySelector(".btn-import-confirm");
   const originalText = importBtn.innerHTML;
-  
+
   importBtn.disabled = true;
   importBtn.innerHTML = `
     <div class="loading-spinner-inline"></div>
@@ -3857,9 +3896,9 @@ function showImportLoading() {
  * Nasconde loading
  */
 function hideImportLoading() {
-  const modal = document.getElementById('modalImportPDF');
-  const importBtn = modal.querySelector('.btn-import-confirm');
-  
+  const modal = document.getElementById("modalImportPDF");
+  const importBtn = modal.querySelector(".btn-import-confirm");
+
   if (importBtn.dataset.originalText) {
     importBtn.innerHTML = importBtn.dataset.originalText;
     importBtn.disabled = false;
@@ -3871,62 +3910,73 @@ function hideImportLoading() {
  */
 function showImportResults(results) {
   hideImportLoading();
-  
-  const total = results.success.length + results.failed.length + 
-                results.notFound.length + results.insufficientStock.length;
-  
+
+  const total =
+    results.success.length +
+    results.failed.length +
+    results.notFound.length +
+    results.insufficientStock.length;
+
   let message = `📊 IMPORT COMPLETATO\n`;
   message += `━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
   message += `✅ Scarichi importati: ${results.success.length}/${total}\n\n`;
-  
+
   // SUCCESSI
   if (results.success.length > 0) {
     message += `✅ SCARICHI CREATI CON SUCCESSO:\n`;
-    results.success.forEach(r => {
-      const dateFormatted = new Date(r.date).toLocaleDateString('it-IT');
+    results.success.forEach((r) => {
+      const dateFormatted = new Date(r.date).toLocaleDateString("it-IT");
       message += `  • ${r.code} (${r.nome})\n`;
-      message += `    Quantità: ${formatQuantity(r.quantity)} pz | Data: ${dateFormatted}\n`;
+      message += `    Quantità: ${formatQuantity(
+        r.quantity
+      )} pz | Data: ${dateFormatted}\n`;
     });
     message += `\n`;
   }
-  
+
   // PRODOTTI NON TROVATI
   if (results.notFound.length > 0) {
     message += `⚠️ PRODOTTI NON TROVATI (${results.notFound.length}):\n`;
-    results.notFound.forEach(r => {
-      const dateFormatted = new Date(r.date).toLocaleDateString('it-IT');
-      message += `  • ${r.code} - ${formatQuantity(r.quantity)} pz (${dateFormatted})\n`;
+    results.notFound.forEach((r) => {
+      const dateFormatted = new Date(r.date).toLocaleDateString("it-IT");
+      message += `  • ${r.code} - ${formatQuantity(
+        r.quantity
+      )} pz (${dateFormatted})\n`;
       message += `    → Crea prima il prodotto nella sezione "Prodotti"\n`;
     });
     message += `\n`;
   }
-  
+
   // GIACENZA INSUFFICIENTE
   if (results.insufficientStock.length > 0) {
     message += `❌ GIACENZA INSUFFICIENTE (${results.insufficientStock.length}):\n`;
-    results.insufficientStock.forEach(r => {
-      const dateFormatted = new Date(r.date).toLocaleDateString('it-IT');
+    results.insufficientStock.forEach((r) => {
+      const dateFormatted = new Date(r.date).toLocaleDateString("it-IT");
       message += `  • ${r.code} (${r.nome})\n`;
-      message += `    Richiesto: ${formatQuantity(r.quantity)} pz | Disponibile: ${formatQuantity(r.available)} pz\n`;
+      message += `    Richiesto: ${formatQuantity(
+        r.quantity
+      )} pz | Disponibile: ${formatQuantity(r.available)} pz\n`;
       message += `    Data: ${dateFormatted}\n`;
     });
     message += `\n`;
   }
-  
+
   // ERRORI
   if (results.failed.length > 0) {
     message += `❌ ERRORI (${results.failed.length}):\n`;
-    results.failed.forEach(r => {
+    results.failed.forEach((r) => {
       message += `  • ${r.code}: ${r.reason}\n`;
     });
   }
-  
+
   alert(message);
-  
+
   // Chiudi il modal solo se tutto è andato bene
-  if (results.failed.length === 0 && 
-      results.notFound.length === 0 && 
-      results.insufficientStock.length === 0) {
+  if (
+    results.failed.length === 0 &&
+    results.notFound.length === 0 &&
+    results.insufficientStock.length === 0
+  ) {
     closeImportPDFModal();
   }
 }
@@ -3935,53 +3985,53 @@ function showImportResults(results) {
  * Apre il modal di import PDF
  */
 function openImportPDFModal() {
-  const modal = document.getElementById('modalImportPDF');
-  const form = document.getElementById('formImportPDF');
-  
+  const modal = document.getElementById("modalImportPDF");
+  const form = document.getElementById("formImportPDF");
+
   form.reset();
-  modal.classList.add('active');
+  modal.classList.add("active");
 }
 
 /**
  * Chiude il modal di import PDF
  */
 function closeImportPDFModal() {
-  const modal = document.getElementById('modalImportPDF');
-  modal.classList.remove('active');
+  const modal = document.getElementById("modalImportPDF");
+  modal.classList.remove("active");
 }
 
 /**
  * Gestisce il submit del form
  */
-document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('formImportPDF');
-  
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("formImportPDF");
+
   if (form) {
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      
-      const fileInput = document.getElementById('importPDFFile');
-      
+
+      const fileInput = document.getElementById("importPDFFile");
+
       // Validazioni
       if (!fileInput.files[0]) {
-        alert('⚠️ Seleziona un file PDF');
+        alert("⚠️ Seleziona un file PDF");
         return;
       }
-      
+
       const file = fileInput.files[0];
-      
+
       // Verifica che sia un PDF
-      if (file.type !== 'application/pdf') {
-        alert('⚠️ Il file deve essere un PDF');
+      if (file.type !== "application/pdf") {
+        alert("⚠️ Il file deve essere un PDF");
         return;
       }
-      
+
       // Verifica dimensione (max 10MB)
       if (file.size > 10 * 1024 * 1024) {
-        alert('⚠️ Il file è troppo grande (max 10MB)');
+        alert("⚠️ Il file è troppo grande (max 10MB)");
         return;
       }
-      
+
       // Avvia import
       try {
         await handlePDFImport(file);
@@ -3990,17 +4040,19 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-  
+
   // Preview del file selezionato
-  const fileInput = document.getElementById('importPDFFile');
+  const fileInput = document.getElementById("importPDFFile");
   if (fileInput) {
-    fileInput.addEventListener('change', (e) => {
+    fileInput.addEventListener("change", (e) => {
       const file = e.target.files[0];
-      const preview = document.getElementById('filePreview');
-      
+      const preview = document.getElementById("filePreview");
+
       if (file && preview) {
-        preview.textContent = `📄 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-        preview.style.display = 'block';
+        preview.textContent = `📄 ${file.name} (${(file.size / 1024).toFixed(
+          1
+        )} KB)`;
+        preview.style.display = "block";
       }
     });
   }
@@ -4013,7 +4065,7 @@ function formatQuantity(num) {
   if (Number.isInteger(n)) {
     return n.toString();
   }
-  return n.toFixed(2).replace('.', ',');
+  return n.toFixed(2).replace(".", ",");
 }
 
 // Aggiungi queste funzioni in script.js [cite: 6]
@@ -4025,27 +4077,32 @@ function openImportPDFModal() {
 function closeImportPDFModal() {
   document.getElementById("modalImportPDF").classList.remove("active");
   document.getElementById("formImportPDF").reset();
-  document.getElementById("filePreview").textContent = "Trascina qui il file o clicca per selezionare";
+  document.getElementById("filePreview").textContent =
+    "Trascina qui il file o clicca per selezionare";
 }
 
 // Gestione dell'importazione PDF
 async function handlePDFImport(file) {
-  // Nota: L'estrazione effettiva del testo da un PDF lato client 
-  // richiede solitamente librerie come pdf.js. 
+  // Nota: L'estrazione effettiva del testo da un PDF lato client
+  // richiede solitamente librerie come pdf.js.
   // Qui implementiamo la logica basata sulla struttura di prova.pdf.
-  
+
   console.log("Elaborazione file:", file.name);
-  
+
   // Esempio di logica di parsing (simulata) per prova.pdf:
   // In prova.pdf troviamo "CODICE RICAMBIO", "QUANTITA'".
-  
+
   // 1. Invia il file al server o usa pdf.js per estrarre il testo
   // 2. Cerca le righe sotto la sezione "RICAMBI"
   // 3. Esegui il mapping con i prodotti esistenti
-  
-  alert("Lettura di " + file.name + " completata. Dati trovati: " + 
-        "Codici Ricambio e Quantità pronti per l'importazione.");
-  
+
+  alert(
+    "Lettura di " +
+      file.name +
+      " completata. Dati trovati: " +
+      "Codici Ricambio e Quantità pronti per l'importazione."
+  );
+
   closeImportPDFModal();
   loadMovimenti(); // Ricarica la tabella
 }
@@ -4067,58 +4124,60 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function openImportPDFModal() {
-    document.getElementById('modalImportPDF').classList.add('active');
+  document.getElementById("modalImportPDF").classList.add("active");
 }
 
 function closeImportPDFModal() {
-    document.getElementById('modalImportPDF').classList.remove('active');
-    document.getElementById('formImportPDF').reset();
-    document.getElementById('filePreview').textContent = "Trascina il PDF qui o clicca per sfogliare";
+  document.getElementById("modalImportPDF").classList.remove("active");
+  document.getElementById("formImportPDF").reset();
+  document.getElementById("filePreview").textContent =
+    "Trascina il PDF qui o clicca per sfogliare";
 }
 
 // Funzione che simula la lettura dei dati da prova.pdf
 async function handlePDFImport(file) {
-    // Qui andrebbe la libreria PDF.js per leggere il contenuto reale.
-    // Basandoci su prova.pdf, sappiamo che cerchiamo: CODICE RICAMBIO e QUANTITA'
-    
-    console.log("Analisi file PDF in corso...");
-    
-    // Esempio di dati estratti dal PDF (logica basata su prova.pdf)
-    const datiEstratti = [
-        { codice: "RIC-001", qta: 2, desc: "Filtro Olio", prezzo: 15.50 },
-        { codice: "RIC-002", qta: 1, desc: "Pastiglie Freno", prezzo: 45.00 }
-    ];
+  // Qui andrebbe la libreria PDF.js per leggere il contenuto reale.
+  // Basandoci su prova.pdf, sappiamo che cerchiamo: CODICE RICAMBIO e QUANTITA'
 
-    // Logica per aggiungere i movimenti estratti alla tabella
-    // (Qui dovresti chiamare la tua API per salvare i nuovi movimenti)
-    alert(`Trovati ${datiEstratti.length} ricambi nel file. Importazione completata.`);
-    
-    closeImportPDFModal();
-    loadMovimenti(); // Ricarica la tabella principale
+  console.log("Analisi file PDF in corso...");
+
+  // Esempio di dati estratti dal PDF (logica basata su prova.pdf)
+  const datiEstratti = [
+    { codice: "RIC-001", qta: 2, desc: "Filtro Olio", prezzo: 15.5 },
+    { codice: "RIC-002", qta: 1, desc: "Pastiglie Freno", prezzo: 45.0 },
+  ];
+
+  // Logica per aggiungere i movimenti estratti alla tabella
+  // (Qui dovresti chiamare la tua API per salvare i nuovi movimenti)
+  alert(
+    `Trovati ${datiEstratti.length} ricambi nel file. Importazione completata.`
+  );
+
+  closeImportPDFModal();
+  loadMovimenti(); // Ricarica la tabella principale
 }
 
 // Inizializzazione listener
-document.addEventListener('DOMContentLoaded', () => {
-    const fileInput = document.getElementById('importPDFFile');
-    if(fileInput) {
-        fileInput.addEventListener('change', (e) => {
-            if(e.target.files[0]) {
-                document.getElementById('filePreview').textContent = e.target.files[0].name;
-            }
-        });
-    }
-    
-    const formPDF = document.getElementById('formImportPDF');
-    if(formPDF) {
-        formPDF.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const file = document.getElementById('importPDFFile').files[0];
-            if(file) handlePDFImport(file);
-        });
-    }
+document.addEventListener("DOMContentLoaded", () => {
+  const fileInput = document.getElementById("importPDFFile");
+  if (fileInput) {
+    fileInput.addEventListener("change", (e) => {
+      if (e.target.files[0]) {
+        document.getElementById("filePreview").textContent =
+          e.target.files[0].name;
+      }
+    });
+  }
+
+  const formPDF = document.getElementById("formImportPDF");
+  if (formPDF) {
+    formPDF.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const file = document.getElementById("importPDFFile").files[0];
+      if (file) handlePDFImport(file);
+    });
+  }
 });
-
-
 
 // ==================== 📄 IMPORT PDF SCARICHI - SISTEMA COMPLETO ====================
 
@@ -4130,29 +4189,30 @@ async function loadPDFJS() {
   return new Promise((resolve, reject) => {
     // Se PDF.js è già caricato, esci
     if (window.pdfjsLib) {
-      console.log('✅ PDF.js già caricato');
+      console.log("✅ PDF.js già caricato");
       resolve();
       return;
     }
-    
-    console.log('⏳ Caricamento PDF.js da CDN...');
-    
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-    
+
+    console.log("⏳ Caricamento PDF.js da CDN...");
+
+    const script = document.createElement("script");
+    script.src =
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+
     script.onload = () => {
       // Configura il worker per PDF.js
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 
-        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-      console.log('✅ PDF.js caricato con successo');
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      console.log("✅ PDF.js caricato con successo");
       resolve();
     };
-    
+
     script.onerror = () => {
-      console.error('❌ Errore caricamento PDF.js');
-      reject(new Error('Impossibile caricare la libreria PDF.js'));
+      console.error("❌ Errore caricamento PDF.js");
+      reject(new Error("Impossibile caricare la libreria PDF.js"));
     };
-    
+
     document.head.appendChild(script);
   });
 }
@@ -4165,57 +4225,56 @@ async function loadPDFJS() {
 async function extractTextFromPDF(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    
-    reader.onload = async function(e) {
+
+    reader.onload = async function (e) {
       try {
-        console.log('📖 Inizio lettura PDF...');
-        
+        console.log("📖 Inizio lettura PDF...");
+
         const typedarray = new Uint8Array(e.target.result);
-        
+
         // Carica PDF.js se non è già presente
         if (!window.pdfjsLib) {
           await loadPDFJS();
         }
-        
+
         // Carica il documento PDF
         const loadingTask = pdfjsLib.getDocument(typedarray);
         const pdf = await loadingTask.promise;
-        
+
         console.log(`📄 PDF caricato: ${pdf.numPages} pagine`);
-        
-        let fullText = '';
-        
+
+        let fullText = "";
+
         // Estrai testo da ogni pagina
         for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
           const page = await pdf.getPage(pageNum);
           const textContent = await page.getTextContent();
-          
+
           // Unisci tutti gli elementi di testo
-          const pageText = textContent.items
-            .map(item => item.str)
-            .join(' ');
-          
-          fullText += pageText + '\n';
-          
+          const pageText = textContent.items.map((item) => item.str).join(" ");
+
+          fullText += pageText + "\n";
+
           console.log(`📄 Pagina ${pageNum}/${pdf.numPages} letta`);
         }
-        
-        console.log('✅ Estrazione testo completata');
-        console.log('📝 Testo estratto:', fullText.substring(0, 500) + '...');
-        
+
+        console.log("✅ Estrazione testo completata");
+        console.log("📝 Testo estratto:", fullText.substring(0, 500) + "...");
+
         resolve(fullText);
-        
       } catch (error) {
-        console.error('❌ Errore estrazione PDF:', error);
-        reject(new Error('Errore durante la lettura del PDF: ' + error.message));
+        console.error("❌ Errore estrazione PDF:", error);
+        reject(
+          new Error("Errore durante la lettura del PDF: " + error.message)
+        );
       }
     };
-    
+
     reader.onerror = () => {
-      console.error('❌ Errore lettura file');
-      reject(new Error('Impossibile leggere il file PDF'));
+      console.error("❌ Errore lettura file");
+      reject(new Error("Impossibile leggere il file PDF"));
     };
-    
+
     // Inizia la lettura del file
     reader.readAsArrayBuffer(file);
   });
@@ -4227,42 +4286,44 @@ async function extractTextFromPDF(file) {
  * @returns {string} - Data in formato YYYY-MM-DD
  */
 function extractDateFromPDF(text) {
-  console.log('📅 Ricerca DATA nel PDF...');
-  
-  const lines = text.split('\n');
-  
+  console.log("📅 Ricerca DATA nel PDF...");
+
+  const lines = text.split("\n");
+
   // Cerca nelle prime 15 righe (la data dovrebbe essere in alto)
   for (let i = 0; i < Math.min(15, lines.length); i++) {
     const line = lines[i].trim();
-    
+
     // Pattern principale: DATA______19/12/2025
     const datePattern = /DATA[_\s]*(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/i;
     const match = line.match(datePattern);
-    
+
     if (match && match[1]) {
       const normalizedDate = normalizeDate(match[1]);
       console.log(`✅ Data trovata: ${match[1]} → ${normalizedDate}`);
       return normalizedDate;
     }
   }
-  
+
   // Fallback: cerca qualsiasi data nelle prime righe
-  console.log('⚠️ Pattern DATA___ non trovato, cerco date generiche...');
-  
+  console.log("⚠️ Pattern DATA___ non trovato, cerco date generiche...");
+
   for (let i = 0; i < Math.min(15, lines.length); i++) {
     const line = lines[i];
     const anyDatePattern = /(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/;
     const match = line.match(anyDatePattern);
-    
+
     if (match && match[1]) {
       const normalizedDate = normalizeDate(match[1]);
-      console.log(`✅ Data trovata (generica): ${match[1]} → ${normalizedDate}`);
+      console.log(
+        `✅ Data trovata (generica): ${match[1]} → ${normalizedDate}`
+      );
       return normalizedDate;
     }
   }
-  
+
   // Se non trova nessuna data, usa oggi
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date().toISOString().split("T")[0];
   console.warn(`⚠️ Nessuna data trovata nel PDF, uso data odierna: ${today}`);
   return today;
 }
@@ -4274,100 +4335,112 @@ function extractDateFromPDF(text) {
  * @returns {Array} - Array di oggetti {code, quantity, date}
  */
 function extractScarichiFromPDF(text, date) {
-  console.log('📦 Ricerca sezione RICAMBI...');
-  
+  console.log("📦 Ricerca sezione RICAMBI...");
+
   const scarichi = [];
-  const lines = text.split('\n');
-  
+  const lines = text.split("\n");
+
   // 1️⃣ TROVA LA SEZIONE "RICAMBI"
   let ricambiStartIndex = -1;
-  
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim().toUpperCase();
-    if (line.includes('RICAMBI')) {
+    if (line.includes("RICAMBI")) {
       ricambiStartIndex = i;
       console.log(`✅ Sezione RICAMBI trovata alla riga ${i}: "${lines[i]}"`);
       break;
     }
   }
-  
+
   if (ricambiStartIndex === -1) {
-    console.warn('⚠️ Sezione RICAMBI non trovata nel PDF');
+    console.warn("⚠️ Sezione RICAMBI non trovata nel PDF");
     return scarichi;
   }
-  
+
   // 2️⃣ SALTA LE RIGHE DI INTESTAZIONE
   // (CODICE RICAMBIO, DESCRIZIONE, QUANTITA', ecc.)
   let dataStartIndex = ricambiStartIndex + 1;
-  
-  for (let i = ricambiStartIndex + 1; i < Math.min(ricambiStartIndex + 5, lines.length); i++) {
+
+  for (
+    let i = ricambiStartIndex + 1;
+    i < Math.min(ricambiStartIndex + 5, lines.length);
+    i++
+  ) {
     const line = lines[i].trim().toUpperCase();
-    
-    if (line.includes('CODICE') || 
-        line.includes('DESCRIZIONE') || 
-        line.includes('QUANTITA') ||
-        line.includes('PREZZO')) {
+
+    if (
+      line.includes("CODICE") ||
+      line.includes("DESCRIZIONE") ||
+      line.includes("QUANTITA") ||
+      line.includes("PREZZO")
+    ) {
       dataStartIndex = i + 1;
       console.log(`⏭️  Riga intestazione saltata: "${lines[i]}"`);
     }
   }
-  
+
   console.log(`🔍 Inizio analisi dati dalla riga ${dataStartIndex}`);
-  
+
   // 3️⃣ ANALIZZA LE RIGHE SUCCESSIVE
   for (let i = dataStartIndex; i < lines.length; i++) {
     const line = lines[i].trim();
-    
+
     // Stop se incontriamo una sezione diversa
-    if (!line || 
-        /MANODOPERA|TOTALE|IVA COMPRESA|DESCRIZIONE LAVORAZIONI|Descrizione Lavorazioni/i.test(line)) {
+    if (
+      !line ||
+      /MANODOPERA|TOTALE|IVA COMPRESA|DESCRIZIONE LAVORAZIONI|Descrizione Lavorazioni/i.test(
+        line
+      )
+    ) {
       console.log(`🛑 Fine sezione RICAMBI alla riga ${i}: "${line}"`);
       break;
     }
-    
+
     // 4️⃣ ESTRAI CODICE E QUANTITÀ
     // Formato atteso: "ABC123 Descrizione... 2" oppure "ABC123  2"
-    const words = line.split(/\s+/).filter(w => w.length > 0);
-    
+    const words = line.split(/\s+/).filter((w) => w.length > 0);
+
     if (words.length < 2) {
       console.log(`⏭️  Riga ignorata (troppo corta): "${line}"`);
       continue;
     }
-    
+
     // Il primo elemento dovrebbe essere il CODICE
     const potentialCode = words[0].toUpperCase();
-    
+
     // Validazione codice: almeno 3 caratteri alfanumerici
     if (!/^[A-Z0-9]{3,}$/i.test(potentialCode)) {
       console.log(`⏭️  Codice non valido: "${potentialCode}" in "${line}"`);
       continue;
     }
-    
+
     // L'ultimo elemento dovrebbe essere la QUANTITÀ
     const potentialQty = words[words.length - 1];
-    
+
     // Rimuovi eventuali simboli (es. "2," → "2")
-    const cleanQty = potentialQty.replace(/[^\d.,]/g, '');
-    const qty = parseFloat(cleanQty.replace(',', '.'));
-    
+    const cleanQty = potentialQty.replace(/[^\d.,]/g, "");
+    const qty = parseFloat(cleanQty.replace(",", "."));
+
     // Validazione quantità
     if (isNaN(qty) || qty <= 0 || qty > 9999) {
-      console.log(`⏭️  Quantità non valida: "${potentialQty}" → ${qty} in "${line}"`);
+      console.log(
+        `⏭️  Quantità non valida: "${potentialQty}" → ${qty} in "${line}"`
+      );
       continue;
     }
-    
+
     // ✅ SUCCESSO: abbiamo trovato un codice e una quantità validi
     scarichi.push({
       code: potentialCode,
       quantity: qty,
-      date: date
+      date: date,
     });
-    
+
     console.log(`✅ Scarico trovato: ${potentialCode} - ${qty} pz (riga ${i})`);
   }
-  
+
   console.log(`📊 Totale scarichi trovati: ${scarichi.length}`);
-  
+
   return scarichi;
 }
 
@@ -4378,30 +4451,35 @@ function extractScarichiFromPDF(text, date) {
  */
 function normalizeDate(dateStr) {
   dateStr = dateStr.trim();
-  
+
   // Determina il separatore (/, -, .)
-  const separator = dateStr.includes('/') ? '/' : 
-                   (dateStr.includes('-') ? '-' : '.');
-  
+  const separator = dateStr.includes("/")
+    ? "/"
+    : dateStr.includes("-")
+    ? "-"
+    : ".";
+
   const parts = dateStr.split(separator);
-  
+
   if (parts.length === 3) {
     // Formato DD/MM/YYYY o YYYY/MM/DD
     if (parts[0].length === 4) {
       // YYYY-MM-DD (già corretto)
-      return dateStr.replace(/\./g, '-').replace(/\//g, '-');
+      return dateStr.replace(/\./g, "-").replace(/\//g, "-");
     } else {
       // DD-MM-YYYY → YYYY-MM-DD
-      const day = parts[0].padStart(2, '0');
-      const month = parts[1].padStart(2, '0');
-      const year = parts[2].length === 2 ? '20' + parts[2] : parts[2];
+      const day = parts[0].padStart(2, "0");
+      const month = parts[1].padStart(2, "0");
+      const year = parts[2].length === 2 ? "20" + parts[2] : parts[2];
       return `${year}-${month}-${day}`;
     }
   }
-  
+
   // Fallback: usa data odierna
-  console.warn(`⚠️ Formato data non riconosciuto: "${dateStr}", uso data odierna`);
-  return new Date().toISOString().split('T')[0];
+  console.warn(
+    `⚠️ Formato data non riconosciuto: "${dateStr}", uso data odierna`
+  );
+  return new Date().toISOString().split("T")[0];
 }
 
 /**
@@ -4412,28 +4490,29 @@ function normalizeDate(dateStr) {
 async function checkProductExists(code) {
   try {
     const res = await fetch(`${API_URL}/prodotti`);
-    
+
     if (!res.ok) {
-      throw new Error('Errore caricamento prodotti dal server');
+      throw new Error("Errore caricamento prodotti dal server");
     }
-    
+
     const prodotti = await res.json();
-    
+
     // Cerca il prodotto confrontando il codice (case-insensitive)
-    const prodotto = prodotti.find(p => 
-      p.nome.toUpperCase() === code.toUpperCase()
+    const prodotto = prodotti.find(
+      (p) => p.nome.toUpperCase() === code.toUpperCase()
     );
-    
+
     if (prodotto) {
-      console.log(`✅ Prodotto trovato: ${code} → ${prodotto.nome} (ID: ${prodotto.id})`);
+      console.log(
+        `✅ Prodotto trovato: ${code} → ${prodotto.nome} (ID: ${prodotto.id})`
+      );
     } else {
       console.warn(`⚠️ Prodotto NON trovato: ${code}`);
     }
-    
+
     return prodotto;
-    
   } catch (error) {
-    console.error('❌ Errore verifica prodotto:', error);
+    console.error("❌ Errore verifica prodotto:", error);
     return null;
   }
 }
@@ -4445,34 +4524,38 @@ async function checkProductExists(code) {
  */
 async function processScarichi(scarichi) {
   console.log(`🚀 Inizio elaborazione ${scarichi.length} scarichi...`);
-  
+
   const results = {
     success: [],
     failed: [],
     notFound: [],
-    insufficientStock: []
+    insufficientStock: [],
   };
-  
+
   for (let i = 0; i < scarichi.length; i++) {
     const scarico = scarichi[i];
-    
-    console.log(`📦 [${i + 1}/${scarichi.length}] Elaborazione: ${scarico.code} - ${scarico.quantity} pz`);
-    
+
+    console.log(
+      `📦 [${i + 1}/${scarichi.length}] Elaborazione: ${scarico.code} - ${
+        scarico.quantity
+      } pz`
+    );
+
     try {
       // 1️⃣ Verifica se il prodotto esiste
       const prodotto = await checkProductExists(scarico.code);
-      
+
       if (!prodotto) {
         results.notFound.push({
           code: scarico.code,
           quantity: scarico.quantity,
           date: scarico.date,
-          reason: 'Prodotto non trovato nel database'
+          reason: "Prodotto non trovato nel database",
         });
         console.warn(`⚠️ Prodotto non trovato: ${scarico.code}`);
         continue;
       }
-      
+
       // 2️⃣ Verifica giacenza disponibile
       if (prodotto.giacenza < scarico.quantity) {
         results.insufficientStock.push({
@@ -4480,63 +4563,66 @@ async function processScarichi(scarichi) {
           nome: prodotto.nome,
           quantity: scarico.quantity,
           available: prodotto.giacenza,
-          date: scarico.date
+          date: scarico.date,
         });
-        console.warn(`⚠️ Giacenza insufficiente: ${scarico.code} (richiesto: ${scarico.quantity}, disponibile: ${prodotto.giacenza})`);
+        console.warn(
+          `⚠️ Giacenza insufficiente: ${scarico.code} (richiesto: ${scarico.quantity}, disponibile: ${prodotto.giacenza})`
+        );
         continue;
       }
-      
+
       // 3️⃣ Crea lo SCARICO
       const movementData = {
         prodotto_id: prodotto.id,
-        tipo: 'scarico',
+        tipo: "scarico",
         quantita: scarico.quantity,
         data_movimento: scarico.date,
         fattura_doc: null,
         fornitore: null,
-        prezzo: null
+        prezzo: null,
       };
-      
-      console.log('📤 Invio scarico al server:', movementData);
-      
+
+      console.log("📤 Invio scarico al server:", movementData);
+
       const res = await fetch(`${API_URL}/dati`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(movementData)
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(movementData),
       });
-      
+
       if (res.ok) {
         results.success.push({
           code: scarico.code,
           nome: prodotto.nome,
           quantity: scarico.quantity,
-          date: scarico.date
+          date: scarico.date,
         });
-        console.log(`✅ Scarico creato: ${scarico.code} - ${scarico.quantity} pz`);
+        console.log(
+          `✅ Scarico creato: ${scarico.code} - ${scarico.quantity} pz`
+        );
       } else {
         const error = await res.json();
         results.failed.push({
           code: scarico.code,
           quantity: scarico.quantity,
           date: scarico.date,
-          reason: error.error || 'Errore sconosciuto dal server'
+          reason: error.error || "Errore sconosciuto dal server",
         });
         console.error(`❌ Errore creazione scarico: ${error.error}`);
       }
-      
     } catch (error) {
       results.failed.push({
         code: scarico.code,
         quantity: scarico.quantity,
         date: scarico.date,
-        reason: error.message
+        reason: error.message,
       });
       console.error(`❌ Errore elaborazione: ${error.message}`);
     }
   }
-  
-  console.log('📊 Elaborazione completata:', results);
-  
+
+  console.log("📊 Elaborazione completata:", results);
+
   return results;
 }
 
@@ -4547,54 +4633,53 @@ async function processScarichi(scarichi) {
  */
 async function handlePDFImport(file) {
   try {
-    console.log('🚀 Inizio importazione PDF:', file.name);
-    
+    console.log("🚀 Inizio importazione PDF:", file.name);
+
     showImportLoading();
-    
+
     // 1️⃣ Estrai testo dal PDF
     const text = await extractTextFromPDF(file);
-    
+
     // 2️⃣ Estrai la DATA
     const date = extractDateFromPDF(text);
-    
+
     // 3️⃣ Estrai gli SCARICHI
     const scarichi = extractScarichiFromPDF(text, date);
-    
+
     console.log(`📦 ${scarichi.length} scarichi trovati per la data ${date}`);
-    
+
     if (scarichi.length === 0) {
       throw new Error(
-        '❌ Nessun prodotto trovato nel PDF.\n\n' +
-        'Verifica che il PDF contenga:\n' +
-        '• Sezione "RICAMBI"\n' +
-        '• CODICE RICAMBIO (es. ABC123)\n' +
-        '• QUANTITÀ (es. 2)\n\n' +
-        'Formato atteso:\n' +
-        'RICAMBI\n' +
-        'CODICE RICAMBIO   DESCRIZIONE   QUANTITA\'\n' +
-        'ABC123           Filtro Olio    2'
+        "❌ Nessun prodotto trovato nel PDF.\n\n" +
+          "Verifica che il PDF contenga:\n" +
+          '• Sezione "RICAMBI"\n' +
+          "• CODICE RICAMBIO (es. ABC123)\n" +
+          "• QUANTITÀ (es. 2)\n\n" +
+          "Formato atteso:\n" +
+          "RICAMBI\n" +
+          "CODICE RICAMBIO   DESCRIZIONE   QUANTITA'\n" +
+          "ABC123           Filtro Olio    2"
       );
     }
-    
+
     // 4️⃣ Processa gli SCARICHI
     const results = await processScarichi(scarichi);
-    
+
     // 5️⃣ Mostra risultati
     showImportResults(results);
-    
+
     // 6️⃣ Ricarica le tabelle se ci sono stati successi
     if (results.success.length > 0) {
-      console.log('🔄 Ricarico tabelle Movimenti e Prodotti...');
+      console.log("🔄 Ricarico tabelle Movimenti e Prodotti...");
       await loadMovimenti();
       await loadProdotti();
-      console.log('✅ Tabelle ricaricate');
+      console.log("✅ Tabelle ricaricate");
     }
-    
+
     return results;
-    
   } catch (error) {
-    console.error('❌ Errore import PDF:', error);
-    alert('❌ Errore durante l\'importazione:\n\n' + error.message);
+    console.error("❌ Errore import PDF:", error);
+    alert("❌ Errore durante l'importazione:\n\n" + error.message);
     hideImportLoading();
     throw error;
   }
@@ -4604,45 +4689,45 @@ async function handlePDFImport(file) {
  * ⏳ Mostra loading durante l'import
  */
 function showImportLoading() {
-  const modal = document.getElementById('modalImportPDF');
-  const importBtn = modal.querySelector('.btn-import-confirm');
-  
+  const modal = document.getElementById("modalImportPDF");
+  const importBtn = modal.querySelector(".btn-import-confirm");
+
   if (!importBtn) {
-    console.error('❌ Bottone import non trovato');
+    console.error("❌ Bottone import non trovato");
     return;
   }
-  
+
   const originalHTML = importBtn.innerHTML;
-  
+
   importBtn.disabled = true;
   importBtn.dataset.originalHTML = originalHTML;
   importBtn.innerHTML = `
     <div class="loading-spinner-inline"></div>
     <span>⏳ Elaborazione in corso...</span>
   `;
-  
-  console.log('⏳ Loading mostrato');
+
+  console.log("⏳ Loading mostrato");
 }
 
 /**
  * ✅ Nasconde loading
  */
 function hideImportLoading() {
-  const modal = document.getElementById('modalImportPDF');
-  const importBtn = modal.querySelector('.btn-import-confirm');
-  
+  const modal = document.getElementById("modalImportPDF");
+  const importBtn = modal.querySelector(".btn-import-confirm");
+
   if (!importBtn) {
-    console.error('❌ Bottone import non trovato');
+    console.error("❌ Bottone import non trovato");
     return;
   }
-  
+
   if (importBtn.dataset.originalHTML) {
     importBtn.innerHTML = importBtn.dataset.originalHTML;
     importBtn.disabled = false;
     delete importBtn.dataset.originalHTML;
   }
-  
-  console.log('✅ Loading nascosto');
+
+  console.log("✅ Loading nascosto");
 }
 
 /**
@@ -4651,41 +4736,48 @@ function hideImportLoading() {
  */
 function showImportResults(results) {
   hideImportLoading();
-  
-  const total = results.success.length + results.failed.length + 
-                results.notFound.length + results.insufficientStock.length;
-  
+
+  const total =
+    results.success.length +
+    results.failed.length +
+    results.notFound.length +
+    results.insufficientStock.length;
+
   let message = `📊 IMPORT COMPLETATO\n`;
   message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
   message += `✅ Scarichi importati: ${results.success.length}/${total}\n\n`;
-  
+
   // ✅ SUCCESSI
   if (results.success.length > 0) {
     message += `✅ SCARICHI CREATI CON SUCCESSO:\n`;
-    results.success.forEach(r => {
-      const dateFormatted = new Date(r.date).toLocaleDateString('it-IT');
+    results.success.forEach((r) => {
+      const dateFormatted = new Date(r.date).toLocaleDateString("it-IT");
       message += `  • ${r.code} (${r.nome})\n`;
-      message += `    Quantità: ${formatQuantity(r.quantity)} pz | Data: ${dateFormatted}\n`;
+      message += `    Quantità: ${formatQuantity(
+        r.quantity
+      )} pz | Data: ${dateFormatted}\n`;
     });
     message += `\n`;
   }
-  
+
   // ⚠️ PRODOTTI NON TROVATI
   if (results.notFound.length > 0) {
     message += `⚠️ PRODOTTI NON TROVATI (${results.notFound.length}):\n`;
-    results.notFound.forEach(r => {
-      const dateFormatted = new Date(r.date).toLocaleDateString('it-IT');
-      message += `  • ${r.code} - ${formatQuantity(r.quantity)} pz (${dateFormatted})\n`;
+    results.notFound.forEach((r) => {
+      const dateFormatted = new Date(r.date).toLocaleDateString("it-IT");
+      message += `  • ${r.code} - ${formatQuantity(
+        r.quantity
+      )} pz (${dateFormatted})\n`;
       message += `    → Crea prima il prodotto nella sezione "Prodotti"\n`;
     });
     message += `\n`;
   }
-  
+
   // ❌ GIACENZA INSUFFICIENTE
   if (results.insufficientStock.length > 0) {
     message += `❌ GIACENZA INSUFFICIENTE (${results.insufficientStock.length}):\n`;
-    results.insufficientStock.forEach(r => {
-      const dateFormatted = new Date(r.date).toLocaleDateString('it-IT');
+    results.insufficientStock.forEach((r) => {
+      const dateFormatted = new Date(r.date).toLocaleDateString("it-IT");
       message += `  • ${r.code} (${r.nome})\n`;
       message += `    Richiesto: ${formatQuantity(r.quantity)} pz | `;
       message += `Disponibile: ${formatQuantity(r.available)} pz\n`;
@@ -4693,21 +4785,23 @@ function showImportResults(results) {
     });
     message += `\n`;
   }
-  
+
   // ❌ ERRORI
   if (results.failed.length > 0) {
     message += `❌ ERRORI (${results.failed.length}):\n`;
-    results.failed.forEach(r => {
+    results.failed.forEach((r) => {
       message += `  • ${r.code}: ${r.reason}\n`;
     });
   }
-  
+
   alert(message);
-  
+
   // Chiudi il modal solo se tutto è andato bene
-  if (results.failed.length === 0 && 
-      results.notFound.length === 0 && 
-      results.insufficientStock.length === 0) {
+  if (
+    results.failed.length === 0 &&
+    results.notFound.length === 0 &&
+    results.insufficientStock.length === 0
+  ) {
     closeImportPDFModal();
   }
 }
@@ -4716,116 +4810,116 @@ function showImportResults(results) {
  * 🔄 Apertura modal import PDF
  */
 function openImportPDFModal() {
-  console.log('🔄 Apertura modal import PDF');
-  
-  const modal = document.getElementById('modalImportPDF');
-  const form = document.getElementById('formImportPDF');
-  
+  console.log("🔄 Apertura modal import PDF");
+
+  const modal = document.getElementById("modalImportPDF");
+  const form = document.getElementById("formImportPDF");
+
   if (!modal || !form) {
-    console.error('❌ Modal o form non trovati');
+    console.error("❌ Modal o form non trovati");
     return;
   }
-  
+
   form.reset();
-  
-  const filePreview = document.getElementById('filePreviewBox');
+
+  const filePreview = document.getElementById("filePreviewBox");
   if (filePreview) {
-    filePreview.style.display = 'none';
-    filePreview.textContent = '';
+    filePreview.style.display = "none";
+    filePreview.textContent = "";
   }
-  
-  modal.classList.add('active');
+
+  modal.classList.add("active");
 }
 
 /**
  * ❌ Chiusura modal import PDF
  */
 function closeImportPDFModal() {
-  console.log('❌ Chiusura modal import PDF');
-  
-  const modal = document.getElementById('modalImportPDF');
-  
+  console.log("❌ Chiusura modal import PDF");
+
+  const modal = document.getElementById("modalImportPDF");
+
   if (!modal) {
-    console.error('❌ Modal non trovato');
+    console.error("❌ Modal non trovato");
     return;
   }
-  
-  modal.classList.remove('active');
+
+  modal.classList.remove("active");
 }
 
 // ==================== 🎯 EVENT LISTENERS ====================
 
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('🎯 Inizializzazione event listeners import PDF');
-  
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("🎯 Inizializzazione event listeners import PDF");
+
   // 1️⃣ SUBMIT FORM
-  const form = document.getElementById('formImportPDF');
+  const form = document.getElementById("formImportPDF");
   if (form) {
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      
-      console.log('📤 Submit form import PDF');
-      
-      const fileInput = document.getElementById('importPDFFile');
+
+      console.log("📤 Submit form import PDF");
+
+      const fileInput = document.getElementById("importPDFFile");
       const file = fileInput.files[0];
-      
+
       // Validazioni
       if (!file) {
-        alert('⚠️ Seleziona un file PDF');
+        alert("⚠️ Seleziona un file PDF");
         return;
       }
-      
-      if (file.type !== 'application/pdf') {
-        alert('⚠️ Il file deve essere un PDF');
+
+      if (file.type !== "application/pdf") {
+        alert("⚠️ Il file deve essere un PDF");
         return;
       }
-      
+
       if (file.size > 10 * 1024 * 1024) {
-        alert('⚠️ Il file è troppo grande (max 10MB)');
+        alert("⚠️ Il file è troppo grande (max 10MB)");
         return;
       }
-      
+
       try {
         await handlePDFImport(file);
       } catch (error) {
         // Errore già gestito in handlePDFImport
-        console.error('❌ Errore gestione import:', error);
+        console.error("❌ Errore gestione import:", error);
       }
     });
-    
-    console.log('✅ Event listener submit form registrato');
+
+    console.log("✅ Event listener submit form registrato");
   } else {
-    console.warn('⚠️ Form import PDF non trovato');
+    console.warn("⚠️ Form import PDF non trovato");
   }
-  
+
   // 2️⃣ PREVIEW FILE SELEZIONATO
-  const fileInput = document.getElementById('importPDFFile');
+  const fileInput = document.getElementById("importPDFFile");
   if (fileInput) {
-    fileInput.addEventListener('change', (e) => {
+    fileInput.addEventListener("change", (e) => {
       const file = e.target.files[0];
-      const preview = document.getElementById('filePreviewBox');
-      
+      const preview = document.getElementById("filePreviewBox");
+
       if (file && preview) {
         const sizeKB = (file.size / 1024).toFixed(1);
         preview.textContent = `📄 ${file.name} (${sizeKB} KB)`;
-        preview.style.display = 'block';
-        
+        preview.style.display = "block";
+
         console.log(`📄 File selezionato: ${file.name} (${sizeKB} KB)`);
       }
     });
-    
-    console.log('✅ Event listener preview file registrato');
+
+    console.log("✅ Event listener preview file registrato");
   } else {
-    console.warn('⚠️ Input file PDF non trovato');
+    console.warn("⚠️ Input file PDF non trovato");
   }
 });
 
 // ==================== 🎉 FINE SEZIONE IMPORT PDF ====================
-console.log('✅ Script import PDF caricato correttamente');
+console.log("✅ Script import PDF caricato correttamente");
 
 function printRiepilogo() {
   if (!riepilogo || riepilogo.length === 0) {
-    alert('Nessun prodotto da stampare');
+    alert("Nessun prodotto da stampare");
     return;
   }
 
@@ -4916,8 +5010,12 @@ function printRiepilogo() {
 
       <h1>Riepilogo Giacenze Magazzino</h1>
       <div class="info">
-        <p><strong>Valore Totale (Filtrato):</strong> ${formatCurrency(valoreTotaleFiltrato)}</p>
-        <p><strong>Data Stampa:</strong> ${new Date().toLocaleDateString('it-IT')} ${new Date().toLocaleTimeString('it-IT')}</p>
+        <p><strong>Valore Totale (Filtrato):</strong> ${formatCurrency(
+          valoreTotaleFiltrato
+        )}</p>
+        <p><strong>Data Stampa:</strong> ${new Date().toLocaleDateString(
+          "it-IT"
+        )} ${new Date().toLocaleTimeString("it-IT")}</p>
       </div>
   `;
 
@@ -4928,16 +5026,20 @@ function printRiepilogo() {
           <div class="prodotto-header">
             <div class="prodotto-info">
               <span><strong>Prodotto:</strong> ${prodotto.nome}</span>
-              <span><strong>Giacenza Totale:</strong> ${formatQuantity(prodotto.giacenza)} pz</span>
+              <span><strong>Giacenza Totale:</strong> ${formatQuantity(
+                prodotto.giacenza
+              )} pz</span>
             </div>
             <div class="prodotto-info">
-              <span><strong>Marca:</strong> ${prodotto.marca_nome || '-'}</span>
-              <span><strong>Valore Totale:</strong> ${formatCurrency(prodotto.valore_totale)}</span>
+              <span><strong>Marca:</strong> ${prodotto.marca_nome || "-"}</span>
+              <span><strong>Valore Totale:</strong> ${formatCurrency(
+                prodotto.valore_totale
+              )}</span>
             </div>
             ${
               prodotto.descrizione
                 ? `<div class="prodotto-info"><span><strong>Descrizione:</strong> ${prodotto.descrizione}</span></div>`
-                : ''
+                : ""
             }
           </div>
       `;
@@ -4961,12 +5063,16 @@ function printRiepilogo() {
         prodotto.lotti.forEach((lotto) => {
           printContent += `
             <tr class="lotto-row">
-              <td>${new Date(lotto.data_carico).toLocaleDateString('it-IT')}</td>
+              <td>${new Date(lotto.data_carico).toLocaleDateString(
+                "it-IT"
+              )}</td>
               <td>${formatQuantity(lotto.quantita_rimanente)} pz</td>
               <td>${formatCurrency(lotto.prezzo)}</td>
-              <td><strong>${formatCurrency(lotto.quantita_rimanente * lotto.prezzo)}</strong></td>
-              <td>${lotto.fattura_doc || '-'}</td>
-              <td>${lotto.fornitore || '-'}</td>
+              <td><strong>${formatCurrency(
+                lotto.quantita_rimanente * lotto.prezzo
+              )}</strong></td>
+              <td>${lotto.fattura_doc || "-"}</td>
+              <td>${lotto.fornitore || "-"}</td>
             </tr>
           `;
         });
@@ -4988,13 +5094,13 @@ function printRiepilogo() {
   // Sostituisci i placeholder con i dati JSON (company-loader.js)
   printContent = insertCompanyInfoPrint(printContent);
 
-  const printFrame = document.createElement('iframe');
-  printFrame.style.position = 'fixed';
-  printFrame.style.right = '0';
-  printFrame.style.bottom = '0';
-  printFrame.style.width = '0';
-  printFrame.style.height = '0';
-  printFrame.style.border = '0';
+  const printFrame = document.createElement("iframe");
+  printFrame.style.position = "fixed";
+  printFrame.style.right = "0";
+  printFrame.style.bottom = "0";
+  printFrame.style.width = "0";
+  printFrame.style.height = "0";
+  printFrame.style.border = "0";
   document.body.appendChild(printFrame);
 
   const doc = printFrame.contentDocument || printFrame.contentWindow.document;
@@ -5011,10 +5117,9 @@ function printRiepilogo() {
   };
 }
 
-
 function printStorico() {
   if (!storico || storico.length === 0) {
-    alert('Nessun prodotto da stampare');
+    alert("Nessun prodotto da stampare");
     return;
   }
 
@@ -5023,10 +5128,10 @@ function printStorico() {
     0
   );
 
-  const dataSelezionata = document.getElementById('storicoDate').value;
+  const dataSelezionata = document.getElementById("storicoDate").value;
   const dataItalianaSelezionata = dataSelezionata
-    ? new Date(dataSelezionata + 'T00:00:00').toLocaleDateString('it-IT')
-    : 'Non selezionata';
+    ? new Date(dataSelezionata + "T00:00:00").toLocaleDateString("it-IT")
+    : "Non selezionata";
 
   let printContent = `
     <!DOCTYPE html>
@@ -5111,8 +5216,12 @@ function printStorico() {
       <h1>Storico Giacenze Magazzino</h1>
       <div class="info">
         <p><strong>Data Selezionata:</strong> ${dataItalianaSelezionata}</p>
-        <p><strong>Valore Totale (Filtrato):</strong> ${formatCurrency(valoreStoricoFiltrato)}</p>
-        <p><strong>Data Stampa:</strong> ${new Date().toLocaleDateString('it-IT')} ${new Date().toLocaleTimeString('it-IT')}</p>
+        <p><strong>Valore Totale (Filtrato):</strong> ${formatCurrency(
+          valoreStoricoFiltrato
+        )}</p>
+        <p><strong>Data Stampa:</strong> ${new Date().toLocaleDateString(
+          "it-IT"
+        )} ${new Date().toLocaleTimeString("it-IT")}</p>
       </div>
   `;
 
@@ -5123,16 +5232,20 @@ function printStorico() {
           <div class="prodotto-header">
             <div class="prodotto-info">
               <span><strong>Prodotto:</strong> ${prodotto.nome}</span>
-              <span><strong>Giacenza Totale:</strong> ${formatQuantity(prodotto.giacenza)} pz</span>
+              <span><strong>Giacenza Totale:</strong> ${formatQuantity(
+                prodotto.giacenza
+              )} pz</span>
             </div>
             <div class="prodotto-info">
-              <span><strong>Marca:</strong> ${prodotto.marca_nome || '-'}</span>
-              <span><strong>Valore Totale:</strong> ${formatCurrency(prodotto.valore_totale)}</span>
+              <span><strong>Marca:</strong> ${prodotto.marca_nome || "-"}</span>
+              <span><strong>Valore Totale:</strong> ${formatCurrency(
+                prodotto.valore_totale
+              )}</span>
             </div>
             ${
               prodotto.descrizione
                 ? `<div class="prodotto-info"><span><strong>Descrizione:</strong> ${prodotto.descrizione}</span></div>`
-                : ''
+                : ""
             }
           </div>
       `;
@@ -5156,12 +5269,16 @@ function printStorico() {
         prodotto.lotti.forEach((lotto) => {
           printContent += `
             <tr class="lotto-row">
-              <td>${new Date(lotto.data_carico).toLocaleDateString('it-IT')}</td>
+              <td>${new Date(lotto.data_carico).toLocaleDateString(
+                "it-IT"
+              )}</td>
               <td>${formatQuantity(lotto.quantita_rimanente)} pz</td>
               <td>${formatCurrency(lotto.prezzo)}</td>
-              <td><strong>${formatCurrency(lotto.quantita_rimanente * lotto.prezzo)}</strong></td>
-              <td>${lotto.fattura_doc || '-'}</td>
-              <td>${lotto.fornitore || '-'}</td>
+              <td><strong>${formatCurrency(
+                lotto.quantita_rimanente * lotto.prezzo
+              )}</strong></td>
+              <td>${lotto.fattura_doc || "-"}</td>
+              <td>${lotto.fornitore || "-"}</td>
             </tr>
           `;
         });
@@ -5182,13 +5299,13 @@ function printStorico() {
 
   printContent = insertCompanyInfoPrint(printContent);
 
-  const printFrame = document.createElement('iframe');
-  printFrame.style.position = 'fixed';
-  printFrame.style.right = '0';
-  printFrame.style.bottom = '0';
-  printFrame.style.width = '0';
-  printFrame.style.height = '0';
-  printFrame.style.border = '0';
+  const printFrame = document.createElement("iframe");
+  printFrame.style.position = "fixed";
+  printFrame.style.right = "0";
+  printFrame.style.bottom = "0";
+  printFrame.style.width = "0";
+  printFrame.style.height = "0";
+  printFrame.style.border = "0";
   document.body.appendChild(printFrame);
 
   const doc = printFrame.contentDocument || printFrame.contentWindow.document;
