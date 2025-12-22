@@ -26,16 +26,12 @@ async function loadCompanyInfo() {
     // Fallback con dati di default
     companyInfo = {
       company: {
-        name: "Magazzino Moto",
         address: "Via prova 123",
         city: "Milano",
         cap: "20100",
         province: "MI",
         country: "Italia",
         piva: "1234567890",
-        phone: "+39 02 1234567",
-        email: "info@magazzinomoto.it",
-        website: "www.magazzinomoto.it",
         logo: "img/Logo.png"
       },
       settings: {
@@ -159,11 +155,6 @@ function getPartitaIVA() {
  * Restituisce il nome azienda
  * @returns {string} - Nome azienda
  */
-function getCompanyName() {
-  if (!companyInfo) return 'Nome azienda non disponibile';
-  
-  return companyInfo.company.name;
-}
 
 /**
  * Restituisce il path del logo
