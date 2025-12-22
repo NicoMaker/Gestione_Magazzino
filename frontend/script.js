@@ -4823,9 +4823,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // ==================== 🎉 FINE SEZIONE IMPORT PDF ====================
 console.log('✅ Script import PDF caricato correttamente');
 
-
 function printRiepilogo() {
-  if (riepilogo.length === 0) {
+  if (!riepilogo || riepilogo.length === 0) {
     alert('Nessun prodotto da stampare');
     return;
   }
@@ -4835,11 +4834,11 @@ function printRiepilogo() {
     0
   );
 
-  // 🎯 TEMPLATE HTML CON PLACEHOLDER
   let printContent = `
     <!DOCTYPE html>
     <html>
     <head>
+      <meta charset="UTF-8">
       <title>Riepilogo Magazzino</title>
       <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
@@ -4852,7 +4851,13 @@ function printRiepilogo() {
           margin-bottom: 10px;
           border-left: 4px solid #4F46E5;
         }
-        .prodotto-info { display: flex; justify-content: space-between; margin: 5px 0; }
+        .prodotto-info { 
+          display: flex; 
+          justify-content: space-between; 
+          margin: 5px 0; 
+          gap: 10px;
+          flex-wrap: wrap;
+        }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
         th { background-color: #6366f1; color: white; }
@@ -4864,6 +4869,7 @@ function printRiepilogo() {
           justify-content: space-between;
           align-items: flex-start;
           margin-bottom: 10px;
+          gap: 10px;
         }
         .header-left img.logo-header {
           width: 120px;
@@ -4875,21 +4881,37 @@ function printRiepilogo() {
           font-size: 12px;
           line-height: 1.2;
         }
+        .header-right p {
+          margin: 2px 0;
+        }
+
+        @media print {
+          body { margin: 10mm; }
+          .prodotto-info { flex-direction: row; }
+          .header-row { flex-direction: row; }
+        }
+
+        @page {
+          margin: 10mm;
+        }
       </style>
     </head>
     <body>
+      <!-- NOME AZIENDA IN ALTO SOPRA AL LOGO -->
+      <div style="font-size:16px; font-weight:bold; margin-bottom:6px;">
+        {{company.name}}
+      </div>
+
       <div class="header-row">
         <div class="header-left">
           <img class="logo-header" src="img/Logo.png" alt="Logo Azienda">
         </div>
         <div class="header-right">
-          <p> {{company.name}}</p>
-          <p> <strong> Indirizzo: </strong> {{company.address}} {{company.cap}} {{company.city}} ({{company.province}})
+          <p><strong>Indirizzo:</strong> {{company.address}} {{company.cap}} {{company.city}} ({{company.province}})</p>
           <p><strong>P. IVA:</strong> {{company.piva}}</p>
-          <p> <strong> Email: </strong> {{company.email}}</p>
-          <p> <strong> Tel: </strong> {{company.phone}} </p>
+          <p><strong>Email:</strong> {{company.email}}</p>
+          <p><strong>Tel:</strong> {{company.phone}}</p>
         </div>
-      </div>
       </div>
 
       <h1>Riepilogo Giacenze Magazzino</h1>
@@ -4899,7 +4921,6 @@ function printRiepilogo() {
       </div>
   `;
 
-  // Aggiungi i prodotti
   riepilogo.forEach((prodotto) => {
     if (prodotto.giacenza > 0) {
       printContent += `
@@ -4913,7 +4934,11 @@ function printRiepilogo() {
               <span><strong>Marca:</strong> ${prodotto.marca_nome || '-'}</span>
               <span><strong>Valore Totale:</strong> ${formatCurrency(prodotto.valore_totale)}</span>
             </div>
-            ${prodotto.descrizione ? `<div class="prodotto-info"><span><strong>Descrizione:</strong> ${prodotto.descrizione}</span></div>` : ''}
+            ${
+              prodotto.descrizione
+                ? `<div class="prodotto-info"><span><strong>Descrizione:</strong> ${prodotto.descrizione}</span></div>`
+                : ''
+            }
           </div>
       `;
 
@@ -4960,10 +4985,9 @@ function printRiepilogo() {
 
   printContent += `</body></html>`;
 
-  // 🎯 SOSTITUISCI I PLACEHOLDER CON I DATI DA JSON
+  // Sostituisci i placeholder con i dati JSON (company-loader.js)
   printContent = insertCompanyInfoPrint(printContent);
 
-  // Crea iframe e stampa
   const printFrame = document.createElement('iframe');
   printFrame.style.position = 'fixed';
   printFrame.style.right = '0';
@@ -4986,8 +5010,10 @@ function printRiepilogo() {
     }, 500);
   };
 }
+
+
 function printStorico() {
-  if (storico.length === 0) {
+  if (!storico || storico.length === 0) {
     alert('Nessun prodotto da stampare');
     return;
   }
@@ -5002,11 +5028,11 @@ function printStorico() {
     ? new Date(dataSelezionata + 'T00:00:00').toLocaleDateString('it-IT')
     : 'Non selezionata';
 
-  // 🎯 TEMPLATE HTML CON PLACEHOLDER
   let printContent = `
     <!DOCTYPE html>
     <html>
     <head>
+      <meta charset="UTF-8">
       <title>Storico Giacenze</title>
       <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
@@ -5019,7 +5045,13 @@ function printStorico() {
           margin-bottom: 10px;
           border-left: 4px solid #4F46E5;
         }
-        .prodotto-info { display: flex; justify-content: space-between; margin: 5px 0; }
+        .prodotto-info { 
+          display: flex; 
+          justify-content: space-between; 
+          margin: 5px 0;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
         th { background-color: #6366f1; color: white; }
@@ -5031,6 +5063,7 @@ function printStorico() {
           justify-content: space-between;
           align-items: flex-start;
           margin-bottom: 10px;
+          gap: 10px;
         }
         .header-left img.logo-header {
           width: 120px;
@@ -5042,19 +5075,36 @@ function printStorico() {
           font-size: 12px;
           line-height: 1.2;
         }
+        .header-right p {
+          margin: 2px 0;
+        }
+
+        @media print {
+          body { margin: 10mm; }
+          .prodotto-info { flex-direction: row; }
+          .header-row { flex-direction: row; }
+        }
+
+        @page {
+          margin: 10mm;
+        }
       </style>
     </head>
     <body>
+      <!-- NOME AZIENDA IN ALTO SOPRA AL LOGO -->
+      <div style="font-size:16px; font-weight:bold; margin-bottom:6px;">
+        {{company.name}}
+      </div>
+
       <div class="header-row">
         <div class="header-left">
           <img class="logo-header" src="img/Logo.png" alt="Logo Azienda">
         </div>
         <div class="header-right">
-          <p> {{company.name}}</p>
-          <p> <strong> Indirizzo: </strong> {{company.address}} {{company.cap}} {{company.city}} ({{company.province}})
+          <p><strong>Indirizzo:</strong> {{company.address}} {{company.cap}} {{company.city}} ({{company.province}})</p>
           <p><strong>P. IVA:</strong> {{company.piva}}</p>
-          <p> <strong> Email: </strong> {{company.email}}</p>
-          <p> <strong> Tel: </strong> {{company.phone}} </p>
+          <p><strong>Email:</strong> {{company.email}}</p>
+          <p><strong>Tel:</strong> {{company.phone}}</p>
         </div>
       </div>
 
@@ -5066,7 +5116,6 @@ function printStorico() {
       </div>
   `;
 
-  // Aggiungi i prodotti
   storico.forEach((prodotto) => {
     if (prodotto.giacenza > 0) {
       printContent += `
@@ -5080,7 +5129,11 @@ function printStorico() {
               <span><strong>Marca:</strong> ${prodotto.marca_nome || '-'}</span>
               <span><strong>Valore Totale:</strong> ${formatCurrency(prodotto.valore_totale)}</span>
             </div>
-            ${prodotto.descrizione ? `<div class="prodotto-info"><span><strong>Descrizione:</strong> ${prodotto.descrizione}</span></div>` : ''}
+            ${
+              prodotto.descrizione
+                ? `<div class="prodotto-info"><span><strong>Descrizione:</strong> ${prodotto.descrizione}</span></div>`
+                : ''
+            }
           </div>
       `;
 
@@ -5127,19 +5180,27 @@ function printStorico() {
 
   printContent += `</body></html>`;
 
-  // 🎯 SOSTITUISCI I PLACEHOLDER CON I DATI DA JSON
   printContent = insertCompanyInfoPrint(printContent);
 
-  // Crea iframe e stampa
   const printFrame = document.createElement('iframe');
-  printFrame.style.display = 'none';
+  printFrame.style.position = 'fixed';
+  printFrame.style.right = '0';
+  printFrame.style.bottom = '0';
+  printFrame.style.width = '0';
+  printFrame.style.height = '0';
+  printFrame.style.border = '0';
   document.body.appendChild(printFrame);
-  printFrame.contentDocument.write(printContent);
-  printFrame.contentDocument.close();
 
-  setTimeout(() => {
-    printFrame.contentWindow.focus();
-    printFrame.contentWindow.print();
-    setTimeout(() => document.body.removeChild(printFrame), 1000);
-  }, 300);
+  const doc = printFrame.contentDocument || printFrame.contentWindow.document;
+  doc.open();
+  doc.write(printContent);
+  doc.close();
+
+  printFrame.onload = () => {
+    setTimeout(() => {
+      printFrame.contentWindow.focus();
+      printFrame.contentWindow.print();
+      setTimeout(() => document.body.removeChild(printFrame), 1000);
+    }, 500);
+  };
 }
