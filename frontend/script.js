@@ -680,7 +680,6 @@ function renderRiepilogo() {
       html += `
       <tr class="lotti-row">
         <td colspan="4" class="lotti-container">
-          <div class="lotti-header">Dettaglio Lotti</div>
           <div class="lotti-table-wrapper">
             <table class="lotti-table">
               <thead>
@@ -816,7 +815,6 @@ function renderStorico(storico) {
       html += `
       <tr class="lotti-row">
         <td colspan="4" class="lotti-container">
-          <div class="lotti-header">Dettaglio Lotti</div>
           <div class="lotti-table-wrapper">
             <table class="lotti-table">
               <thead>
