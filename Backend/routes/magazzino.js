@@ -157,9 +157,7 @@ router.get("/storico-giacenza/:date", (req, res) => {
   `,
     (err, prodotti) => {
       if (err) {
-        return res
-          .status(500)
-          .json({ error: "Errore nel recupero prodotti" });
+        return res.status(500).json({ error: "Errore nel recupero prodotti" });
       }
 
       const results = [];
@@ -249,9 +247,7 @@ router.get("/storico-giacenza/:date", (req, res) => {
                   lotto.qty_rimanente = formatDecimal(
                     lotto.qty_rimanente - qtaPrelevata
                   );
-                  qtaDaScaricare = formatDecimal(
-                    qtaDaScaricare - qtaPrelevata
-                  );
+                  qtaDaScaricare = formatDecimal(qtaDaScaricare - qtaPrelevata);
                 }
               }
             });
@@ -261,9 +257,7 @@ router.get("/storico-giacenza/:date", (req, res) => {
             );
 
             lottiRimanenti.forEach((l) => {
-              totaleGiacenza = formatDecimal(
-                totaleGiacenza + l.qty_rimanente
-              );
+              totaleGiacenza = formatDecimal(totaleGiacenza + l.qty_rimanente);
               totaleValore = formatDecimal(
                 totaleValore + l.qty_rimanente * l.prezzo
               );
