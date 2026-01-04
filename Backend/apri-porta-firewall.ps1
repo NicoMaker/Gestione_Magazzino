@@ -48,7 +48,7 @@ try {
         -Enabled True | Out-Null
     
     Write-Host ""
-    Write-Host "✅ SUCCESSO! Porta 3000 aperta nel firewall." -ForegroundColor Green
+    Write-Host "SUCCESSO! Porta 3000 aperta nel firewall." -ForegroundColor Green
     Write-Host ""
     Write-Host "La regola è stata creata con successo:" -ForegroundColor Cyan
     Write-Host "  Nome: Gestione Magazzino Node.js" -ForegroundColor White
@@ -65,12 +65,12 @@ try {
     $ipAddress = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.InterfaceAlias -notlike "*Loopback*" -and $_.IPAddress -notlike "169.254.*" } | Select-Object -First 1).IPAddress
     if ($ipAddress) {
         Write-Host "Il tuo IP locale è probabilmente: $ipAddress" -ForegroundColor Cyan
-        Write-Host "Prova da cellulare: http://$ipAddress:3000" -ForegroundColor White
+        Write-Host "Prova da cellulare: http://$ipAddress`:3000" -ForegroundColor White
     }
     
 } catch {
     Write-Host ""
-    Write-Host "❌ ERRORE durante la creazione della regola:" -ForegroundColor Red
+    Write-Host "ERRORE durante la creazione della regola:" -ForegroundColor Red
     Write-Host $_.Exception.Message -ForegroundColor Red
     Write-Host ""
 }
@@ -78,4 +78,3 @@ try {
 Write-Host ""
 Write-Host "Premi un tasto per uscire..."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-
