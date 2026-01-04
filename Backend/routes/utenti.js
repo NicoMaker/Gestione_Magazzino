@@ -69,6 +69,12 @@ router.post("/", async (req, res) => {
             .status(500)
             .json({ error: "Errore durante la creazione utente" });
         }
+        // Emetti evento Socket.IO per aggiornamento real-time
+        const io = req.app.get("io");
+        if (io) {
+          io.emit("utente_aggiunto");
+          io.emit("utenti_aggiornati");
+        }
         res.json({ id: this.lastID, username: username.trim() });
       }
     );
@@ -161,6 +167,12 @@ router.put("/:id", async (req, res) => {
                   .json({ error: "Errore durante l'aggiornamento utente" });
               }
 
+              // Emetti evento Socket.IO per aggiornamento real-time
+              const io = req.app.get("io");
+              if (io) {
+                io.emit("utente_modificato", { id });
+                io.emit("utenti_aggiornati");
+              }
               // 🎯 RISPOSTA CON FLAG username_modificato
               res.json({
                 id,
@@ -184,6 +196,12 @@ router.put("/:id", async (req, res) => {
               .json({ error: "Errore durante l'aggiornamento utente" });
           }
 
+          // Emetti evento Socket.IO per aggiornamento real-time
+          const io = req.app.get("io");
+          if (io) {
+            io.emit("utente_modificato", { id });
+            io.emit("utenti_aggiornati");
+          }
           // 🎯 RISPOSTA CON FLAG password_modificata
           res.json({
             id,
@@ -243,6 +261,13 @@ router.delete("/:id", (req, res) => {
 
         if (this.changes === 0) {
           return res.status(404).json({ error: "Utente non trovato" });
+        }
+
+        // Emetti evento Socket.IO per aggiornamento real-time
+        const io = req.app.get("io");
+        if (io) {
+          io.emit("utente_eliminato", { id });
+          io.emit("utenti_aggiornati");
         }
 
         // 🎯 RISPOSTA CON FLAG utente_eliminato

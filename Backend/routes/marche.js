@@ -38,6 +38,12 @@ router.post("/", (req, res) => {
         }
         return res.status(500).json({ error: err.message });
       }
+      // Emetti evento Socket.IO per aggiornamento real-time
+      const io = req.app.get("io");
+      if (io) {
+        io.emit("marca_aggiunta");
+        io.emit("marche_aggiornate");
+      }
       res.json({
         id: this.lastID,
         nome: nome.trim(),
@@ -69,6 +75,14 @@ router.put("/:id", (req, res) => {
 
       if (this.changes === 0) {
         return res.status(404).json({ error: "Marca non trovata" });
+      }
+
+      // Emetti evento Socket.IO per aggiornamento real-time
+      const io = req.app.get("io");
+      if (io) {
+        io.emit("marca_modificata", { id });
+        io.emit("marche_aggiornate");
+        io.emit("prodotti_aggiornati");
       }
 
       res.json({ success: true, nome: nome.trim() });
@@ -105,6 +119,14 @@ router.delete("/:id", (req, res) => {
 
         if (this.changes === 0) {
           return res.status(404).json({ error: "Marca non trovata" });
+        }
+
+        // Emetti evento Socket.IO per aggiornamento real-time
+        const io = req.app.get("io");
+        if (io) {
+          io.emit("marca_eliminata", { id });
+          io.emit("marche_aggiornate");
+          io.emit("prodotti_aggiornati");
         }
 
         res.json({

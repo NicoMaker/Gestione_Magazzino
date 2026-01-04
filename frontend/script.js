@@ -190,7 +190,7 @@ function editMarca(id) {
 }
 
 async function deleteMarca(id) {
-  if (!confirm("Sei sicuro di voler eliminare questa marca?")) return;
+  if (!(await confirm("Sei sicuro di voler eliminare questa marca?"))) return;
 
   try {
     const res = await fetch(`${API_URL}/marche/${id}`, { method: "DELETE" });
@@ -355,7 +355,7 @@ function editProdotto(id) {
 }
 
 async function deleteProdotto(id) {
-  if (!confirm("Sei sicuro di voler eliminare questo prodotto?")) return;
+  if (!(await confirm("Sei sicuro di voler eliminare questo prodotto?"))) return;
 
   try {
     const res = await fetch(`${API_URL}/prodotti/${id}`, { method: "DELETE" });
@@ -483,7 +483,7 @@ function editMovimento(id) {
 }
 
 async function deleteMovimento(id) {
-  if (!confirm("Sei sicuro di voler eliminare questo movimento?")) return;
+  if (!(await confirm("Sei sicuro di voler eliminare questo movimento?"))) return;
 
   try {
     const res = await fetch(`${API_URL}/dati/${id}`, { method: "DELETE" });
@@ -968,7 +968,7 @@ function editUser(id) {
 }
 
 async function deleteUser(id) {
-  if (!confirm("Sei sicuro di voler eliminare questo utente?")) return;
+  if (!(await confirm("Sei sicuro di voler eliminare questo utente?"))) return;
 
   try {
     const currentUser = localStorage.getItem("username") || "";
