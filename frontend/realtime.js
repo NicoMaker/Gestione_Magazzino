@@ -2,6 +2,7 @@
 
 // Connessione Socket.IO
 let socket = null;
+let ignoreNextUpdate = false; // Flag per ignorare aggiornamenti dopo operazioni locali
 
 // Inizializza Socket.IO
 function initSocket() {
@@ -23,7 +24,6 @@ function initSocket() {
 
   socket.on('disconnect', () => {
     console.log('❌ Disconnesso dal server real-time');
-    showNotification('Disconnesso dal server', 'warning');
   });
 
   socket.on('connect_error', (error) => {
@@ -32,90 +32,139 @@ function initSocket() {
 
   // Eventi per aggiornamenti real-time
   
-  // Marche
+  // Marche - Aggiorna solo se l'operazione viene da altri dispositivi
   socket.on('marca_aggiunta', () => {
-    showNotification('Nuova marca aggiunta', 'info');
-    if (typeof loadMarche === 'function') loadMarche();
+    if (!ignoreNextUpdate && typeof loadMarche === 'function') {
+      loadMarche();
+    }
   });
 
   socket.on('marca_modificata', () => {
-    showNotification('Marca modificata', 'info');
-    if (typeof loadMarche === 'function') loadMarche();
-    if (typeof loadProdotti === 'function') loadProdotti();
+    if (!ignoreNextUpdate) {
+      if (typeof loadMarche === 'function') loadMarche();
+      if (typeof loadProdotti === 'function') loadProdotti();
+    }
   });
 
   socket.on('marca_eliminata', () => {
-    showNotification('Marca eliminata', 'info');
-    if (typeof loadMarche === 'function') loadMarche();
-    if (typeof loadProdotti === 'function') loadProdotti();
+    if (!ignoreNextUpdate) {
+      if (typeof loadMarche === 'function') loadMarche();
+      if (typeof loadProdotti === 'function') loadProdotti();
+    }
   });
 
   socket.on('marche_aggiornate', () => {
-    if (typeof loadMarche === 'function') loadMarche();
+    if (!ignoreNextUpdate && typeof loadMarche === 'function') {
+      loadMarche();
+    }
   });
 
-  // Prodotti
+  // Prodotti - Aggiorna solo se l'operazione viene da altri dispositivi
   socket.on('prodotto_aggiunto', () => {
-    showNotification('Nuovo prodotto aggiunto', 'success');
-    if (typeof loadProdotti === 'function') loadProdotti();
+    if (!ignoreNextUpdate && typeof loadProdotti === 'function') {
+      loadProdotti();
+    }
   });
 
   socket.on('prodotto_modificato', () => {
-    showNotification('Prodotto modificato', 'info');
-    if (typeof loadProdotti === 'function') loadProdotti();
+    if (!ignoreNextUpdate && typeof loadProdotti === 'function') {
+      loadProdotti();
+    }
   });
 
   socket.on('prodotto_eliminato', () => {
-    showNotification('Prodotto eliminato', 'warning');
-    if (typeof loadProdotti === 'function') loadProdotti();
+    if (!ignoreNextUpdate && typeof loadProdotti === 'function') {
+      loadProdotti();
+    }
   });
 
   socket.on('prodotti_aggiornati', () => {
-    if (typeof loadProdotti === 'function') loadProdotti();
+    if (!ignoreNextUpdate && typeof loadProdotti === 'function') {
+      loadProdotti();
+    }
   });
 
-  // Movimenti
-  socket.on('movimento_aggiunto', (data) => {
-    const tipo = data.tipo === 'carico' ? 'Carico' : 'Scarico';
-    showNotification(`${tipo} registrato con successo`, 'success');
-    if (typeof loadMovimenti === 'function') loadMovimenti();
+  // Movimenti - Aggiorna solo se l'operazione viene da altri dispositivi
+  socket.on('movimento_aggiunto', () => {
+    if (!ignoreNextUpdate && typeof loadMovimenti === 'function') {
+      loadMovimenti();
+    }
   });
 
-  socket.on('movimento_eliminato', (data) => {
-    const tipo = data.tipo === 'carico' ? 'Carico' : 'Scarico';
-    showNotification(`${tipo} eliminato`, 'warning');
-    if (typeof loadMovimenti === 'function') loadMovimenti();
+  socket.on('movimento_eliminato', () => {
+    if (!ignoreNextUpdate && typeof loadMovimenti === 'function') {
+      loadMovimenti();
+    }
   });
 
   socket.on('dati_aggiornati', () => {
-    if (typeof loadMovimenti === 'function') loadMovimenti();
+    if (!ignoreNextUpdate && typeof loadMovimenti === 'function') {
+      loadMovimenti();
+    }
   });
 
-  // Magazzino
+  // Magazzino - Aggiorna solo se l'operazione viene da altri dispositivi
   socket.on('magazzino_aggiornato', () => {
-    if (typeof loadRiepilogo === 'function') loadRiepilogo();
-    if (typeof loadMovimenti === 'function') loadMovimenti();
-    if (typeof loadProdotti === 'function') loadProdotti();
+    if (!ignoreNextUpdate) {
+      if (typeof loadRiepilogo === 'function') loadRiepilogo();
+      if (typeof loadMovimenti === 'function') loadMovimenti();
+      if (typeof loadProdotti === 'function') loadProdotti();
+    }
   });
 
-  // Utenti
+  // Utenti - Aggiorna solo se l'operazione viene da altri dispositivi
   socket.on('utente_aggiunto', () => {
-    showNotification('Nuovo utente aggiunto', 'success');
-    if (typeof loadUtenti === 'function') loadUtenti();
+    if (!ignoreNextUpdate && typeof loadUtenti === 'function') {
+      loadUtenti();
+    }
   });
 
-  socket.on('utente_modificato', () => {
-    showNotification('Utente modificato', 'info');
-    if (typeof loadUtenti === 'function') loadUtenti();
+  socket.on('utente_modificato', (data) => {
+    const currentUsername = localStorage.getItem('username');
+    
+    // Se l'utente modificato è quello loggato, fai logout
+    if (data.oldUsername && currentUsername === data.oldUsername) {
+      if (typeof forceLogout === 'function') {
+        forceLogout('Il tuo account è stato modificato da un altro dispositivo. Effettua di nuovo il login.');
+      } else {
+        // Fallback se forceLogout non è disponibile
+        localStorage.removeItem('username');
+        localStorage.removeItem('activeSection');
+        window.location.href = 'index.html';
+      }
+      return;
+    }
+    
+    if (!ignoreNextUpdate && typeof loadUtenti === 'function') {
+      loadUtenti();
+    }
   });
 
-  socket.on('utente_eliminato', () => {
-    showNotification('Utente eliminato', 'warning');
-    if (typeof loadUtenti === 'function') loadUtenti();
+  socket.on('utente_eliminato', (data) => {
+    const currentUsername = localStorage.getItem('username');
+    
+    // Se l'utente eliminato è quello loggato, fai logout
+    if (data.username && currentUsername === data.username) {
+      if (typeof forceLogout === 'function') {
+        forceLogout('Il tuo account è stato eliminato. Verrai disconnesso.');
+      } else {
+        // Fallback se forceLogout non è disponibile
+        localStorage.removeItem('username');
+        localStorage.removeItem('activeSection');
+        window.location.href = 'index.html';
+      }
+      return;
+    }
+    
+    if (!ignoreNextUpdate && typeof loadUtenti === 'function') {
+      loadUtenti();
+    }
   });
 
   socket.on('utenti_aggiornati', () => {
-    if (typeof loadUtenti === 'function') loadUtenti();
+    if (!ignoreNextUpdate && typeof loadUtenti === 'function') {
+      loadUtenti();
+    }
   });
 }
 
@@ -183,8 +232,17 @@ if (document.readyState === 'loading') {
   initSocket();
 }
 
+// Funzione per ignorare il prossimo aggiornamento (dopo operazione locale)
+function ignoreNextSocketUpdate(duration = 2000) {
+  ignoreNextUpdate = true;
+  setTimeout(() => {
+    ignoreNextUpdate = false;
+  }, duration);
+}
+
 // Esporta per uso globale
 window.showNotification = showNotification;
+window.ignoreNextSocketUpdate = ignoreNextSocketUpdate;
 
 // ==================== MODALI MODERNI ====================
 

@@ -197,6 +197,7 @@ async function deleteMarca(id) {
     const data = await res.json();
 
     if (res.ok) {
+      if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
       alert("Marca eliminata con successo!");
       loadMarche();
     } else {
@@ -226,6 +227,7 @@ document.getElementById("formMarca").addEventListener("submit", async (e) => {
     const data = await res.json();
 
     if (res.ok) {
+      if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
       alert(id ? "Marca aggiornata!" : "Marca creata!");
       closeMarcaModal();
       loadMarche();
@@ -362,6 +364,7 @@ async function deleteProdotto(id) {
     const data = await res.json();
 
     if (res.ok) {
+      if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
       alert("Prodotto eliminato con successo!");
       loadProdotti();
     } else {
@@ -490,6 +493,7 @@ async function deleteMovimento(id) {
     const data = await res.json();
 
     if (res.ok) {
+      if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
       alert("Movimento eliminato con successo!");
       loadMovimenti();
       loadProdotti();
@@ -576,6 +580,7 @@ document
       const data = await res.json();
 
       if (res.ok) {
+        if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
         alert(id ? "Movimento aggiornato!" : "Movimento registrato!");
         closeMovimentoModal();
         loadMovimenti();
@@ -984,6 +989,7 @@ async function deleteUser(id) {
           "Hai eliminato il tuo account. Verrai disconnesso e dovrai effettuare di nuovo il login."
         );
       } else {
+        if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
         alert("Utente eliminato con successo!");
         loadUtenti();
       }
@@ -1024,6 +1030,7 @@ document.getElementById("formUser").addEventListener("submit", async (e) => {
       const mustLogout =
         data.username_modificato || data.password_modificata || false;
 
+      if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
       alert(id ? "Utente aggiornato!" : "Utente creato!");
       closeUserModal();
       if (mustLogout) {
@@ -3201,6 +3208,7 @@ document
       const data = await res.json();
 
       if (res.ok) {
+        if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
         alert(id ? "✅ Prodotto aggiornato!" : "✅ Prodotto creato!");
         closeProdottoModal();
         loadProdotti(); // Ricarica la lista prodotti

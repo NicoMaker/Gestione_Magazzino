@@ -170,7 +170,7 @@ router.put("/:id", async (req, res) => {
               // Emetti evento Socket.IO per aggiornamento real-time
               const io = req.app.get("io");
               if (io) {
-                io.emit("utente_modificato", { id });
+                io.emit("utente_modificato", { id, oldUsername: user.username, newUsername });
                 io.emit("utenti_aggiornati");
               }
               // 🎯 RISPOSTA CON FLAG username_modificato
@@ -199,7 +199,7 @@ router.put("/:id", async (req, res) => {
           // Emetti evento Socket.IO per aggiornamento real-time
           const io = req.app.get("io");
           if (io) {
-            io.emit("utente_modificato", { id });
+            io.emit("utente_modificato", { id, oldUsername: user.username, newUsername: user.username });
             io.emit("utenti_aggiornati");
           }
           // 🎯 RISPOSTA CON FLAG password_modificata
@@ -266,7 +266,7 @@ router.delete("/:id", (req, res) => {
         // Emetti evento Socket.IO per aggiornamento real-time
         const io = req.app.get("io");
         if (io) {
-          io.emit("utente_eliminato", { id });
+          io.emit("utente_eliminato", { id, username: user.username });
           io.emit("utenti_aggiornati");
         }
 
