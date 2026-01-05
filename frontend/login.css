@@ -93,7 +93,6 @@ body::before {
   position: relative;
 }
 
-
 /* Modern gradient text */
 .login-title {
   font-size: 30px;
@@ -428,69 +427,162 @@ body::before {
 
 /* Tablet Optimization */
 @media (min-width: 481px) and (max-width: 1024px) {
+  body {
+    padding: 40px 20px;
+    align-items: flex-start;
+    overflow-y: auto;
+    /* Removed height constraint to allow full scroll */
+    min-height: 100vh;
+  }
+
   .login-container {
-    max-width: 520px; /* Leggermente più larga per tablet */
+    max-width: 580px;
+    padding: 30px;
+    max-height: none;
+    margin: 0 auto;
+    /* Add bottom padding to ensure content is fully visible */
+    padding-bottom: 60px;
   }
 
   .login-card {
-    padding: 56px 48px; /* Più respiro interno */
-    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6); /* Ombra più profonda */
+    padding: 64px 56px;
+    box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.65);
+  }
+
+  .logo-section {
+    margin-bottom: 48px;
+  }
+
+  .logo-wrapper {
+    margin-bottom: 32px;
+  }
+
+  .logo-img {
+    max-width: 320px;
   }
 
   .login-title {
-    font-size: 34px; /* Testo più leggibile */
-  }
-
-  .form-group {
-    margin-bottom: 28px;
-  }
-
-  .form-input {
-    font-size: 16px; /* Input leggermente più grandi per facilitare il tocco */
-  }
-}
-
-/* Tablet Optimization (iPad, Android Tablets) */
-@media (min-width: 481px) and (max-width: 1024px) {
-  .login-container {
-    max-width: 540px; /* Card leggermente più larga per equilibrio visivo */
-    padding: 20px;
-  }
-
-  .login-card {
-    padding: 60px 50px; /* Più spazio interno (spatiousness) */
-    box-shadow: 0 40px 70px -15px rgba(0, 0, 0, 0.6); /* Ombra più profonda */
-  }
-
-  .login-title {
-    font-size: 36px; /* Titolo più grande e d'impatto */
-    margin-bottom: 12px;
+    font-size: 38px;
+    margin-bottom: 14px;
   }
 
   .login-subtitle {
-    font-size: 18px;
-    margin-bottom: 40px;
+    font-size: 19px;
+    margin-bottom: 48px;
   }
 
   .form-group {
-    margin-bottom: 30px; /* Maggiore spaziatura tra i campi */
+    margin-bottom: 32px;
+  }
+
+  .form-label {
+    font-size: 14px;
+    margin-bottom: 12px;
   }
 
   .form-input {
-    padding: 18px 56px; /* Campi più grandi per facilitare il touch */
-    font-size: 16px;
+    padding: 20px 60px;
+    font-size: 17px;
+    border-radius: 16px;
   }
 
   .input-icon {
-    width: 22px;
-    height: 22px;
-    left: 20px;
+    width: 24px;
+    height: 24px;
+    left: 22px;
+  }
+
+  .toggle-password {
+    width: 24px;
+    height: 24px;
+    right: 22px;
   }
 
   .btn-login {
-    padding: 18px;
+    padding: 20px;
+    font-size: 18px;
+    margin-top: 48px;
+    border-radius: 16px;
+  }
+
+  .error-message {
+    padding: 18px 20px;
+    font-size: 15px;
+    margin-top: 24px;
+  }
+
+  .login-footer {
+    margin-top: 44px;
+    padding-top: 32px;
+  }
+
+  .footer-text {
+    font-size: 15px;
+    margin-bottom: 24px;
+  }
+
+  .company-info {
+    padding: 24px;
+    border-radius: 16px;
+    margin-top: 20px;
+  }
+
+  .company-address {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+
+  .piva-container {
+    padding: 14px 20px;
+    border-radius: 12px;
+  }
+
+  .piva-label {
+    font-size: 13px;
+  }
+
+  .piva-value {
     font-size: 17px;
-    margin-top: 40px;
+  }
+
+  /* Improved scrollbar for tablet */
+  .login-container::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  .login-container::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+  }
+
+  /* Ensure body scrollbar is visible */
+  body::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  body::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  body::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-radius: 10px;
   }
 }
 
+/* iPad Mini specific fixes (768px-820px) */
+@media (min-width: 768px) and (max-width: 820px) {
+  body {
+    align-items: flex-start;
+    padding-top: 30px;
+  }
+
+  .login-container {
+    max-height: none;
+    overflow-y: visible;
+    padding-bottom: 80px;
+  }
+
+  .login-card {
+    padding: 50px 40px;
+  }
+}

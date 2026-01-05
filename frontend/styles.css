@@ -23,8 +23,7 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto,
-    Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   background: var(--bg-main);
   color: var(--text-primary);
   line-height: 1.6;
@@ -623,12 +622,9 @@ tbody tr:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-}
-
-.btn-icon:hover {
-  background: var(--bg-main);
-  border-color: var(--primary);
-  transform: scale(1.05);
+  /* Made icons more visible with larger size and better styling */
+  min-width: 36px;
+  min-height: 36px;
 }
 
 .btn-icon svg {
@@ -636,6 +632,12 @@ tbody tr:hover {
   height: 18px;
   stroke: var(--text-secondary);
   transition: stroke 0.25s ease;
+}
+
+.btn-icon:hover {
+  background: var(--bg-main);
+  border-color: var(--primary);
+  transform: scale(1.05);
 }
 
 .btn-icon:hover svg {
@@ -733,10 +735,8 @@ tbody tr:hover {
   display: flex;
   flex-direction: column;
   animation: slideUpModal 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 
-    0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(99, 102, 241, 0.05);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px
+    rgba(99, 102, 241, 0.05);
   border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
@@ -1074,6 +1074,139 @@ tbody tr:hover {
     font-size: 28px;
   }
 }
+
+/* CHANGE START */
+/* Tablet ora usa hamburger menu come mobile */
+@media (max-width: 1024px) {
+  /* Show mobile menu toggle on tablet */
+  .mobile-menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Hide sidebar by default on tablet */
+  .sidebar {
+    transform: translateX(-100%);
+    width: 280px; /* Explicitly set width as it might be changed by other media queries */
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  /* Full width main content on tablet */
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 100px 32px 32px;
+  }
+
+  /* Added more padding-top for tablet sidebar header */
+  .sidebar-header {
+    padding: 100px 24px 32px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .section-header {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .filter-controls {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Show mobile menu toggle */
+  .mobile-menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Hide sidebar by default on mobile */
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  /* Full width main content on mobile */
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    /* Adjusted mobile padding to keep logo visible below hamburger */
+    padding: 100px 20px 20px;
+  }
+
+  /* Added more padding-top for mobile sidebar header */
+  .sidebar-header {
+    padding: 100px 24px 32px;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .section-header h1 {
+    font-size: 28px;
+  }
+
+  .filter-controls {
+    width: 100%;
+  }
+
+  .filter-input {
+    min-width: 100%;
+    flex: 1;
+  }
+
+  .date-filter {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .date-filter > * {
+    width: 100%;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-content {
+    max-width: 100%;
+    border-radius: 16px;
+  }
+
+  .table-container {
+    border-radius: 12px;
+  }
+
+  th,
+  td {
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .stat-value {
+    font-size: 28px;
+  }
+}
+/* CHANGE END */
 
 @media (max-width: 480px) {
   .main-content {
@@ -1582,11 +1715,7 @@ tbody tr:hover {
    ============================================ */
 
 .company-info-sidebar {
-  background: linear-gradient(
-    135deg,
-    rgba(99, 102, 241, 0.1) 0%,
-    rgba(168, 85, 247, 0.05) 100%
-  );
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.05) 100%);
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 16px;
@@ -1726,15 +1855,10 @@ tbody tr:hover {
   }
 }
 
-
 /* Variante alternativa con bordo colorato */
 .company-info-sidebar.bordered {
   border-left: 4px solid #6366f1;
-  background: linear-gradient(
-    90deg,
-    rgba(99, 102, 241, 0.08) 0%,
-    rgba(168, 85, 247, 0.03) 100%
-  );
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.03) 100%);
 }
 
 /* Effetto glassmorphism più pronunciato */
@@ -1775,10 +1899,7 @@ tbody tr:hover {
   width: 20px; /* Dimensione piccola (20x20px) */
   height: 20px;
   cursor: pointer;
-  color: var(
-    --text-secondary,
-    #64748b
-  ); /* Usa il colore del testo secondario */
+  color: var(--text-secondary, #64748b); /* Usa il colore del testo secondario */
   transition: color 0.2s ease;
   z-index: 10; /* Assicura che sia cliccabile sopra l'input */
 }
@@ -1937,7 +2058,7 @@ tbody tr:hover {
 
 .example-content pre {
   margin: 0;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 13px;
   line-height: 1.8;
   color: var(--text-primary);
@@ -2005,32 +2126,31 @@ tbody tr:hover {
     flex-direction: column;
     padding: 16px;
   }
-  
+
   .info-box svg {
     width: 20px;
     height: 20px;
   }
-  
+
   .file-upload-label {
     padding: 30px 20px;
     flex-direction: column;
   }
-  
+
   .file-upload-label svg {
     width: 28px;
     height: 28px;
   }
-  
+
   .file-upload-text {
     font-size: 14px;
     text-align: center;
   }
-  
+
   .example-content pre {
     font-size: 12px;
   }
 }
-
 
 /* ==================== NOTIFICHE REAL-TIME ==================== */
 .notification-container {
@@ -2224,7 +2344,8 @@ tbody tr:hover {
 }
 
 @keyframes pulseIcon {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {
@@ -2314,7 +2435,7 @@ tbody tr:hover {
   background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
   border-radius: 12px;
   border: 1px solid rgba(226, 232, 240, 0.8);
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 13px;
   overflow-x: auto;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
@@ -2327,23 +2448,23 @@ tbody tr:hover {
     max-width: 95%;
     margin: 20px auto;
   }
-  
+
   .confirm-icon {
     width: 64px;
     height: 64px;
   }
-  
+
   .confirm-icon svg {
     width: 32px;
     height: 32px;
   }
-  
+
   .alert-icon {
     width: 48px;
     height: 48px;
     border-radius: 12px;
   }
-  
+
   .alert-icon svg {
     width: 24px;
     height: 24px;
@@ -2358,82 +2479,81 @@ tbody tr:hover {
 
 /* Tablet Portrait (768px - 1024px) */
 @media (min-width: 768px) and (max-width: 1024px) {
-  
   /* ==================== LOGIN PAGE ==================== */
-  
+
   .login-container {
     width: 70% !important;
     max-width: 500px !important;
     padding: 40px !important;
     margin: 0 auto;
   }
-  
+
   .login-container h2 {
     font-size: 2rem !important;
     margin-bottom: 30px !important;
   }
-  
+
   .login-form .form-group {
     margin-bottom: 25px !important;
   }
-  
+
   .login-form label {
     font-size: 1.1rem !important;
     margin-bottom: 10px !important;
   }
-  
+
   .login-form input {
     height: 50px !important;
     font-size: 1.1rem !important;
     padding: 15px !important;
   }
-  
+
   .login-form button {
     height: 55px !important;
     font-size: 1.2rem !important;
     margin-top: 30px !important;
   }
-  
+
   /* ==================== HOME/DASHBOARD ==================== */
-  
+
   /* Header ottimizzato */
   header {
     padding: 20px 30px !important;
     flex-wrap: wrap !important;
   }
-  
+
   header h1 {
     font-size: 1.8rem !important;
   }
-  
+
   .user-info {
     font-size: 1rem !important;
   }
-  
+
   .btn-logout {
     padding: 10px 25px !important;
     font-size: 1rem !important;
   }
-  
+
   /* Navigation ottimizzata */
   nav {
     padding: 15px 30px !important;
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
   }
-  
+
   nav button {
     min-width: 140px !important;
     padding: 12px 20px !important;
     font-size: 1rem !important;
     margin: 5px !important;
   }
-  
+
   /* Main content */
   main {
     padding: 30px !important;
   }
-  
+
   /* Cards e pannelli */
   .card,
   .panel,
@@ -2441,23 +2561,23 @@ tbody tr:hover {
     margin-bottom: 25px !important;
     padding: 25px !important;
   }
-  
+
   .card h2,
   .panel h2 {
     font-size: 1.6rem !important;
     margin-bottom: 20px !important;
   }
-  
+
   /* Form groups */
   .form-group {
     margin-bottom: 20px !important;
   }
-  
+
   .form-group label {
     font-size: 1.05rem !important;
     margin-bottom: 8px !important;
   }
-  
+
   .form-group input,
   .form-group select,
   .form-group textarea {
@@ -2465,12 +2585,12 @@ tbody tr:hover {
     font-size: 1.05rem !important;
     padding: 12px !important;
   }
-  
+
   .form-group textarea {
     height: auto !important;
     min-height: 100px !important;
   }
-  
+
   /* Buttons ottimizzati */
   .btn,
   button {
@@ -2479,12 +2599,12 @@ tbody tr:hover {
     font-size: 1.05rem !important;
     margin: 5px !important;
   }
-  
+
   .btn-primary,
   .btn-success {
     min-width: 140px !important;
   }
-  
+
   /* Tabelle responsive */
   table {
     font-size: 1rem !important;
@@ -2492,22 +2612,22 @@ tbody tr:hover {
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
   }
-  
+
   table thead {
     display: table-header-group !important;
   }
-  
+
   table th {
     padding: 15px 12px !important;
     font-size: 1.05rem !important;
     white-space: nowrap !important;
   }
-  
+
   table td {
     padding: 12px 10px !important;
     font-size: 1rem !important;
   }
-  
+
   /* Action buttons nelle tabelle */
   table .btn-sm,
   table .btn-icon {
@@ -2515,7 +2635,7 @@ tbody tr:hover {
     font-size: 0.95rem !important;
     margin: 2px !important;
   }
-  
+
   /* Statistiche e cards info */
   .stats-grid,
   .info-grid {
@@ -2523,22 +2643,22 @@ tbody tr:hover {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 20px !important;
   }
-  
+
   .stat-card,
   .info-card {
     padding: 20px !important;
   }
-  
+
   .stat-card h3,
   .info-card h3 {
     font-size: 1.3rem !important;
   }
-  
+
   .stat-card .value,
   .info-card .value {
     font-size: 2rem !important;
   }
-  
+
   /* Modal ottimizzati */
   .modal-content {
     width: 85% !important;
@@ -2547,27 +2667,27 @@ tbody tr:hover {
     max-height: 85vh !important;
     overflow-y: auto !important;
   }
-  
+
   .modal-header h2 {
     font-size: 1.6rem !important;
   }
-  
+
   .modal-body {
     padding: 20px 0 !important;
   }
-  
+
   .modal-footer {
     padding-top: 20px !important;
     gap: 15px !important;
   }
-  
+
   /* Filtri e search bar */
   .filters,
   .search-bar {
     flex-wrap: wrap !important;
     gap: 15px !important;
   }
-  
+
   .filters input,
   .filters select,
   .search-bar input {
@@ -2575,7 +2695,7 @@ tbody tr:hover {
     height: 48px !important;
     font-size: 1.05rem !important;
   }
-  
+
   /* Liste prodotti/items */
   .product-list,
   .item-list {
@@ -2583,28 +2703,28 @@ tbody tr:hover {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 20px !important;
   }
-  
+
   .product-item,
   .item-card {
     padding: 20px !important;
   }
-  
+
   /* Scrollbar personalizzate per tablet */
   ::-webkit-scrollbar {
     width: 12px !important;
     height: 12px !important;
   }
-  
+
   ::-webkit-scrollbar-track {
     background: #f1f1f1 !important;
     border-radius: 6px !important;
   }
-  
+
   ::-webkit-scrollbar-thumb {
     background: #888 !important;
     border-radius: 6px !important;
   }
-  
+
   ::-webkit-scrollbar-thumb:hover {
     background: #555 !important;
   }
@@ -2612,32 +2732,31 @@ tbody tr:hover {
 
 /* Tablet Landscape (1024px - 1366px) */
 @media (min-width: 1024px) and (max-width: 1366px) and (orientation: landscape) {
-  
   .login-container {
     width: 50% !important;
     max-width: 550px !important;
   }
-  
+
   /* Dashboard in landscape */
   main {
     padding: 30px 50px !important;
   }
-  
+
   .stats-grid,
   .info-grid {
     grid-template-columns: repeat(3, 1fr) !important;
   }
-  
+
   .product-list,
   .item-list {
     grid-template-columns: repeat(3, 1fr) !important;
   }
-  
+
   /* Tabelle più larghe in landscape */
   table {
     font-size: 1.05rem !important;
   }
-  
+
   table th,
   table td {
     padding: 12px 15px !important;
@@ -2646,7 +2765,6 @@ tbody tr:hover {
 
 /* 📱 TOUCH FRIENDLY - Aree cliccabili più grandi */
 @media (hover: none) and (pointer: coarse) {
-  
   /* Tutti i bottoni e link più grandi per touch */
   button,
   .btn,
@@ -2655,7 +2773,7 @@ tbody tr:hover {
     min-width: 48px !important;
     padding: 12px 20px !important;
   }
-  
+
   /* Checkbox e radio più grandi */
   input[type="checkbox"],
   input[type="radio"] {
@@ -2663,7 +2781,7 @@ tbody tr:hover {
     height: 24px !important;
     margin-right: 10px !important;
   }
-  
+
   /* Icons più grandi */
   .icon,
   i,
@@ -2671,7 +2789,7 @@ tbody tr:hover {
     min-width: 24px !important;
     min-height: 24px !important;
   }
-  
+
   /* Select dropdown più grande */
   select {
     background-size: 20px !important;
@@ -2683,20 +2801,19 @@ tbody tr:hover {
 
 /* Sezione Magazzino */
 @media (min-width: 768px) and (max-width: 1024px) {
-  
   .magazzino-grid {
     grid-template-columns: 1fr !important;
     gap: 20px !important;
   }
-  
+
   .riepilogo-card {
     padding: 25px !important;
   }
-  
+
   .giacenza-value {
     font-size: 2.5rem !important;
   }
-  
+
   .valore-totale {
     font-size: 2rem !important;
   }
@@ -2704,17 +2821,16 @@ tbody tr:hover {
 
 /* Sezione Movimenti/Dati */
 @media (min-width: 768px) and (max-width: 1024px) {
-  
   .movimento-form {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
     gap: 20px !important;
   }
-  
+
   .movimento-form .form-group:last-child {
     grid-column: 1 / -1 !important;
   }
-  
+
   .filtri-data {
     flex-direction: row !important;
     gap: 15px !important;
@@ -2723,16 +2839,15 @@ tbody tr:hover {
 
 /* Sezione Utenti */
 @media (min-width: 768px) and (max-width: 1024px) {
-  
   .users-grid {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 20px !important;
   }
-  
+
   .user-card {
     padding: 20px !important;
   }
-  
+
   .user-actions {
     flex-direction: row !important;
     justify-content: space-between !important;
@@ -2741,25 +2856,24 @@ tbody tr:hover {
 
 /* 🔄 ORIENTAMENTO PORTRAIT SPECIFICO */
 @media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
-  
   /* Header compatto in portrait */
   header {
     flex-direction: column !important;
     align-items: flex-start !important;
     gap: 15px !important;
   }
-  
+
   .user-info {
     display: flex !important;
     justify-content: space-between !important;
     width: 100% !important;
   }
-  
+
   /* Navigation full width in portrait */
   nav {
     justify-content: flex-start !important;
   }
-  
+
   nav button {
     flex: 0 0 auto !important;
   }
@@ -2767,48 +2881,204 @@ tbody tr:hover {
 
 /* 🎯 UTILITY CLASSES PER TABLET */
 @media (min-width: 768px) and (max-width: 1024px) {
-  
   .tablet-hidden {
     display: none !important;
   }
-  
+
   .tablet-visible {
     display: block !important;
   }
-  
+
   .tablet-flex {
     display: flex !important;
   }
-  
+
   .tablet-grid {
     display: grid !important;
   }
-  
+
   .tablet-full-width {
     width: 100% !important;
   }
-  
+
   .tablet-padding {
     padding: 20px !important;
   }
-  
+
   .tablet-margin {
     margin: 20px !important;
   }
-  
+
   .tablet-text-center {
     text-align: center !important;
   }
-  
+
   .tablet-gap-sm {
     gap: 10px !important;
   }
-  
+
   .tablet-gap-md {
     gap: 20px !important;
   }
-  
+
   .tablet-gap-lg {
     gap: 30px !important;
+  }
+}
+
+/* iPad Mini specific optimizations for full content visibility */
+@media (max-width: 820px) and (min-width: 481px) {
+  /* Ensure body allows full scroll */
+  body {
+    overflow-y: auto;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .main-content {
+    padding-bottom: 60px;
+    min-height: calc(100vh - 100px);
+  }
+
+  /* Make sure tables show all data */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 20px;
+  }
+
+  /* Larger, more visible action icons for iPad */
+  .btn-icon {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 12px;
+    border: 2px solid var(--primary);
+    background: rgba(99, 102, 241, 0.05);
+  }
+
+  .btn-icon svg {
+    width: 20px;
+    height: 20px;
+    stroke: var(--primary);
+    stroke-width: 2.5;
+  }
+
+  .btn-icon:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+  }
+
+  .btn-icon:hover svg {
+    stroke: white;
+  }
+
+  /* Ensure table actions are visible */
+  td.text-right {
+    white-space: nowrap;
+    min-width: 120px;
+  }
+
+  td.text-right .btn-icon {
+    margin: 0 4px;
+  }
+}
+
+/* Desktop and tablet - make action icons more prominent and visible */
+@media (min-width: 821px) {
+  .btn-icon {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 10px;
+    border: 2px solid var(--border);
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .btn-icon svg {
+    width: 20px;
+    height: 20px;
+    stroke: var(--text-secondary);
+    stroke-width: 2.5;
+  }
+
+  .btn-icon:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
+  }
+
+  .btn-icon:hover svg {
+    stroke: white;
+  }
+
+  /* Make table action buttons more visible */
+  td.text-right {
+    white-space: nowrap;
+  }
+
+  td.text-right .btn-icon {
+    margin: 0 6px;
+  }
+
+  /* Edit button color */
+  .btn-icon[onclick*="edit"],
+  .btn-icon[onclick*="Edit"] {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.05);
+  }
+
+  .btn-icon[onclick*="edit"] svg,
+  .btn-icon[onclick*="Edit"] svg {
+    stroke: #3b82f6;
+  }
+
+  .btn-icon[onclick*="edit"]:hover,
+  .btn-icon[onclick*="Edit"]:hover {
+    background: #3b82f6;
+    border-color: #3b82f6;
+  }
+
+  /* Delete button color */
+  .btn-icon[onclick*="delete"],
+  .btn-icon[onclick*="Delete"],
+  .btn-icon[onclick*="elimina"] {
+    border-color: #ef4444;
+    background: rgba(239, 68, 68, 0.05);
+  }
+
+  .btn-icon[onclick*="delete"] svg,
+  .btn-icon[onclick*="Delete"] svg,
+  .btn-icon[onclick*="elimina"] svg {
+    stroke: #ef4444;
+  }
+
+  .btn-icon[onclick*="delete"]:hover,
+  .btn-icon[onclick*="Delete"]:hover,
+  .btn-icon[onclick*="elimina"]:hover {
+    background: #ef4444;
+    border-color: #ef4444;
+  }
+}
+
+/* Mobile responsiveness - keep icons visible */
+@media (max-width: 768px) {
+  .btn-icon {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 10px;
+    border: 2px solid var(--primary);
+    background: rgba(99, 102, 241, 0.05);
+  }
+
+  .btn-icon svg {
+    width: 18px;
+    height: 18px;
+    stroke: var(--primary);
+    stroke-width: 2.5;
+  }
+
+  /* Make table action column wider on mobile */
+  td.text-right {
+    min-width: 100px;
   }
 }
