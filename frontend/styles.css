@@ -622,15 +622,17 @@ tbody tr:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  /* Made icons more visible with larger size and better styling */
-  min-width: 36px;
-  min-height: 36px;
+  /* Increased minimum size for better touch targets on iPad */
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .btn-icon svg {
-  width: 18px;
-  height: 18px;
+  /* Larger icons for better visibility */
+  width: 22px;
+  height: 22px;
   stroke: var(--text-secondary);
+  stroke-width: 2.5;
   transition: stroke 0.25s ease;
 }
 
@@ -2986,64 +2988,70 @@ tbody tr:hover {
 /* Desktop and tablet - make action icons more prominent and visible */
 @media (min-width: 821px) {
   .btn-icon {
-    min-width: 40px;
-    min-height: 40px;
-    padding: 10px;
-    border: 2px solid var(--border);
+    /* Optimized for PC/tablet */
+    min-width: 44px;
+    min-height: 44px;
+    padding: 12px;
+    border: 2.5px solid var(--border);
     background: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   }
 
   .btn-icon svg {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     stroke: var(--text-secondary);
     stroke-width: 2.5;
   }
 
   .btn-icon:hover {
-    background: var(--primary);
-    border-color: var(--primary);
-    box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
-  }
-
-  .btn-icon:hover svg {
-    stroke: white;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 
   /* Make table action buttons more visible */
   td.text-right {
     white-space: nowrap;
+    padding: 12px 8px;
   }
 
   td.text-right .btn-icon {
-    margin: 0 6px;
+    margin: 0 8px;
   }
 
-  /* Edit button color */
+  /* Edit button - BLU */
   .btn-icon[onclick*="edit"],
-  .btn-icon[onclick*="Edit"] {
+  .btn-icon[onclick*="Edit"],
+  .btn-icon[onclick*="modifica"] {
     border-color: #3b82f6;
-    background: rgba(59, 130, 246, 0.05);
+    background: rgba(59, 130, 246, 0.1);
   }
 
   .btn-icon[onclick*="edit"] svg,
-  .btn-icon[onclick*="Edit"] svg {
+  .btn-icon[onclick*="Edit"] svg,
+  .btn-icon[onclick*="modifica"] svg {
     stroke: #3b82f6;
   }
 
   .btn-icon[onclick*="edit"]:hover,
-  .btn-icon[onclick*="Edit"]:hover {
+  .btn-icon[onclick*="Edit"]:hover,
+  .btn-icon[onclick*="modifica"]:hover {
     background: #3b82f6;
     border-color: #3b82f6;
   }
 
-  /* Delete button color */
+  .btn-icon[onclick*="edit"]:hover svg,
+  .btn-icon[onclick*="Edit"]:hover svg,
+  .btn-icon[onclick*="modifica"]:hover svg {
+    stroke: white;
+  }
+
+  /* Delete button - ROSSO */
   .btn-icon[onclick*="delete"],
   .btn-icon[onclick*="Delete"],
   .btn-icon[onclick*="elimina"] {
     border-color: #ef4444;
-    background: rgba(239, 68, 68, 0.05);
+    background: rgba(239, 68, 68, 0.1);
   }
 
   .btn-icon[onclick*="delete"] svg,
@@ -3057,6 +3065,60 @@ tbody tr:hover {
   .btn-icon[onclick*="elimina"]:hover {
     background: #ef4444;
     border-color: #ef4444;
+  }
+
+  .btn-icon[onclick*="delete"]:hover svg,
+  .btn-icon[onclick*="Delete"]:hover svg,
+  .btn-icon[onclick*="elimina"]:hover svg {
+    stroke: white;
+  }
+}
+
+/* Specific optimizations for iPad (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .btn-icon {
+    min-width: 48px;
+    min-height: 48px;
+    padding: 14px;
+    border-width: 2.5px;
+  }
+
+  .btn-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 2.5;
+  }
+
+  td.text-right .btn-icon {
+    margin: 0 10px;
+  }
+
+  /* Edit button - BLU for iPad */
+  .btn-icon[onclick*="edit"],
+  .btn-icon[onclick*="Edit"],
+  .btn-icon[onclick*="modifica"] {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.15);
+  }
+
+  .btn-icon[onclick*="edit"] svg,
+  .btn-icon[onclick*="Edit"] svg,
+  .btn-icon[onclick*="modifica"] svg {
+    stroke: #3b82f6;
+  }
+
+  /* Delete button - ROSSO for iPad */
+  .btn-icon[onclick*="delete"],
+  .btn-icon[onclick*="Delete"],
+  .btn-icon[onclick*="elimina"] {
+    border-color: #ef4444;
+    background: rgba(239, 68, 68, 0.15);
+  }
+
+  .btn-icon[onclick*="delete"] svg,
+  .btn-icon[onclick*="Delete"] svg,
+  .btn-icon[onclick*="elimina"] svg {
+    stroke: #ef4444;
   }
 }
 
