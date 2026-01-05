@@ -197,7 +197,8 @@ async function deleteMarca(id) {
     const data = await res.json();
 
     if (res.ok) {
-      if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
+      if (typeof ignoreNextSocketUpdate === "function")
+        ignoreNextSocketUpdate();
       alert("Marca eliminata con successo!");
       loadMarche();
     } else {
@@ -227,7 +228,8 @@ document.getElementById("formMarca").addEventListener("submit", async (e) => {
     const data = await res.json();
 
     if (res.ok) {
-      if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
+      if (typeof ignoreNextSocketUpdate === "function")
+        ignoreNextSocketUpdate();
       alert(id ? "Marca aggiornata!" : "Marca creata!");
       closeMarcaModal();
       loadMarche();
@@ -357,14 +359,16 @@ function editProdotto(id) {
 }
 
 async function deleteProdotto(id) {
-  if (!(await confirm("Sei sicuro di voler eliminare questo prodotto?"))) return;
+  if (!(await confirm("Sei sicuro di voler eliminare questo prodotto?")))
+    return;
 
   try {
     const res = await fetch(`${API_URL}/prodotti/${id}`, { method: "DELETE" });
     const data = await res.json();
 
     if (res.ok) {
-      if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
+      if (typeof ignoreNextSocketUpdate === "function")
+        ignoreNextSocketUpdate();
       alert("Prodotto eliminato con successo!");
       loadProdotti();
     } else {
@@ -486,14 +490,16 @@ function editMovimento(id) {
 }
 
 async function deleteMovimento(id) {
-  if (!(await confirm("Sei sicuro di voler eliminare questo movimento?"))) return;
+  if (!(await confirm("Sei sicuro di voler eliminare questo movimento?")))
+    return;
 
   try {
     const res = await fetch(`${API_URL}/dati/${id}`, { method: "DELETE" });
     const data = await res.json();
 
     if (res.ok) {
-      if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
+      if (typeof ignoreNextSocketUpdate === "function")
+        ignoreNextSocketUpdate();
       alert("Movimento eliminato con successo!");
       loadMovimenti();
       loadProdotti();
@@ -569,8 +575,8 @@ document
         body: JSON.stringify({
           prodotto_id,
           tipo,
-          quantita: parseFloat(quantita.toFixed(2)), // Assicura 2 decimali
-          prezzo: prezzo ? parseFloat(prezzo.toFixed(2)) : null, // Assicura 2 decimali
+          quantita: Number.parseFloat(quantita.toFixed(2)), // Assicura 2 decimali
+          prezzo: prezzo ? Number.parseFloat(prezzo.toFixed(2)) : null, // Assicura 2 decimali
           data_movimento,
           fattura_doc,
           fornitore,
@@ -580,7 +586,8 @@ document
       const data = await res.json();
 
       if (res.ok) {
-        if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
+        if (typeof ignoreNextSocketUpdate === "function")
+          ignoreNextSocketUpdate();
         alert(id ? "Movimento aggiornato!" : "Movimento registrato!");
         closeMovimentoModal();
         loadMovimenti();
@@ -979,7 +986,9 @@ async function deleteUser(id) {
     const currentUser = localStorage.getItem("username") || "";
     const res = await fetch(
       `${API_URL}/utenti/${id}?current_user=${encodeURIComponent(currentUser)}`,
-      { method: "DELETE" }
+      {
+        method: "DELETE",
+      }
     );
     const data = await res.json();
 
@@ -989,7 +998,8 @@ async function deleteUser(id) {
           "Hai eliminato il tuo account. Verrai disconnesso e dovrai effettuare di nuovo il login."
         );
       } else {
-        if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
+        if (typeof ignoreNextSocketUpdate === "function")
+          ignoreNextSocketUpdate();
         alert("Utente eliminato con successo!");
         loadUtenti();
       }
@@ -1030,7 +1040,8 @@ document.getElementById("formUser").addEventListener("submit", async (e) => {
       const mustLogout =
         data.username_modificato || data.password_modificata || false;
 
-      if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
+      if (typeof ignoreNextSocketUpdate === "function")
+        ignoreNextSocketUpdate();
       alert(id ? "Utente aggiornato!" : "Utente creato!");
       closeUserModal();
       if (mustLogout) {
@@ -1107,7 +1118,7 @@ function limitToTwoDecimals(inputElement) {
     }
 
     value = value.replace(",", ".");
-    const num = parseFloat(value);
+    const num = Number.parseFloat(value);
 
     if (!isNaN(num)) {
       // Formatta con 2 decimali
@@ -1175,7 +1186,7 @@ function getDecimalSeparator() {
 
 // Formatta numero con separatore corretto per l'utente
 function formatNumberWithLocale(num) {
-  const n = parseFloat(num);
+  const n = Number.parseFloat(num);
   if (isNaN(n)) return "0";
 
   const separator = getDecimalSeparator();
@@ -1191,7 +1202,7 @@ function formatNumberWithLocale(num) {
 
 // Aggiorna la funzione formatCurrency esistente
 function formatCurrency(num) {
-  const n = parseFloat(num);
+  const n = Number.parseFloat(num);
   if (isNaN(n)) return "€ 0,00";
 
   return `€ ${formatNumber(n)}`;
@@ -1199,7 +1210,7 @@ function formatCurrency(num) {
 
 // Aggiorna formatNumber per usare il separatore locale
 function formatNumber(num) {
-  const n = parseFloat(num);
+  const n = Number.parseFloat(num);
   if (isNaN(n)) return "0";
 
   const separator = getDecimalSeparator();
@@ -1218,7 +1229,7 @@ function formatNumber(num) {
 
 // Formatta quantità: senza decimali se intero, altrimenti 2 decimali con virgola
 function formatQuantity(num) {
-  const n = parseFloat(num);
+  const n = Number.parseFloat(num);
   if (isNaN(n)) return "0";
   if (Number.isInteger(n)) {
     return n.toString();
@@ -1272,7 +1283,7 @@ function limitToTwoDecimals(inputElement) {
 
     // Converti in numero
     value = value.replace(",", ".");
-    const num = parseFloat(value);
+    const num = Number.parseFloat(value);
 
     if (!isNaN(num) && num >= 0) {
       // Formatta con esattamente 2 decimali e virgola
@@ -1289,7 +1300,7 @@ function limitToTwoDecimals(inputElement) {
       "text"
     );
     const cleaned = pastedText.replace(/[^\d.,]/g, "").replace(",", ".");
-    const num = parseFloat(cleaned);
+    const num = Number.parseFloat(cleaned);
 
     if (!isNaN(num) && num >= 0) {
       this.value = num.toFixed(2).replace(".", ",");
@@ -1304,7 +1315,7 @@ function limitToTwoDecimals(inputElement) {
 function parseDecimalInput(value) {
   if (!value || value === "") return 0;
   const cleaned = String(value).replace(",", ".");
-  const num = parseFloat(cleaned);
+  const num = Number.parseFloat(cleaned);
   return isNaN(num) ? 0 : num;
 }
 
@@ -1421,7 +1432,7 @@ function setupProductSearch() {
   searchInput.classList.remove("has-selection");
 
   // Ricerca mentre digiti
-  searchInput.addEventListener("input", function (e) {
+  searchInput.addEventListener("input", (e) => {
     const searchTerm = e.target.value.toLowerCase().trim();
 
     // Se l'utente modifica dopo aver selezionato, resetta la selezione
@@ -1455,7 +1466,7 @@ function setupProductSearch() {
   });
 
   // Chiudi risultati cliccando fuori
-  document.addEventListener("click", function (e) {
+  document.addEventListener("click", (e) => {
     if (
       !searchInput.contains(e.target) &&
       !resultsContainer.contains(e.target)
@@ -2272,7 +2283,7 @@ function searchProducts() {
 function parseDecimalInput(value) {
   if (!value || value === "") return 0;
   const cleaned = String(value).replace(",", ".");
-  const num = parseFloat(cleaned);
+  const num = Number.parseFloat(cleaned);
   return isNaN(num) ? 0 : num;
 }
 
@@ -2283,14 +2294,14 @@ function parseDecimalInput(value) {
 function limitToTwoDecimals(inputElement) {
   // Listener per la digitazione in tempo reale
   inputElement.addEventListener("input", function (e) {
-    let value = this.value;
+    const value = this.value;
     // Rimuovi caratteri non validi
-    let cleaned = value.replace(/[^\d.,]/g, "");
+    const cleaned = value.replace(/[^\d.,]/g, "");
 
     // ... (Logica per la gestione di separatori multipli)
 
     const valueAsDot = cleaned.replace(",", ".");
-    const num = parseFloat(valueAsDot);
+    const num = Number.parseFloat(valueAsDot);
 
     if (isNaN(num)) {
       this.value = "";
@@ -2313,7 +2324,7 @@ function limitToTwoDecimals(inputElement) {
       "text"
     );
     const cleaned = pastedText.replace(/[^\d.,]/g, "").replace(",", ".");
-    const num = parseFloat(cleaned);
+    const num = Number.parseFloat(cleaned);
 
     if (!isNaN(num) && num >= 0) {
       // Forzatura a 2 decimali anche all'atto di incollare.
@@ -2338,7 +2349,7 @@ function getDecimalSeparator() {
  * garantendo sempre 2 decimali con toFixed(2).
  */
 function formatNumber(num) {
-  const n = parseFloat(num);
+  const n = Number.parseFloat(num);
   if (isNaN(n)) return "0";
   const separator = getDecimalSeparator();
   // PUNTO CHIAVE: toFixed(2) garantisce lo zero finale per la visualizzazione.
@@ -2357,7 +2368,7 @@ function formatNumber(num) {
 
 // Formatta un numero come valuta (es. € 1.234,56)
 function formatCurrency(num) {
-  const n = parseFloat(num);
+  const n = Number.parseFloat(num);
   if (isNaN(n)) return "€ 0,00";
   return `€ ${formatNumber(n)}`;
 }
@@ -2380,7 +2391,7 @@ function getDecimalSeparator() {
 function parseDecimalInput(value) {
   if (!value || value === "") return 0;
   const cleaned = String(value).replace(",", ".");
-  const num = parseFloat(cleaned);
+  const num = Number.parseFloat(cleaned);
   return isNaN(num) ? 0 : num;
 }
 
@@ -2397,7 +2408,7 @@ function limitToTwoDecimals(inputElement) {
 
   // 1. Listener per la digitazione in tempo reale (solo pulizia)
   inputElement.addEventListener("input", function (e) {
-    let value = this.value;
+    const value = this.value;
 
     // Rimuovi tutti i caratteri non numerici, punti e virgole
     let cleaned = value.replace(/[^\d.,]/g, "");
@@ -2420,7 +2431,7 @@ function limitToTwoDecimals(inputElement) {
 
   // 2. Listener per il BLUR (quando l'utente esce dal campo) - Applica toFixed(2)
   inputElement.addEventListener("blur", function (e) {
-    let value = this.value;
+    const value = this.value;
     const num = parseDecimalInput(value);
 
     if (!isNaN(num) && value !== "") {
@@ -2440,7 +2451,7 @@ function limitToTwoDecimals(inputElement) {
     );
 
     const cleaned = pastedText.replace(/[^\d.,]/g, "").replace(",", ".");
-    const num = parseFloat(cleaned);
+    const num = Number.parseFloat(cleaned);
 
     if (!isNaN(num) && num >= 0) {
       // Formatta a 2 decimali e usa il separatore decimale locale
@@ -2456,7 +2467,7 @@ function limitToTwoDecimals(inputElement) {
  * garantendo sempre 2 decimali con toFixed(2).
  */
 function formatNumber(num) {
-  const n = parseFloat(num);
+  const n = Number.parseFloat(num);
   if (isNaN(n)) return "0";
   const separator = getDecimalSeparator();
   // toFixed(2) forza 2 cifre decimali (es. 0.5 -> "0.50")
@@ -2474,7 +2485,7 @@ function formatNumber(num) {
 
 // Formatta un numero come valuta (es. € 1.234,56)
 function formatCurrency(num) {
-  const n = parseFloat(num);
+  const n = Number.parseFloat(num);
   if (isNaN(n)) return "€ 0,00";
   return `€ ${formatNumber(n)}`;
 }
@@ -2497,7 +2508,7 @@ function getDecimalSeparator() {
 function parseDecimalInput(value) {
   if (!value || value === "") return 0;
   const cleaned = String(value).replace(",", ".");
-  const num = parseFloat(cleaned);
+  const num = Number.parseFloat(cleaned);
   return isNaN(num) ? 0 : num;
 }
 
@@ -2514,7 +2525,7 @@ function limitToTwoDecimals(inputElement) {
 
   // 1. Listener per la digitazione in tempo reale (ENFORCES MAX 2 DECIMALI)
   inputElement.addEventListener("input", function (e) {
-    let value = this.value;
+    const value = this.value;
 
     // Rimuovi tutti i caratteri non numerici, punti e virgole
     let cleaned = value.replace(/[^\d.,]/g, "");
@@ -2537,7 +2548,7 @@ function limitToTwoDecimals(inputElement) {
 
   // 2. Listener per il BLUR (quando l'utente esce dal campo) - FORZA .00
   inputElement.addEventListener("blur", function (e) {
-    let value = this.value;
+    const value = this.value;
     const num = parseDecimalInput(value);
 
     if (!isNaN(num) && value !== "") {
@@ -2557,7 +2568,7 @@ function limitToTwoDecimals(inputElement) {
     );
 
     const cleaned = pastedText.replace(/[^\d.,]/g, "").replace(",", ".");
-    const num = parseFloat(cleaned);
+    const num = Number.parseFloat(cleaned);
 
     if (!isNaN(num) && num >= 0) {
       // Formatta a 2 decimali anche quando si incolla
@@ -2595,7 +2606,7 @@ function setupDecimalInputs() {
  * garantendo sempre 2 decimali con toFixed(2).
  */
 function formatNumber(num) {
-  const n = parseFloat(num);
+  const n = Number.parseFloat(num);
   if (isNaN(n)) return "0";
   const separator = getDecimalSeparator();
   // toFixed(2) forza 2 cifre decimali (es. 0.5 -> "0.50")
@@ -2614,7 +2625,7 @@ function formatNumber(num) {
 
 // Formatta un numero come valuta (es. € 1.234,56)
 function formatCurrency(num) {
-  const n = parseFloat(num);
+  const n = Number.parseFloat(num);
   if (isNaN(n)) return "€ 0,00";
   return `€ ${formatNumber(n)}`;
 }
@@ -2641,7 +2652,7 @@ function parseDecimalInput(value) {
   if (!value || value === "") return 0;
   // Converte virgola in punto per parseFloat
   const cleaned = String(value).replace(",", ".");
-  const num = parseFloat(cleaned);
+  const num = Number.parseFloat(cleaned);
   return isNaN(num) ? 0 : num;
 }
 
@@ -2686,7 +2697,7 @@ function limitToTwoDecimals(inputElement) {
 
   // ========== EVENTO BLUR (quando si esce dal campo) ==========
   const handleBlur = function (e) {
-    let value = this.value;
+    const value = this.value;
 
     // Se vuoto, imposta a 0.00
     if (value === "" || value === separator) {
@@ -2712,7 +2723,7 @@ function limitToTwoDecimals(inputElement) {
       "text"
     );
     const cleaned = pastedText.replace(/[^\d.,]/g, "").replace(",", ".");
-    const num = parseFloat(cleaned);
+    const num = Number.parseFloat(cleaned);
 
     if (!isNaN(num) && num >= 0) {
       this.value = num.toFixed(2).replace(".", separator);
@@ -2808,7 +2819,7 @@ function setupDecimalInputs() {
  * @returns {string} - Numero formattato (es. "1.234,56")
  */
 function formatNumber(num) {
-  const n = parseFloat(num);
+  const n = Number.parseFloat(num);
   if (isNaN(n)) return "0,00";
 
   const separator = getDecimalSeparator();
@@ -2828,7 +2839,7 @@ function formatNumber(num) {
  * @returns {string} - Valuta formattata (es. "€ 1.234,56")
  */
 function formatCurrency(num) {
-  const n = parseFloat(num);
+  const n = Number.parseFloat(num);
   if (isNaN(n)) return "€ 0,00";
   return `€ ${formatNumber(n)}`;
 }
@@ -2921,7 +2932,7 @@ function setupMarcaSearch() {
   searchInput.classList.remove("has-selection");
 
   // Chiudi risultati cliccando fuori
-  document.addEventListener("click", function (e) {
+  document.addEventListener("click", (e) => {
     if (
       !searchInput.contains(e.target) &&
       !resultsContainer.contains(e.target)
@@ -3208,7 +3219,8 @@ document
       const data = await res.json();
 
       if (res.ok) {
-        if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
+        if (typeof ignoreNextSocketUpdate === "function")
+          ignoreNextSocketUpdate();
         alert(id ? "✅ Prodotto aggiornato!" : "✅ Prodotto creato!");
         closeProdottoModal();
         loadProdotti(); // Ricarica la lista prodotti
@@ -3391,7 +3403,7 @@ function setupPasswordToggle(inputId, toggleId) {
   `;
 
   // La logica si basa sullo stato iniziale: input è type="password" e icona è iconVisible (occhio aperto)
-  togglePassword.addEventListener("click", function () {
+  togglePassword.addEventListener("click", () => {
     // Determina il nuovo tipo
     const type =
       passwordInput.getAttribute("type") === "password" ? "text" : "password";
@@ -3572,7 +3584,7 @@ async function extractTextFromPDF(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
-    reader.onload = async function (e) {
+    reader.onload = async (e) => {
       try {
         const typedarray = new Uint8Array(e.target.result);
 
@@ -3641,7 +3653,7 @@ function parseScarichiFromText(text) {
     if (!line) continue;
 
     // 1. CERCA DATA (priorità)
-    const datePattern = /(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/g;
+    const datePattern = /(\d{1,2}[/\-.]\d{1,2}[/\-.]\d{2,4})/g;
     const dateMatch = line.match(datePattern);
     if (dateMatch && dateMatch[0]) {
       foundData.date = normalizeDate(dateMatch[0]);
@@ -3651,7 +3663,7 @@ function parseScarichiFromText(text) {
     const words = line.split(/\s+/);
     for (const word of words) {
       // Pattern per codici: ABC123, ABC-123, ABC_123, ABC/123
-      if (/^[A-Z0-9]{3,}[\-\_\/]?[A-Z0-9]*$/i.test(word) && word.length >= 3) {
+      if (/^[A-Z0-9]{3,}[-_/]?[A-Z0-9]*$/i.test(word) && word.length >= 3) {
         // Escludi parole comuni che non sono codici
         const excluded = [
           "TOTALE",
@@ -3670,12 +3682,12 @@ function parseScarichiFromText(text) {
 
     // 3. CERCA QUANTITÀ (numero con/senza decimali)
     // Pattern: "5", "5.5", "5,5", "5 pz", "5 PZ", "n. 5"
-    const qtyPattern = /(?:n\.?\s*)?(\d+[,\.]?\d*)\s*(?:pz|PZ|pezzi|pezzo)?/gi;
+    const qtyPattern = /(?:n\.?\s*)?(\d+[,.]?\d*)\s*(?:pz|PZ|pezzi|pezzo)?/gi;
     const qtyMatches = [...line.matchAll(qtyPattern)];
 
     if (qtyMatches.length > 0) {
       for (const match of qtyMatches) {
-        const qty = parseFloat(match[1].replace(",", "."));
+        const qty = Number.parseFloat(match[1].replace(",", "."));
         // Validazione: quantità ragionevole (non troppo grande, non zero)
         if (qty > 0 && qty <= 999999) {
           foundData.quantity = qty;
@@ -4066,7 +4078,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Funzione helper per formattare quantità (già presente in script.js)
 function formatQuantity(num) {
-  const n = parseFloat(num);
+  const n = Number.parseFloat(num);
   if (isNaN(n)) return "0";
   if (Number.isInteger(n)) {
     return n.toString();
@@ -4232,7 +4244,7 @@ async function extractTextFromPDF(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
-    reader.onload = async function (e) {
+    reader.onload = async (e) => {
       try {
         console.log("📖 Inizio lettura PDF...");
 
@@ -4301,7 +4313,7 @@ function extractDateFromPDF(text) {
     const line = lines[i].trim();
 
     // Pattern principale: DATA______19/12/2025
-    const datePattern = /DATA[_\s]*(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/i;
+    const datePattern = /DATA[_\s]*(\d{1,2}[/\-.]\d{1,2}[/\-.]\d{2,4})/i;
     const match = line.match(datePattern);
 
     if (match && match[1]) {
@@ -4316,7 +4328,7 @@ function extractDateFromPDF(text) {
 
   for (let i = 0; i < Math.min(15, lines.length); i++) {
     const line = lines[i];
-    const anyDatePattern = /(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/;
+    const anyDatePattern = /(\d{1,2}[/\-.]\d{1,2}[/\-.]\d{2,4})/;
     const match = line.match(anyDatePattern);
 
     if (match && match[1]) {
@@ -4425,7 +4437,7 @@ function extractScarichiFromPDF(text, date) {
 
     // Rimuovi eventuali simboli (es. "2," → "2")
     const cleanQty = potentialQty.replace(/[^\d.,]/g, "");
-    const qty = parseFloat(cleanQty.replace(",", "."));
+    const qty = Number.parseFloat(cleanQty.replace(",", "."));
 
     // Validazione quantità
     if (isNaN(qty) || qty <= 0 || qty > 9999) {

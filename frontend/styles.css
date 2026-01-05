@@ -109,6 +109,7 @@ body {
   box-shadow: var(--shadow-xl);
   z-index: 1000;
   transition: transform 0.3s ease;
+  padding-bottom: 20px;
 }
 
 .sidebar::-webkit-scrollbar {
@@ -1002,6 +1003,7 @@ tbody tr:hover {
   /* Hide sidebar by default on mobile */
   .sidebar {
     transform: translateX(-100%);
+    padding-bottom: 30px;
   }
 
   .sidebar.mobile-open {
@@ -1075,6 +1077,61 @@ tbody tr:hover {
   .stat-value {
     font-size: 28px;
   }
+
+  /* Mobile action button styling */
+  .btn-icon {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 12px;
+    border-width: 2px;
+  }
+
+  .btn-icon svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2;
+  }
+
+  /* Delete button - ROSSO for mobile */
+  .btn-icon[onclick*="delete"],
+  .btn-icon[onclick*="Delete"],
+  .btn-icon[onclick*="elimina"] {
+    border-color: #ef4444 !important;
+    background: rgba(239, 68, 68, 0.1) !important;
+  }
+
+  .btn-icon[onclick*="delete"] svg,
+  .btn-icon[onclick*="Delete"] svg,
+  .btn-icon[onclick*="elimina"] svg {
+    stroke: #ef4444 !important;
+  }
+
+  .btn-icon[onclick*="delete"]:hover,
+  .btn-icon[onclick*="Delete"]:hover,
+  .btn-icon[onclick*="elimina"]:hover {
+    background: #ef4444 !important;
+    border-color: #ef4444 !important;
+  }
+
+  .btn-icon[onclick*="delete"]:hover svg,
+  .btn-icon[onclick*="Delete"]:hover svg,
+  .btn-icon[onclick*="elimina"]:hover svg {
+    stroke: white !important;
+  }
+
+  /* Edit button - BLU for mobile */
+  .btn-icon[onclick*="edit"],
+  .btn-icon[onclick*="Edit"],
+  .btn-icon[onclick*="modifica"] {
+    border-color: #3b82f6 !important;
+    background: rgba(59, 130, 246, 0.1) !important;
+  }
+
+  .btn-icon[onclick*="edit"] svg,
+  .btn-icon[onclick*="Edit"] svg,
+  .btn-icon[onclick*="modifica"] svg {
+    stroke: #3b82f6 !important;
+  }
 }
 
 /* CHANGE START */
@@ -1090,7 +1147,10 @@ tbody tr:hover {
   /* Hide sidebar by default on tablet */
   .sidebar {
     transform: translateX(-100%);
-    width: 280px; /* Explicitly set width as it might be changed by other media queries */
+    width: 280px;
+    padding-bottom: 30px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .sidebar.mobile-open {
@@ -1102,11 +1162,8 @@ tbody tr:hover {
     margin-left: 0;
     width: 100%;
     padding: 100px 32px 32px;
-  }
-
-  /* Added more padding-top for tablet sidebar header */
-  .sidebar-header {
-    padding: 100px 24px 32px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .stats-grid {
@@ -3097,28 +3154,41 @@ tbody tr:hover {
   .btn-icon[onclick*="edit"],
   .btn-icon[onclick*="Edit"],
   .btn-icon[onclick*="modifica"] {
-    border-color: #3b82f6;
-    background: rgba(59, 130, 246, 0.15);
+    border-color: #3b82f6 !important;
+    background: rgba(59, 130, 246, 0.15) !important;
   }
 
   .btn-icon[onclick*="edit"] svg,
   .btn-icon[onclick*="Edit"] svg,
   .btn-icon[onclick*="modifica"] svg {
-    stroke: #3b82f6;
+    stroke: #3b82f6 !important;
   }
 
   /* Delete button - ROSSO for iPad */
   .btn-icon[onclick*="delete"],
   .btn-icon[onclick*="Delete"],
   .btn-icon[onclick*="elimina"] {
-    border-color: #ef4444;
-    background: rgba(239, 68, 68, 0.15);
+    border-color: #ef4444 !important;
+    background: rgba(239, 68, 68, 0.15) !important;
   }
 
   .btn-icon[onclick*="delete"] svg,
   .btn-icon[onclick*="Delete"] svg,
   .btn-icon[onclick*="elimina"] svg {
-    stroke: #ef4444;
+    stroke: #ef4444 !important;
+  }
+
+  .btn-icon[onclick*="delete"]:hover,
+  .btn-icon[onclick*="Delete"]:hover,
+  .btn-icon[onclick*="elimina"]:hover {
+    background: #ef4444 !important;
+    border-color: #ef4444 !important;
+  }
+
+  .btn-icon[onclick*="delete"]:hover svg,
+  .btn-icon[onclick*="Delete"]:hover svg,
+  .btn-icon[onclick*="elimina"]:hover svg {
+    stroke: white !important;
   }
 }
 
