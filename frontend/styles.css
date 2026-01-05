@@ -2349,3 +2349,466 @@ tbody tr:hover {
     height: 24px;
   }
 }
+
+/* ============================================
+   📱 OTTIMIZZAZIONI TABLET - LOGIN E HOME
+   ============================================ */
+
+/* 🎯 MEDIA QUERIES PER TABLET */
+
+/* Tablet Portrait (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  
+  /* ==================== LOGIN PAGE ==================== */
+  
+  .login-container {
+    width: 70% !important;
+    max-width: 500px !important;
+    padding: 40px !important;
+    margin: 0 auto;
+  }
+  
+  .login-container h2 {
+    font-size: 2rem !important;
+    margin-bottom: 30px !important;
+  }
+  
+  .login-form .form-group {
+    margin-bottom: 25px !important;
+  }
+  
+  .login-form label {
+    font-size: 1.1rem !important;
+    margin-bottom: 10px !important;
+  }
+  
+  .login-form input {
+    height: 50px !important;
+    font-size: 1.1rem !important;
+    padding: 15px !important;
+  }
+  
+  .login-form button {
+    height: 55px !important;
+    font-size: 1.2rem !important;
+    margin-top: 30px !important;
+  }
+  
+  /* ==================== HOME/DASHBOARD ==================== */
+  
+  /* Header ottimizzato */
+  header {
+    padding: 20px 30px !important;
+    flex-wrap: wrap !important;
+  }
+  
+  header h1 {
+    font-size: 1.8rem !important;
+  }
+  
+  .user-info {
+    font-size: 1rem !important;
+  }
+  
+  .btn-logout {
+    padding: 10px 25px !important;
+    font-size: 1rem !important;
+  }
+  
+  /* Navigation ottimizzata */
+  nav {
+    padding: 15px 30px !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  nav button {
+    min-width: 140px !important;
+    padding: 12px 20px !important;
+    font-size: 1rem !important;
+    margin: 5px !important;
+  }
+  
+  /* Main content */
+  main {
+    padding: 30px !important;
+  }
+  
+  /* Cards e pannelli */
+  .card,
+  .panel,
+  .box {
+    margin-bottom: 25px !important;
+    padding: 25px !important;
+  }
+  
+  .card h2,
+  .panel h2 {
+    font-size: 1.6rem !important;
+    margin-bottom: 20px !important;
+  }
+  
+  /* Form groups */
+  .form-group {
+    margin-bottom: 20px !important;
+  }
+  
+  .form-group label {
+    font-size: 1.05rem !important;
+    margin-bottom: 8px !important;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    height: 48px !important;
+    font-size: 1.05rem !important;
+    padding: 12px !important;
+  }
+  
+  .form-group textarea {
+    height: auto !important;
+    min-height: 100px !important;
+  }
+  
+  /* Buttons ottimizzati */
+  .btn,
+  button {
+    min-height: 48px !important;
+    padding: 12px 24px !important;
+    font-size: 1.05rem !important;
+    margin: 5px !important;
+  }
+  
+  .btn-primary,
+  .btn-success {
+    min-width: 140px !important;
+  }
+  
+  /* Tabelle responsive */
+  table {
+    font-size: 1rem !important;
+    display: block !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  table thead {
+    display: table-header-group !important;
+  }
+  
+  table th {
+    padding: 15px 12px !important;
+    font-size: 1.05rem !important;
+    white-space: nowrap !important;
+  }
+  
+  table td {
+    padding: 12px 10px !important;
+    font-size: 1rem !important;
+  }
+  
+  /* Action buttons nelle tabelle */
+  table .btn-sm,
+  table .btn-icon {
+    padding: 8px 16px !important;
+    font-size: 0.95rem !important;
+    margin: 2px !important;
+  }
+  
+  /* Statistiche e cards info */
+  .stats-grid,
+  .info-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 20px !important;
+  }
+  
+  .stat-card,
+  .info-card {
+    padding: 20px !important;
+  }
+  
+  .stat-card h3,
+  .info-card h3 {
+    font-size: 1.3rem !important;
+  }
+  
+  .stat-card .value,
+  .info-card .value {
+    font-size: 2rem !important;
+  }
+  
+  /* Modal ottimizzati */
+  .modal-content {
+    width: 85% !important;
+    max-width: 650px !important;
+    padding: 30px !important;
+    max-height: 85vh !important;
+    overflow-y: auto !important;
+  }
+  
+  .modal-header h2 {
+    font-size: 1.6rem !important;
+  }
+  
+  .modal-body {
+    padding: 20px 0 !important;
+  }
+  
+  .modal-footer {
+    padding-top: 20px !important;
+    gap: 15px !important;
+  }
+  
+  /* Filtri e search bar */
+  .filters,
+  .search-bar {
+    flex-wrap: wrap !important;
+    gap: 15px !important;
+  }
+  
+  .filters input,
+  .filters select,
+  .search-bar input {
+    min-width: 200px !important;
+    height: 48px !important;
+    font-size: 1.05rem !important;
+  }
+  
+  /* Liste prodotti/items */
+  .product-list,
+  .item-list {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 20px !important;
+  }
+  
+  .product-item,
+  .item-card {
+    padding: 20px !important;
+  }
+  
+  /* Scrollbar personalizzate per tablet */
+  ::-webkit-scrollbar {
+    width: 12px !important;
+    height: 12px !important;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1 !important;
+    border-radius: 6px !important;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #888 !important;
+    border-radius: 6px !important;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555 !important;
+  }
+}
+
+/* Tablet Landscape (1024px - 1366px) */
+@media (min-width: 1024px) and (max-width: 1366px) and (orientation: landscape) {
+  
+  .login-container {
+    width: 50% !important;
+    max-width: 550px !important;
+  }
+  
+  /* Dashboard in landscape */
+  main {
+    padding: 30px 50px !important;
+  }
+  
+  .stats-grid,
+  .info-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  
+  .product-list,
+  .item-list {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  
+  /* Tabelle più larghe in landscape */
+  table {
+    font-size: 1.05rem !important;
+  }
+  
+  table th,
+  table td {
+    padding: 12px 15px !important;
+  }
+}
+
+/* 📱 TOUCH FRIENDLY - Aree cliccabili più grandi */
+@media (hover: none) and (pointer: coarse) {
+  
+  /* Tutti i bottoni e link più grandi per touch */
+  button,
+  .btn,
+  a.btn {
+    min-height: 48px !important;
+    min-width: 48px !important;
+    padding: 12px 20px !important;
+  }
+  
+  /* Checkbox e radio più grandi */
+  input[type="checkbox"],
+  input[type="radio"] {
+    width: 24px !important;
+    height: 24px !important;
+    margin-right: 10px !important;
+  }
+  
+  /* Icons più grandi */
+  .icon,
+  i,
+  svg {
+    min-width: 24px !important;
+    min-height: 24px !important;
+  }
+  
+  /* Select dropdown più grande */
+  select {
+    background-size: 20px !important;
+    padding-right: 40px !important;
+  }
+}
+
+/* 🎨 OTTIMIZZAZIONI SPECIFICHE PER SEZIONI */
+
+/* Sezione Magazzino */
+@media (min-width: 768px) and (max-width: 1024px) {
+  
+  .magazzino-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+  
+  .riepilogo-card {
+    padding: 25px !important;
+  }
+  
+  .giacenza-value {
+    font-size: 2.5rem !important;
+  }
+  
+  .valore-totale {
+    font-size: 2rem !important;
+  }
+}
+
+/* Sezione Movimenti/Dati */
+@media (min-width: 768px) and (max-width: 1024px) {
+  
+  .movimento-form {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 20px !important;
+  }
+  
+  .movimento-form .form-group:last-child {
+    grid-column: 1 / -1 !important;
+  }
+  
+  .filtri-data {
+    flex-direction: row !important;
+    gap: 15px !important;
+  }
+}
+
+/* Sezione Utenti */
+@media (min-width: 768px) and (max-width: 1024px) {
+  
+  .users-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 20px !important;
+  }
+  
+  .user-card {
+    padding: 20px !important;
+  }
+  
+  .user-actions {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+  }
+}
+
+/* 🔄 ORIENTAMENTO PORTRAIT SPECIFICO */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+  
+  /* Header compatto in portrait */
+  header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 15px !important;
+  }
+  
+  .user-info {
+    display: flex !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+  }
+  
+  /* Navigation full width in portrait */
+  nav {
+    justify-content: flex-start !important;
+  }
+  
+  nav button {
+    flex: 0 0 auto !important;
+  }
+}
+
+/* 🎯 UTILITY CLASSES PER TABLET */
+@media (min-width: 768px) and (max-width: 1024px) {
+  
+  .tablet-hidden {
+    display: none !important;
+  }
+  
+  .tablet-visible {
+    display: block !important;
+  }
+  
+  .tablet-flex {
+    display: flex !important;
+  }
+  
+  .tablet-grid {
+    display: grid !important;
+  }
+  
+  .tablet-full-width {
+    width: 100% !important;
+  }
+  
+  .tablet-padding {
+    padding: 20px !important;
+  }
+  
+  .tablet-margin {
+    margin: 20px !important;
+  }
+  
+  .tablet-text-center {
+    text-align: center !important;
+  }
+  
+  .tablet-gap-sm {
+    gap: 10px !important;
+  }
+  
+  .tablet-gap-md {
+    gap: 20px !important;
+  }
+  
+  .tablet-gap-lg {
+    gap: 30px !important;
+  }
+}
