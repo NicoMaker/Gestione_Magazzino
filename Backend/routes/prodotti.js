@@ -73,6 +73,12 @@ router.post("/", (req, res) => {
         [this.lastID],
         (err, row) => {
           if (err) return res.status(500).json({ error: err.message });
+          // Emetti evento Socket.IO per aggiornamento real-time
+          const io = req.app.get("io");
+          if (io) {
+            io.emit("prodotto_aggiunto");
+            io.emit("prodotti_aggiornati");
+          }
           res.json({ ...row, giacenza: formatDecimal(0) }); // 🎯 Giacenza 0.00
         }
       );
@@ -102,6 +108,14 @@ router.put("/:id", (req, res) => {
 
       if (this.changes === 0) {
         return res.status(404).json({ error: "Prodotto non trovato" });
+      }
+
+      // Emetti evento Socket.IO per aggiornamento real-time
+      const io = req.app.get("io");
+      if (io) {
+        io.emit("prodotto_modificato", { id });
+        io.emit("prodotti_aggiornati");
+        io.emit("magazzino_aggiornato");
       }
 
       res.json({ success: true });
@@ -160,6 +174,13 @@ router.delete("/:id", (req, res) => {
               db.run("COMMIT;", (commitErr) => {
                 if (commitErr) {
                   return res.status(500).json({ error: commitErr.message });
+                }
+                // Emetti evento Socket.IO per aggiornamento real-time
+                const io = req.app.get("io");
+                if (io) {
+                  io.emit("prodotto_eliminato", { id });
+                  io.emit("prodotti_aggiornati");
+                  io.emit("magazzino_aggiornato");
                 }
                 res.json({
                   success: true,

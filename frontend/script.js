@@ -190,13 +190,14 @@ function editMarca(id) {
 }
 
 async function deleteMarca(id) {
-  if (!confirm("Sei sicuro di voler eliminare questa marca?")) return;
+  if (!(await confirm("Sei sicuro di voler eliminare questa marca?"))) return;
 
   try {
     const res = await fetch(`${API_URL}/marche/${id}`, { method: "DELETE" });
     const data = await res.json();
 
     if (res.ok) {
+      if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
       alert("Marca eliminata con successo!");
       loadMarche();
     } else {
@@ -226,6 +227,7 @@ document.getElementById("formMarca").addEventListener("submit", async (e) => {
     const data = await res.json();
 
     if (res.ok) {
+      if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
       alert(id ? "Marca aggiornata!" : "Marca creata!");
       closeMarcaModal();
       loadMarche();
@@ -355,13 +357,14 @@ function editProdotto(id) {
 }
 
 async function deleteProdotto(id) {
-  if (!confirm("Sei sicuro di voler eliminare questo prodotto?")) return;
+  if (!(await confirm("Sei sicuro di voler eliminare questo prodotto?"))) return;
 
   try {
     const res = await fetch(`${API_URL}/prodotti/${id}`, { method: "DELETE" });
     const data = await res.json();
 
     if (res.ok) {
+      if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
       alert("Prodotto eliminato con successo!");
       loadProdotti();
     } else {
@@ -483,13 +486,14 @@ function editMovimento(id) {
 }
 
 async function deleteMovimento(id) {
-  if (!confirm("Sei sicuro di voler eliminare questo movimento?")) return;
+  if (!(await confirm("Sei sicuro di voler eliminare questo movimento?"))) return;
 
   try {
     const res = await fetch(`${API_URL}/dati/${id}`, { method: "DELETE" });
     const data = await res.json();
 
     if (res.ok) {
+      if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
       alert("Movimento eliminato con successo!");
       loadMovimenti();
       loadProdotti();
@@ -576,6 +580,7 @@ document
       const data = await res.json();
 
       if (res.ok) {
+        if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
         alert(id ? "Movimento aggiornato!" : "Movimento registrato!");
         closeMovimentoModal();
         loadMovimenti();
@@ -968,7 +973,7 @@ function editUser(id) {
 }
 
 async function deleteUser(id) {
-  if (!confirm("Sei sicuro di voler eliminare questo utente?")) return;
+  if (!(await confirm("Sei sicuro di voler eliminare questo utente?"))) return;
 
   try {
     const currentUser = localStorage.getItem("username") || "";
@@ -984,6 +989,7 @@ async function deleteUser(id) {
           "Hai eliminato il tuo account. Verrai disconnesso e dovrai effettuare di nuovo il login."
         );
       } else {
+        if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
         alert("Utente eliminato con successo!");
         loadUtenti();
       }
@@ -1024,6 +1030,7 @@ document.getElementById("formUser").addEventListener("submit", async (e) => {
       const mustLogout =
         data.username_modificato || data.password_modificata || false;
 
+      if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
       alert(id ? "Utente aggiornato!" : "Utente creato!");
       closeUserModal();
       if (mustLogout) {
@@ -3201,6 +3208,7 @@ document
       const data = await res.json();
 
       if (res.ok) {
+        if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
         alert(id ? "✅ Prodotto aggiornato!" : "✅ Prodotto creato!");
         closeProdottoModal();
         loadProdotti(); // Ricarica la lista prodotti
