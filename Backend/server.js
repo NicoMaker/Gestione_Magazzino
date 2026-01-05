@@ -15,6 +15,9 @@ const datiRoutes = require("./routes/dati");
 const magazzinoRoutes = require("./routes/magazzino");
 const utentiRoutes = require("./routes/utenti");
 
+// ========================================
+// 🌐 CONFIGURAZIONE VPS
+// ========================================
 const PORT = process.env.PORT || 3000;
 const app = express();
 
@@ -24,11 +27,11 @@ const app = express();
 const server = http.createServer(app);
 
 // ========================================
-// 🔌 CONFIGURA SOCKET.IO CON CORS
+// 🔌 CONFIGURA SOCKET.IO CON CORS PER VPS
 // ========================================
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: "*", // In produzione considera di limitare agli origin specifici
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -46,7 +49,7 @@ app.set("io", io);
 // ========================================
 app.use(
   cors({
-    origin: "*",
+    origin: "*", // In produzione limita agli origin necessari
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
@@ -87,12 +90,15 @@ app.use("/api/utenti", utentiRoutes);
 // ========================================
 // 🏥 HEALTH CHECK
 // ========================================
-app.get("/api/health", (req, res) => {
+app.get("/api/health", async (req, res) => {
+  const publicIP = await getPublicIP();
   res.json({
     status: "OK",
     timestamp: new Date().toISOString(),
     uptime: Math.floor(process.uptime()),
     socketConnections: io.engine.clientsCount,
+    publicIP: publicIP,
+    port: PORT,
   });
 });
 
@@ -125,7 +131,7 @@ io.on("connection", (socket) => {
 });
 
 // ========================================
-// 🌐 FUNZIONE PER OTTENERE IP LOCALE
+// 🌍 FUNZIONI PER OTTENERE IP
 // ========================================
 function getLocalIP() {
   const interfaces = os.networkInterfaces();
@@ -138,6 +144,31 @@ function getLocalIP() {
     }
   }
   return "localhost";
+}
+
+async function getPublicIP() {
+  try {
+    const https = require("https");
+    return new Promise((resolve, reject) => {
+      https
+        .get("https://api.ipify.org?format=json", (res) => {
+          let data = "";
+          res.on("data", (chunk) => (data += chunk));
+          res.on("end", () => {
+            try {
+              const ip = JSON.parse(data).ip;
+              resolve(ip);
+            } catch (e) {
+              reject(e);
+            }
+          });
+        })
+        .on("error", reject);
+    });
+  } catch (error) {
+    console.error("⚠️ Impossibile recuperare IP pubblico:", error.message);
+    return null;
+  }
 }
 
 // ========================================
@@ -173,23 +204,26 @@ process.on("unhandledRejection", (reason, promise) => {
 });
 
 // ========================================
-// 🚀 AVVIO SERVER SU 0.0.0.0 (RETE LOCALE)
+// 🚀 AVVIO SERVER SU 0.0.0.0 (TUTTE LE INTERFACCE)
 // ========================================
-server.listen(PORT, "0.0.0.0", () => {
-  const ip = getLocalIP();
-  console.log(`✅ Backend avviato`);
+server.listen(PORT, "0.0.0.0", async () => {
+  const localIP = getLocalIP();
+  const publicIP = await getPublicIP();
+  
+  console.log(`✅ Backend avviato su VPS`);
+  console.log(`🌐 IP Pubblico: http://${publicIP}:${PORT}`);
+  console.log(`🏠 IP Locale: http://${localIP}:${PORT}`);
   console.log(`📍 Localhost: http://localhost:${PORT}`);
-  console.log(`🌐 Network: http://${ip}:${PORT}`);
   console.log(`🔌 Socket.IO abilitato per sincronizzazione real-time`);
-  console.log(`📱 Da telefono usa: http://${ip}:${PORT}`);
   console.log(`📂 Frontend servito da: ../frontend/index.html`);
+  console.log(`🏥 Health check: http://${publicIP}:${PORT}/api/health`);
 });
 
 // ========================================
 // 🛑 CHIUSURA GRACEFUL
 // ========================================
 const gracefulShutdown = (signal) => {
-  console.log(`\n⏹️ ${signal} ricevuto. Chiusura in corso...`);
+  console.log(`\nℹ️ ${signal} ricevuto. Chiusura in corso...`);
 
   server.close(() => {
     console.log("✅ Server chiuso");
