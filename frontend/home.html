@@ -160,11 +160,8 @@
 
 <!-- ✅ IMPORTANTE: Aggiungi questo script PRIMA di script.js -->
 <!-- Inseriscilo subito prima di <script src="script.js"></script> -->
-    <script src="company-loader.js"></script>
+<script src="company-loader.js"></script>
       </aside>
-
-      <!-- Sistema Notifiche -->
-      <div id="notificationContainer" class="notification-container"></div>
 
       <!-- Main Content -->
       <main class="main-content">
@@ -929,54 +926,6 @@
       </div>
     </div>
 
-    <!-- Modale Conferma Moderno -->
-    <div id="confirmModal" class="modal">
-      <div class="modal-content modal-small">
-        <div class="modal-header">
-          <h2 id="confirmModalTitle">Conferma</h2>
-          <button class="modal-close">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div class="confirm-content">
-            <div class="confirm-icon" id="confirmIcon"></div>
-            <p id="confirmMessage"></p>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary">
-            <span>Annulla</span>
-          </button>
-          <button class="btn btn-primary" id="confirmButton">
-            <span>Conferma</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modale Messaggio/Alert Moderno -->
-    <div id="alertModal" class="modal">
-      <div class="modal-content modal-medium">
-        <div class="modal-header">
-          <h2 id="alertModalTitle">Informazione</h2>
-          <button class="modal-close">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div class="alert-content" id="alertContent">
-            <div class="alert-icon" id="alertIcon"></div>
-            <div class="alert-message-text" id="alertMessage"></div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-primary" id="alertModalOkBtn">
-            <span>OK</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Socket.IO Client -->
-    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-    <script src="realtime.js"></script>
     <script src="script.js"></script>
   </body>
 </html>

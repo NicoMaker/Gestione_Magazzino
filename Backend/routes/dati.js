@@ -143,13 +143,6 @@ router.post("/", (req, res) => {
                 return res.status(500).json({ error: err.message });
               }
               db.run("COMMIT;");
-              // Emetti evento Socket.IO per aggiornamento real-time
-              const io = req.app.get("io");
-              if (io) {
-                io.emit("movimento_aggiunto", { tipo: "carico", prodotto_id });
-                io.emit("magazzino_aggiornato");
-                io.emit("dati_aggiornati");
-              }
               res.json({ id: dati_id, lotto_id: this.lastID });
             }
           );
@@ -270,13 +263,6 @@ router.post("/", (req, res) => {
                       updatesCompleted++;
                       if (updatesCompleted === totalUpdates) {
                         db.run("COMMIT;");
-                        // Emetti evento Socket.IO per aggiornamento real-time
-                        const io = req.app.get("io");
-                        if (io) {
-                          io.emit("movimento_aggiunto", { tipo: "scarico", prodotto_id });
-                          io.emit("magazzino_aggiornato");
-                          io.emit("dati_aggiornati");
-                        }
                         return res.json({
                           success: true,
                           costo_totale_scarico: costoTotaleScarico,
@@ -355,13 +341,6 @@ router.delete("/:id", (req, res) => {
                 }
 
                 db.run("COMMIT;");
-                // Emetti evento Socket.IO per aggiornamento real-time
-                const io = req.app.get("io");
-                if (io) {
-                  io.emit("movimento_eliminato", { tipo: "carico", prodotto_id });
-                  io.emit("magazzino_aggiornato");
-                  io.emit("dati_aggiornati");
-                }
                 res.json({
                   success: true,
                   message: "Carico eliminato con successo",
@@ -427,13 +406,6 @@ router.delete("/:id", (req, res) => {
                   }
 
                   db.run("COMMIT;");
-                  // Emetti evento Socket.IO per aggiornamento real-time
-                  const io = req.app.get("io");
-                  if (io) {
-                    io.emit("movimento_eliminato", { tipo: "scarico", prodotto_id });
-                    io.emit("magazzino_aggiornato");
-                    io.emit("dati_aggiornati");
-                  }
                   res.json({
                     success: true,
                     message: "Scarico eliminato con successo",
