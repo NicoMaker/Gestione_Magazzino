@@ -109,7 +109,8 @@ body {
   box-shadow: var(--shadow-xl);
   z-index: 1000;
   transition: transform 0.3s ease;
-  padding-bottom: 20px;
+  /* Increased padding-bottom to ensure logout button is always reachable */
+  padding-bottom: 120px;
 }
 
 .sidebar::-webkit-scrollbar {
@@ -1003,7 +1004,8 @@ tbody tr:hover {
   /* Hide sidebar by default on mobile */
   .sidebar {
     transform: translateX(-100%);
-    padding-bottom: 30px;
+    /* Added extra padding-bottom for mobile sidebar scroll */
+    padding-bottom: 150px;
   }
 
   .sidebar.mobile-open {
@@ -1166,8 +1168,13 @@ tbody tr:hover {
     -webkit-overflow-scrolling: touch;
   }
 
+  /* Made stat cards full width on tablet for better visibility */
   .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr !important;
+  }
+
+  .stat-card {
+    width: 100% !important;
   }
 
   .section-header {
@@ -1263,6 +1270,24 @@ tbody tr:hover {
 
   .stat-value {
     font-size: 28px;
+  }
+
+  /* Made stat cards full width on mobile like desktop */
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    width: 100%;
+    padding: 24px;
+  }
+
+  .stat-value {
+    font-size: 32px;
+  }
+
+  .stat-label {
+    font-size: 13px;
   }
 }
 /* CHANGE END */
