@@ -425,3 +425,71 @@ body::before {
 .login-container::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, #8b5cf6, #6366f1);
 }
+
+/* Tablet Optimization */
+@media (min-width: 481px) and (max-width: 1024px) {
+  .login-container {
+    max-width: 520px; /* Leggermente più larga per tablet */
+  }
+
+  .login-card {
+    padding: 56px 48px; /* Più respiro interno */
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6); /* Ombra più profonda */
+  }
+
+  .login-title {
+    font-size: 34px; /* Testo più leggibile */
+  }
+
+  .form-group {
+    margin-bottom: 28px;
+  }
+
+  .form-input {
+    font-size: 16px; /* Input leggermente più grandi per facilitare il tocco */
+  }
+}
+
+/* Tablet Optimization (iPad, Android Tablets) */
+@media (min-width: 481px) and (max-width: 1024px) {
+  .login-container {
+    max-width: 540px; /* Card leggermente più larga per equilibrio visivo */
+    padding: 20px;
+  }
+
+  .login-card {
+    padding: 60px 50px; /* Più spazio interno (spatiousness) */
+    box-shadow: 0 40px 70px -15px rgba(0, 0, 0, 0.6); /* Ombra più profonda */
+  }
+
+  .login-title {
+    font-size: 36px; /* Titolo più grande e d'impatto */
+    margin-bottom: 12px;
+  }
+
+  .login-subtitle {
+    font-size: 18px;
+    margin-bottom: 40px;
+  }
+
+  .form-group {
+    margin-bottom: 30px; /* Maggiore spaziatura tra i campi */
+  }
+
+  .form-input {
+    padding: 18px 56px; /* Campi più grandi per facilitare il touch */
+    font-size: 16px;
+  }
+
+  .input-icon {
+    width: 22px;
+    height: 22px;
+    left: 20px;
+  }
+
+  .btn-login {
+    padding: 18px;
+    font-size: 17px;
+    margin-top: 40px;
+  }
+}
