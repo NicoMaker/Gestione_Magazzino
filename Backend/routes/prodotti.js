@@ -141,13 +141,19 @@ router.delete("/:id", (req, res) => {
 
         const giacenza = formatDecimal(row.giacenza);
 
+        // ✅ CORREZIONE: Formatta giacenza nel messaggio di errore
         if (giacenza > 0) {
           db.run("ROLLBACK;");
+
+          // 🎯 Formatta con 2 decimali e virgola
+          const giacenzaFormattata = giacenza.toFixed(2).replace(".", ",");
+
           return res.status(400).json({
-            error: `Impossibile eliminare: giacenza residua di ${giacenza} pezzi.`,
+            error: `Impossibile eliminare: giacenza residua di ${giacenzaFormattata} pezzi.`,
           });
         }
 
+        // ... resto del codice (non modificare)
         db.run("DELETE FROM lotti WHERE prodotto_id = ?", [id], (err) => {
           if (err) {
             db.run("ROLLBACK;");
@@ -175,7 +181,6 @@ router.delete("/:id", (req, res) => {
                 if (commitErr) {
                   return res.status(500).json({ error: commitErr.message });
                 }
-                // Emetti evento Socket.IO per aggiornamento real-time
                 const io = req.app.get("io");
                 if (io) {
                   io.emit("prodotto_eliminato", { id });
