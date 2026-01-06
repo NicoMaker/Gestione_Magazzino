@@ -1,102 +1,120 @@
-const API_URL = "api";
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Gestione Magazzino Moto</title>
+    <link rel="stylesheet" href="login.css" />
+  </head>
+  <body>
+    <div class="login-container">
+      <div class="login-card">
+        <div class="logo-section">
+          <div class="logo-wrapper">
+            <img
+              src="img/logo.png"
+              alt="Logo Magazzino Moto"
+              class="logo-img"
+            />
+          </div>
+          <h1 class="login-title">Gestione Magazzino Moto</h1>
+          <p class="login-subtitle">Accedi al sistema di gestione</p>
+        </div>
 
-// Toggle password visibility
-const passwordInput = document.getElementById("password");
-const togglePassword = document.getElementById("togglePassword");
+        <form id="loginForm">
+          <div class="form-group">
+            <label class="form-label" for="username">Username</label>
+            <div class="input-container">
+              <svg
+                class="input-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              <input
+                type="text"
+                id="username"
+                class="form-input"
+                placeholder="Inserisci username"
+                required
+                autocomplete="off"
+              />
+            </div>
+          </div>
 
-if (togglePassword && passwordInput) {
-    togglePassword.addEventListener("click", function () {
-        const type =
-            passwordInput.getAttribute("type") === "password"
-                ? "text"
-                : "password";
-
-        passwordInput.setAttribute("type", type);
-
-        if (type === "text") {
-            // icona "occhio aperto"
-            togglePassword.innerHTML = `
-                <path d="M1 12s4-8 11-8 11 8-4 8-11 8S1 12 1 12z" />
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <div class="input-container">
+              <svg
+                class="input-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0110 0v4" />
+              </svg>
+              <input
+                type="password"
+                id="password"
+                class="form-input"
+                placeholder="Inserisci password"
+                required
+                autocomplete="off"
+              />
+              <svg
+                class="toggle-password"
+                id="togglePassword"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" />
                 <circle cx="12" cy="12" r="3" />
-            `;
-        } else {
-            // icona "occhio chiuso"
-            togglePassword.innerHTML = `
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20
-                         c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
-                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4
-                         c7 0 11 8 11 8a18.5 18.5 0 0 1-2.08 2.58" />
-                <line x1="1" y1="1" x2="23" y2="23" />
-            `;
-        }
-    });
-}
+              </svg>
+            </div>
+          </div>
 
-// Login form submission
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
+          <button type="submit" class="btn-login">
+            <span class="btn-text">Accedi</span>
+            <div class="loader"></div>
+          </button>
 
-    const username = document.getElementById("username").value.trim();
-    const password = document.getElementById("password").value;
-    const errorMessage = document.getElementById("errorMessage");
-    const btnLogin = document.querySelector(".btn-login");
+          <div id="errorMessage" class="error-message"></div>
+        </form>
 
-    errorMessage.classList.remove("show");
-    btnLogin.classList.add("loading");
+        <div class="login-footer">
+          <p class="footer-text">
+            Credenziali di accesso fornite dall'amministratore
+          </p>
+        </div>
 
-    try {
-        const response = await fetch(`${API_URL}/auth/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, password }),
-        });
+        <div class="company-info">
+          <!-- INDIRIZZO -->
+          <p class="company-address">Caricamento...</p>
+          <!-- TELEFONO -->
+          <p class="company-phone">Caricamento...</p>
+          <!-- EMAIL -->
+          <p class="company-email">Caricamento...</p>
+          <!-- PARTITA IVA -->
+          <div class="piva-container">
+            <p class="piva-label">Partita IVA</p>
+            <p class="piva-value">Caricamento...</p>
+          </div>
+        </div>
 
-        const data = await response.json();
+        <br /><br />
+      </div>
+    </div>
 
-        if (response.ok) {
-            // Salva lo username per mostrarlo in home.html (non viene usato per pre‑compilare il login)
-            localStorage.setItem("username", username);
-
-            // Success animation
-            btnLogin.style.background =
-                "linear-gradient(135deg, #10b981 0%, #059669 100%)";
-            btnLogin.querySelector(".btn-text").textContent =
-                "✓ Accesso effettuato!";
-            btnLogin.classList.remove("loading");
-
-            setTimeout(() => {
-                window.location.href = "home.html";
-            }, 800);
-        } else {
-            errorMessage.textContent =
-                data.error || "Errore durante il login";
-            errorMessage.classList.add("show");
-
-            // Error animation
-            btnLogin.style.background =
-                "linear-gradient(135deg, #f87171 0%, #ef4444 100%)";
-            btnLogin.querySelector(".btn-text").textContent = "Accesso fallito";
-            btnLogin.classList.remove("loading");
-
-            setTimeout(() => {
-                btnLogin.style.background = ""; // Reset background
-                btnLogin.querySelector(".btn-text").textContent = "Accedi";
-            }, 1500);
-        }
-    } catch (error) {
-        console.error("Login Error:", error);
-        errorMessage.textContent =
-            "Impossibile connettersi al server. Riprova più tardi.";
-        errorMessage.classList.add("show");
-
-        btnLogin.style.background =
-            "linear-gradient(135deg, #f87171 0%, #ef4444 100%)";
-        btnLogin.querySelector(".btn-text").textContent = "Errore di rete";
-        btnLogin.classList.remove("loading");
-
-        setTimeout(() => {
-            btnLogin.style.background = ""; // Reset background
-            btnLogin.querySelector(".btn-text").textContent = "Accedi";
-        }, 1500);
-    }
-});
+    <!-- IMPORTANTE: company-loader.js PRIMA di login.js -->
+    <script src="company-loader.js"></script>
+    <script src="login.js"></script>
+  </body>
+</html>
