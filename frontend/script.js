@@ -180,8 +180,9 @@ function openMarcaModal(marca = null) {
   modal.classList.add("active");
 }
 
-const closeMarcaModal = () => 
+function closeMarcaModal() {
   document.getElementById("modalMarca").classList.remove("active");
+}
 
 function editMarca(id) {
   const marca = marche.find((m) => m.id === id);
@@ -348,9 +349,9 @@ async function openProdottoModal(prodotto = null) {
   modal.classList.add("active");
 }
 
-const closeProdottoModal = () =>
+function closeProdottoModal() {
   document.getElementById("modalProdotto").classList.remove("active");
-
+}
 
 function editProdotto(id) {
   const prodotto = prodotti.find((p) => p.id === id);
@@ -479,8 +480,9 @@ async function openMovimentoModal(movimento = null) {
   modal.classList.add("active");
 }
 
-const closeMovimentoModal = () =>
+function closeMovimentoModal() {
   document.getElementById("modalMovimento").classList.remove("active");
+}
 
 function editMovimento(id) {
   const movimento = movimenti.find((m) => m.id === id);
@@ -968,8 +970,9 @@ function openUserModal(user = null) {
   modal.classList.add("active");
 }
 
-const closeUserModal = () =>
+function closeUserModal() {
   document.getElementById("modalUser").classList.remove("active");
+}
 
 function editUser(id) {
   const user = utenti.find((u) => u.id === id);
@@ -5207,7 +5210,6 @@ function printStorico() {
       </style>
     </head>
     <body>
-
       <div class="header-row">
         <div class="header-left">
           <img class="logo-header" src="img/Logo.png" alt="Logo Azienda">
