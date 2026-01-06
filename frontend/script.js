@@ -180,9 +180,8 @@ function openMarcaModal(marca = null) {
   modal.classList.add("active");
 }
 
-function closeMarcaModal() {
+const closeMarcaModal = () => 
   document.getElementById("modalMarca").classList.remove("active");
-}
 
 function editMarca(id) {
   const marca = marche.find((m) => m.id === id);
@@ -349,9 +348,9 @@ async function openProdottoModal(prodotto = null) {
   modal.classList.add("active");
 }
 
-function closeProdottoModal() {
+const closeProdottoModal = () =>
   document.getElementById("modalProdotto").classList.remove("active");
-}
+
 
 function editProdotto(id) {
   const prodotto = prodotti.find((p) => p.id === id);
@@ -480,9 +479,8 @@ async function openMovimentoModal(movimento = null) {
   modal.classList.add("active");
 }
 
-function closeMovimentoModal() {
+const closeMovimentoModal = () =>
   document.getElementById("modalMovimento").classList.remove("active");
-}
 
 function editMovimento(id) {
   const movimento = movimenti.find((m) => m.id === id);
@@ -970,9 +968,8 @@ function openUserModal(user = null) {
   modal.classList.add("active");
 }
 
-function closeUserModal() {
+const closeUserModal = () =>
   document.getElementById("modalUser").classList.remove("active");
-}
 
 function editUser(id) {
   const user = utenti.find((u) => u.id === id);
@@ -5009,10 +5006,6 @@ function printRiepilogo() {
       </style>
     </head>
     <body>
-      <!-- NOME AZIENDA IN ALTO SOPRA AL LOGO -->
-      <div style="font-size:16px; font-weight:bold; margin-bottom:6px;">
-        {{company.name}}
-      </div>
 
       <div class="header-row">
         <div class="header-left">
@@ -5214,10 +5207,6 @@ function printStorico() {
       </style>
     </head>
     <body>
-      <!-- NOME AZIENDA IN ALTO SOPRA AL LOGO -->
-      <div style="font-size:16px; font-weight:bold; margin-bottom:6px;">
-        {{company.name}}
-      </div>
 
       <div class="header-row">
         <div class="header-left">
