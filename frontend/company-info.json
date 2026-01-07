@@ -1,13 +1,13 @@
 {
   "company": {
-    "address": "Via Nazionale 1",
-    "city": "Roma",
-    "cap": "20100",
-    "province": "RO",
+    "address": "Via Stradalta 27",
+    "city": "Bertiolo",
+    "cap": "33032",
+    "province": "UD",
     "country": "Italia",
-    "piva": "1234567890",
-    "email":"prova@prova.com",
-    "phone":"+39 1234567890"
+    "piva": "03141330302",
+    "email":"carlo.palmino@palminomotors.com",
+    "phone":"+39 349 0028627"
   },
   "settings": {
     "currency": "EUR",
