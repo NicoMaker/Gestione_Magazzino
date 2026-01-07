@@ -5015,7 +5015,7 @@ function printRiepilogo() {
           <img class="logo-header" src="img/Logo.png" alt="Logo Azienda">
         </div>
         <div class="header-right">
-          <p><strong>Indirizzo:</strong> {{company.address}} {{company.cap}} {{company.city}} ({{company.province}})</p>
+          <p><strong>Indirizzo:</strong> {{company.address}},{{company.cap}} {{company.city}} ({{company.province}})</p>
           <p><strong>P. IVA:</strong> {{company.piva}}</p>
           <p><strong>Email:</strong> {{company.email}}</p>
           <p><strong>Tel:</strong> {{company.phone}}</p>
@@ -5215,7 +5215,7 @@ function printStorico() {
           <img class="logo-header" src="img/Logo.png" alt="Logo Azienda">
         </div>
         <div class="header-right">
-          <p><strong>Indirizzo:</strong> {{company.address}} {{company.cap}} {{company.city}} ({{company.province}})</p>
+          <p><strong>Indirizzo:</strong> {{company.address}},{{company.cap}} {{company.city}} ({{company.province}})</p>
           <p><strong>P. IVA:</strong> {{company.piva}}</p>
           <p><strong>Email:</strong> {{company.email}}</p>
           <p><strong>Tel:</strong> {{company.phone}}</p>
