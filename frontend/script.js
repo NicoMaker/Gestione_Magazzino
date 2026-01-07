@@ -5884,3 +5884,124 @@ async function handlePDFImport(file) {
 // Esporta le funzioni
 window.handlePDFImport = handlePDFImport;
 window.loadPDFJS = loadPDFJS;
+
+function extractScarichiFromPDF(text, date) {
+    console.log('Ricerca sezione RICAMBI...')
+    const scarichi = []
+    const lines = text.split('\n')
+    
+    // 1. TROVA LA SEZIONE RICAMBI
+    let ricambiStartIndex = -1
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim().toUpperCase()
+        if (line.includes('RICAMBI')) {
+            ricambiStartIndex = i
+            console.log('Sezione RICAMBI trovata alla riga', i, lines[i])
+            break
+        }
+    }
+    
+    if (ricambiStartIndex === -1) {
+        console.warn('Sezione RICAMBI non trovata nel PDF')
+        return scarichi
+    }
+    
+    // 2. SALTA LE RIGHE DI INTESTAZIONE
+    let dataStartIndex = ricambiStartIndex + 1
+    for (let i = ricambiStartIndex + 1; i < Math.min(ricambiStartIndex + 10, lines.length); i++) {
+        const line = lines[i].toUpperCase()
+        if (['CODICE', 'RICAMBIO', 'DESCRIZIONE', 'QUANTITA', 'PREZZO', 'IVA'].some(keyword => line.includes(keyword))) {
+            dataStartIndex = i + 1
+            console.log('Riga intestazione saltata:', lines[i])
+            break
+        }
+    }
+    
+    console.log('Inizio analisi dati dalla riga', dataStartIndex)
+    
+    // 3. ANALIZZA LE RIGHE SUCCESSIVE (UN SOLO LOOP)
+    for (let i = dataStartIndex; i < lines.length; i++) {
+        const line = lines[i].trim()
+        
+        if (!line) continue
+        
+        // Stop se incontriamo una sezione diversa
+        const lineUpper = line.toUpperCase()
+        if (['MANODOPERA', 'TOTALE', 'IVA COMPRESA', 'DESCRIZIONE LAVORAZIONI'].some(keyword => lineUpper.includes(keyword))) {
+            console.log('Fine sezione RICAMBI alla riga', i, line)
+            break
+        }
+        
+        // 4. ESTRAI CODICE E QUANTITÀ
+        const parsed = parseRicamboLine(line)
+        if (parsed) {
+            scarichi.push({
+                code: parsed.code,
+                quantity: parsed.quantity,
+                date: date,
+            })
+            console.log('Scarico trovato:', parsed.code, '-', parsed.quantity, 'pz', 'riga', i)
+        } else {
+            console.log('Riga ignorata:', line)
+        }
+    }
+    
+    console.log('Totale scarichi trovati:', scarichi.length)
+    return scarichi
+}
+
+// IMPORT PDF SCARICHI - FUNZIONE UNICA CORRETTA
+
+async function handlePDFImport(file) {
+    try {
+        console.log("Inizio importazione PDF:", file.name);
+
+        // 1) Mostra loading nel bottone del modal
+        showImportLoading();   // usa showImportLoading/hideImportLoading già definiti
+
+        // 2) Estrai il testo dal PDF
+        const text = await extractTextFromPDF(file);
+        console.log("Testo estratto dal PDF (prime 1000 chars):", text.substring(0, 1000));
+
+        // 3) Estrai la DATA dal PDF
+        const date = extractDateFromPDF(text);
+        console.log("Data trovata nel PDF:", date);
+
+        // 4) Estrai gli SCARICHI dalla sezione RICAMBI
+        const scarichi = extractScarichiFromPDF(text, date);
+        console.log(scarichi.length, "scarichi trovati per la data", date, scarichi);
+
+        if (scarichi.length === 0) {
+            throw new Error(
+                "Nessun prodotto trovato nel PDF.\n" +
+                "Verifica che il PDF contenga:\n" +
+                "- Sezione 'RICAMBI'\n" +
+                "- Codice prodotto (es. 101)\n" +
+                "- Quantità (es. 2)"
+            );
+        }
+
+        // 5) Processa gli SCARICHI: crea solo uno SCARICO per riga PDF
+        const results = await processScarichi(scarichi);
+
+        // 6) Mostra risultati dettagliati
+        showImportResults(results);
+
+        // 7) Se ci sono successi, ricarica Movimenti e Prodotti UNA SOLA VOLTA
+        if (results.success.length > 0) {
+            console.log("Ricarico tabelle Movimenti e Prodotti...");
+            await loadMovimenti();
+            await loadProdotti();
+            console.log("Tabelle ricaricate");
+        }
+
+        return results;
+    } catch (error) {
+        console.error("Errore import PDF:", error);
+        alert("Errore durante l'importazione: " + error.message);
+        throw error;
+    } finally {
+        // nasconde sempre il loading e chiude il modal
+        hideImportLoading();
+    }
+}
