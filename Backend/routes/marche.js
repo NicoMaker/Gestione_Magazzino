@@ -105,9 +105,10 @@ router.delete("/:id", (req, res) => {
 
       if (row.count > 0) {
         return res.status(400).json({
-          error: `Impossibile eliminare: ci sono ${row.count} prodott${
-            row.count === 1 ? "o" : "i"
-          } collegat${row.count === 1 ? "o" : "i"} a questa marca.`,
+          error:
+            row.count === 1
+              ? `Impossibile eliminare: c'è 1 prodotto collegato a questa marca.`
+              : `Impossibile eliminare: ci sono ${row.count} prodotti collegati a questa marca.`,
         });
       }
 
