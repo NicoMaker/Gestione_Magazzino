@@ -23,7 +23,8 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, sans-serif;
   background: var(--bg-main);
   color: var(--text-primary);
   line-height: 1.6;
@@ -739,8 +740,8 @@ tbody tr:hover {
   display: flex;
   flex-direction: column;
   animation: slideUpModal 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px
-    rgba(99, 102, 241, 0.05);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(99, 102, 241, 0.05);
   border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
@@ -840,6 +841,30 @@ tbody tr:hover {
   overflow-y: auto;
   flex: 1;
   background: #ffffff;
+  /* Ensure scrollbar is always visible on webkit browsers */
+  overflow-y: scroll;
+}
+
+/* Custom scrollbar styling for modal-body */
+.modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  background-clip: padding-box;
 }
 
 .modal-footer {
@@ -850,6 +875,8 @@ tbody tr:hover {
   border-top: 1px solid rgba(226, 232, 240, 0.6);
   background: linear-gradient(145deg, #f8fafc 0%, #ffffff 100%);
   border-radius: 0 0 24px 24px;
+  /* Added flex-shrink to prevent footer from being cut off */
+  flex-shrink: 0;
 }
 
 .form-group {
@@ -1799,7 +1826,11 @@ tbody tr:hover {
    ============================================ */
 
 .company-info-sidebar {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.05) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.1) 0%,
+    rgba(168, 85, 247, 0.05) 100%
+  );
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 16px;
@@ -1942,7 +1973,11 @@ tbody tr:hover {
 /* Variante alternativa con bordo colorato */
 .company-info-sidebar.bordered {
   border-left: 4px solid #6366f1;
-  background: linear-gradient(90deg, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.03) 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(99, 102, 241, 0.08) 0%,
+    rgba(168, 85, 247, 0.03) 100%
+  );
 }
 
 /* Effetto glassmorphism più pronunciato */
@@ -1983,7 +2018,10 @@ tbody tr:hover {
   width: 20px; /* Dimensione piccola (20x20px) */
   height: 20px;
   cursor: pointer;
-  color: var(--text-secondary, #64748b); /* Usa il colore del testo secondario */
+  color: var(
+    --text-secondary,
+    #64748b
+  ); /* Usa il colore del testo secondario */
   transition: color 0.2s ease;
   z-index: 10; /* Assicura che sia cliccabile sopra l'input */
 }
@@ -2419,7 +2457,11 @@ tbody tr:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(239, 68, 68, 0.15) 0%,
+    rgba(220, 38, 38, 0.1) 100%
+  );
   color: var(--danger);
   flex-shrink: 0;
   box-shadow: 0 8px 16px rgba(239, 68, 68, 0.15);
@@ -2480,25 +2522,41 @@ tbody tr:hover {
 }
 
 .alert-icon.success {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.15) 0%,
+    rgba(5, 150, 105, 0.1) 100%
+  );
   color: var(--secondary);
   border-color: rgba(16, 185, 129, 0.2);
 }
 
 .alert-icon.error {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(239, 68, 68, 0.15) 0%,
+    rgba(220, 38, 38, 0.1) 100%
+  );
   color: var(--danger);
   border-color: rgba(239, 68, 68, 0.2);
 }
 
 .alert-icon.warning {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.1) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.15) 0%,
+    rgba(217, 119, 6, 0.1) 100%
+  );
   color: var(--warning);
   border-color: rgba(245, 158, 11, 0.2);
 }
 
 .alert-icon.info {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(79, 70, 229, 0.1) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.15) 0%,
+    rgba(79, 70, 229, 0.1) 100%
+  );
   color: var(--primary);
   border-color: rgba(99, 102, 241, 0.2);
 }
@@ -3238,4 +3296,11 @@ tbody tr:hover {
   td.text-right {
     min-width: 100px;
   }
+}
+.modal-body {
+  padding: 32px;
+  overflow-y: auto; /* ✅ QUESTA È LA CHIAVE */
+  flex: 1;
+  background: #ffffff;
+  max-height: calc(90vh - 200px); /* ✅ AGGIUNGI QUESTA RIGA */
 }
