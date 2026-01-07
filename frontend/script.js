@@ -6005,3 +6005,64 @@ async function handlePDFImport(file) {
         hideImportLoading();
     }
 }
+
+// 🧾 Importa ordine da PDF e crea UN movimento di scarico per riga prodotto
+async function importaOrdineDaPdf(righePdf, dataOrdine, nomeFilePdf) {
+  try {
+    // 1) Raggruppa per codice prodotto e somma le quantità
+    const aggregati = {}; // { codice: { codice, quantita } }
+
+    righePdf.forEach((r) => {
+      const codice = String(r.codice).trim();
+      if (!codice) return;
+
+      const qta = Number(String(r.quantita).replace(",", ".")) || 0;
+      if (qta <= 0) return;
+
+      if (!aggregati[codice]) {
+        aggregati[codice] = { codice, quantita: 0 };
+      }
+      aggregati[codice].quantita += qta;
+    });
+
+    const movimentiDaInviare = Object.values(aggregati);
+
+    // 2) Per ogni prodotto aggregato fai UNA chiamata POST /dati
+    for (const mov of movimentiDaInviare) {
+      // trova il prodotto_id a partire dal codice (adatta a come hai salvato i prodotti)
+      const prodotto = allProdotti.find(
+        (p) => String(p.codice) === String(mov.codice)
+      );
+      if (!prodotto) {
+        console.warn("Prodotto non trovato per codice", mov.codice);
+        continue;
+      }
+
+      const body = {
+        prodotto_id: prodotto.id,
+        tipo: "scarico",
+        quantita: mov.quantita,
+        prezzo: null,                // il costo lo calcola il backend
+        data_movimento: dataOrdine,  // es. "2026-01-07"
+        fattura_doc: nomeFilePdf || "",
+        fornitore: null,
+      };
+
+      const res = await fetch(`${API_URL}/dati`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.error("Errore import movimento", mov, err);
+      }
+    }
+
+    // 3) Ricarica la tabella movimenti
+    await loadMovimenti();
+  } catch (e) {
+    console.error("Errore durante importaOrdineDaPdf:", e);
+  }
+}

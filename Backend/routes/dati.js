@@ -80,7 +80,6 @@ router.post("/", (req, res) => {
 
   const qtaString = String(quantita).replace(",", ".");
   const qty = formatDecimal(qtaString);
-
   if (qty === null || qty <= 0) {
     return res
       .status(400)
@@ -89,210 +88,230 @@ router.post("/", (req, res) => {
 
   const data_registrazione = new Date().toISOString();
 
-  if (tipo === "carico") {
-    const prezzoString = String(prezzo).replace(",", ".");
-    const prc = formatDecimal(prezzoString);
+  // 🔍 CONTROLLO ANTI-DUPLICATO (stesso movimento da stesso PDF)
+  const dupQuery = `
+    SELECT id FROM dati
+    WHERE prodotto_id = ?
+      AND tipo = ?
+      AND quantita = ?
+      AND data_movimento = ?
+      AND IFNULL(fattura_doc, '') = IFNULL(?, '')
+    LIMIT 1
+  `;
 
-    if (prc === null || prc <= 0) {
-      return res.status(400).json({
-        error: "Prezzo obbligatorio e maggiore di 0 per il carico",
-      });
-    }
+  db.get(
+    dupQuery,
+    [prodotto_id, tipo, qty, data_movimento, fattura_doc || ""],
+    (err, existing) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      if (existing) {
+        return res.status(409).json({
+          error: "Movimento già presente (ordine PDF importato più volte).",
+        });
+      }
 
-    const prezzoTotale = formatDecimal(prc * qty);
-
-    db.serialize(() => {
-      db.run("BEGIN TRANSACTION;");
-
-      db.run(
-        "INSERT INTO dati (prodotto_id, tipo, quantita, prezzo, prezzo_totale_movimento, data_movimento, data_registrazione, fattura_doc, fornitore_cliente_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [
-          prodotto_id,
-          tipo,
-          qty,
-          prc,
-          prezzoTotale,
-          data_movimento,
-          data_registrazione,
-          fattura_doc,
-          fornitore || null,
-        ],
-        function (err) {
-          if (err) {
-            db.run("ROLLBACK;");
-            return res.status(500).json({ error: err.message });
-          }
-          const dati_id = this.lastID;
-
-          db.run(
-            "INSERT INTO lotti (prodotto_id, quantita_iniziale, quantita_rimanente, prezzo, data_carico, data_registrazione, fattura_doc, fornitore, dati_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            [
-              prodotto_id,
-              qty,
-              qty,
-              prc,
-              data_movimento,
-              data_registrazione,
-              fattura_doc,
-              fornitore || null,
-              dati_id,
-            ],
-            function (err) {
-              if (err) {
-                db.run("ROLLBACK;");
-                return res.status(500).json({ error: err.message });
-              }
-              db.run("COMMIT;");
-              // Emetti evento Socket.IO per aggiornamento real-time
-              const io = req.app.get("io");
-              if (io) {
-                io.emit("movimento_aggiunto", { tipo: "carico", prodotto_id });
-                io.emit("magazzino_aggiornato");
-                io.emit("dati_aggiornati");
-              }
-              res.json({ id: dati_id, lotto_id: this.lastID });
-            }
-          );
-        }
-      );
-    });
-  } else {
-    // 🚨 SCARICO - CON CONTROLLO TEMPORALE
-
-    // 🔍 Step 1: Recupera tutti i lotti disponibili FINO alla data_movimento
-    db.all(
-      `SELECT id, quantita_rimanente, prezzo, data_carico 
-       FROM lotti 
-       WHERE prodotto_id = ? 
-       AND quantita_rimanente > 0 
-       AND data_carico <= ?
-       ORDER BY data_carico ASC, data_registrazione ASC`,
-      [prodotto_id, data_movimento],
-      (err, lotti) => {
-        if (err) return res.status(500).json({ error: err.message });
-
-        if (lotti.length === 0) {
-          // Converti data da YYYY-MM-DD a gg/mm/aaaa
-          const [anno, mese, giorno] = data_movimento.split("-");
-          const dataItaliana = `${giorno}/${mese}/${anno}`;
-
+      // ===================== CARICO =====================
+      if (tipo === "carico") {
+        const prezzoString = String(prezzo).replace(",", ".");
+        const prc = formatDecimal(prezzoString);
+        if (prc === null || prc <= 0) {
           return res.status(400).json({
-            error: `Nessun carico disponibile alla data ${dataItaliana}. Verifica di aver caricato il prodotto prima o nella stessa data dello scarico.`,
+            error: "Prezzo obbligatorio e maggiore di 0 per il carico",
           });
         }
 
-        // 📊 Calcola giacenza disponibile alla data richiesta
-        const giacenzaTotale = lotti.reduce(
-          (sum, l) => sum + formatDecimal(l.quantita_rimanente),
-          0
-        );
-
-        if (giacenzaTotale < qty) {
-          return res.status(400).json({
-            error: `Giacenza insufficiente alla data indicata. Disponibili: ${formatDecimal(
-              giacenzaTotale
-            )} - Richiesti: ${qty}`,
-          });
-        }
-
-        // ✅ Procedi con lo scarico FIFO
-        let daScaricare = qty;
-        let costoTotaleScarico = 0;
-        const updates = [];
-
-        for (const lotto of lotti) {
-          if (daScaricare <= 0) break;
-
-          const qtaDaQuestoLotto = Math.min(
-            daScaricare,
-            formatDecimal(lotto.quantita_rimanente)
-          );
-          const nuovaQta = formatDecimal(
-            formatDecimal(lotto.quantita_rimanente) - qtaDaQuestoLotto
-          );
-
-          costoTotaleScarico += qtaDaQuestoLotto * formatDecimal(lotto.prezzo);
-
-          updates.push({
-            id: lotto.id,
-            nuova_quantita: nuovaQta,
-          });
-
-          daScaricare = formatDecimal(daScaricare - qtaDaQuestoLotto);
-        }
-
-        costoTotaleScarico = formatDecimal(costoTotaleScarico);
-
+        const prezzoTotale = formatDecimal(prc * qty);
         db.serialize(() => {
           db.run("BEGIN TRANSACTION;");
-
           db.run(
             "INSERT INTO dati (prodotto_id, tipo, quantita, prezzo, prezzo_totale_movimento, data_movimento, data_registrazione, fattura_doc, fornitore_cliente_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [
               prodotto_id,
               tipo,
               qty,
-              null,
-              costoTotaleScarico,
+              prc,
+              prezzoTotale,
               data_movimento,
               data_registrazione,
               fattura_doc,
-              null,
+              fornitore || null,
             ],
-            (err) => {
+            function (err) {
               if (err) {
                 db.run("ROLLBACK;");
                 return res.status(500).json({ error: err.message });
               }
 
-              let updatesCompleted = 0;
-              const totalUpdates = updates.length;
-
-              if (totalUpdates === 0) {
-                db.run("COMMIT;");
-                return res.json({
-                  success: true,
-                  costo_totale_scarico: costoTotaleScarico,
-                });
-              }
-
-              updates.forEach((u) => {
-                db.run(
-                  "UPDATE lotti SET quantita_rimanente = ? WHERE id = ?",
-                  [u.nuova_quantita, u.id],
-                  (err) => {
-                    if (err) {
-                      if (!res.headersSent) {
-                        db.run("ROLLBACK;");
-                        return res.status(500).json({ error: err.message });
-                      }
-                    } else {
-                      updatesCompleted++;
-                      if (updatesCompleted === totalUpdates) {
-                        db.run("COMMIT;");
-                        // Emetti evento Socket.IO per aggiornamento real-time
-                        const io = req.app.get("io");
-                        if (io) {
-                          io.emit("movimento_aggiunto", { tipo: "scarico", prodotto_id });
-                          io.emit("magazzino_aggiornato");
-                          io.emit("dati_aggiornati");
-                        }
-                        return res.json({
-                          success: true,
-                          costo_totale_scarico: costoTotaleScarico,
-                        });
-                      }
-                    }
+              const dati_id = this.lastID;
+              db.run(
+                "INSERT INTO lotti (prodotto_id, quantita_iniziale, quantita_rimanente, prezzo, data_carico, data_registrazione, fattura_doc, fornitore, dati_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                [
+                  prodotto_id,
+                  qty,
+                  qty,
+                  prc,
+                  data_movimento,
+                  data_registrazione,
+                  fattura_doc,
+                  fornitore || null,
+                  dati_id,
+                ],
+                function (err) {
+                  if (err) {
+                    db.run("ROLLBACK;");
+                    return res.status(500).json({ error: err.message });
                   }
-                );
-              });
+
+                  db.run("COMMIT;");
+                  const io = req.app.get("io");
+                  if (io) {
+                    io.emit("movimento_aggiunto", { tipo: "carico", prodotto_id });
+                    io.emit("magazzino_aggiornato");
+                    io.emit("dati_aggiornati");
+                  }
+
+                  res.json({ id: dati_id, lotto_id: this.lastID });
+                }
+              );
             }
           );
         });
+      } else {
+        // ===================== SCARICO =====================
+        db.all(
+          `SELECT id, quantita_rimanente, prezzo, data_carico
+           FROM lotti
+           WHERE prodotto_id = ?
+             AND quantita_rimanente > 0
+             AND data_carico <= ?
+           ORDER BY data_carico ASC, data_registrazione ASC`,
+          [prodotto_id, data_movimento],
+          (err, lotti) => {
+            if (err) return res.status(500).json({ error: err.message });
+
+            if (lotti.length === 0) {
+              const [anno, mese, giorno] = data_movimento.split("-");
+              const dataItaliana = `${giorno}/${mese}/${anno}`;
+              return res.status(400).json({
+                error: `Nessun carico disponibile alla data ${dataItaliana}. Verifica di aver caricato il prodotto prima o nella stessa data dello scarico.`,
+              });
+            }
+
+            const giacenzaTotale = lotti.reduce(
+              (sum, l) => sum + formatDecimal(l.quantita_rimanente),
+              0
+            );
+
+            if (giacenzaTotale < qty) {
+              return res.status(400).json({
+                error: `Giacenza insufficiente alla data indicata. Disponibili: ${formatDecimal(
+                  giacenzaTotale
+                )} - Richiesti: ${qty}`,
+              });
+            }
+
+            let daScaricare = qty;
+            let costoTotaleScarico = 0;
+            const updates = [];
+
+            for (const lotto of lotti) {
+              if (daScaricare <= 0) break;
+              const qtaDaQuestoLotto = Math.min(
+                daScaricare,
+                formatDecimal(lotto.quantita_rimanente)
+              );
+              const nuovaQta = formatDecimal(
+                formatDecimal(lotto.quantita_rimanente) - qtaDaQuestoLotto
+              );
+              costoTotaleScarico +=
+                qtaDaQuestoLotto * formatDecimal(lotto.prezzo);
+              updates.push({
+                id: lotto.id,
+                nuova_quantita: nuovaQta,
+              });
+              daScaricare = formatDecimal(daScaricare - qtaDaQuestoLotto);
+            }
+
+            costoTotaleScarico = formatDecimal(costoTotaleScarico);
+            db.serialize(() => {
+              db.run("BEGIN TRANSACTION;");
+              db.run(
+                "INSERT INTO dati (prodotto_id, tipo, quantita, prezzo, prezzo_totale_movimento, data_movimento, data_registrazione, fattura_doc, fornitore_cliente_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                [
+                  prodotto_id,
+                  tipo,
+                  qty,
+                  null,
+                  costoTotaleScarico,
+                  data_movimento,
+                  data_registrazione,
+                  fattura_doc,
+                  null,
+                ],
+                (err) => {
+                  if (err) {
+                    db.run("ROLLBACK;");
+                    return res.status(500).json({ error: err.message });
+                  }
+
+                  let updatesCompleted = 0;
+                  const totalUpdates = updates.length;
+
+                  if (totalUpdates === 0) {
+                    db.run("COMMIT;");
+                    return res.json({
+                      success: true,
+                      costo_totale_scarico: costoTotaleScarico,
+                    });
+                  }
+
+                  updates.forEach((u) => {
+                    db.run(
+                      "UPDATE lotti SET quantita_rimanente = ? WHERE id = ?",
+                      [u.nuova_quantita, u.id],
+                      (err) => {
+                        if (err) {
+                          if (!res.headersSent) {
+                            db.run("ROLLBACK;");
+                            return res
+                              .status(500)
+                              .json({ error: err.message });
+                          }
+                        } else {
+                          updatesCompleted++;
+                          if (updatesCompleted === totalUpdates) {
+                            db.run("COMMIT;");
+                            const io = req.app.get("io");
+                            if (io) {
+                              io.emit("movimento_aggiunto", {
+                                tipo: "scarico",
+                                prodotto_id,
+                              });
+                              io.emit("magazzino_aggiornato");
+                              io.emit("dati_aggiornati");
+                            }
+
+                            return res.json({
+                              success: true,
+                              costo_totale_scarico: costoTotaleScarico,
+                            });
+                          }
+                        }
+                      }
+                    );
+                  });
+                }
+              );
+            });
+          }
+        );
       }
-    );
-  }
+    }
+  );
 });
+
 
 // DELETE - Elimina movimento
 router.delete("/:id", (req, res) => {
@@ -358,7 +377,10 @@ router.delete("/:id", (req, res) => {
                 // Emetti evento Socket.IO per aggiornamento real-time
                 const io = req.app.get("io");
                 if (io) {
-                  io.emit("movimento_eliminato", { tipo: "carico", prodotto_id });
+                  io.emit("movimento_eliminato", {
+                    tipo: "carico",
+                    prodotto_id,
+                  });
                   io.emit("magazzino_aggiornato");
                   io.emit("dati_aggiornati");
                 }
@@ -430,7 +452,10 @@ router.delete("/:id", (req, res) => {
                   // Emetti evento Socket.IO per aggiornamento real-time
                   const io = req.app.get("io");
                   if (io) {
-                    io.emit("movimento_eliminato", { tipo: "scarico", prodotto_id });
+                    io.emit("movimento_eliminato", {
+                      tipo: "scarico",
+                      prodotto_id,
+                    });
                     io.emit("magazzino_aggiornato");
                     io.emit("dati_aggiornati");
                   }
