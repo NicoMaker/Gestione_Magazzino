@@ -5330,3 +5330,557 @@ function printStorico() {
     }, 500);
   };
 }
+
+// ==================== 📄 SISTEMA IMPORT PDF MIGLIORATO ====================
+
+/**
+ * 🔧 Carica PDF.js da CDN (Cloudflare)
+ */
+async function loadPDFJS() {
+  return new Promise((resolve, reject) => {
+    if (window.pdfjsLib) {
+      console.log("✅ PDF.js già caricato");
+      resolve();
+      return;
+    }
+
+    console.log("⏳ Caricamento PDF.js da CDN...");
+
+    const script = document.createElement("script");
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+
+    script.onload = () => {
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      console.log("✅ PDF.js caricato con successo");
+      resolve();
+    };
+
+    script.onerror = () => {
+      console.error("❌ Errore caricamento PDF.js");
+      reject(new Error("Impossibile caricare la libreria PDF.js"));
+    };
+
+    document.head.appendChild(script);
+  });
+}
+
+/**
+ * 📖 Estrae tutto il testo dal PDF con migliore gestione degli spazi
+ */
+async function extractTextFromPDF(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = async (e) => {
+      try {
+        console.log("📖 Inizio lettura PDF...");
+
+        const typedarray = new Uint8Array(e.target.result);
+
+        if (!window.pdfjsLib) {
+          await loadPDFJS();
+        }
+
+        const loadingTask = pdfjsLib.getDocument(typedarray);
+        const pdf = await loadingTask.promise;
+
+        console.log(`📄 PDF caricato: ${pdf.numPages} pagine`);
+
+        let fullText = "";
+
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+          const page = await pdf.getPage(pageNum);
+          const textContent = await page.getTextContent();
+
+          // 🎯 MIGLIORAMENTO: Mantieni la struttura del testo con gli spazi
+          let lastY = null;
+          let pageText = "";
+
+          textContent.items.forEach((item, index) => {
+            const currentY = item.transform[5]; // Posizione Y
+
+            // Se cambia riga, aggiungi newline
+            if (lastY !== null && Math.abs(currentY - lastY) > 5) {
+              pageText += "\n";
+            }
+
+            // Aggiungi spazio se necessario tra gli item sulla stessa riga
+            if (index > 0 && lastY === currentY) {
+              const prevItem = textContent.items[index - 1];
+              const prevX = prevItem.transform[4] + prevItem.width;
+              const currentX = item.transform[4];
+              
+              // Se c'è uno spazio significativo, aggiungilo
+              if (currentX - prevX > 2) {
+                pageText += " ";
+              }
+            }
+
+            pageText += item.str;
+            lastY = currentY;
+          });
+
+          fullText += pageText + "\n\n";
+
+          console.log(`📄 Pagina ${pageNum}/${pdf.numPages} letta`);
+        }
+
+        console.log("✅ Estrazione testo completata");
+        console.log("📝 Anteprima testo estratto:");
+        console.log(fullText.substring(0, 1000) + "...");
+
+        resolve(fullText);
+      } catch (error) {
+        console.error("❌ Errore estrazione PDF:", error);
+        reject(new Error("Errore durante la lettura del PDF: " + error.message));
+      }
+    };
+
+    reader.onerror = () => {
+      console.error("❌ Errore lettura file");
+      reject(new Error("Impossibile leggere il file PDF"));
+    };
+
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+/**
+ * 📅 Estrae la DATA dal PDF (cerca pattern "DATA_____")
+ */
+function extractDateFromPDF(text) {
+  console.log("📅 Ricerca DATA nel PDF...");
+
+  const lines = text.split("\n");
+
+  // Pattern migliorati per trovare la data
+  const datePatterns = [
+    /DATA[_\s]{3,}(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/i,
+    /DATA\s*:\s*(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/i,
+    /DATA\s+(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/i,
+  ];
+
+  // Cerca nelle prime 20 righe
+  for (let i = 0; i < Math.min(20, lines.length); i++) {
+    const line = lines[i].trim();
+
+    for (const pattern of datePatterns) {
+      const match = line.match(pattern);
+      if (match && match[1]) {
+        const normalizedDate = normalizeDate(match[1]);
+        console.log(`✅ Data trovata: ${match[1]} → ${normalizedDate}`);
+        return normalizedDate;
+      }
+    }
+  }
+
+  // Fallback: cerca qualsiasi data nelle prime righe
+  console.log("⚠️ Pattern DATA non trovato, cerco date generiche...");
+
+  for (let i = 0; i < Math.min(20, lines.length); i++) {
+    const line = lines[i];
+    const anyDatePattern = /(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/;
+    const match = line.match(anyDatePattern);
+
+    if (match && match[1]) {
+      const normalizedDate = normalizeDate(match[1]);
+      console.log(`✅ Data trovata (generica): ${match[1]} → ${normalizedDate}`);
+      return normalizedDate;
+    }
+  }
+
+  // Se non trova nessuna data, usa oggi
+  const today = new Date().toISOString().split("T")[0];
+  console.warn(`⚠️ Nessuna data trovata nel PDF, uso data odierna: ${today}`);
+  return today;
+}
+
+/**
+ * 📦 Estrae gli SCARICHI dalla sezione RICAMBI - VERSIONE MIGLIORATA
+ */
+function extractScarichiFromPDF(text, date) {
+  console.log("📦 Ricerca sezione RICAMBI...");
+
+  const scarichi = [];
+  const lines = text.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+
+  console.log(`📄 Totale righe da analizzare: ${lines.length}`);
+
+  // 1️⃣ TROVA LA SEZIONE "RICAMBI"
+  let ricambiStartIndex = -1;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].toUpperCase();
+    if (line.includes("RICAMBI")) {
+      ricambiStartIndex = i;
+      console.log(`✅ Sezione RICAMBI trovata alla riga ${i}: "${lines[i]}"`);
+      break;
+    }
+  }
+
+  if (ricambiStartIndex === -1) {
+    console.warn("⚠️ Sezione RICAMBI non trovata nel PDF");
+    return scarichi;
+  }
+
+  // 2️⃣ SALTA LE RIGHE DI INTESTAZIONE
+  let dataStartIndex = ricambiStartIndex + 1;
+
+  const headerKeywords = [
+    "CODICE", "RICAMBIO", "DESCRIZIONE", "QUANTITA", 
+    "PREZZO", "IVA", "ESCLUSA", "QUANTITÀ"
+  ];
+
+  for (let i = ricambiStartIndex + 1; i < Math.min(ricambiStartIndex + 10, lines.length); i++) {
+    const lineUpper = lines[i].toUpperCase();
+    
+    // Se la riga contiene parole chiave dell'header, saltala
+    if (headerKeywords.some(keyword => lineUpper.includes(keyword))) {
+      dataStartIndex = i + 1;
+      console.log(`⏭️ Riga intestazione saltata: "${lines[i]}"`);
+    } else {
+      break; // Prima riga che non è intestazione
+    }
+  }
+
+  console.log(`🔍 Inizio analisi dati dalla riga ${dataStartIndex}`);
+
+  // 3️⃣ ANALIZZA LE RIGHE SUCCESSIVE
+  const stopKeywords = [
+    "MANODOPERA", "TOTALE", "IVA COMPRESA", 
+    "DESCRIZIONE LAVORAZIONI", "LAVORAZIONI"
+  ];
+
+  for (let i = dataStartIndex; i < lines.length; i++) {
+    const line = lines[i].trim();
+
+    if (!line) continue;
+
+    // Stop se incontriamo una sezione diversa
+    const lineUpper = line.toUpperCase();
+    if (stopKeywords.some(keyword => lineUpper.includes(keyword))) {
+      console.log(`🛑 Fine sezione RICAMBI alla riga ${i}: "${line}"`);
+      break;
+    }
+
+    console.log(`🔍 Analisi riga ${i}: "${line}"`);
+
+    // 4️⃣ ESTRAI CODICE E QUANTITÀ
+    const parsed = parseRicamboLine(line);
+
+    if (parsed) {
+      scarichi.push({
+        code: parsed.code,
+        quantity: parsed.quantity,
+        date: date,
+      });
+
+      console.log(`✅ Scarico trovato: ${parsed.code} - ${parsed.quantity} pz (riga ${i})`);
+    } else {
+      console.log(`⏭️ Riga ignorata: "${line}"`);
+    }
+  }
+
+  console.log(`📊 Totale scarichi trovati: ${scarichi.length}`);
+
+  return scarichi;
+}
+
+/**
+ * 🔍 Parsing intelligente di una riga ricambio
+ * Formato atteso: "CODICE [DESCRIZIONE...] QUANTITÀ"
+ */
+function parseRicamboLine(line) {
+  // Rimuovi spazi multipli
+  const cleanLine = line.replace(/\s+/g, " ").trim();
+  
+  console.log(`  🔍 Parsing: "${cleanLine}"`);
+
+  // Pattern 1: CODICE alla fine con QUANTITÀ
+  // Es: "Descrizione varia 101 2"
+  const pattern1 = /^(.+)\s+(\d+)\s+(\d+(?:[,\.]\d{1,2})?)$/;
+  const match1 = cleanLine.match(pattern1);
+
+  if (match1) {
+    const potentialCode = match1[2]; // Il penultimo numero
+    const potentialQty = match1[3];  // L'ultimo numero
+
+    const qty = parseFloat(potentialQty.replace(",", "."));
+
+    if (isValidCode(potentialCode) && isValidQuantity(qty)) {
+      console.log(`  ✅ Match Pattern 1: code=${potentialCode}, qty=${qty}`);
+      return { code: potentialCode, quantity: qty };
+    }
+  }
+
+  // Pattern 2: Solo CODICE e QUANTITÀ (senza descrizione)
+  // Es: "101 2"
+  const pattern2 = /^(\d+)\s+(\d+(?:[,\.]\d{1,2})?)$/;
+  const match2 = cleanLine.match(pattern2);
+
+  if (match2) {
+    const potentialCode = match2[1];
+    const potentialQty = match2[2];
+
+    const qty = parseFloat(potentialQty.replace(",", "."));
+
+    if (isValidCode(potentialCode) && isValidQuantity(qty)) {
+      console.log(`  ✅ Match Pattern 2: code=${potentialCode}, qty=${qty}`);
+      return { code: potentialCode, quantity: qty };
+    }
+  }
+
+  // Pattern 3: CODICE all'inizio
+  // Es: "101 Descrizione varia 2"
+  const words = cleanLine.split(/\s+/);
+
+  if (words.length >= 2) {
+    const firstWord = words[0];
+    const lastWord = words[words.length - 1];
+
+    const qty = parseFloat(lastWord.replace(",", "."));
+
+    if (isValidCode(firstWord) && isValidQuantity(qty)) {
+      console.log(`  ✅ Match Pattern 3: code=${firstWord}, qty=${qty}`);
+      return { code: firstWord, quantity: qty };
+    }
+  }
+
+  console.log(`  ❌ Nessun match valido trovato`);
+  return null;
+}
+
+/**
+ * ✅ Valida un codice prodotto
+ */
+function isValidCode(code) {
+  // Codice valido: almeno 1 carattere, solo alfanumerici e simboli comuni
+  return /^[A-Z0-9\-_\/]{1,50}$/i.test(code);
+}
+
+/**
+ * ✅ Valida una quantità
+ */
+function isValidQuantity(qty) {
+  return !isNaN(qty) && qty > 0 && qty <= 9999;
+}
+
+/**
+ * 📅 Normalizza data in formato ISO (YYYY-MM-DD)
+ */
+function normalizeDate(dateStr) {
+  dateStr = dateStr.trim();
+
+  const separator = dateStr.includes("/")
+    ? "/"
+    : dateStr.includes("-")
+    ? "-"
+    : ".";
+
+  const parts = dateStr.split(separator);
+
+  if (parts.length === 3) {
+    if (parts[0].length === 4) {
+      // YYYY-MM-DD (già corretto)
+      return dateStr.replace(/\./g, "-").replace(/\//g, "-");
+    } else {
+      // DD-MM-YYYY → YYYY-MM-DD
+      const day = parts[0].padStart(2, "0");
+      const month = parts[1].padStart(2, "0");
+      const year = parts[2].length === 2 ? "20" + parts[2] : parts[2];
+      return `${year}-${month}-${day}`;
+    }
+  }
+
+  console.warn(`⚠️ Formato data non riconosciuto: "${dateStr}", uso data odierna`);
+  return new Date().toISOString().split("T")[0];
+}
+
+/**
+ * 🔍 Verifica se un prodotto esiste nel database
+ */
+async function checkProductExists(code) {
+  try {
+    const res = await fetch(`${API_URL}/prodotti`);
+
+    if (!res.ok) {
+      throw new Error("Errore caricamento prodotti dal server");
+    }
+
+    const prodotti = await res.json();
+
+    const prodotto = prodotti.find(
+      (p) => p.nome.toUpperCase() === code.toUpperCase()
+    );
+
+    if (prodotto) {
+      console.log(`✅ Prodotto trovato: ${code} → ${prodotto.nome} (ID: ${prodotto.id})`);
+    } else {
+      console.warn(`⚠️ Prodotto NON trovato: ${code}`);
+    }
+
+    return prodotto;
+  } catch (error) {
+    console.error("❌ Errore verifica prodotto:", error);
+    return null;
+  }
+}
+
+/**
+ * ✅ Crea gli SCARICHI nel database
+ */
+async function processScarichi(scarichi) {
+  console.log(`🚀 Inizio elaborazione ${scarichi.length} scarichi...`);
+
+  const results = {
+    success: [],
+    failed: [],
+    notFound: [],
+    insufficientStock: [],
+  };
+
+  for (let i = 0; i < scarichi.length; i++) {
+    const scarico = scarichi[i];
+
+    console.log(`📦 [${i + 1}/${scarichi.length}] Elaborazione: ${scarico.code} - ${scarico.quantity} pz`);
+
+    try {
+      // 1️⃣ Verifica se il prodotto esiste
+      const prodotto = await checkProductExists(scarico.code);
+
+      if (!prodotto) {
+        results.notFound.push({
+          code: scarico.code,
+          quantity: scarico.quantity,
+          date: scarico.date,
+          reason: "Prodotto non trovato nel database",
+        });
+        continue;
+      }
+
+      // 2️⃣ Verifica giacenza disponibile
+      if (prodotto.giacenza < scarico.quantity) {
+        results.insufficientStock.push({
+          code: scarico.code,
+          nome: prodotto.nome,
+          quantity: scarico.quantity,
+          available: prodotto.giacenza,
+          date: scarico.date,
+        });
+        continue;
+      }
+
+      // 3️⃣ Crea lo SCARICO
+      const movementData = {
+        prodotto_id: prodotto.id,
+        tipo: "scarico",
+        quantita: scarico.quantity,
+        data_movimento: scarico.date,
+        fattura_doc: null,
+        fornitore: null,
+        prezzo: null,
+      };
+
+      console.log("📤 Invio scarico al server:", movementData);
+
+      const res = await fetch(`${API_URL}/dati`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(movementData),
+      });
+
+      if (res.ok) {
+        results.success.push({
+          code: scarico.code,
+          nome: prodotto.nome,
+          quantity: scarico.quantity,
+          date: scarico.date,
+        });
+        console.log(`✅ Scarico creato: ${scarico.code} - ${scarico.quantity} pz`);
+      } else {
+        const error = await res.json();
+        results.failed.push({
+          code: scarico.code,
+          quantity: scarico.quantity,
+          date: scarico.date,
+          reason: error.error || "Errore sconosciuto dal server",
+        });
+        console.error(`❌ Errore creazione scarico: ${error.error}`);
+      }
+    } catch (error) {
+      results.failed.push({
+        code: scarico.code,
+        quantity: scarico.quantity,
+        date: scarico.date,
+        reason: error.message,
+      });
+      console.error(`❌ Errore elaborazione: ${error.message}`);
+    }
+  }
+
+  console.log("📊 Elaborazione completata:", results);
+
+  return results;
+}
+
+/**
+ * 🚀 Funzione principale per gestire l'import PDF
+ */
+async function handlePDFImport(file) {
+  try {
+    console.log("🚀 Inizio importazione PDF:", file.name);
+
+    showImportLoading();
+
+    // 1️⃣ Estrai testo dal PDF
+    const text = await extractTextFromPDF(file);
+
+    // 2️⃣ Estrai la DATA
+    const date = extractDateFromPDF(text);
+
+    // 3️⃣ Estrai gli SCARICHI
+    const scarichi = extractScarichiFromPDF(text, date);
+
+    console.log(`📦 ${scarichi.length} scarichi trovati per la data ${date}`);
+
+    if (scarichi.length === 0) {
+      throw new Error(
+        "❌ Nessun prodotto trovato nel PDF.\n\n" +
+          "Verifica che il PDF contenga:\n" +
+          '• Sezione "RICAMBI"\n' +
+          "• CODICE RICAMBIO (es. 101)\n" +
+          "• QUANTITÀ (es. 2)\n\n" +
+          "Formato atteso:\n" +
+          "RICAMBI\n" +
+          "CODICE RICAMBIO   DESCRIZIONE   QUANTITA'\n" +
+          "101               Filtro Olio    2"
+      );
+    }
+
+    // 4️⃣ Processa gli SCARICHI
+    const results = await processScarichi(scarichi);
+
+    // 5️⃣ Mostra risultati
+    showImportResults(results);
+
+    // 6️⃣ Ricarica le tabelle se ci sono stati successi
+    if (results.success.length > 0) {
+      console.log("🔄 Ricarico tabelle Movimenti e Prodotti...");
+      await loadMovimenti();
+      await loadProdotti();
+      console.log("✅ Tabelle ricaricate");
+    }
+
+    return results;
+  } catch (error) {
+    console.error("❌ Errore import PDF:", error);
+    alert("❌ Errore durante l'importazione:\n\n" + error.message);
+    hideImportLoading();
+    throw error;
+  }
+}
+
+// Esporta le funzioni
+window.handlePDFImport = handlePDFImport;
+window.loadPDFJS = loadPDFJS;
