@@ -301,19 +301,34 @@ document.getElementById("filterProdotti")?.addEventListener("input", (e) => {
   const searchTerm = e.target.value.toLowerCase().trim();
 
   if (!searchTerm) {
-    // Nessun testo: mostra tutti i prodotti
+    // ✅ Nessun testo: mostra tutti i prodotti
     prodotti = [...allProdotti];
   } else {
-    // Testo presente: applica il filtro
-    prodotti = allProdotti.filter(
-      (p) =>
-        p.nome.toLowerCase().includes(searchTerm) ||
-        (p.marcanome && p.marcanome.toLowerCase().includes(searchTerm)) ||
-        (p.descrizione && p.descrizione.toLowerCase().includes(searchTerm))
-    );
+    // 🔍 Testo presente: applica il filtro COMPLETO
+    prodotti = allProdotti.filter((p) => {
+      // 1️⃣ Cerca nel CODICE/TELAIO PRODOTTO
+      const matchesNome = p.nome.toLowerCase().includes(searchTerm);
+
+      // 2️⃣ Cerca nella MARCA
+      const matchesMarca = p.marca_nome
+        ? p.marca_nome.toLowerCase().includes(searchTerm)
+        : false;
+
+      // 3️⃣ Cerca nella DESCRIZIONE
+      const matchesDescrizione = p.descrizione
+        ? p.descrizione.toLowerCase().includes(searchTerm)
+        : false;
+
+      // ✅ Ritorna TRUE se ALMENO UNO dei criteri è soddisfatto
+      return matchesNome || matchesMarca || matchesDescrizione;
+    });
   }
 
+  // 🎨 Renderizza i risultati filtrati
   renderProdotti();
+
+  // 📊 LOG per debug (opzionale)
+  console.log(`🔍 Ricerca: "${searchTerm}" → ${prodotti.length} prodotti trovati`);
 });
 
 async function openProdottoModal(prodotto = null) {
