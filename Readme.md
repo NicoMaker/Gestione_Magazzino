@@ -63,6 +63,8 @@ Questa sezione permette di registrare le entrate e le uscite dei prodotti.
 - **Eliminazione Movimenti:** È possibile **eliminare un movimento** (carico o scarico).
   - **Importante:** L'eliminazione di un **Carico** rimuove il lotto e riduce la giacenza. L'eliminazione di uno **Scarico** ripristina la quantità prelevata nei lotti originali (annullando l'operazione).
 
+- in alto a sinistra c'è un bottone scarica da pdf dove al suo interno vengono inseriti i dati della data e dei prodotti con codice articolo e quantità scaricata se dati corrette e esistenti nel db li scarica altrimenti no.
+
 ### 4. Magazzino - Riepilogo (Giacenze e Valore) sezione Riepilogo
 
 Questa è la sezione principale per il controllo delle scorte.
@@ -84,8 +86,7 @@ Questa è la sezione principale per il controllo delle scorte.
 
 Questa è la sezione principale per il controllo delle scorte a una data specifica.
 
-- accanto al bottone cerca si trova il campo per inserire la data di ricerca.
-  e succesivamente inserita la data cliccando il bottone cerca trova tutti i prodotti con giacenza per quella data.
+- in alto a sinistra c'è un campo date dove mettere la data al quale si vede il suo valore del magazzino (storico).
 
 - **Valore Totale:** In alto, vedrai il **Valore Totale del Magazzino** alla data selezionata (somma del valore di tutti i lotti attivi).
 - **Tabella Riepilogo:**
