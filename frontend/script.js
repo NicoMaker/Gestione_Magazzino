@@ -22,6 +22,10 @@ function forceLogout(message) {
   window.location.href = "index.html";
 }
 
+document.getElementById("storicoDate")?.addEventListener("change", () => {
+  loadStorico();
+});
+
 // ==================== INIZIALIZZAZIONE ====================
 document.addEventListener("DOMContentLoaded", () => {
   const username = localStorage.getItem("username");
@@ -328,7 +332,9 @@ document.getElementById("filterProdotti")?.addEventListener("input", (e) => {
   renderProdotti();
 
   // 📊 LOG per debug (opzionale)
-  console.log(`🔍 Ricerca: "${searchTerm}" → ${prodotti.length} prodotti trovati`);
+  console.log(
+    `🔍 Ricerca: "${searchTerm}" → ${prodotti.length} prodotti trovati`
+  );
 });
 
 async function openProdottoModal(prodotto = null) {
@@ -771,10 +777,18 @@ document.getElementById("filterRiepilogo")?.addEventListener("input", (e) => {
 });
 
 // ==================== STORICO ====================
+
+// ==================== STORICO ====================
 async function loadStorico() {
   const data = document.getElementById("storicoDate").value;
   if (!data) {
-    alert("Seleziona una data");
+    // Se non c'è una data, resetta la visualizzazione
+    allStorico = [];
+    storico = [];
+    updateStoricoTotal();
+    const tbody = document.getElementById("storicoTableBody");
+    tbody.innerHTML =
+      '<tr><td colspan="4" class="text-center">Seleziona una data per visualizzare lo storico</td></tr>';
     return;
   }
 
@@ -5362,7 +5376,8 @@ async function loadPDFJS() {
     console.log("⏳ Caricamento PDF.js da CDN...");
 
     const script = document.createElement("script");
-    script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+    script.src =
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
 
     script.onload = () => {
       pdfjsLib.GlobalWorkerOptions.workerSrc =
@@ -5425,7 +5440,7 @@ async function extractTextFromPDF(file) {
               const prevItem = textContent.items[index - 1];
               const prevX = prevItem.transform[4] + prevItem.width;
               const currentX = item.transform[4];
-              
+
               // Se c'è uno spazio significativo, aggiungilo
               if (currentX - prevX > 2) {
                 pageText += " ";
@@ -5448,7 +5463,9 @@ async function extractTextFromPDF(file) {
         resolve(fullText);
       } catch (error) {
         console.error("❌ Errore estrazione PDF:", error);
-        reject(new Error("Errore durante la lettura del PDF: " + error.message));
+        reject(
+          new Error("Errore durante la lettura del PDF: " + error.message)
+        );
       }
     };
 
@@ -5500,7 +5517,9 @@ function extractDateFromPDF(text) {
 
     if (match && match[1]) {
       const normalizedDate = normalizeDate(match[1]);
-      console.log(`✅ Data trovata (generica): ${match[1]} → ${normalizedDate}`);
+      console.log(
+        `✅ Data trovata (generica): ${match[1]} → ${normalizedDate}`
+      );
       return normalizedDate;
     }
   }
@@ -5518,7 +5537,10 @@ function extractScarichiFromPDF(text, date) {
   console.log("📦 Ricerca sezione RICAMBI...");
 
   const scarichi = [];
-  const lines = text.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+  const lines = text
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
 
   console.log(`📄 Totale righe da analizzare: ${lines.length}`);
 
@@ -5543,15 +5565,25 @@ function extractScarichiFromPDF(text, date) {
   let dataStartIndex = ricambiStartIndex + 1;
 
   const headerKeywords = [
-    "CODICE", "RICAMBIO", "DESCRIZIONE", "QUANTITA", 
-    "PREZZO", "IVA", "ESCLUSA", "QUANTITÀ"
+    "CODICE",
+    "RICAMBIO",
+    "DESCRIZIONE",
+    "QUANTITA",
+    "PREZZO",
+    "IVA",
+    "ESCLUSA",
+    "QUANTITÀ",
   ];
 
-  for (let i = ricambiStartIndex + 1; i < Math.min(ricambiStartIndex + 10, lines.length); i++) {
+  for (
+    let i = ricambiStartIndex + 1;
+    i < Math.min(ricambiStartIndex + 10, lines.length);
+    i++
+  ) {
     const lineUpper = lines[i].toUpperCase();
-    
+
     // Se la riga contiene parole chiave dell'header, saltala
-    if (headerKeywords.some(keyword => lineUpper.includes(keyword))) {
+    if (headerKeywords.some((keyword) => lineUpper.includes(keyword))) {
       dataStartIndex = i + 1;
       console.log(`⏭️ Riga intestazione saltata: "${lines[i]}"`);
     } else {
@@ -5563,8 +5595,11 @@ function extractScarichiFromPDF(text, date) {
 
   // 3️⃣ ANALIZZA LE RIGHE SUCCESSIVE
   const stopKeywords = [
-    "MANODOPERA", "TOTALE", "IVA COMPRESA", 
-    "DESCRIZIONE LAVORAZIONI", "LAVORAZIONI"
+    "MANODOPERA",
+    "TOTALE",
+    "IVA COMPRESA",
+    "DESCRIZIONE LAVORAZIONI",
+    "LAVORAZIONI",
   ];
 
   for (let i = dataStartIndex; i < lines.length; i++) {
@@ -5574,7 +5609,7 @@ function extractScarichiFromPDF(text, date) {
 
     // Stop se incontriamo una sezione diversa
     const lineUpper = line.toUpperCase();
-    if (stopKeywords.some(keyword => lineUpper.includes(keyword))) {
+    if (stopKeywords.some((keyword) => lineUpper.includes(keyword))) {
       console.log(`🛑 Fine sezione RICAMBI alla riga ${i}: "${line}"`);
       break;
     }
@@ -5591,7 +5626,9 @@ function extractScarichiFromPDF(text, date) {
         date: date,
       });
 
-      console.log(`✅ Scarico trovato: ${parsed.code} - ${parsed.quantity} pz (riga ${i})`);
+      console.log(
+        `✅ Scarico trovato: ${parsed.code} - ${parsed.quantity} pz (riga ${i})`
+      );
     } else {
       console.log(`⏭️ Riga ignorata: "${line}"`);
     }
@@ -5609,7 +5646,7 @@ function extractScarichiFromPDF(text, date) {
 function parseRicamboLine(line) {
   // Rimuovi spazi multipli
   const cleanLine = line.replace(/\s+/g, " ").trim();
-  
+
   console.log(`  🔍 Parsing: "${cleanLine}"`);
 
   // Pattern 1: CODICE alla fine con QUANTITÀ
@@ -5619,7 +5656,7 @@ function parseRicamboLine(line) {
 
   if (match1) {
     const potentialCode = match1[2]; // Il penultimo numero
-    const potentialQty = match1[3];  // L'ultimo numero
+    const potentialQty = match1[3]; // L'ultimo numero
 
     const qty = parseFloat(potentialQty.replace(",", "."));
 
@@ -5708,7 +5745,9 @@ function normalizeDate(dateStr) {
     }
   }
 
-  console.warn(`⚠️ Formato data non riconosciuto: "${dateStr}", uso data odierna`);
+  console.warn(
+    `⚠️ Formato data non riconosciuto: "${dateStr}", uso data odierna`
+  );
   return new Date().toISOString().split("T")[0];
 }
 
@@ -5730,7 +5769,9 @@ async function checkProductExists(code) {
     );
 
     if (prodotto) {
-      console.log(`✅ Prodotto trovato: ${code} → ${prodotto.nome} (ID: ${prodotto.id})`);
+      console.log(
+        `✅ Prodotto trovato: ${code} → ${prodotto.nome} (ID: ${prodotto.id})`
+      );
     } else {
       console.warn(`⚠️ Prodotto NON trovato: ${code}`);
     }
@@ -5758,7 +5799,11 @@ async function processScarichi(scarichi) {
   for (let i = 0; i < scarichi.length; i++) {
     const scarico = scarichi[i];
 
-    console.log(`📦 [${i + 1}/${scarichi.length}] Elaborazione: ${scarico.code} - ${scarico.quantity} pz`);
+    console.log(
+      `📦 [${i + 1}/${scarichi.length}] Elaborazione: ${scarico.code} - ${
+        scarico.quantity
+      } pz`
+    );
 
     try {
       // 1️⃣ Verifica se il prodotto esiste
@@ -5812,7 +5857,9 @@ async function processScarichi(scarichi) {
           quantity: scarico.quantity,
           date: scarico.date,
         });
-        console.log(`✅ Scarico creato: ${scarico.code} - ${scarico.quantity} pz`);
+        console.log(
+          `✅ Scarico creato: ${scarico.code} - ${scarico.quantity} pz`
+        );
       } else {
         const error = await res.json();
         results.failed.push({
@@ -5901,124 +5948,152 @@ window.handlePDFImport = handlePDFImport;
 window.loadPDFJS = loadPDFJS;
 
 function extractScarichiFromPDF(text, date) {
-    console.log('Ricerca sezione RICAMBI...')
-    const scarichi = []
-    const lines = text.split('\n')
-    
-    // 1. TROVA LA SEZIONE RICAMBI
-    let ricambiStartIndex = -1
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].trim().toUpperCase()
-        if (line.includes('RICAMBI')) {
-            ricambiStartIndex = i
-            console.log('Sezione RICAMBI trovata alla riga', i, lines[i])
-            break
-        }
+  console.log("Ricerca sezione RICAMBI...");
+  const scarichi = [];
+  const lines = text.split("\n");
+
+  // 1. TROVA LA SEZIONE RICAMBI
+  let ricambiStartIndex = -1;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim().toUpperCase();
+    if (line.includes("RICAMBI")) {
+      ricambiStartIndex = i;
+      console.log("Sezione RICAMBI trovata alla riga", i, lines[i]);
+      break;
     }
-    
-    if (ricambiStartIndex === -1) {
-        console.warn('Sezione RICAMBI non trovata nel PDF')
-        return scarichi
+  }
+
+  if (ricambiStartIndex === -1) {
+    console.warn("Sezione RICAMBI non trovata nel PDF");
+    return scarichi;
+  }
+
+  // 2. SALTA LE RIGHE DI INTESTAZIONE
+  let dataStartIndex = ricambiStartIndex + 1;
+  for (
+    let i = ricambiStartIndex + 1;
+    i < Math.min(ricambiStartIndex + 10, lines.length);
+    i++
+  ) {
+    const line = lines[i].toUpperCase();
+    if (
+      ["CODICE", "RICAMBIO", "DESCRIZIONE", "QUANTITA", "PREZZO", "IVA"].some(
+        (keyword) => line.includes(keyword)
+      )
+    ) {
+      dataStartIndex = i + 1;
+      console.log("Riga intestazione saltata:", lines[i]);
+      break;
     }
-    
-    // 2. SALTA LE RIGHE DI INTESTAZIONE
-    let dataStartIndex = ricambiStartIndex + 1
-    for (let i = ricambiStartIndex + 1; i < Math.min(ricambiStartIndex + 10, lines.length); i++) {
-        const line = lines[i].toUpperCase()
-        if (['CODICE', 'RICAMBIO', 'DESCRIZIONE', 'QUANTITA', 'PREZZO', 'IVA'].some(keyword => line.includes(keyword))) {
-            dataStartIndex = i + 1
-            console.log('Riga intestazione saltata:', lines[i])
-            break
-        }
+  }
+
+  console.log("Inizio analisi dati dalla riga", dataStartIndex);
+
+  // 3. ANALIZZA LE RIGHE SUCCESSIVE (UN SOLO LOOP)
+  for (let i = dataStartIndex; i < lines.length; i++) {
+    const line = lines[i].trim();
+
+    if (!line) continue;
+
+    // Stop se incontriamo una sezione diversa
+    const lineUpper = line.toUpperCase();
+    if (
+      ["MANODOPERA", "TOTALE", "IVA COMPRESA", "DESCRIZIONE LAVORAZIONI"].some(
+        (keyword) => lineUpper.includes(keyword)
+      )
+    ) {
+      console.log("Fine sezione RICAMBI alla riga", i, line);
+      break;
     }
-    
-    console.log('Inizio analisi dati dalla riga', dataStartIndex)
-    
-    // 3. ANALIZZA LE RIGHE SUCCESSIVE (UN SOLO LOOP)
-    for (let i = dataStartIndex; i < lines.length; i++) {
-        const line = lines[i].trim()
-        
-        if (!line) continue
-        
-        // Stop se incontriamo una sezione diversa
-        const lineUpper = line.toUpperCase()
-        if (['MANODOPERA', 'TOTALE', 'IVA COMPRESA', 'DESCRIZIONE LAVORAZIONI'].some(keyword => lineUpper.includes(keyword))) {
-            console.log('Fine sezione RICAMBI alla riga', i, line)
-            break
-        }
-        
-        // 4. ESTRAI CODICE E QUANTITÀ
-        const parsed = parseRicamboLine(line)
-        if (parsed) {
-            scarichi.push({
-                code: parsed.code,
-                quantity: parsed.quantity,
-                date: date,
-            })
-            console.log('Scarico trovato:', parsed.code, '-', parsed.quantity, 'pz', 'riga', i)
-        } else {
-            console.log('Riga ignorata:', line)
-        }
+
+    // 4. ESTRAI CODICE E QUANTITÀ
+    const parsed = parseRicamboLine(line);
+    if (parsed) {
+      scarichi.push({
+        code: parsed.code,
+        quantity: parsed.quantity,
+        date: date,
+      });
+      console.log(
+        "Scarico trovato:",
+        parsed.code,
+        "-",
+        parsed.quantity,
+        "pz",
+        "riga",
+        i
+      );
+    } else {
+      console.log("Riga ignorata:", line);
     }
-    
-    console.log('Totale scarichi trovati:', scarichi.length)
-    return scarichi
+  }
+
+  console.log("Totale scarichi trovati:", scarichi.length);
+  return scarichi;
 }
 
 // IMPORT PDF SCARICHI - FUNZIONE UNICA CORRETTA
 
 async function handlePDFImport(file) {
-    try {
-        console.log("Inizio importazione PDF:", file.name);
+  try {
+    console.log("Inizio importazione PDF:", file.name);
 
-        // 1) Mostra loading nel bottone del modal
-        showImportLoading();   // usa showImportLoading/hideImportLoading già definiti
+    // 1) Mostra loading nel bottone del modal
+    showImportLoading(); // usa showImportLoading/hideImportLoading già definiti
 
-        // 2) Estrai il testo dal PDF
-        const text = await extractTextFromPDF(file);
-        console.log("Testo estratto dal PDF (prime 1000 chars):", text.substring(0, 1000));
+    // 2) Estrai il testo dal PDF
+    const text = await extractTextFromPDF(file);
+    console.log(
+      "Testo estratto dal PDF (prime 1000 chars):",
+      text.substring(0, 1000)
+    );
 
-        // 3) Estrai la DATA dal PDF
-        const date = extractDateFromPDF(text);
-        console.log("Data trovata nel PDF:", date);
+    // 3) Estrai la DATA dal PDF
+    const date = extractDateFromPDF(text);
+    console.log("Data trovata nel PDF:", date);
 
-        // 4) Estrai gli SCARICHI dalla sezione RICAMBI
-        const scarichi = extractScarichiFromPDF(text, date);
-        console.log(scarichi.length, "scarichi trovati per la data", date, scarichi);
+    // 4) Estrai gli SCARICHI dalla sezione RICAMBI
+    const scarichi = extractScarichiFromPDF(text, date);
+    console.log(
+      scarichi.length,
+      "scarichi trovati per la data",
+      date,
+      scarichi
+    );
 
-        if (scarichi.length === 0) {
-            throw new Error(
-                "Nessun prodotto trovato nel PDF.\n" +
-                "Verifica che il PDF contenga:\n" +
-                "- Sezione 'RICAMBI'\n" +
-                "- Codice prodotto (es. 101)\n" +
-                "- Quantità (es. 2)"
-            );
-        }
-
-        // 5) Processa gli SCARICHI: crea solo uno SCARICO per riga PDF
-        const results = await processScarichi(scarichi);
-
-        // 6) Mostra risultati dettagliati
-        showImportResults(results);
-
-        // 7) Se ci sono successi, ricarica Movimenti e Prodotti UNA SOLA VOLTA
-        if (results.success.length > 0) {
-            console.log("Ricarico tabelle Movimenti e Prodotti...");
-            await loadMovimenti();
-            await loadProdotti();
-            console.log("Tabelle ricaricate");
-        }
-
-        return results;
-    } catch (error) {
-        console.error("Errore import PDF:", error);
-        alert("Errore durante l'importazione: " + error.message);
-        throw error;
-    } finally {
-        // nasconde sempre il loading e chiude il modal
-        hideImportLoading();
+    if (scarichi.length === 0) {
+      throw new Error(
+        "Nessun prodotto trovato nel PDF.\n" +
+          "Verifica che il PDF contenga:\n" +
+          "- Sezione 'RICAMBI'\n" +
+          "- Codice prodotto (es. 101)\n" +
+          "- Quantità (es. 2)"
+      );
     }
+
+    // 5) Processa gli SCARICHI: crea solo uno SCARICO per riga PDF
+    const results = await processScarichi(scarichi);
+
+    // 6) Mostra risultati dettagliati
+    showImportResults(results);
+
+    // 7) Se ci sono successi, ricarica Movimenti e Prodotti UNA SOLA VOLTA
+    if (results.success.length > 0) {
+      console.log("Ricarico tabelle Movimenti e Prodotti...");
+      await loadMovimenti();
+      await loadProdotti();
+      console.log("Tabelle ricaricate");
+    }
+
+    return results;
+  } catch (error) {
+    console.error("Errore import PDF:", error);
+    alert("Errore durante l'importazione: " + error.message);
+    throw error;
+  } finally {
+    // nasconde sempre il loading e chiude il modal
+    hideImportLoading();
+  }
 }
 
 // 🧾 Importa ordine da PDF e crea UN movimento di scarico per riga prodotto
@@ -6057,8 +6132,8 @@ async function importaOrdineDaPdf(righePdf, dataOrdine, nomeFilePdf) {
         prodotto_id: prodotto.id,
         tipo: "scarico",
         quantita: mov.quantita,
-        prezzo: null,                // il costo lo calcola il backend
-        data_movimento: dataOrdine,  // es. "2026-01-07"
+        prezzo: null, // il costo lo calcola il backend
+        data_movimento: dataOrdine, // es. "2026-01-07"
         fattura_doc: nomeFilePdf || "",
         fornitore: null,
       };
