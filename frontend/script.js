@@ -721,7 +721,7 @@ function renderRiepilogo() {
                   <th>Quantità</th>
                   <th>Prezzo Unit.</th>
                   <th>Valore</th>
-                  <th>Documento</th>
+                  <th>Documento/Fattura</th>
                   <th>Fornitore</th>
                 </tr>
               </thead>
@@ -864,7 +864,7 @@ function renderStorico(storico) {
                   <th>Quantità</th>
                   <th>Prezzo Unit.</th>
                   <th>Valore</th>
-                  <th>Documento</th>
+                  <th>Documento/Fattura</th>
                   <th>Fornitore</th>
                 </tr>
               </thead>
@@ -5096,7 +5096,7 @@ function printRiepilogo() {
                 <th>Quantità</th>
                 <th>Prezzo Unit.</th>
                 <th>Valore</th>
-                <th>Documento</th>
+                <th>Documento/Fattura</th>
                 <th>Fornitore</th>
               </tr>
             </thead>
@@ -5297,7 +5297,7 @@ function printStorico() {
                 <th>Quantità</th>
                 <th>Prezzo Unit.</th>
                 <th>Valore</th>
-                <th>Documento</th>
+                <th>Documento/Fattura</th>
                 <th>Fornitore</th>
               </tr>
             </thead>
