@@ -252,95 +252,58 @@ window.ignoreNextSocketUpdate = ignoreNextSocketUpdate;
  * @param {string} title - Titolo del modale (opzionale)
  * @returns {Promise<boolean>} - true se confermato, false se annullato
  */
+/**
+ * Mostra modale di conferma moderna (Promise)
+ */
 function showConfirmModal(message, title = 'Conferma') {
   return new Promise((resolve) => {
     const modal = document.getElementById('confirmModal');
-    const titleEl = document.getElementById('confirmModalTitle');
-    const messageEl = document.getElementById('confirmMessage');
-    const iconEl = document.getElementById('confirmIcon');
+    const msgElem = document.getElementById('confirmMessage');
+    const titleElem = modal.querySelector('.modal-header h2');
     const confirmBtn = document.getElementById('confirmButton');
-
-    // Imposta titolo e messaggio
-    titleEl.textContent = title;
-    messageEl.textContent = message;
-
-    // Icona di avviso
-    iconEl.innerHTML = `
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-        <line x1="12" y1="9" x2="12" y2="13"></line>
-        <line x1="12" y1="17" x2="12.01" y2="17"></line>
-      </svg>
-    `;
-
-    // Pulisci stato precedente
-    if (window.confirmModalResolve) {
-      window.confirmModalResolve(false);
-      window.confirmModalResolve = null;
-    }
-
-    // Rimuovi listener precedenti e clona il pulsante
-    const newConfirmBtn = confirmBtn.cloneNode(true);
-    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-
-    // Salva resolve
-    window.confirmModalResolve = resolve;
-
-    // Handler conferma
-    newConfirmBtn.onclick = (e) => {
-      e.stopPropagation();
-      const res = window.confirmModalResolve;
-      window.confirmModalResolve = null;
-      closeConfirmModal(true);
-      if (res) res(true);
-    };
-
-    // Handler per chiudere (X e Annulla)
-    const closeHandler = (e) => {
-      e.stopPropagation();
-      const res = window.confirmModalResolve;
-      window.confirmModalResolve = null;
-      closeConfirmModal(true);
-      if (res) res(false);
-    };
-    
-    // Pulsante chiudi (X)
-    const closeBtn = modal.querySelector('.modal-close');
-    if (closeBtn) {
-      closeBtn.onclick = closeHandler;
-    }
-    
-    // Pulsante Annulla
     const cancelBtn = modal.querySelector('.btn-secondary');
-    if (cancelBtn) {
-      cancelBtn.onclick = closeHandler;
-    }
-    
-    window.confirmModalCloseHandler = closeHandler;
+    const closeBtn = modal.querySelector('.modal-close');
+    const iconContainer = document.getElementById('confirmIcon');
 
-    // Handler backdrop click
-    const handleBackdropClick = (e) => {
-      if (e.target === modal) {
-        const res = window.confirmModalResolve;
-        window.confirmModalResolve = null;
-        closeConfirmModal(true);
-        if (res) res(false);
-      }
+    // Imposta testi
+    msgElem.innerHTML = message;
+    titleElem.textContent = title;
+
+    // Se il titolo contiene "Elimina", rendiamo il tasto e l'icona "Pericolo" (Rosso)
+    if (title.toLowerCase().includes('elimina')) {
+      confirmBtn.style.background = 'var(--danger)';
+      iconContainer.innerHTML = '🗑️';
+      iconContainer.style.background = 'rgba(239, 68, 68, 0.1)';
+      iconContainer.style.color = 'var(--danger)';
+    } else {
+      confirmBtn.style.background = 'var(--primary)';
+      iconContainer.innerHTML = '❓';
+      iconContainer.style.background = 'rgba(99, 102, 241, 0.1)';
+      iconContainer.style.color = 'var(--primary)';
+    }
+
+    modal.classList.add('show');
+
+    const handleConfirm = () => {
+      cleanup();
+      resolve(true);
     };
-    
-    modal.addEventListener('click', handleBackdropClick);
-    window.confirmModalBackdropHandler = handleBackdropClick;
-    
-    // Previeni la chiusura quando si clicca sul contenuto del modale
-    const modalContent = modal.querySelector('.modal-content');
-    if (modalContent) {
-      modalContent.addEventListener('click', (e) => {
-        e.stopPropagation();
-      });
-    }
 
-    // Mostra modale
-    modal.classList.add('active', 'show');
+    const handleCancel = () => {
+      cleanup();
+      resolve(false);
+    };
+
+    const cleanup = () => {
+      modal.classList.remove('show');
+      confirmBtn.removeEventListener('click', handleConfirm);
+      cancelBtn.removeEventListener('click', handleCancel);
+      closeBtn.removeEventListener('click', handleCancel);
+    };
+
+    confirmBtn.addEventListener('click', handleConfirm);
+    cancelBtn.addEventListener('click', handleCancel);
+    closeBtn.addEventListener('click', handleCancel);
   });
 }
 

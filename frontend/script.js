@@ -6377,3 +6377,60 @@ function escapeHtml(text) {
 
 // ==================== ESPORTA FUNZIONI (se usi moduli) ====================
 // export { loadMarche, renderMarche, deleteMarca, escapeHtml };
+
+/**
+ * 🗑️ Elimina una marca con modale di conferma moderna
+ */
+async function deleteMarca(id, nome) {
+  // 1. Calcola quanti prodotti appartengono a questa marca
+  const prodottiCount = allProdotti.filter(p => p.marca_id === id).length;
+  
+  // 2. Prepara il messaggio personalizzato
+  let messaggio = `Sei sicuro di voler eliminare la marca "<strong>${escapeHtml(nome)}</strong>"?`;
+  
+  if (prodottiCount > 0) {
+    messaggio += `
+      <div style="margin-top: 15px; padding: 12px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.2);">
+        <span style="color: var(--danger); font-weight: 700; display: block; margin-bottom: 4px;">⚠️ ATTENZIONE</span>
+        Ci sono <strong>${prodottiCount}</strong> prodotti collegati a questa marca. 
+        Eliminando la marca, verranno eliminati anche tutti i prodotti associati!
+      </div>`;
+  }
+
+  // 3. Mostra la modale (funzione definita in realtime.js)
+  const confermato = await showConfirmModal(messaggio, 'Elimina Marca');
+
+  // Se l'utente clicca "Annulla", interrompiamo
+  if (!confermato) return;
+
+  try {
+    console.log(`♻️ Eliminazione marca ${id} in corso...`);
+    
+    const response = await fetch(`${API_URL}/marche/${id}`, {
+      method: 'DELETE',
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      // Notifica di successo
+      showAlertModal(
+        `Marca "${nome}" e relativi prodotti eliminati correttamente.`, 
+        'Operazione Completata', 
+        'success'
+      );
+
+      // Aggiorna i dati locali
+      await loadMarche();
+      if (prodottiCount > 0) {
+        await loadProdotti();
+      }
+    } else {
+      throw new Error(data.error || 'Errore durante l\'eliminazione');
+    }
+  } catch (error) {
+    console.error('❌ Errore eliminazione marca:', error);
+    showAlertModal(`Errore: ${error.message}`, 'Errore', 'error');
+  }
+}
+
