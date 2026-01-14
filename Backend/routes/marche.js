@@ -1,4 +1,4 @@
-// routes/marche.js - VERSIONE AGGIORNATA CON CONTEGGIO PRODOTTI
+// routes/marche.js - VERSIONE CON BLOCCO ELIMINAZIONE SE CI SONO PRODOTTI
 
 const express = require("express");
 const router = express.Router();
@@ -6,7 +6,6 @@ const { db } = require("../db/init");
 
 // ==================== GET - Lista tutte le marche con conteggio prodotti ====================
 router.get("/", (req, res) => {
-  // 🎯 QUERY MODIFICATA: Aggiunge il conteggio dei prodotti relazionati
   const query = `
     SELECT 
       m.id, 
@@ -25,9 +24,7 @@ router.get("/", (req, res) => {
       return res.status(500).json({ error: err.message });
     }
 
-    // 📊 LOG per debug (opzionale, rimuovi in produzione)
     console.log(`✅ ${rows.length} marche caricate con conteggio prodotti`);
-
     res.json(rows);
   });
 });
@@ -54,7 +51,6 @@ router.post("/", (req, res) => {
         return res.status(500).json({ error: err.message });
       }
 
-      // Emetti evento Socket.IO per aggiornamento real-time
       const io = req.app.get("io");
       if (io) {
         io.emit("marca_aggiunta");
@@ -67,7 +63,7 @@ router.post("/", (req, res) => {
         id: this.lastID,
         nome: nome.trim(),
         data_creazione,
-        prodotti_count: 0  // 🆕 Nuova marca ha 0 prodotti
+        prodotti_count: 0
       });
     }
   );
@@ -98,7 +94,6 @@ router.put("/:id", (req, res) => {
         return res.status(404).json({ error: "Marca non trovata" });
       }
 
-      // Emetti evento Socket.IO per aggiornamento real-time
       const io = req.app.get("io");
       if (io) {
         io.emit("marca_modificata", { id });
@@ -107,14 +102,13 @@ router.put("/:id", (req, res) => {
       }
 
       console.log(`✅ Marca aggiornata: ID ${id} -> "${nome.trim()}"`);
-
       res.json({ success: true, nome: nome.trim() });
     }
   );
 });
 
 // ==================== DELETE - Elimina marca ====================
-// 🎯 VERSIONE MIGLIORATA: Permette eliminazione ma avvisa se ci sono prodotti
+// 🚫 VERSIONE STRICT: BLOCCA L'ELIMINAZIONE SE CI SONO PRODOTTI COLLEGATI
 router.delete("/:id", (req, res) => {
   const { id } = req.params;
 
@@ -130,85 +124,42 @@ router.delete("/:id", (req, res) => {
 
       const prodottiCount = row.count || 0;
 
-      // ⚠️ OPZIONE 1: BLOCCA ELIMINAZIONE SE CI SONO PRODOTTI (STRICT)
-      /*
+      // 🚫 BLOCCA L'ELIMINAZIONE SE CI SONO PRODOTTI
       if (prodottiCount > 0) {
+        console.log(`⚠️ Tentativo di eliminare marca ID ${id} con ${prodottiCount} prodotti - BLOCCATO`);
+        
         return res.status(400).json({
           error: prodottiCount === 1
-            ? `Impossibile eliminare: c'è 1 prodotto collegato a questa marca.`
-            : `Impossibile eliminare: ci sono ${prodottiCount} prodotti collegati a questa marca.`
+            ? "Impossibile eliminare: c'è 1 prodotto collegato a questa marca."
+            : `Impossibile eliminare: ci sono ${prodottiCount} prodotti collegati a questa marca.`,
+          prodotti_count: prodottiCount
         });
       }
-      */
 
-      // ✅ OPZIONE 2: PERMETTI ELIMINAZIONE, SETTA marca_id = NULL NEI PRODOTTI
-      // (Questa è la soluzione che hai implementato nel frontend)
-      
-      db.serialize(() => {
-        db.run("BEGIN TRANSACTION");
-
-        // 2️⃣ Se ci sono prodotti, rimuovi il riferimento alla marca
-        if (prodottiCount > 0) {
-          db.run(
-            "UPDATE prodotti SET marca_id = NULL WHERE marca_id = ?",
-            [id],
-            (err2) => {
-              if (err2) {
-                db.run("ROLLBACK");
-                console.error('❌ Errore aggiornamento prodotti:', err2);
-                return res.status(500).json({ error: err2.message });
-              }
-
-              console.log(`📝 ${prodottiCount} prodotti scollegati dalla marca ID ${id}`);
-
-              // 3️⃣ Elimina la marca
-              eliminaMarca();
-            }
-          );
-        } else {
-          // Nessun prodotto, elimina direttamente
-          eliminaMarca();
+      // ✅ Nessun prodotto collegato, procedi con l'eliminazione
+      db.run("DELETE FROM marche WHERE id = ?", [id], function (err2) {
+        if (err2) {
+          console.error('❌ Errore eliminazione marca:', err2);
+          return res.status(500).json({ error: err2.message });
         }
 
-        // 🗑️ Funzione helper per eliminare la marca
-        function eliminaMarca() {
-          db.run("DELETE FROM marche WHERE id = ?", [id], function (err3) {
-            if (err3) {
-              db.run("ROLLBACK");
-              console.error('❌ Errore eliminazione marca:', err3);
-              return res.status(500).json({ error: err3.message });
-            }
-
-            if (this.changes === 0) {
-              db.run("ROLLBACK");
-              return res.status(404).json({ error: "Marca non trovata" });
-            }
-
-            db.run("COMMIT");
-
-            // Emetti evento Socket.IO per aggiornamento real-time
-            const io = req.app.get("io");
-            if (io) {
-              io.emit("marca_eliminata", { id });
-              io.emit("marche_aggiornate");
-              
-              // Se ci sono prodotti modificati, aggiorna anche la lista prodotti
-              if (prodottiCount > 0) {
-                io.emit("prodotti_aggiornati");
-              }
-            }
-
-            console.log(`✅ Marca eliminata: ID ${id} (${prodottiCount} prodotti scollegati)`);
-
-            res.json({
-              success: true,
-              message: prodottiCount > 0 
-                ? `Marca eliminata con successo. ${prodottiCount} prodotto/i scollegato/i.`
-                : "Marca eliminata con successo",
-              prodotti_scollegati: prodottiCount
-            });
-          });
+        if (this.changes === 0) {
+          return res.status(404).json({ error: "Marca non trovata" });
         }
+
+        // Emetti evento Socket.IO per aggiornamento real-time
+        const io = req.app.get("io");
+        if (io) {
+          io.emit("marca_eliminata", { id });
+          io.emit("marche_aggiornate");
+        }
+
+        console.log(`✅ Marca eliminata: ID ${id}`);
+
+        res.json({
+          success: true,
+          message: "Marca eliminata con successo"
+        });
       });
     }
   );
