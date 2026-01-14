@@ -692,7 +692,7 @@ function renderRiepilogo() {
     <tr class="product-main-row">
       <td><strong>${r.nome}</strong>${
       r.marca_nome
-        ? ` <span class="badge-marca">(${r.marca_nome.toUpperCase()})</span>`
+        ? ` <span class="badge-marca">${r.marca_nome.toUpperCase()}</span>`
         : ""
     }</td>
       <td>${
@@ -835,7 +835,7 @@ function renderStorico(storico) {
     <tr class="product-main-row">
       <td><strong>${s.nome}</strong>${
       s.marca_nome
-        ? ` <span class="badge-marca">(${s.marca_nome.toUpperCase()})</span>`
+        ? ` <span class="badge-marca">${s.marca_nome.toUpperCase()}</span>`
         : ""
     }</td>
       <td>${
