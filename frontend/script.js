@@ -6239,8 +6239,8 @@ function renderMarche() {
         
         <!-- 🎯 BADGE CONTEGGIO PRODOTTI -->
         <td class="text-center-badge">
-          <span class="prodotti-badge ${badgeClass}" title="${badgeText}">
-            ${prodottiCount}
+          <span class="prodotti-badge ${badgeClass}"">
+            ${prodottiCount} Prodotto${prodottiCount !== 1 ? 'i' : ''}
           </span>
         </td>
         
