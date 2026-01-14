@@ -3304,3 +3304,67 @@ tbody tr:hover {
   background: #ffffff;
   max-height: calc(90vh - 200px); /* ✅ AGGIUNGI QUESTA RIGA */
 }
+/* Badge per conteggio prodotti */
+.prodotti-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  min-width: 50px;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e40af;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+  transition: all 0.3s ease;
+}
+
+.prodotti-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+/* Badge vuoto (0 prodotti) */
+.prodotti-badge.empty {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #64748b;
+  box-shadow: 0 2px 4px rgba(100, 116, 139, 0.1);
+}
+
+/* Badge con prodotti */
+.prodotti-badge.has-products {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #065f46;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+/* Animazione badge */
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.prodotti-badge.has-products {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Centratura colonna */
+.text-center-badge {
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .prodotti-badge {
+    font-size: 12px;
+    padding: 5px 12px;
+    min-width: 45px;
+  }
+}

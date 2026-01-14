@@ -6156,3 +6156,224 @@ async function importaOrdineDaPdf(righePdf, dataOrdine, nomeFilePdf) {
     console.error("Errore durante importaOrdineDaPdf:", e);
   }
 }
+
+// ==================== MARCHE CON CONTEGGIO PRODOTTI ====================
+
+/**
+ * 📦 Carica le marche con il conteggio dei prodotti relazionati
+ */
+async function loadMarche() {
+  try {
+    console.log('📦 Caricamento marche con conteggio prodotti...');
+    
+    const res = await fetch(`${API_URL}/marche`);
+    
+    if (!res.ok) {
+      throw new Error(`Errore HTTP: ${res.status}`);
+    }
+    
+    allMarche = await res.json();
+    marche = allMarche;
+    
+    console.log(`✅ ${marche.length} marche caricate:`, marche);
+    
+    renderMarche();
+  } catch (error) {
+    console.error('❌ Errore caricamento marche:', error);
+    showNotification('Errore nel caricamento delle marche', 'error');
+  }
+}
+
+/**
+ * 🎨 Renderizza la tabella marche con conteggio prodotti
+ */
+function renderMarche() {
+  const tbody = document.getElementById('marcheTableBody');
+
+  if (!tbody) {
+    console.error('❌ Elemento marcheTableBody non trovato');
+    return;
+  }
+
+  // Caso: Nessuna marca presente
+  if (marche.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="3" class="text-center">
+          <div style="padding: 40px 20px; color: var(--text-secondary);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;">
+              <path d="M20 7h-9M14 17H5M3 7h2M21 17h-4M15 12h6M9 12H3M15 6v12M9 6v12"/>
+            </svg>
+            <p style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Nessuna marca presente</p>
+            <p style="font-size: 14px;">Clicca su "Nuova Marca" per iniziare</p>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  // Rendering marche con badge conteggio
+  tbody.innerHTML = marche.map(m => {
+    // Determina il numero di prodotti (fallback a 0 se mancante)
+    const prodottiCount = parseInt(m.prodotti_count) || 0;
+    
+    // Classe badge dinamica
+    const badgeClass = prodottiCount > 0 ? 'has-products' : 'empty';
+    
+    // Testo badge
+    const badgeText = prodottiCount === 0 
+      ? 'Nessun prodotto' 
+      : prodottiCount === 1 
+        ? '1 prodotto' 
+        : `${prodottiCount} prodotti`;
+
+    return `
+      <tr>
+        <!-- 📝 NOME MARCA -->
+        <td>
+          <strong style="font-size: 15px; color: var(--text-primary);">
+            ${escapeHtml(m.nome)}
+          </strong>
+        </td>
+        
+        <!-- 🎯 BADGE CONTEGGIO PRODOTTI -->
+        <td class="text-center-badge">
+          <span class="prodotti-badge ${badgeClass}" title="${badgeText}">
+            ${prodottiCount}
+          </span>
+        </td>
+        
+        <!-- ⚙️ AZIONI -->
+        <td class="text-right">
+          <button 
+            class="btn-icon" 
+            onclick="editMarca(${m.id})" 
+            title="Modifica marca"
+            aria-label="Modifica ${escapeHtml(m.nome)}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </button>
+          
+          <button 
+            class="btn-icon" 
+            onclick="deleteMarca(${m.id}, '${escapeHtml(m.nome)}', ${prodottiCount})" 
+            title="Elimina marca"
+            aria-label="Elimina ${escapeHtml(m.nome)}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  console.log(`✅ ${marche.length} marche renderizzate`);
+}
+
+/**
+ * 🗑️ Elimina marca con controllo prodotti relazionati
+ */
+async function deleteMarca(id, nome, prodottiCount) {
+  console.log(`🗑️ Tentativo eliminazione marca: ${nome} (ID: ${id}, Prodotti: ${prodottiCount})`);
+
+  // ⚠️ AVVISO SE CI SONO PRODOTTI RELAZIONATI
+  let confirmMessage = `Sei sicuro di voler eliminare la marca "${nome}"?`;
+  
+  if (prodottiCount > 0) {
+    confirmMessage = `⚠️ ATTENZIONE!\n\nLa marca "${nome}" ha ${prodottiCount} prodotto/i relazionato/i.\n\nEliminando questa marca, ${prodottiCount === 1 ? 'il prodotto perderà' : 'i prodotti perderanno'} il riferimento alla marca.\n\nVuoi continuare?`;
+  }
+
+  // Conferma eliminazione
+  const conferma = await showConfirmModal(confirmMessage, 'Conferma Eliminazione');
+  
+  if (!conferma) {
+    console.log('❌ Eliminazione annullata dall\'utente');
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/marche/${id}`, { 
+      method: 'DELETE' 
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      // Ignora prossimo aggiornamento socket
+      if (typeof ignoreNextSocketUpdate === 'function') {
+        ignoreNextSocketUpdate();
+      }
+
+      showNotification(
+        `Marca "${nome}" eliminata con successo!`, 
+        'success'
+      );
+
+      // Ricarica marche e prodotti (per aggiornare i conteggi)
+      await loadMarche();
+      
+      if (prodottiCount > 0) {
+        await loadProdotti();
+      }
+
+      console.log(`✅ Marca "${nome}" eliminata con successo`);
+    } else {
+      throw new Error(data.error || 'Errore durante l\'eliminazione');
+    }
+  } catch (error) {
+    console.error('❌ Errore eliminazione marca:', error);
+    showNotification(
+      `Errore: ${error.message}`, 
+      'error'
+    );
+  }
+}
+
+/**
+ * 🔍 Filtra marche in base alla ricerca
+ */
+document.getElementById('filterMarche')?.addEventListener('input', (e) => {
+  const searchTerm = e.target.value.toLowerCase().trim();
+  
+  console.log(`🔍 Ricerca marca: "${searchTerm}"`);
+
+  if (!searchTerm) {
+    // Nessun filtro: mostra tutte le marche
+    marche = [...allMarche];
+  } else {
+    // Filtra per nome marca
+    marche = allMarche.filter(m => 
+      m.nome.toLowerCase().includes(searchTerm)
+    );
+  }
+
+  console.log(`📊 ${marche.length} marche trovate su ${allMarche.length} totali`);
+  
+  renderMarche();
+});
+
+/**
+ * 🛡️ Helper: Escape HTML per prevenire XSS
+ */
+function escapeHtml(text) {
+  if (!text) return '';
+  
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  
+  return String(text).replace(/[&<>"']/g, m => map[m]);
+}
+
+// ==================== ESPORTA FUNZIONI (se usi moduli) ====================
+// export { loadMarche, renderMarche, deleteMarca, escapeHtml };
