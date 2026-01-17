@@ -6434,3 +6434,366 @@ async function deleteMarca(id, nome) {
   }
 }
 
+// Apertura modal per SCARICO da PDF (ricambi)
+function openImportPDFScarichiModal() {
+    importPDFMode = 'scarico';
+    console.log('Modal import PDF in modalità SCARICO');
+
+    const modal = document.getElementById('modalImportPDF');
+    const form = document.getElementById('formImportPDF');
+    if (!modal || !form) {
+        console.error('Modal o form import PDF non trovati');
+        return;
+    }
+
+    form.reset();
+    const fileInput = document.getElementById('importPDFFile');
+    if (fileInput) fileInput.value = '';
+
+    const preview = document.getElementById('filePreview');
+    if (preview) {
+        preview.textContent = 'Trascina il PDF qui o clicca per sfogliare';
+        preview.style.display = 'block';
+    }
+
+    modal.classList.add('active');
+}
+
+// Apertura modal per CARICO da FATTURA PDF
+function openImportPDFCarichiModal() {
+    importPDFMode = 'carico';
+    console.log('Modal import PDF in modalità CARICO');
+
+    const modal = document.getElementById('modalImportPDF');
+    const form = document.getElementById('formImportPDF');
+    if (!modal || !form) {
+        console.error('Modal o form import PDF non trovati');
+        return;
+    }
+
+    form.reset();
+    const fileInput = document.getElementById('importPDFFile');
+    if (fileInput) fileInput.value = '';
+
+    const preview = document.getElementById('filePreview');
+    if (preview) {
+        preview.textContent = 'Trascina il PDF qui o clicca per sfogliare';
+        preview.style.display = 'block';
+    }
+
+    modal.classList.add('active');
+}
+
+// Chiusura modal import PDF (versione unica)
+function closeImportPDFModal() {
+    console.log('Chiusura modal import PDF');
+    const modal = document.getElementById('modalImportPDF');
+    if (!modal) {
+        console.error('Modal non trovato');
+        return;
+    }
+    modal.classList.remove('active');
+}
+
+// Estrae i CARICHI da una fattura PDF.
+// Formato atteso (generico, adattabile):
+//  - prime righe: data, fornitore, numero fattura/documento
+//  - righe prodotto: CODICE ... QTA ... PREZZO_UNIT
+function extractCarichiFromPDF(text, dateFromHeader) {
+    console.log('Ricerca CARICHI (fattura) nel PDF...');
+    const carichi = [];
+
+    const lines = text.split('\n');
+
+    // 1) intestazione: fornitore + numero documento (prime 30 righe max)
+    let supplier = null;
+    let docNumber = null;
+    let date = dateFromHeader;
+
+    for (let i = 0; i < Math.min(30, lines.length); i++) {
+        const raw = lines[i] || '';
+        const line = raw.trim();
+
+        if (!line) continue;
+
+        // Fornitore: "FORNITORE: XYZ SRL" oppure "Cliente/Fornitore XYZ SRL"
+        if (!supplier && /fornitore/i.test(line)) {
+            supplier = line.replace(/.*fornitore[:\s-]*/i, '').trim();
+            console.log('Fornitore trovato:', supplier);
+        }
+
+        // Documento/Fattura: "Fattura n. FT2025/001", "Documento n. 123"
+        if (!docNumber && /(fattura|doc\.?|documento)/i.test(line)) {
+            docNumber = line.replace(/.*(fattura|doc\.?|documento)[:\s-]*/i, '').trim();
+            console.log('Documento trovato:', docNumber);
+        }
+    }
+
+    if (!date) {
+        // fallback se non trovata prima
+        date = new Date().toISOString().split('T')[0];
+        console.warn('Data non trovata in intestazione fattura, uso oggi:', date);
+    }
+
+    // 2) righe prodotti: codice, quantità, prezzo unitario
+    // ESEMPIO semplificato:
+    //   ABC123 Descrizione molto lunga 5 25,50
+    //
+    // Regola:
+    //   - prima parola = codice
+    //   - penultima = quantità
+    //   - ultima = prezzo unitario
+    for (let i = 0; i < lines.length; i++) {
+        const raw = lines[i] || '';
+        const line = raw.trim();
+        if (!line) continue;
+
+        const upper = line.toUpperCase();
+
+        // salta intestazioni tipiche
+        if (
+            /CODICE/.test(upper) &&
+            (/QTA/.test(upper) || /QUANT/.test(upper)) &&
+            /PREZZO/.test(upper)
+        ) {
+            console.log('Riga intestazione prodotti fattura saltata:', line);
+            continue;
+        }
+
+        // salta righe totali / altre sezioni
+        if (/TOTALE|IVA|IMPOSTA|NETTO|LAVORAZIONI|MANODOPERA/.test(upper)) {
+            continue;
+        }
+
+        const parts = line.split(/\s+/).filter(Boolean);
+        if (parts.length < 4) continue;
+
+        const code = parts[0];
+
+        // codice almeno 3 caratteri alfanumerici
+        if (!/[A-Z0-9]/i.test(code) || code.length < 3) continue;
+
+        const qtyRaw = parts[parts.length - 2];
+        const priceRaw = parts[parts.length - 1];
+
+        const qty = Number.parseFloat(qtyRaw.replace('.', '').replace(',', '.'));
+        const unitPrice = Number.parseFloat(priceRaw.replace('.', '').replace(',', '.'));
+
+        if (!qty || qty <= 0 || !unitPrice || unitPrice <= 0) {
+            continue;
+        }
+
+        carichi.push({
+            code: code.toUpperCase(),
+            quantity: qty,
+            unitPrice: unitPrice,
+            date,
+            supplier: supplier || null,
+            docNumber: docNumber || null
+        });
+
+        console.log('Carico fattura trovato:', code, qty, unitPrice, date);
+    }
+
+    console.log('Totale carichi fattura trovati:', carichi.length);
+    return carichi;
+}
+
+// Crea i CARICHI nel database a partire dai dati estratti dalla fattura
+// Ogni riga PDF -> 1 movimento di carico
+async function processCarichi(carichi) {
+    console.log('Inizio elaborazione CARICHI:', carichi.length);
+    const results = {
+        success: [],
+        failed: [],
+        notFound: []
+    };
+
+    for (let i = 0; i < carichi.length; i++) {
+        const carico = carichi[i];
+        console.log(`${i + 1}/${carichi.length} Elaborazione CARICO`, carico.code, '-', carico.quantity, 'pz');
+
+        try {
+            // 1) verifica se il prodotto esiste
+            const prodotto = await checkProductExists(carico.code);
+            if (!prodotto) {
+                results.notFound.push({
+                    code: carico.code,
+                    quantity: carico.quantity,
+                    date: carico.date,
+                    reason: 'Prodotto non trovato nel database'
+                });
+                console.warn('Prodotto non trovato (carico):', carico.code);
+                continue;
+            }
+
+            // 2) crea movimento CARICO
+            const movementData = {
+                prodottoid: prodotto.id,
+                tipo: 'carico',
+                quantita: carico.quantity,
+                datamovimento: carico.date,
+                fatturadoc: carico.docNumber || null,
+                fornitore: carico.supplier || null,
+                prezzo: carico.unitPrice
+            };
+
+            console.log('Invio CARICO al server:', movementData);
+
+            const res = await fetch(`${APIURL}dati`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(movementData)
+            });
+
+            if (res.ok) {
+                results.success.push({
+                    code: carico.code,
+                    nome: prodotto.nome,
+                    quantity: carico.quantity,
+                    date: carico.date
+                });
+                console.log('Carico creato:', carico.code, '-', carico.quantity, 'pz');
+            } else {
+                const error = await res.json().catch(() => ({ error: 'Errore sconosciuto dal server' }));
+                results.failed.push({
+                    code: carico.code,
+                    quantity: carico.quantity,
+                    date: carico.date,
+                    reason: error.error || 'Errore sconosciuto dal server'
+                });
+                console.error('Errore creazione carico:', error.error);
+            }
+        } catch (error) {
+            results.failed.push({
+                code: carico.code,
+                quantity: carico.quantity,
+                date: carico.date,
+                reason: error.message
+            });
+            console.error('Errore elaborazione carico:', error.message);
+        }
+    }
+
+    console.log('Elaborazione CARICHI completata', results);
+    return results;
+}
+
+// Import PDF generico: gestisce SCARICHI (RICAMBI) o CARICHI (FATTURA) in base a importPDFMode
+async function handlePDFImport(file) {
+    try {
+        console.log('Inizio importazione PDF', file.name);
+        showImportLoading(); // usa già showImportLoading/hideImportLoading esistenti
+
+        // 1) Estrai testo dal PDF
+        const text = await extractTextFromPDF(file);
+        console.log('Testo estratto dal PDF (prime 1000 chars):', text.substring(0, 1000));
+
+        // 2) Estrai la DATA (vale sia per scarichi che per carichi)
+        const date = extractDateFromPDF(text);
+        console.log('Data trovata nel PDF:', date);
+
+        let results;
+
+        if (importPDFMode === 'scarico') {
+            // --- Modalità SCARICO (RICAMBI) ---
+            const scarichi = extractScarichiFromPDF(text, date);
+            console.log(scarichi.length, 'scarichi trovati per la data', date, scarichi);
+
+            if (scarichi.length === 0) {
+                throw new Error(
+                    'Nessun prodotto trovato nel PDF.\n' +
+                    'Verifica che il PDF contenga:\n' +
+                    '- Sezione RICAMBI\n' +
+                    '- Codice ricambio e Quantità'
+                );
+            }
+
+            results = await processScarichi(scarichi);
+        } else {
+            // --- Modalità CARICO (FATTURA) ---
+            const carichi = extractCarichiFromPDF(text, date);
+            console.log(carichi.length, 'carichi trovati per la data', date, carichi);
+
+            if (carichi.length === 0) {
+                throw new Error(
+                    'Nessun prodotto trovato nel PDF fattura.\n' +
+                    'Controlla che le righe abbiano: CODICE, QUANTITÀ e PREZZO UNITARIO.'
+                );
+            }
+
+            results = await processCarichi(carichi);
+        }
+
+        // 3) Mostra risultati (riusa showImportResults)
+        showImportResults(results);
+
+        // 4) Se ci sono successi, ricarica Movimenti + Prodotti
+        if (results.success && results.success.length > 0) {
+            console.log('Ricarico tabelle Movimenti e Prodotti...');
+            await loadMovimenti();
+            await loadProdotti();
+            console.log('Tabelle ricaricate');
+        }
+
+        return results;
+    } catch (error) {
+        console.error('Errore import PDF', error);
+        alert('Errore durante l\'importazione: ' + error.message);
+        throw error;
+    } finally {
+        hideImportLoading(); // nasconde loading, il modal viene chiuso da showImportResults se tutto ok
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Inizializzazione event listeners import PDF');
+
+    // SUBMIT FORM
+    const form = document.getElementById('formImportPDF');
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            console.log('Submit form import PDF');
+
+            const fileInput = document.getElementById('importPDFFile');
+            const file = fileInput?.files?.[0];
+
+            if (!file) {
+                alert('Seleziona un file PDF');
+                return;
+            }
+
+            if (file.type !== 'application/pdf') {
+                alert('Il file deve essere un PDF');
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                alert('Il file è troppo grande (max 10MB)');
+                return;
+            }
+
+            try {
+                await handlePDFImport(file);
+            } catch (error) {
+                console.error('Errore gestione import', error);
+            }
+        });
+    }
+
+    // PREVIEW FILE SELEZIONATO
+    const fileInput = document.getElementById('importPDFFile');
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            const preview = document.getElementById('filePreview');
+            if (file && preview) {
+                const sizeKB = (file.size / 1024).toFixed(1);
+                preview.textContent = `${file.name} (${sizeKB} KB)`;
+                preview.style.display = 'block';
+                console.log('File selezionato', file.name, sizeKB, 'KB');
+            }
+        });
+    }
+});
