@@ -6797,3 +6797,363 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+function normalizeDate(dateStr) {
+    if (!dateStr) return new Date().toISOString().split("T")[0];
+
+    dateStr = String(dateStr).trim();
+
+    // Formato con separatore: 12/01/2025, 12-1-25, 12.01.2025
+    if (dateStr.includes("/") || dateStr.includes("-") || dateStr.includes(".")) {
+        const sep = dateStr.includes("/") ? "/" : dateStr.includes("-") ? "-" : ".";
+        const parts = dateStr.split(sep).filter(Boolean);
+        if (parts.length === 3) {
+            let [d, m, y] = parts;
+            if (d.length === 4) {
+                // Già YYYY-MM-DD
+                return dateStr.replace(/[/\.]/g, "-");
+            }
+            if (y.length === 2) y = "20" + y;
+            d = d.padStart(2, "0");
+            m = m.padStart(2, "0");
+            return `${y}-${m}-${d}`;
+        }
+    }
+
+    // Formato senza separatore: 12012025, 120125 (12/01/25)
+    const onlyDigits = dateStr.replace(/\D/g, "");
+    if (onlyDigits.length === 8) {
+        const d = onlyDigits.slice(0, 2);
+        const m = onlyDigits.slice(2, 4);
+        let y = onlyDigits.slice(4);
+        return `${y}-${m}-${d}`;
+    }
+    if (onlyDigits.length === 6) {
+        const d = onlyDigits.slice(0, 2);
+        const m = onlyDigits.slice(2, 4);
+        let y = "20" + onlyDigits.slice(4);
+        return `${y}-${m}-${d}`;
+    }
+
+    // Fallback: oggi
+    return new Date().toISOString().split("T")[0];
+}
+
+function extractDateFromPDF(text) {
+    const lines = text.split(/\r?\n/);
+
+    // 1) Cerca righe con "DATA", "DATA DOC", "DATA FATTURA" ecc.
+    const headerDatePattern = /(data\s*(doc|fattura|documento)?\s*[:\-]?\s*)(\d{1,2}[\/\.\-]?\d{1,2}[\/\.\-]?\d{2,4})/i;
+
+    for (let i = 0; i < Math.min(40, lines.length); i++) {
+        const line = lines[i];
+        const match = line.match(headerDatePattern);
+        if (match && match[3]) {
+            return normalizeDate(match[3]);
+        }
+    }
+
+    // 2) Se non trova "DATA", cerca una qualsiasi data nelle prime righe
+    const anyDatePattern = /(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4})/;
+    for (let i = 0; i < Math.min(40, lines.length); i++) {
+        const line = lines[i];
+        const match = line.match(anyDatePattern);
+        if (match && match[1]) {
+            return normalizeDate(match[1]);
+        }
+    }
+
+    // 3) Fallback: oggi
+    return new Date().toISOString().split("T")[0];
+}
+
+function extractHeaderInfoFromPDF(text, dateFromHeader) {
+    const lines = text.split(/\r?\n/);
+    let supplier = null;
+    let docNumber = null;
+    let date = dateFromHeader || null;
+
+    for (let i = 0; i < Math.min(40, lines.length); i++) {
+        const raw = lines[i];
+        const line = raw.trim();
+        if (!line) continue;
+
+        // Fornitore: “Fornitore XYZ SRL”, “Cliente/Fornitore XY...”
+        if (!supplier) {
+            const fornitoreMatch = line.match(/(fornitore|cliente\s*\/?\s*fornitore)\s*[:\-]?\s*(.*)/i);
+            if (fornitoreMatch && fornitoreMatch[2]) {
+                supplier = fornitoreMatch[2].trim();
+            }
+        }
+
+        // Documento / Fattura n.
+        if (!docNumber) {
+            const docMatch = line.match(/(fattura|documento|doc\.?)\s*(n\.?|nr\.?|num\.?)?\s*[:\-]?\s*(.+)/i);
+            if (docMatch && docMatch[3]) {
+                docNumber = docMatch[3].trim();
+            }
+        }
+
+        // Eventuale data più precisa
+        if (!date) {
+            const anyDatePattern = /(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4})/;
+            const match = line.match(anyDatePattern);
+            if (match && match[1]) {
+                date = normalizeDate(match[1]);
+            }
+        }
+    }
+
+    if (!date) {
+        date = new Date().toISOString().split("T")[0];
+    }
+
+    return { supplier, docNumber, date };
+}
+
+function extractCarichiFromPDF(text, dateFromHeader) {
+    const lines = text.split(/\r?\n/);
+    const carichi = [];
+
+    // Intestazione: fornitore, n. documento, data
+    const headerInfo = extractHeaderInfoFromPDF(text, dateFromHeader);
+    const supplier = headerInfo.supplier || null;
+    const docNumber = headerInfo.docNumber || null;
+    const date = headerInfo.date;
+
+    // Individua (se possibile) la riga intestazione prodotti: qualcosa che contenga
+    // CODICE e QTA/QUANT e PREZZO ma non ci affidiamo solo a questo
+    let startIndex = 0;
+    for (let i = 0; i < Math.min(60, lines.length); i++) {
+        const upper = lines[i].toUpperCase();
+        if (
+            upper.includes("CODICE") &&
+            (upper.includes("QTA") || upper.includes("QUANT")) &&
+            (upper.includes("PREZZO") || upper.includes("P. UNIT") || upper.includes("UNIT"))
+        ) {
+            startIndex = i + 1;
+            break;
+        }
+    }
+
+    // Se non trovi l'intestazione, comunque partiamo più avanti per saltare logo/indirizzi
+    if (startIndex === 0) {
+        startIndex = 10; // euristica
+    }
+
+    // Regex di supporto
+    const headerWords = /(CODICE|RICAMBIO|DESCRIZIONE|QTA|QUANT|PREZZO|IMPORTO|TOTALE|IVA)/i;
+
+    for (let i = startIndex; i < lines.length; i++) {
+        const raw = lines[i];
+        let line = raw.trim();
+        if (!line) continue;
+
+        const upper = line.toUpperCase();
+
+        // Stop a zone tipiche di totali / altre sezioni
+        if (
+            upper.includes("TOTALE") ||
+            upper.includes("NETTO") ||
+            upper.includes("MANODOPERA") ||
+            upper.includes("LAVORAZIONI") ||
+            upper.includes("IVA") && !upper.includes("IVA INCLUSA")
+        ) {
+            break;
+        }
+
+        // Salta righe che sono chiaramente intestazioni (se il 70% delle parole sono keyword)
+        const words = line.split(/\s+/).filter(Boolean);
+        const headerCount = words.filter(w => headerWords.test(w)).length;
+        if (words.length > 0 && headerCount / words.length >= 0.6) {
+            continue;
+        }
+
+        // Ora proviamo a capire codice, quantita, prezzo
+        const parts = words;
+
+        // Trova il prezzo: ultimo numero plausibile con decimali
+        let priceIndex = -1;
+        let unitPrice = null;
+        for (let idx = parts.length - 1; idx >= 0; idx--) {
+            const cleaned = parts[idx].replace(/\./g, "").replace(",", ".");
+            const num = Number.parseFloat(cleaned);
+            if (!Number.isNaN(num) && num >= 0 && num <= 999999) {
+                unitPrice = num;
+                priceIndex = idx;
+                break;
+            }
+        }
+        if (unitPrice === null) continue;
+
+        // Trova la quantità: numero prima del prezzo
+        let qtyIndex = -1;
+        let qty = null;
+        for (let idx = priceIndex - 1; idx >= 0; idx--) {
+            const cleaned = parts[idx].replace(/\./g, "").replace(",", ".");
+            const num = Number.parseFloat(cleaned);
+            if (!Number.isNaN(num) && num > 0 && num <= 999999) {
+                qty = num;
+                qtyIndex = idx;
+                break;
+            }
+        }
+        if (qty === null) continue;
+
+        // Codice: la prima parola “codice-like” prima della descrizione
+        // pattern ABC123, 123ABC, ABC-123 etc.
+        let code = null;
+        for (let idx = 0; idx < qtyIndex; idx++) {
+            const w = parts[idx];
+            const cleaned = w.replace(/[^A-Z0-9\-]/gi, "").toUpperCase();
+            if (/^[A-Z0-9][A-Z0-9\-]{2,}$/.test(cleaned)) {
+                // escludi parole tipiche tipo “FILTRO”, “MOTO”, ecc. se vuoi
+                const excluded = ["QTA", "QUANTITA", "PZ", "PEZZI", "RICAMBIO", "CODICE"];
+                if (!excluded.includes(cleaned)) {
+                    code = cleaned;
+                    break;
+                }
+            }
+        }
+        if (!code) continue;
+
+        carichi.push({
+            code,
+            quantity: qty,
+            unitPrice: unitPrice,
+            date,
+            supplier,
+            docNumber
+        });
+    }
+
+    return carichi;
+}
+
+async function checkProductExists(code) {
+    try {
+        const res = await fetch(APIURL + "prodotti");
+        if (!res.ok) return null;
+        const prodotti = await res.json();
+        // confronto solo sul "codice" che nel tuo DB usi come nome prodotto
+        const codeUpper = String(code).toUpperCase().trim();
+        return prodotti.find(p => String(p.nome).toUpperCase().trim() === codeUpper) || null;
+    } catch (error) {
+        console.error("Errore verifica prodotto", error);
+        return null;
+    }
+}
+
+async function processCarichi(carichi) {
+    const results = { success: [], failed: [], notFound: [] };
+
+    for (let i = 0; i < carichi.length; i++) {
+        const carico = carichi[i];
+
+        try {
+            // 1) verifica prodotto
+            const prodotto = await checkProductExists(carico.code);
+            if (!prodotto) {
+                results.notFound.push({
+                    code: carico.code,
+                    quantity: carico.quantity,
+                    date: carico.date,
+                    reason: "Prodotto non trovato nel database"
+                });
+                continue;
+            }
+
+            // 2) prepara movimento CARICO
+            const movementData = {
+                prodottoid: prodotto.id,
+                tipo: "carico",
+                quantita: Number.parseFloat(carico.quantity.toFixed(2)),
+                datamovimento: carico.date,
+                fatturadoc: carico.docNumber || null,
+                fornitore: carico.supplier || null,
+                prezzo: Number.parseFloat(carico.unitPrice.toFixed(2))
+            };
+
+            const res = await fetch(APIURL + "dati", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(movementData)
+            });
+
+            if (res.ok) {
+                results.success.push({
+                    code: carico.code,
+                    nome: prodotto.nome,
+                    quantity: carico.quantity,
+                    date: carico.date
+                });
+            } else {
+                let errorMsg = "Errore sconosciuto dal server";
+                try {
+                    const err = await res.json();
+                    if (err && err.error) errorMsg = err.error;
+                } catch (e) {}
+                results.failed.push({
+                    code: carico.code,
+                    quantity: carico.quantity,
+                    date: carico.date,
+                    reason: errorMsg
+                });
+            }
+        } catch (error) {
+            results.failed.push({
+                code: carico.code,
+                quantity: carico.quantity,
+                date: carico.date,
+                reason: error.message || "Errore elaborazione carico"
+            });
+        }
+    }
+
+    return results;
+}
+
+async function handlePDFImport(file) {
+    try {
+        console.log("Inizio importazione PDF", file.name);
+        showImportLoading();
+
+        // 1) Estrai testo dal PDF (usa pdf.js o il tuo metodo esistente)
+        const text = await extractTextFromPDF(file); // funzione che hai/avrai tu
+
+        // 2) Data intestazione
+        const dateFromHeader = extractDateFromPDF(text);
+
+        // 3) In base alla modalità: importPDFMode === "carico" / "scarico"
+        let results;
+        if (importPDFMode === "carico") {
+            const carichi = extractCarichiFromPDF(text, dateFromHeader);
+            if (!carichi || carichi.length === 0) {
+                throw new Error("Nessun prodotto trovato nel PDF fattura. Controlla che ci siano codice, quantità e prezzo unitario.");
+            }
+            results = await processCarichi(carichi);
+        } else {
+            // scarichi: usi le tue extractScarichiFromPDF / processScarichi esistenti
+            const scarichi = extractScarichiFromPDF(text, dateFromHeader);
+            if (!scarichi || scarichi.length === 0) {
+                throw new Error("Nessun prodotto trovato nella sezione RICAMBI del PDF.");
+            }
+            results = await processScarichi(scarichi);
+        }
+
+        showImportResults(results);
+
+        if (results.success && results.success.length > 0) {
+            await loadMovimenti();
+            await loadProdotti();
+        }
+
+        return results;
+    } catch (error) {
+        console.error("Errore import PDF", error);
+        alert("Errore durante l'importazione: " + (error.message || error));
+        throw error;
+    } finally {
+        hideImportLoading();
+    }
+}
