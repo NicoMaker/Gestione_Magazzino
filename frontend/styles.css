@@ -23,9 +23,8 @@
 }
 
 body {
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantarell, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, sans-serif;
   background: var(--bg-main);
   color: var(--text-primary);
   line-height: 1.6;
@@ -741,10 +740,8 @@ tbody tr:hover {
   display: flex;
   flex-direction: column;
   animation: slideUpModal 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow:
-    0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(99, 102, 241, 0.05);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(99, 102, 241, 0.05);
   border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
@@ -3369,194 +3366,5 @@ tbody tr:hover {
     font-size: 12px;
     padding: 5px 12px;
     min-width: 45px;
-  }
-}
-
-/* Header sezione movimenti: layout orizzontale */
-.section-header-movimenti {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-  flex-wrap: wrap;
-}
-
-/* blocco titolo a sinistra */
-.section-header-movimenti .section-title h1 {
-  margin: 0;
-  font-size: 2.2rem;
-  font-weight: 700;
-}
-
-.section-header-movimenti .section-title p {
-  margin: 0.3rem 0 0;
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-}
-
-/* blocco comandi a destra */
-.section-header-movimenti .section-actions {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex: 1;
-  justify-content: flex-end;
-}
-
-/* search larga come nello screenshot */
-.section-header-movimenti .search-wrapper.large {
-  flex: 1;
-  max-width: 420px;
-}
-
-.filter-input-large {
-  width: 100%;
-  height: 48px;
-  border-radius: 999px;
-  padding: 0 1.2rem;
-  font-size: 0.95rem;
-}
-
-/* gruppo bottoni */
-.section-header-movimenti .actions-buttons {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-/* stile bottoni outline (grigi) */
-.btn.btn-outline {
-  background: #fff;
-  color: var(--text-primary);
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  border-radius: 999px;
-  padding: 0.65rem 1.2rem;
-  font-size: 0.9rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
-  transition:
-    background 0.15s ease,
-    box-shadow 0.15s ease,
-    transform 0.05s ease;
-}
-
-.btn.btn-outline:hover {
-  background: #f3f4ff;
-  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.18);
-  transform: translateY(-1px);
-}
-
-/* bottone principale viola grande */
-.btn.btn-primary.btn-large {
-  border-radius: 999px;
-  padding: 0.8rem 1.6rem;
-  font-weight: 600;
-  font-size: 0.95rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* icona a sinistra del testo */
-.btn-icon-left {
-  display: inline-flex;
-  margin-right: 0.1rem;
-}
-
-.btn-icon-left svg {
-  width: 18px;
-  height: 18px;
-}
-
-/* responsive: su mobile va tutto a colonne */
-@media (max-width: 768px) {
-  .section-header-movimenti {
-    align-items: flex-start;
-  }
-
-  .section-header-movimenti .section-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .section-header-movimenti .actions-buttons {
-    justify-content: stretch;
-    flex-wrap: wrap;
-  }
-
-  .section-header-movimenti .actions-buttons .btn {
-    flex: 1 1 100%;
-    justify-content: center;
-  }
-}
-.section-header-movimenti {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.section-header-movimenti .section-title h1 {
-  margin: 0;
-  font-size: 2.2rem;
-  font-weight: 700;
-}
-
-/* wrapper destra: input + bottoni sulla stessa riga */
-.section-header-movimenti .section-actions {
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.section-header-movimenti .section-actions-top {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  width: 100%;
-  justify-content: flex-end;
-}
-
-.section-header-movimenti .search-wrapper.large {
-  flex: 1;
-  max-width: 450px;
-}
-
-.filter-input-large {
-  width: 100%;
-  height: 48px;
-  border-radius: 999px;
-  padding: 0 1.2rem;
-}
-
-/* gruppo bottoni a destra dell'input */
-.section-header-movimenti .actions-buttons {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-/* responsivo */
-@media (max-width: 768px) {
-  .section-header-movimenti {
-    align-items: flex-start;
-  }
-
-  .section-header-movimenti .section-actions-top {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .section-header-movimenti .actions-buttons {
-    flex-wrap: wrap;
-    justify-content: stretch;
-  }
-
-  .section-header-movimenti .actions-buttons .btn {
-    flex: 1 1 100%;
-    justify-content: center;
   }
 }

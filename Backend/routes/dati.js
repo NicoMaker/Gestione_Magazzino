@@ -1,55 +1,5 @@
 // routes/dati.js - CON VINCOLI TEMPORALI SUI LOTTI
 
-// 🔧 Helper: trova prodotto per codice (nome) oppure lo crea
-function findOrCreateProduct(db, code, descrizione = null, marcaId = null) {
-  return new Promise((resolve, reject) => {
-    if (!code || !code.trim()) {
-      return reject(new Error("Codice prodotto mancante"));
-    }
-
-    const nome = code.trim();
-
-    // 1) cerca prodotto esistente
-    db.get(
-      `SELECT p.id, p.nome, p.marca_id, p.descrizione
-       FROM prodotti p
-       WHERE UPPER(p.nome) = UPPER(?)`,
-      [nome],
-      (err, row) => {
-        if (err) return reject(err);
-
-        if (row) {
-          return resolve(row); // trovato
-        }
-
-        // 2) non trovato → crealo
-        const data_creazione = new Date().toISOString();
-        db.run(
-          `INSERT INTO prodotti (nome, marca_id, descrizione, data_creazione)
-           VALUES (?, ?, ?, ?)`,
-          [nome, marcaId || null, descrizione || null, data_creazione],
-          function (err2) {
-            if (err2) return reject(err2);
-
-            const newId = this.lastID;
-            db.get(
-              `SELECT p.id, p.nome, p.marca_id, p.descrizione
-               FROM prodotti p
-               WHERE p.id = ?`,
-              [newId],
-              (err3, newRow) => {
-                if (err3) return reject(err3);
-                resolve(newRow);
-              }
-            );
-          }
-        );
-      }
-    );
-  });
-}
-
-
 const express = require("express");
 const router = express.Router();
 const { db } = require("../db/init");
@@ -105,7 +55,6 @@ router.get("/", (req, res) => {
 });
 
 // POST - Crea nuovo movimento (carico o scarico)
-// POST - Crea nuovo movimento (carico o scarico)
 router.post("/", (req, res) => {
   const {
     prodotto_id,
@@ -139,9 +88,7 @@ router.post("/", (req, res) => {
 
   const data_registrazione = new Date().toISOString();
 
-  // 🔍 CONTROLLO ANTI-DUPLICATO
-  // - blocca solo i CARICHI (per evitare doppio import della stessa fattura)
-  // - NON blocca gli SCARICHI (possono essere ripetuti se c'è giacenza)
+  // 🔍 CONTROLLO ANTI-DUPLICATO (stesso movimento da stesso PDF)
   const dupQuery = `
     SELECT id FROM dati
     WHERE prodotto_id = ?
@@ -159,9 +106,7 @@ router.post("/", (req, res) => {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
-
-      // ⛔ blocca solo i duplicati di CARICO
-      if (existing && tipo === "carico") {
+      if (existing) {
         return res.status(409).json({
           error: "Movimento già presente (ordine PDF importato più volte).",
         });
@@ -178,7 +123,6 @@ router.post("/", (req, res) => {
         }
 
         const prezzoTotale = formatDecimal(prc * qty);
-
         db.serialize(() => {
           db.run("BEGIN TRANSACTION;");
           db.run(
@@ -201,7 +145,6 @@ router.post("/", (req, res) => {
               }
 
               const dati_id = this.lastID;
-
               db.run(
                 "INSERT INTO lotti (prodotto_id, quantita_iniziale, quantita_rimanente, prezzo, data_carico, data_registrazione, fattura_doc, fornitore, dati_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 [
@@ -222,7 +165,6 @@ router.post("/", (req, res) => {
                   }
 
                   db.run("COMMIT;");
-
                   const io = req.app.get("io");
                   if (io) {
                     io.emit("movimento_aggiunto", { tipo: "carico", prodotto_id });
@@ -276,29 +218,23 @@ router.post("/", (req, res) => {
 
             for (const lotto of lotti) {
               if (daScaricare <= 0) break;
-
               const qtaDaQuestoLotto = Math.min(
                 daScaricare,
                 formatDecimal(lotto.quantita_rimanente)
               );
-
               const nuovaQta = formatDecimal(
                 formatDecimal(lotto.quantita_rimanente) - qtaDaQuestoLotto
               );
-
               costoTotaleScarico +=
                 qtaDaQuestoLotto * formatDecimal(lotto.prezzo);
-
               updates.push({
                 id: lotto.id,
                 nuova_quantita: nuovaQta,
               });
-
               daScaricare = formatDecimal(daScaricare - qtaDaQuestoLotto);
             }
 
             costoTotaleScarico = formatDecimal(costoTotaleScarico);
-
             db.serialize(() => {
               db.run("BEGIN TRANSACTION;");
               db.run(
@@ -325,12 +261,6 @@ router.post("/", (req, res) => {
 
                   if (totalUpdates === 0) {
                     db.run("COMMIT;");
-                    const io = req.app.get("io");
-                    if (io) {
-                      io.emit("movimento_aggiunto", { tipo: "scarico", prodotto_id });
-                      io.emit("magazzino_aggiornato");
-                      io.emit("dati_aggiornati");
-                    }
                     return res.json({
                       success: true,
                       costo_totale_scarico: costoTotaleScarico,
@@ -362,6 +292,7 @@ router.post("/", (req, res) => {
                               io.emit("magazzino_aggiornato");
                               io.emit("dati_aggiornati");
                             }
+
                             return res.json({
                               success: true,
                               costo_totale_scarico: costoTotaleScarico,
@@ -380,7 +311,6 @@ router.post("/", (req, res) => {
     }
   );
 });
-
 
 
 // DELETE - Elimina movimento
@@ -563,146 +493,5 @@ router.delete("/:id", (req, res) => {
     );
   });
 });
-
-// POST /dati/import-fattura
-// body: { righe: [{ code, descrizione, quantita, prezzo, data_movimento, fattura_doc, fornitore }] }
-router.post("/import-fattura", async (req, res) => {
-  const { righe } = req.body;
-
-  if (!Array.isArray(righe) || righe.length === 0) {
-    return res.status(400).json({ error: "Nessuna riga da importare" });
-  }
-
-  const results = {
-    success: [],
-    failed: [],
-  };
-
-  try {
-    for (const riga of righe) {
-      const {
-        code,
-        descrizione,
-        quantita,
-        prezzo,
-        data_movimento,
-        fattura_doc,
-        fornitore,
-      } = riga;
-
-      try {
-        const prodotto = await findOrCreateProduct(db, code, descrizione, null);
-
-        await new Promise((resolve, reject) => {
-          const qtaString = String(quantita || "").replace(",", ".");
-          const qty = formatDecimal(qtaString);
-          if (qty === null || qty <= 0) {
-            return reject(new Error("Quantità non valida"));
-          }
-
-          const prezzoString = String(prezzo || "").replace(",", ".");
-          const prc = formatDecimal(prezzoString);
-          if (prc === null || prc <= 0) {
-            return reject(new Error("Prezzo non valido"));
-          }
-
-          const data_registrazione = new Date().toISOString();
-          const prezzoTotale = formatDecimal(prc * qty);
-          const fornitoreValue =
-            fornitore && String(fornitore).trim() !== ""
-              ? String(fornitore).trim()
-              : null;
-
-          db.serialize(() => {
-            db.run("BEGIN TRANSACTION;");
-
-            db.run(
-              `INSERT INTO dati
-               (prodotto_id, tipo, quantita, prezzo, prezzo_totale_movimento,
-                data_movimento, data_registrazione, fattura_doc, fornitore_cliente_id)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-              [
-                prodotto.id,
-                "carico",
-                qty,
-                prc,
-                prezzoTotale,
-                data_movimento,
-                data_registrazione,
-                fattura_doc,
-                fornitoreValue,
-              ],
-              function (err) {
-                if (err) {
-                  db.run("ROLLBACK;");
-                  return reject(err);
-                }
-
-                const dati_id = this.lastID;
-
-                db.run(
-                  `INSERT INTO lotti
-                   (prodotto_id, quantita_iniziale, quantita_rimanente, prezzo,
-                    data_carico, data_registrazione, fattura_doc, fornitore, dati_id)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                  [
-                    prodotto.id,
-                    qty,
-                    qty,
-                    prc,
-                    data_movimento,
-                    data_registrazione,
-                    fattura_doc,
-                    fornitoreValue,
-                    dati_id,
-                  ],
-                  function (err2) {
-                    if (err2) {
-                      db.run("ROLLBACK;");
-                      return reject(err2);
-                    }
-
-                    db.run("COMMIT;");
-                    const io = req.app.get("io");
-                    if (io) {
-                      io.emit("movimento_aggiunto", {
-                        tipo: "carico",
-                        prodotto_id: prodotto.id,
-                      });
-                      io.emit("magazzino_aggiornato");
-                      io.emit("dati_aggiornati");
-                      io.emit("prodotti_aggiornati");
-                    }
-                    resolve();
-                  }
-                );
-              }
-            );
-          });
-        });
-
-        results.success.push({
-          code,
-          descrizione,
-          quantita,
-          prezzo,
-          data_movimento,
-        });
-      } catch (errRiga) {
-        results.failed.push({
-          code: riga.code,
-          descrizione: riga.descrizione,
-          error: errRiga.message,
-        });
-      }
-    }
-
-    return res.json(results);
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
-});
-
-
 
 module.exports = router;
