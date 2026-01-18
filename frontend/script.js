@@ -7157,3 +7157,38 @@ async function handlePDFImport(file) {
         hideImportLoading();
     }
 }
+
+async function handleFatturaImport(file) {
+  showImportLoading(); // come per gli scarichi
+
+  try {
+    const text = await extractTextFromPDF(file); // già esiste per scarichi
+    const righe = parseCarichiFromFatturaText(text); // da scrivere tu per il formato della fattura
+
+    if (!righe.length) {
+      throw new Error("Nessun rigo valido trovato nella fattura.");
+    }
+
+    const res = await fetch(`${API_URL}/dati/import-fattura`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ righe })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || "Errore import fattura");
+    }
+
+    showImportResults(data); // simile a showImportResults degli scarichi
+    if (data.success.length > 0) {
+      await loadMovimenti();
+      await loadProdotti();
+      await loadRiepilogo?.();
+    }
+  } catch (err) {
+    alert("Errore durante l'import fattura: " + err.message);
+  } finally {
+    hideImportLoading();
+  }
+}

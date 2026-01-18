@@ -1,5 +1,55 @@
 // routes/dati.js - CON VINCOLI TEMPORALI SUI LOTTI
 
+// 🔧 Helper: trova prodotto per codice (nome) oppure lo crea
+function findOrCreateProduct(db, code, descrizione = null, marcaId = null) {
+  return new Promise((resolve, reject) => {
+    if (!code || !code.trim()) {
+      return reject(new Error("Codice prodotto mancante"));
+    }
+
+    const nome = code.trim();
+
+    // 1) cerca prodotto esistente
+    db.get(
+      `SELECT p.id, p.nome, p.marca_id, p.descrizione
+       FROM prodotti p
+       WHERE UPPER(p.nome) = UPPER(?)`,
+      [nome],
+      (err, row) => {
+        if (err) return reject(err);
+
+        if (row) {
+          return resolve(row); // trovato
+        }
+
+        // 2) non trovato → crealo
+        const data_creazione = new Date().toISOString();
+        db.run(
+          `INSERT INTO prodotti (nome, marca_id, descrizione, data_creazione)
+           VALUES (?, ?, ?, ?)`,
+          [nome, marcaId || null, descrizione || null, data_creazione],
+          function (err2) {
+            if (err2) return reject(err2);
+
+            const newId = this.lastID;
+            db.get(
+              `SELECT p.id, p.nome, p.marca_id, p.descrizione
+               FROM prodotti p
+               WHERE p.id = ?`,
+              [newId],
+              (err3, newRow) => {
+                if (err3) return reject(err3);
+                resolve(newRow);
+              }
+            );
+          }
+        );
+      }
+    );
+  });
+}
+
+
 const express = require("express");
 const router = express.Router();
 const { db } = require("../db/init");
@@ -493,5 +543,146 @@ router.delete("/:id", (req, res) => {
     );
   });
 });
+
+// POST /dati/import-fattura
+// body: { righe: [{ code, descrizione, quantita, prezzo, data_movimento, fattura_doc, fornitore }] }
+router.post("/import-fattura", async (req, res) => {
+  const { righe } = req.body;
+
+  if (!Array.isArray(righe) || righe.length === 0) {
+    return res.status(400).json({ error: "Nessuna riga da importare" });
+  }
+
+  const results = {
+    success: [],
+    failed: []
+  };
+
+  try {
+    for (const riga of righe) {
+      const {
+        code,
+        descrizione,
+        quantita,
+        prezzo,
+        data_movimento,
+        fattura_doc,
+        fornitore
+      } = riga;
+
+      try {
+        // 1) crea/trova prodotto
+        const prodotto = await findOrCreateProduct(db, code, descrizione, null);
+
+        // 2) chiama la stessa logica del POST /dati normale (carico)
+        const body = {
+          prodotto_id: prodotto.id,
+          tipo: "carico",
+          quantita,
+          prezzo,
+          data_movimento,
+          fattura_doc,
+          fornitore
+        };
+
+        // puoi riusare direttamente la logica del router.post("/"...) spostandola
+        // in una funzione separata, oppure rifare l'INSERT qui.
+        await new Promise((resolve, reject) => {
+          const qtaString = String(quantita).replace(",", ".");
+          const qty = formatDecimal(qtaString);
+          if (qty === null || qty <= 0) {
+            return reject(new Error("Quantità non valida"));
+          }
+
+          const prezzoString = String(prezzo).replace(",", ".");
+          const prc = formatDecimal(prezzoString);
+          if (prc === null || prc <= 0) {
+            return reject(new Error("Prezzo non valido"));
+          }
+
+          const data_registrazione = new Date().toISOString();
+          const prezzoTotale = formatDecimal(prc * qty);
+
+          db.serialize(() => {
+            db.run("BEGIN TRANSACTION;");
+
+            db.run(
+              `INSERT INTO dati
+               (prodotto_id, tipo, quantita, prezzo, prezzo_totale_movimento,
+                data_movimento, data_registrazione, fattura_doc, fornitore_cliente_id)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              [
+                prodotto.id,
+                "carico",
+                qty,
+                prc,
+                prezzoTotale,
+                data_movimento,
+                data_registrazione,
+                fattura_doc,
+                fornitore || null
+              ],
+              function (err) {
+                if (err) {
+                  db.run("ROLLBACK;");
+                  return reject(err);
+                }
+
+                const dati_id = this.lastID;
+
+                db.run(
+                  `INSERT INTO lotti
+                   (prodotto_id, quantita_iniziale, quantita_rimanente, prezzo,
+                    data_carico, data_registrazione, fattura_doc, fornitore, dati_id)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                  [
+                    prodotto.id,
+                    qty,
+                    qty,
+                    prc,
+                    data_movimento,
+                    data_registrazione,
+                    fattura_doc,
+                    fornitore || null,
+                    dati_id
+                  ],
+                  function (err2) {
+                    if (err2) {
+                      db.run("ROLLBACK;");
+                      return reject(err2);
+                    }
+
+                    db.run("COMMIT;");
+                    const io = req.app.get("io");
+                    if (io) {
+                      io.emit("movimento_aggiunto", { tipo: "carico", prodotto_id: prodotto.id });
+                      io.emit("magazzino_aggiornato");
+                      io.emit("dati_aggiornati");
+                      io.emit("prodotti_aggiornati");
+                    }
+                    resolve();
+                  }
+                );
+              }
+            );
+          });
+        });
+
+        results.success.push({ code, descrizione, quantita, prezzo, data_movimento });
+      } catch (errRiga) {
+        results.failed.push({
+          code: riga.code,
+          descrizione: riga.descrizione,
+          error: errRiga.message
+        });
+      }
+    }
+
+    res.json(results);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 module.exports = router;
