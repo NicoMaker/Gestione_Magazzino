@@ -105,6 +105,7 @@ router.get("/", (req, res) => {
 });
 
 // POST - Crea nuovo movimento (carico o scarico)
+// POST - Crea nuovo movimento (carico o scarico)
 router.post("/", (req, res) => {
   const {
     prodotto_id,
@@ -138,7 +139,9 @@ router.post("/", (req, res) => {
 
   const data_registrazione = new Date().toISOString();
 
-  // 🔍 CONTROLLO ANTI-DUPLICATO (stesso movimento da stesso PDF)
+  // 🔍 CONTROLLO ANTI-DUPLICATO
+  // - blocca solo i CARICHI (per evitare doppio import della stessa fattura)
+  // - NON blocca gli SCARICHI (possono essere ripetuti se c'è giacenza)
   const dupQuery = `
     SELECT id FROM dati
     WHERE prodotto_id = ?
@@ -156,7 +159,9 @@ router.post("/", (req, res) => {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
-      if (existing) {
+
+      // ⛔ blocca solo i duplicati di CARICO
+      if (existing && tipo === "carico") {
         return res.status(409).json({
           error: "Movimento già presente (ordine PDF importato più volte).",
         });
@@ -173,6 +178,7 @@ router.post("/", (req, res) => {
         }
 
         const prezzoTotale = formatDecimal(prc * qty);
+
         db.serialize(() => {
           db.run("BEGIN TRANSACTION;");
           db.run(
@@ -195,6 +201,7 @@ router.post("/", (req, res) => {
               }
 
               const dati_id = this.lastID;
+
               db.run(
                 "INSERT INTO lotti (prodotto_id, quantita_iniziale, quantita_rimanente, prezzo, data_carico, data_registrazione, fattura_doc, fornitore, dati_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 [
@@ -215,6 +222,7 @@ router.post("/", (req, res) => {
                   }
 
                   db.run("COMMIT;");
+
                   const io = req.app.get("io");
                   if (io) {
                     io.emit("movimento_aggiunto", { tipo: "carico", prodotto_id });
@@ -268,23 +276,29 @@ router.post("/", (req, res) => {
 
             for (const lotto of lotti) {
               if (daScaricare <= 0) break;
+
               const qtaDaQuestoLotto = Math.min(
                 daScaricare,
                 formatDecimal(lotto.quantita_rimanente)
               );
+
               const nuovaQta = formatDecimal(
                 formatDecimal(lotto.quantita_rimanente) - qtaDaQuestoLotto
               );
+
               costoTotaleScarico +=
                 qtaDaQuestoLotto * formatDecimal(lotto.prezzo);
+
               updates.push({
                 id: lotto.id,
                 nuova_quantita: nuovaQta,
               });
+
               daScaricare = formatDecimal(daScaricare - qtaDaQuestoLotto);
             }
 
             costoTotaleScarico = formatDecimal(costoTotaleScarico);
+
             db.serialize(() => {
               db.run("BEGIN TRANSACTION;");
               db.run(
@@ -311,6 +325,12 @@ router.post("/", (req, res) => {
 
                   if (totalUpdates === 0) {
                     db.run("COMMIT;");
+                    const io = req.app.get("io");
+                    if (io) {
+                      io.emit("movimento_aggiunto", { tipo: "scarico", prodotto_id });
+                      io.emit("magazzino_aggiornato");
+                      io.emit("dati_aggiornati");
+                    }
                     return res.json({
                       success: true,
                       costo_totale_scarico: costoTotaleScarico,
@@ -342,7 +362,6 @@ router.post("/", (req, res) => {
                               io.emit("magazzino_aggiornato");
                               io.emit("dati_aggiornati");
                             }
-
                             return res.json({
                               success: true,
                               costo_totale_scarico: costoTotaleScarico,
@@ -361,6 +380,7 @@ router.post("/", (req, res) => {
     }
   );
 });
+
 
 
 // DELETE - Elimina movimento
@@ -555,7 +575,7 @@ router.post("/import-fattura", async (req, res) => {
 
   const results = {
     success: [],
-    failed: []
+    failed: [],
   };
 
   try {
@@ -567,34 +587,20 @@ router.post("/import-fattura", async (req, res) => {
         prezzo,
         data_movimento,
         fattura_doc,
-        fornitore
+        fornitore,
       } = riga;
 
       try {
-        // 1) crea/trova prodotto
         const prodotto = await findOrCreateProduct(db, code, descrizione, null);
 
-        // 2) chiama la stessa logica del POST /dati normale (carico)
-        const body = {
-          prodotto_id: prodotto.id,
-          tipo: "carico",
-          quantita,
-          prezzo,
-          data_movimento,
-          fattura_doc,
-          fornitore
-        };
-
-        // puoi riusare direttamente la logica del router.post("/"...) spostandola
-        // in una funzione separata, oppure rifare l'INSERT qui.
         await new Promise((resolve, reject) => {
-          const qtaString = String(quantita).replace(",", ".");
+          const qtaString = String(quantita || "").replace(",", ".");
           const qty = formatDecimal(qtaString);
           if (qty === null || qty <= 0) {
             return reject(new Error("Quantità non valida"));
           }
 
-          const prezzoString = String(prezzo).replace(",", ".");
+          const prezzoString = String(prezzo || "").replace(",", ".");
           const prc = formatDecimal(prezzoString);
           if (prc === null || prc <= 0) {
             return reject(new Error("Prezzo non valido"));
@@ -602,6 +608,10 @@ router.post("/import-fattura", async (req, res) => {
 
           const data_registrazione = new Date().toISOString();
           const prezzoTotale = formatDecimal(prc * qty);
+          const fornitoreValue =
+            fornitore && String(fornitore).trim() !== ""
+              ? String(fornitore).trim()
+              : null;
 
           db.serialize(() => {
             db.run("BEGIN TRANSACTION;");
@@ -620,7 +630,7 @@ router.post("/import-fattura", async (req, res) => {
                 data_movimento,
                 data_registrazione,
                 fattura_doc,
-                fornitore || null
+                fornitoreValue,
               ],
               function (err) {
                 if (err) {
@@ -643,8 +653,8 @@ router.post("/import-fattura", async (req, res) => {
                     data_movimento,
                     data_registrazione,
                     fattura_doc,
-                    fornitore || null,
-                    dati_id
+                    fornitoreValue,
+                    dati_id,
                   ],
                   function (err2) {
                     if (err2) {
@@ -655,7 +665,10 @@ router.post("/import-fattura", async (req, res) => {
                     db.run("COMMIT;");
                     const io = req.app.get("io");
                     if (io) {
-                      io.emit("movimento_aggiunto", { tipo: "carico", prodotto_id: prodotto.id });
+                      io.emit("movimento_aggiunto", {
+                        tipo: "carico",
+                        prodotto_id: prodotto.id,
+                      });
                       io.emit("magazzino_aggiornato");
                       io.emit("dati_aggiornati");
                       io.emit("prodotti_aggiornati");
@@ -668,21 +681,28 @@ router.post("/import-fattura", async (req, res) => {
           });
         });
 
-        results.success.push({ code, descrizione, quantita, prezzo, data_movimento });
+        results.success.push({
+          code,
+          descrizione,
+          quantita,
+          prezzo,
+          data_movimento,
+        });
       } catch (errRiga) {
         results.failed.push({
           code: riga.code,
           descrizione: riga.descrizione,
-          error: errRiga.message
+          error: errRiga.message,
         });
       }
     }
 
-    res.json(results);
+    return res.json(results);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 });
+
 
 
 module.exports = router;
