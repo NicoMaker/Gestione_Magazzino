@@ -3350,10 +3350,6 @@ tbody tr:hover {
   }
 }
 
-.prodotti-badge.has-products {
-  animation: pulse 2s ease-in-out infinite;
-}
-
 /* Centratura colonna */
 .text-center-badge {
   text-align: center;
