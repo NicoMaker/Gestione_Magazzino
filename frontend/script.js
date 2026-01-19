@@ -6220,13 +6220,6 @@ function renderMarche() {
     
     // Classe badge dinamica
     const badgeClass = prodottiCount > 0 ? 'has-products' : 'empty';
-    
-    // Testo badge
-    const badgeText = prodottiCount === 0 
-      ? 'Nessun prodotto' 
-      : prodottiCount === 1 
-        ? '1 prodotto' 
-        : `${prodottiCount} prodotti`;
 
     return `
       <tr>
