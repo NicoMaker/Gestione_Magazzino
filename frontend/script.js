@@ -6427,3 +6427,1199 @@ async function deleteMarca(id, nome) {
   }
 }
 
+
+// ==================== PRODOTTI CON ICONA VUOTA ====================
+
+/**
+ * 🎨 Renderizza la tabella prodotti con messaggio personalizzato
+ */
+function renderProdotti() {
+  const tbody = document.getElementById("prodottiTableBody");
+
+  if (!tbody) {
+    console.error("❌ Elemento prodottiTableBody non trovato");
+    return;
+  }
+
+  // Caso: Nessun prodotto presente
+  if (prodotti.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" class="text-center">
+          <div style="padding: 40px 20px; color: var(--text-secondary);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                 style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <line x1="3" y1="9" x2="21" y2="9"/>
+              <line x1="9" y1="21" x2="9" y2="9"/>
+            </svg>
+            <p style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">
+              Nessun prodotto presente
+            </p>
+            <p style="font-size: 14px;">
+              Clicca su "Nuovo Prodotto" per iniziare
+            </p>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  // Rendering prodotti
+  tbody.innerHTML = prodotti
+    .map((p) => `
+      <tr>
+        <td><strong>${escapeHtml(p.nome)}</strong></td>
+        <td>
+          <span class="badge badge-marca">
+            ${p.marca_nome ? escapeHtml(p.marca_nome).toUpperCase() : "N/A"}
+          </span>
+        </td>
+        <td>
+          <span class="badge-giacenza">
+            ${formatQuantity(p.giacenza ?? 0)} pz
+          </span>
+        </td>
+        <td>${p.descrizione ? escapeHtml(p.descrizione) : "-"}</td>
+        <td class="text-right">
+          <button 
+            class="btn-icon" 
+            onclick="editProdotto(${p.id})" 
+            title="Modifica prodotto"
+            aria-label="Modifica ${escapeHtml(p.nome)}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </button>
+          <button 
+            class="btn-icon" 
+            onclick="deleteProdotto(${p.id}, '${escapeHtml(p.nome)}')" 
+            title="Elimina prodotto"
+            aria-label="Elimina ${escapeHtml(p.nome)}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+          </button>
+        </td>
+      </tr>
+    `)
+    .join("");
+
+  console.log(`✅ ${prodotti.length} prodotti renderizzati`);
+}
+
+/**
+ * 🗑️ Elimina prodotto con controllo movimenti
+ */
+async function deleteProdotto(id, nome) {
+  // Verifica se ci sono movimenti collegati
+  const movimentiCollegati = allMovimenti.filter(m => m.prodotto_id === id).length;
+  
+  let messaggio = `Sei sicuro di voler eliminare il prodotto "<strong>${escapeHtml(nome)}</strong>"?`;
+  
+  if (movimentiCollegati > 0) {
+    messaggio += `
+      <div style="margin-top: 15px; padding: 12px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.2);">
+        <span style="color: var(--danger); font-weight: 700; display: block; margin-bottom: 4px;">⚠️ ATTENZIONE</span>
+        Ci sono <strong>${movimentiCollegati}</strong> movimenti collegati a questo prodotto.
+        Eliminando il prodotto, verranno eliminati anche tutti i movimenti associati!
+      </div>`;
+  }
+
+  const confermato = await showConfirmModal(messaggio, 'Elimina Prodotto');
+  if (!confermato) return;
+
+  try {
+    const res = await fetch(`${API_URL}/prodotti/${id}`, { method: "DELETE" });
+    const data = await res.json();
+
+    if (res.ok) {
+      if (typeof ignoreNextSocketUpdate === "function") {
+        ignoreNextSocketUpdate();
+      }
+      
+      showAlertModal(
+        `Prodotto "${nome}" eliminato con successo!`,
+        'Operazione Completata',
+        'success'
+      );
+      
+      await loadProdotti();
+      if (movimentiCollegati > 0) {
+        await loadMovimenti();
+      }
+    } else {
+      throw new Error(data.error || "Errore durante l'eliminazione");
+    }
+  } catch (error) {
+    console.error("❌ Errore eliminazione prodotto:", error);
+    showAlertModal(`Errore: ${error.message}`, 'Errore', 'error');
+  }
+}
+
+// ==================== MOVIMENTI CON ICONA VUOTA ====================
+
+/**
+ * 🎨 Renderizza la tabella movimenti con messaggio personalizzato
+ */
+function renderMovimenti() {
+  const tbody = document.getElementById("movimentiTableBody");
+
+  if (!tbody) {
+    console.error("❌ Elemento movimentiTableBody non trovato");
+    return;
+  }
+
+  // Caso: Nessun movimento presente
+  if (movimenti.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="11" class="text-center">
+          <div style="padding: 40px 20px; color: var(--text-secondary);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                 style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+              <polyline points="17 6 23 6 23 12"/>
+            </svg>
+            <p style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">
+              Nessun movimento presente
+            </p>
+            <p style="font-size: 14px;">
+              Clicca su "Nuovo Movimento" per registrare il primo carico o scarico
+            </p>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  // Rendering movimenti
+  tbody.innerHTML = movimenti.map((m) => {
+    const prefix = m.tipo === "scarico" ? "- " : "";
+    const colorClass = m.tipo === "carico" ? "text-green" : "text-red";
+
+    let prezzoUnitarioRaw = "-";
+    if (m.tipo === "carico" && m.prezzo) {
+      prezzoUnitarioRaw = formatCurrency(m.prezzo);
+    } else if (m.tipo === "scarico" && m.prezzo_unitario_scarico) {
+      prezzoUnitarioRaw = formatCurrency(m.prezzo_unitario_scarico);
+    }
+
+    const prezzoUnitarioHtml = prezzoUnitarioRaw !== "-" 
+      ? prezzoUnitarioRaw.replace("€ ", `${prefix}€ `) 
+      : "-";
+
+    const prezzoTotaleRaw = formatCurrency(m.prezzo_totale || 0);
+    const prezzoTotaleHtml = prezzoTotaleRaw.replace("€ ", `${prefix}€ `);
+
+    return `
+      <tr>
+        <td>${new Date(m.data_movimento).toLocaleDateString("it-IT")}</td>
+        <td><strong>${escapeHtml(m.prodotto_nome)}</strong></td>
+        <td>${m.marca_nome ? escapeHtml(m.marca_nome) : '<span style="color: #999;">-</span>'}</td>
+        <td>${m.prodotto_descrizione 
+          ? `<small>${escapeHtml(m.prodotto_descrizione.substring(0, 30))}${m.prodotto_descrizione.length > 30 ? "..." : ""}</small>`
+          : '<span style="color: #999;">-</span>'
+        }</td>
+        <td>
+          <span class="badge ${m.tipo === "carico" ? "badge-success" : "badge-danger"}">
+            ${m.tipo.toUpperCase()}
+          </span>
+        </td>
+        <td class="${colorClass}">${formatQuantity(m.quantita)} pz</td>
+        <td class="${colorClass}">${prezzoUnitarioHtml}</td>
+        <td class="${colorClass}"><strong>${prezzoTotaleHtml}</strong></td>
+        <td>${m.fattura_doc || '<span style="color: #999;">-</span>'}</td>
+        <td>${m.fornitore_cliente_id || '<span style="color: #999;">-</span>'}</td>
+        <td class="text-right">
+          <button 
+            class="btn-icon" 
+            onclick="deleteMovimento(${m.id}, '${escapeHtml(m.prodotto_nome)}', '${m.tipo}')" 
+            title="Elimina movimento"
+            aria-label="Elimina movimento ${m.tipo}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  console.log(`✅ ${movimenti.length} movimenti renderizzati`);
+}
+
+/**
+ * 🗑️ Elimina movimento con conferma
+ */
+async function deleteMovimento(id, prodottoNome, tipo) {
+  const tipoLabel = tipo === 'carico' ? 'CARICO' : 'SCARICO';
+  
+  const messaggio = `
+    Sei sicuro di voler eliminare questo movimento di <strong>${tipoLabel}</strong>?
+    <div style="margin-top: 12px; padding: 10px; background: rgba(99, 102, 241, 0.1); border-radius: 6px;">
+      <strong>Prodotto:</strong> ${escapeHtml(prodottoNome)}
+    </div>
+  `;
+
+  const confermato = await showConfirmModal(messaggio, 'Elimina Movimento');
+  if (!confermato) return;
+
+  try {
+    const res = await fetch(`${API_URL}/dati/${id}`, { method: "DELETE" });
+    const data = await res.json();
+
+    if (res.ok) {
+      if (typeof ignoreNextSocketUpdate === "function") {
+        ignoreNextSocketUpdate();
+      }
+      
+      showAlertModal(
+        'Movimento eliminato con successo!',
+        'Operazione Completata',
+        'success'
+      );
+      
+      await loadMovimenti();
+      await loadProdotti();
+    } else {
+      throw new Error(data.error || "Errore durante l'eliminazione");
+    }
+  } catch (error) {
+    console.error("❌ Errore eliminazione movimento:", error);
+    showAlertModal(`Errore: ${error.message}`, 'Errore', 'error');
+  }
+}
+
+// ==================== RIEPILOGO CON ICONA VUOTA ====================
+
+/**
+ * 🎨 Renderizza il riepilogo con messaggio personalizzato
+ */
+function renderRiepilogo() {
+  const tbody = document.getElementById("riepilogoTableBody");
+
+  if (!tbody) {
+    console.error("❌ Elemento riepilogoTableBody non trovato");
+    return;
+  }
+
+  // Caso: Nessun prodotto in magazzino
+  if (riepilogo.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4" class="text-center">
+          <div style="padding: 40px 20px; color: var(--text-secondary);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                 style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+              <line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+            <p style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">
+              Nessun prodotto in magazzino
+            </p>
+            <p style="font-size: 14px;">
+              Registra dei movimenti di carico per iniziare
+            </p>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  // Rendering riepilogo con lotti
+  let html = "";
+
+  riepilogo.forEach((r) => {
+    html += `
+      <tr class="product-main-row">
+        <td>
+          <strong>${escapeHtml(r.nome)}</strong>
+          ${r.marca_nome 
+            ? ` <span class="badge-marca">${escapeHtml(r.marca_nome).toUpperCase()}</span>` 
+            : ""
+          }
+        </td>
+        <td>
+          ${r.descrizione
+            ? `<small>${escapeHtml(r.descrizione.substring(0, 50))}${r.descrizione.length > 50 ? "..." : ""}</small>`
+            : '<span style="color: #999;">-</span>'
+          }
+        </td>
+        <td>
+          <span class="badge-giacenza">${formatQuantity(r.giacenza)} pz</span>
+        </td>
+        <td>
+          <strong>${formatCurrency(r.valore_totale)}</strong>
+        </td>
+      </tr>
+    `;
+
+    // Lotti (se presenti)
+    if (r.giacenza > 0 && r.lotti && r.lotti.length > 0) {
+      html += `
+        <tr class="lotti-row">
+          <td colspan="4" class="lotti-container">
+            <div class="lotti-table-wrapper">
+              <table class="lotti-table">
+                <thead>
+                  <tr>
+                    <th>Data Carico</th>
+                    <th>Quantità</th>
+                    <th>Prezzo Unit.</th>
+                    <th>Valore</th>
+                    <th>Documento/Fattura</th>
+                    <th>Fornitore</th>
+                  </tr>
+                </thead>
+                <tbody>
+      `;
+
+      r.lotti.forEach((lotto) => {
+        html += `
+          <tr>
+            <td>${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
+            <td><strong>${formatQuantity(lotto.quantita_rimanente)} pz</strong></td>
+            <td>${formatCurrency(lotto.prezzo)}</td>
+            <td><strong>${formatCurrency(lotto.quantita_rimanente * lotto.prezzo)}</strong></td>
+            <td>${lotto.fattura_doc || '<span style="color: #999;">-</span>'}</td>
+            <td>${lotto.fornitore || '<span style="color: #999;">-</span>'}</td>
+          </tr>
+        `;
+      });
+
+      html += `
+                </tbody>
+              </table>
+            </div>
+          </td>
+        </tr>
+      `;
+    }
+  });
+
+  tbody.innerHTML = html;
+  console.log(`✅ ${riepilogo.length} prodotti nel riepilogo`);
+}
+
+// ==================== STORICO CON ICONA VUOTA ====================
+
+/**
+ * 🎨 Renderizza lo storico con messaggio personalizzato
+ */
+function renderStorico(storico) {
+  const tbody = document.getElementById("storicoTableBody");
+
+  if (!tbody) {
+    console.error("❌ Elemento storicoTableBody non trovato");
+    return;
+  }
+
+  // Caso: Nessuna data selezionata
+  if (!document.getElementById("storicoDate").value) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4" class="text-center">
+          <div style="padding: 40px 20px; color: var(--text-secondary);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                 style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <p style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">
+              Seleziona una data
+            </p>
+            <p style="font-size: 14px;">
+              Scegli una data dal calendario per visualizzare lo storico
+            </p>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  // Caso: Nessun dato disponibile per la data
+  if (storico.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4" class="text-center">
+          <div style="padding: 40px 20px; color: var(--text-secondary);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                 style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <p style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">
+              Nessun dato disponibile
+            </p>
+            <p style="font-size: 14px;">
+              Non ci sono prodotti in magazzino per questa data
+            </p>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  // Rendering storico con lotti
+  let html = "";
+
+  storico.forEach((s) => {
+    html += `
+      <tr class="product-main-row">
+        <td>
+          <strong>${escapeHtml(s.nome)}</strong>
+          ${s.marca_nome 
+            ? ` <span class="badge-marca">${escapeHtml(s.marca_nome).toUpperCase()}</span>` 
+            : ""
+          }
+        </td>
+        <td>
+          ${s.descrizione
+            ? `<small>${escapeHtml(s.descrizione.substring(0, 50))}${s.descrizione.length > 50 ? "..." : ""}</small>`
+            : '<span style="color: #999;">-</span>'
+          }
+        </td>
+        <td>
+          <span class="badge-giacenza">${formatQuantity(s.giacenza)} pz</span>
+        </td>
+        <td>
+          <strong>${formatCurrency(s.valore_totale)}</strong>
+        </td>
+      </tr>
+    `;
+
+    // Lotti (se presenti)
+    if (s.giacenza > 0 && s.lotti && s.lotti.length > 0) {
+      html += `
+        <tr class="lotti-row">
+          <td colspan="4" class="lotti-container">
+            <div class="lotti-table-wrapper">
+              <table class="lotti-table">
+                <thead>
+                  <tr>
+                    <th>Data Carico</th>
+                    <th>Quantità</th>
+                    <th>Prezzo Unit.</th>
+                    <th>Valore</th>
+                    <th>Documento/Fattura</th>
+                    <th>Fornitore</th>
+                  </tr>
+                </thead>
+                <tbody>
+      `;
+
+      s.lotti.forEach((lotto) => {
+        html += `
+          <tr>
+            <td>${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
+            <td><strong>${formatQuantity(lotto.quantita_rimanente)} pz</strong></td>
+            <td>${formatCurrency(lotto.prezzo)}</td>
+            <td><strong>${formatCurrency(lotto.quantita_rimanente * lotto.prezzo)}</strong></td>
+            <td>${lotto.fattura_doc || '<span style="color: #999;">-</span>'}</td>
+            <td>${lotto.fornitore || '<span style="color: #999;">-</span>'}</td>
+          </tr>
+        `;
+      });
+
+      html += `
+                </tbody>
+              </table>
+            </div>
+          </td>
+        </tr>
+      `;
+    }
+  });
+
+  tbody.innerHTML = html;
+  console.log(`✅ ${storico.length} prodotti nello storico`);
+}
+
+// ==================== HELPER FUNZIONI ====================
+
+/**
+ * 🛡️ Escape HTML per prevenire XSS
+ */
+function escapeHtml(text) {
+  if (!text) return '';
+  
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  
+  return String(text).replace(/[&<>"']/g, m => map[m]);
+}
+
+/**
+ * 🔔 Mostra notifica (opzionale, se hai un sistema di notifiche)
+ */
+function showNotification(message, type = 'info') {
+  // Se hai un sistema di notifiche toast, usalo qui
+  // Altrimenti, usa semplicemente alert
+  console.log(`[${type.toUpperCase()}] ${message}`);
+  
+  if (type === 'error') {
+    alert('❌ ' + message);
+  } else if (type === 'success') {
+    // Potresti usare una libreria come Toastify.js o una modale custom
+    console.log('✅ ' + message);
+  }
+}
+
+// ==================== ESPORTA FUNZIONI ====================
+// Se usi moduli ES6, decommenta:
+// export {
+//   renderProdotti,
+//   deleteProdotto,
+//   renderMovimenti,
+//   deleteMovimento,
+//   renderRiepilogo,
+//   renderStorico,
+//   escapeHtml,
+//   showNotification
+// };
+// ==================== PRODOTTI CON ICONA VUOTA ====================
+
+/**
+ * 🎨 Renderizza la tabella prodotti con messaggio personalizzato
+ */
+function renderProdotti() {
+  const tbody = document.getElementById("prodottiTableBody");
+
+  if (!tbody) {
+    console.error("❌ Elemento prodottiTableBody non trovato");
+    return;
+  }
+
+  // Caso: Nessun prodotto presente
+  if (prodotti.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" class="text-center">
+          <div style="padding: 40px 20px; color: var(--text-secondary);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                 style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <line x1="3" y1="9" x2="21" y2="9"/>
+              <line x1="9" y1="21" x2="9" y2="9"/>
+            </svg>
+            <p style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">
+              Nessun prodotto presente
+            </p>
+            <p style="font-size: 14px;">
+              Clicca su "Nuovo Prodotto" per iniziare
+            </p>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  // Rendering prodotti
+  tbody.innerHTML = prodotti
+    .map((p) => `
+      <tr>
+        <td><strong>${escapeHtml(p.nome)}</strong></td>
+        <td>
+          <span class="badge badge-marca">
+            ${p.marca_nome ? escapeHtml(p.marca_nome).toUpperCase() : "N/A"}
+          </span>
+        </td>
+        <td>
+          <span class="badge-giacenza">
+            ${formatQuantity(p.giacenza ?? 0)} pz
+          </span>
+        </td>
+        <td>${p.descrizione ? escapeHtml(p.descrizione) : "-"}</td>
+        <td class="text-right">
+          <button 
+            class="btn-icon" 
+            onclick="editProdotto(${p.id})" 
+            title="Modifica prodotto"
+            aria-label="Modifica ${escapeHtml(p.nome)}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </button>
+          <button 
+            class="btn-icon" 
+            onclick="deleteProdotto(${p.id}, '${escapeHtml(p.nome)}')" 
+            title="Elimina prodotto"
+            aria-label="Elimina ${escapeHtml(p.nome)}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+          </button>
+        </td>
+      </tr>
+    `)
+    .join("");
+
+  console.log(`✅ ${prodotti.length} prodotti renderizzati`);
+}
+
+/**
+ * 🗑️ Elimina prodotto con controllo movimenti
+ */
+async function deleteProdotto(id, nome) {
+  // Verifica se ci sono movimenti collegati
+  const movimentiCollegati = allMovimenti.filter(m => m.prodotto_id === id).length;
+  
+  let messaggio = `Sei sicuro di voler eliminare il prodotto "<strong>${escapeHtml(nome)}</strong>"?`;
+  
+  if (movimentiCollegati > 0) {
+    messaggio += `
+      <div style="margin-top: 15px; padding: 12px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.2);">
+        <span style="color: var(--danger); font-weight: 700; display: block; margin-bottom: 4px;">⚠️ ATTENZIONE</span>
+        Ci sono <strong>${movimentiCollegati}</strong> movimenti collegati a questo prodotto.
+        Eliminando il prodotto, verranno eliminati anche tutti i movimenti associati!
+      </div>`;
+  }
+
+  const confermato = await showConfirmModal(messaggio, 'Elimina Prodotto');
+  if (!confermato) return;
+
+  try {
+    const res = await fetch(`${API_URL}/prodotti/${id}`, { method: "DELETE" });
+    const data = await res.json();
+
+    if (res.ok) {
+      if (typeof ignoreNextSocketUpdate === "function") {
+        ignoreNextSocketUpdate();
+      }
+      
+      showAlertModal(
+        `Prodotto "${nome}" eliminato con successo!`,
+        'Operazione Completata',
+        'success'
+      );
+      
+      await loadProdotti();
+      if (movimentiCollegati > 0) {
+        await loadMovimenti();
+      }
+    } else {
+      throw new Error(data.error || "Errore durante l'eliminazione");
+    }
+  } catch (error) {
+    console.error("❌ Errore eliminazione prodotto:", error);
+    showAlertModal(`Errore: ${error.message}`, 'Errore', 'error');
+  }
+}
+
+// ==================== MOVIMENTI CON ICONA VUOTA ====================
+
+/**
+ * 🎨 Renderizza la tabella movimenti con messaggio personalizzato
+ */
+function renderMovimenti() {
+  const tbody = document.getElementById("movimentiTableBody");
+
+  if (!tbody) {
+    console.error("❌ Elemento movimentiTableBody non trovato");
+    return;
+  }
+
+  // Caso: Nessun movimento presente
+  if (movimenti.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="11" class="text-center">
+          <div style="padding: 40px 20px; color: var(--text-secondary);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                 style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+              <polyline points="17 6 23 6 23 12"/>
+            </svg>
+            <p style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">
+              Nessun movimento presente
+            </p>
+            <p style="font-size: 14px;">
+              Clicca su "Nuovo Movimento" per registrare il primo carico o scarico
+            </p>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  // Rendering movimenti
+  tbody.innerHTML = movimenti.map((m) => {
+    const prefix = m.tipo === "scarico" ? "- " : "";
+    const colorClass = m.tipo === "carico" ? "text-green" : "text-red";
+
+    let prezzoUnitarioRaw = "-";
+    if (m.tipo === "carico" && m.prezzo) {
+      prezzoUnitarioRaw = formatCurrency(m.prezzo);
+    } else if (m.tipo === "scarico" && m.prezzo_unitario_scarico) {
+      prezzoUnitarioRaw = formatCurrency(m.prezzo_unitario_scarico);
+    }
+
+    const prezzoUnitarioHtml = prezzoUnitarioRaw !== "-" 
+      ? prezzoUnitarioRaw.replace("€ ", `${prefix}€ `) 
+      : "-";
+
+    const prezzoTotaleRaw = formatCurrency(m.prezzo_totale || 0);
+    const prezzoTotaleHtml = prezzoTotaleRaw.replace("€ ", `${prefix}€ `);
+
+    return `
+      <tr>
+        <td>${new Date(m.data_movimento).toLocaleDateString("it-IT")}</td>
+        <td><strong>${escapeHtml(m.prodotto_nome)}</strong></td>
+        <td>${m.marca_nome ? escapeHtml(m.marca_nome) : '<span style="color: #999;">-</span>'}</td>
+        <td>${m.prodotto_descrizione 
+          ? `<small>${escapeHtml(m.prodotto_descrizione.substring(0, 30))}${m.prodotto_descrizione.length > 30 ? "..." : ""}</small>`
+          : '<span style="color: #999;">-</span>'
+        }</td>
+        <td>
+          <span class="badge ${m.tipo === "carico" ? "badge-success" : "badge-danger"}">
+            ${m.tipo.toUpperCase()}
+          </span>
+        </td>
+        <td class="${colorClass}">${formatQuantity(m.quantita)} pz</td>
+        <td class="${colorClass}">${prezzoUnitarioHtml}</td>
+        <td class="${colorClass}"><strong>${prezzoTotaleHtml}</strong></td>
+        <td>${m.fattura_doc || '<span style="color: #999;">-</span>'}</td>
+        <td>${m.fornitore_cliente_id || '<span style="color: #999;">-</span>'}</td>
+        <td class="text-right">
+          <button 
+            class="btn-icon" 
+            onclick="deleteMovimento(${m.id}, '${escapeHtml(m.prodotto_nome)}', '${m.tipo}')" 
+            title="Elimina movimento"
+            aria-label="Elimina movimento ${m.tipo}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  console.log(`✅ ${movimenti.length} movimenti renderizzati`);
+}
+
+/**
+ * 🗑️ Elimina movimento con conferma
+ */
+async function deleteMovimento(id, prodottoNome, tipo) {
+  const tipoLabel = tipo === 'carico' ? 'CARICO' : 'SCARICO';
+  
+  const messaggio = `
+    Sei sicuro di voler eliminare questo movimento di <strong>${tipoLabel}</strong>?
+    <div style="margin-top: 12px; padding: 10px; background: rgba(99, 102, 241, 0.1); border-radius: 6px;">
+      <strong>Prodotto:</strong> ${escapeHtml(prodottoNome)}
+    </div>
+  `;
+
+  const confermato = await showConfirmModal(messaggio, 'Elimina Movimento');
+  if (!confermato) return;
+
+  try {
+    const res = await fetch(`${API_URL}/dati/${id}`, { method: "DELETE" });
+    const data = await res.json();
+
+    if (res.ok) {
+      if (typeof ignoreNextSocketUpdate === "function") {
+        ignoreNextSocketUpdate();
+      }
+      
+      showAlertModal(
+        'Movimento eliminato con successo!',
+        'Operazione Completata',
+        'success'
+      );
+      
+      await loadMovimenti();
+      await loadProdotti();
+    } else {
+      throw new Error(data.error || "Errore durante l'eliminazione");
+    }
+  } catch (error) {
+    console.error("❌ Errore eliminazione movimento:", error);
+    showAlertModal(`Errore: ${error.message}`, 'Errore', 'error');
+  }
+}
+
+// ==================== RIEPILOGO CON ICONA VUOTA ====================
+
+/**
+ * 🎨 Renderizza il riepilogo con messaggio personalizzato
+ */
+function renderRiepilogo() {
+  const tbody = document.getElementById("riepilogoTableBody");
+
+  if (!tbody) {
+    console.error("❌ Elemento riepilogoTableBody non trovato");
+    return;
+  }
+
+  // Caso: Nessun prodotto in magazzino
+  if (riepilogo.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4" class="text-center">
+          <div style="padding: 40px 20px; color: var(--text-secondary);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                 style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+              <line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+            <p style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">
+              Nessun prodotto in magazzino
+            </p>
+            <p style="font-size: 14px;">
+              Registra dei movimenti di carico per iniziare
+            </p>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  // Rendering riepilogo con lotti
+  let html = "";
+
+  riepilogo.forEach((r) => {
+    html += `
+      <tr class="product-main-row">
+        <td>
+          <strong>${escapeHtml(r.nome)}</strong>
+          ${r.marca_nome 
+            ? ` <span class="badge-marca">${escapeHtml(r.marca_nome).toUpperCase()}</span>` 
+            : ""
+          }
+        </td>
+        <td>
+          ${r.descrizione
+            ? `<small>${escapeHtml(r.descrizione.substring(0, 50))}${r.descrizione.length > 50 ? "..." : ""}</small>`
+            : '<span style="color: #999;">-</span>'
+          }
+        </td>
+        <td>
+          <span class="badge-giacenza">${formatQuantity(r.giacenza)} pz</span>
+        </td>
+        <td>
+          <strong>${formatCurrency(r.valore_totale)}</strong>
+        </td>
+      </tr>
+    `;
+
+    // Lotti (se presenti)
+    if (r.giacenza > 0 && r.lotti && r.lotti.length > 0) {
+      html += `
+        <tr class="lotti-row">
+          <td colspan="4" class="lotti-container">
+            <div class="lotti-table-wrapper">
+              <table class="lotti-table">
+                <thead>
+                  <tr>
+                    <th>Data Carico</th>
+                    <th>Quantità</th>
+                    <th>Prezzo Unit.</th>
+                    <th>Valore</th>
+                    <th>Documento/Fattura</th>
+                    <th>Fornitore</th>
+                  </tr>
+                </thead>
+                <tbody>
+      `;
+
+      r.lotti.forEach((lotto) => {
+        html += `
+          <tr>
+            <td>${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
+            <td><strong>${formatQuantity(lotto.quantita_rimanente)} pz</strong></td>
+            <td>${formatCurrency(lotto.prezzo)}</td>
+            <td><strong>${formatCurrency(lotto.quantita_rimanente * lotto.prezzo)}</strong></td>
+            <td>${lotto.fattura_doc || '<span style="color: #999;">-</span>'}</td>
+            <td>${lotto.fornitore || '<span style="color: #999;">-</span>'}</td>
+          </tr>
+        `;
+      });
+
+      html += `
+                </tbody>
+              </table>
+            </div>
+          </td>
+        </tr>
+      `;
+    }
+  });
+
+  tbody.innerHTML = html;
+  console.log(`✅ ${riepilogo.length} prodotti nel riepilogo`);
+}
+
+// ==================== STORICO CON ICONA VUOTA ====================
+
+/**
+ * 📅 Carica lo storico giacenze per una data specifica
+ */
+async function loadStorico() {
+  const data = document.getElementById("storicoDate").value;
+  
+  if (!data) {
+    // Se non c'è una data, resetta la visualizzazione
+    allStorico = [];
+    storico = [];
+    updateStoricoTotal();
+    renderStorico(storico);
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/magazzino/storico-giacenza/${data}`);
+    const result = await res.json();
+
+    allStorico = result.riepilogo || [];
+    storico = allStorico;
+
+    updateStoricoTotal();
+    renderStorico(storico);
+  } catch (error) {
+    console.error("❌ Errore caricamento storico:", error);
+    showAlertModal("Errore nel caricamento dello storico", "Errore", "error");
+  }
+}
+
+/**
+ * 🎨 Renderizza lo storico con messaggio personalizzato
+ */
+function renderStorico(storico) {
+  const tbody = document.getElementById("storicoTableBody");
+
+  if (!tbody) {
+    console.error("❌ Elemento storicoTableBody non trovato");
+    return;
+  }
+
+  // Caso: Nessuna data selezionata
+  if (!document.getElementById("storicoDate").value) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4" class="text-center">
+          <div style="padding: 40px 20px; color: var(--text-secondary);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                 style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <p style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">
+              Seleziona una data
+            </p>
+            <p style="font-size: 14px;">
+              Scegli una data dal calendario per visualizzare lo storico
+            </p>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  // Caso: Nessun dato disponibile per la data
+  if (storico.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4" class="text-center">
+          <div style="padding: 40px 20px; color: var(--text-secondary);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                 style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <p style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">
+              Nessun dato disponibile
+            </p>
+            <p style="font-size: 14px;">
+              Non ci sono prodotti in magazzino per questa data
+            </p>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  // Rendering storico con lotti
+  let html = "";
+
+  storico.forEach((s) => {
+    html += `
+      <tr class="product-main-row">
+        <td>
+          <strong>${escapeHtml(s.nome)}</strong>
+          ${s.marca_nome 
+            ? ` <span class="badge-marca">${escapeHtml(s.marca_nome).toUpperCase()}</span>` 
+            : ""
+          }
+        </td>
+        <td>
+          ${s.descrizione
+            ? `<small>${escapeHtml(s.descrizione.substring(0, 50))}${s.descrizione.length > 50 ? "..." : ""}</small>`
+            : '<span style="color: #999;">-</span>'
+          }
+        </td>
+        <td>
+          <span class="badge-giacenza">${formatQuantity(s.giacenza)} pz</span>
+        </td>
+        <td>
+          <strong>${formatCurrency(s.valore_totale)}</strong>
+        </td>
+      </tr>
+    `;
+
+    // Lotti (se presenti)
+    if (s.giacenza > 0 && s.lotti && s.lotti.length > 0) {
+      html += `
+        <tr class="lotti-row">
+          <td colspan="4" class="lotti-container">
+            <div class="lotti-table-wrapper">
+              <table class="lotti-table">
+                <thead>
+                  <tr>
+                    <th>Data Carico</th>
+                    <th>Quantità</th>
+                    <th>Prezzo Unit.</th>
+                    <th>Valore</th>
+                    <th>Documento/Fattura</th>
+                    <th>Fornitore</th>
+                  </tr>
+                </thead>
+                <tbody>
+      `;
+
+      s.lotti.forEach((lotto) => {
+        html += `
+          <tr>
+            <td>${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
+            <td><strong>${formatQuantity(lotto.quantita_rimanente)} pz</strong></td>
+            <td>${formatCurrency(lotto.prezzo)}</td>
+            <td><strong>${formatCurrency(lotto.quantita_rimanente * lotto.prezzo)}</strong></td>
+            <td>${lotto.fattura_doc || '<span style="color: #999;">-</span>'}</td>
+            <td>${lotto.fornitore || '<span style="color: #999;">-</span>'}</td>
+          </tr>
+        `;
+      });
+
+      html += `
+                </tbody>
+              </table>
+            </div>
+          </td>
+        </tr>
+      `;
+    }
+  });
+
+  tbody.innerHTML = html;
+  console.log(`✅ ${storico.length} prodotti nello storico`);
+}
+
+/**
+ * 🔍 Filtra storico in base alla ricerca
+ */
+document.getElementById("filterStorico")?.addEventListener("input", (e) => {
+  const searchTerm = e.target.value.toLowerCase();
+  storico = allStorico.filter(
+    (s) =>
+      s.nome.toLowerCase().includes(searchTerm) ||
+      (s.marca_nome && s.marca_nome.toLowerCase().includes(searchTerm)) ||
+      (s.descrizione && s.descrizione.toLowerCase().includes(searchTerm))
+  );
+  updateStoricoTotal();
+  renderStorico(storico);
+});
+
+/**
+ * 💰 Aggiorna il totale dello storico
+ */
+function updateStoricoTotal() {
+  const valoreStoricoFiltrato = storico.reduce(
+    (sum, s) => sum + Number.parseFloat(s.valore_totale || 0),
+    0
+  );
+  const totalElement = document.getElementById("valoreStorico");
+  if (totalElement) {
+    totalElement.textContent = formatCurrency(valoreStoricoFiltrato);
+  }
+}
+
+// ==================== HELPER FUNZIONI ====================
+
+/**
+ * 🛡️ Escape HTML per prevenire XSS
+ */
+function escapeHtml(text) {
+  if (!text) return '';
+  
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  
+  return String(text).replace(/[&<>"']/g, m => map[m]);
+}
+
+/**
+ * 🔔 Mostra notifica (opzionale, se hai un sistema di notifiche)
+ */
+function showNotification(message, type = 'info') {
+  // Se hai un sistema di notifiche toast, usalo qui
+  // Altrimenti, usa semplicemente alert
+  console.log(`[${type.toUpperCase()}] ${message}`);
+  
+  if (type === 'error') {
+    alert('❌ ' + message);
+  } else if (type === 'success') {
+    // Potresti usare una libreria come Toastify.js o una modale custom
+    console.log('✅ ' + message);
+  }
+}
+
+// ==================== ESPORTA FUNZIONI ====================
+// Se usi moduli ES6, decommenta:
+// export {
+//   renderProdotti,
+//   deleteProdotto,
+//   renderMovimenti,
+//   deleteMovimento,
+//   renderRiepilogo,
+//   renderStorico,
+//   escapeHtml,
+//   showNotification
+// };
