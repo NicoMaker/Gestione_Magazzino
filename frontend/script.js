@@ -7623,3 +7623,517 @@ function showNotification(message, type = 'info') {
 //   escapeHtml,
 //   showNotification
 // };
+
+// ==================== 🔍 SISTEMA RICERCA CON MEMORIA LOCALSTORAGE ====================
+
+/**
+ * 💾 STORAGE KEYS per ogni sezione
+ */
+const SEARCH_KEYS = {
+  marche: 'search_marche',
+  prodotti: 'search_prodotti',
+  movimenti: 'search_movimenti',
+  riepilogo: 'search_riepilogo',
+  storico: 'search_storico',
+  utenti: 'search_utenti'
+};
+
+/**
+ * 📝 Salva il termine di ricerca nel localStorage
+ * @param {string} section - Nome della sezione (es. 'marche', 'prodotti')
+ * @param {string} searchTerm - Termine di ricerca da salvare
+ */
+function saveSearchTerm(section, searchTerm) {
+  try {
+    const key = SEARCH_KEYS[section];
+    if (key) {
+      localStorage.setItem(key, searchTerm);
+      console.log(`💾 Ricerca salvata [${section}]: "${searchTerm}"`);
+    }
+  } catch (error) {
+    console.error('❌ Errore salvataggio ricerca:', error);
+  }
+}
+
+/**
+ * 📖 Recupera il termine di ricerca dal localStorage
+ * @param {string} section - Nome della sezione
+ * @returns {string} - Termine di ricerca salvato (o stringa vuota)
+ */
+function getSearchTerm(section) {
+  try {
+    const key = SEARCH_KEYS[section];
+    if (key) {
+      const savedTerm = localStorage.getItem(key) || '';
+      console.log(`📖 Ricerca caricata [${section}]: "${savedTerm}"`);
+      return savedTerm;
+    }
+    return '';
+  } catch (error) {
+    console.error('❌ Errore caricamento ricerca:', error);
+    return '';
+  }
+}
+
+/**
+ * 🗑️ Cancella il termine di ricerca dal localStorage
+ * @param {string} section - Nome della sezione
+ */
+function clearSearchTerm(section) {
+  try {
+    const key = SEARCH_KEYS[section];
+    if (key) {
+      localStorage.removeItem(key);
+      console.log(`🗑️ Ricerca cancellata [${section}]`);
+    }
+  } catch (error) {
+    console.error('❌ Errore cancellazione ricerca:', error);
+  }
+}
+
+/**
+ * 🔄 Ripristina e applica il filtro salvato per una sezione
+ * @param {string} section - Nome della sezione
+ * @param {string} inputId - ID del campo input di ricerca
+ * @param {Function} filterFunction - Funzione di filtro da eseguire
+ */
+function restoreAndApplySearch(section, inputId, filterFunction) {
+  try {
+    const inputElement = document.getElementById(inputId);
+    
+    if (!inputElement) {
+      console.warn(`⚠️ Input non trovato: ${inputId}`);
+      return;
+    }
+
+    // 1️⃣ Recupera il termine salvato
+    const savedTerm = getSearchTerm(section);
+    
+    // 2️⃣ Imposta il valore nell'input
+    inputElement.value = savedTerm;
+    
+    // 3️⃣ Applica il filtro se c'è un termine salvato
+    if (savedTerm && filterFunction) {
+      console.log(`🔍 Applicazione filtro salvato [${section}]: "${savedTerm}"`);
+      filterFunction(savedTerm);
+    }
+    
+    console.log(`✅ Ricerca ripristinata [${section}]`);
+  } catch (error) {
+    console.error('❌ Errore ripristino ricerca:', error);
+  }
+}
+
+/**
+ * 🎯 Setup listener per salvataggio automatico
+ * @param {string} section - Nome della sezione
+ * @param {string} inputId - ID del campo input di ricerca
+ * @param {Function} filterFunction - Funzione di filtro da eseguire
+ */
+function setupSearchListener(section, inputId, filterFunction) {
+  try {
+    const inputElement = document.getElementById(inputId);
+    
+    if (!inputElement) {
+      console.warn(`⚠️ Input non trovato per listener: ${inputId}`);
+      return;
+    }
+
+    // Listener per input in tempo reale
+    inputElement.addEventListener('input', function(e) {
+      const searchTerm = e.target.value.trim();
+      
+      // Salva nel localStorage
+      saveSearchTerm(section, searchTerm);
+      
+      // Applica il filtro
+      if (filterFunction) {
+        filterFunction(searchTerm);
+      }
+    });
+    
+    console.log(`✅ Listener ricerca attivo [${section}]`);
+  } catch (error) {
+    console.error('❌ Errore setup listener:', error);
+  }
+}
+
+// ==================== 🎯 FUNZIONI DI FILTRO PER OGNI SEZIONE ====================
+
+/**
+ * 🏷️ Filtra MARCHE in base al termine di ricerca
+ */
+function filterMarche(searchTerm) {
+  const term = searchTerm.toLowerCase();
+  
+  if (!term) {
+    marche = [...allMarche];
+  } else {
+    marche = allMarche.filter(m => 
+      m.nome.toLowerCase().includes(term)
+    );
+  }
+  
+  renderMarche();
+  console.log(`🔍 Marche filtrate: ${marche.length}/${allMarche.length}`);
+}
+
+/**
+ * 📦 Filtra PRODOTTI in base al termine di ricerca
+ */
+function filterProdotti(searchTerm) {
+  const term = searchTerm.toLowerCase();
+  
+  if (!term) {
+    prodotti = [...allProdotti];
+  } else {
+    prodotti = allProdotti.filter(p => {
+      const matchesNome = p.nome.toLowerCase().includes(term);
+      const matchesMarca = p.marca_nome ? p.marca_nome.toLowerCase().includes(term) : false;
+      const matchesDescrizione = p.descrizione ? p.descrizione.toLowerCase().includes(term) : false;
+      
+      return matchesNome || matchesMarca || matchesDescrizione;
+    });
+  }
+  
+  renderProdotti();
+  console.log(`🔍 Prodotti filtrati: ${prodotti.length}/${allProdotti.length}`);
+}
+
+/**
+ * 📊 Filtra MOVIMENTI in base al termine di ricerca
+ */
+function filterMovimenti(searchTerm) {
+  const term = searchTerm.toLowerCase();
+  
+  if (!term) {
+    movimenti = [...allMovimenti];
+  } else {
+    movimenti = allMovimenti.filter(m => {
+      const matchesProdotto = m.prodotto_nome.toLowerCase().includes(term);
+      const matchesMarca = m.marca_nome ? m.marca_nome.toLowerCase().includes(term) : false;
+      const matchesTipo = m.tipo.toLowerCase().includes(term);
+      const matchesDescrizione = m.prodotto_descrizione ? 
+        m.prodotto_descrizione.toLowerCase().includes(term) : false;
+      
+      return matchesProdotto || matchesMarca || matchesTipo || matchesDescrizione;
+    });
+  }
+  
+  renderMovimenti();
+  console.log(`🔍 Movimenti filtrati: ${movimenti.length}/${allMovimenti.length}`);
+}
+
+/**
+ * 📋 Filtra RIEPILOGO in base al termine di ricerca
+ */
+function filterRiepilogo(searchTerm) {
+  const term = searchTerm.toLowerCase();
+  
+  if (!term) {
+    riepilogo = [...allRiepilogo];
+  } else {
+    riepilogo = allRiepilogo.filter(r => {
+      const matchesNome = r.nome.toLowerCase().includes(term);
+      const matchesMarca = r.marca_nome ? r.marca_nome.toLowerCase().includes(term) : false;
+      const matchesDescrizione = r.descrizione ? r.descrizione.toLowerCase().includes(term) : false;
+      
+      return matchesNome || matchesMarca || matchesDescrizione;
+    });
+  }
+  
+  updateRiepilogoTotal();
+  renderRiepilogo();
+  console.log(`🔍 Riepilogo filtrato: ${riepilogo.length}/${allRiepilogo.length}`);
+}
+
+/**
+ * 🕐 Filtra STORICO in base al termine di ricerca
+ */
+function filterStorico(searchTerm) {
+  const term = searchTerm.toLowerCase();
+  
+  if (!term) {
+    storico = [...allStorico];
+  } else {
+    storico = allStorico.filter(s => {
+      const matchesNome = s.nome.toLowerCase().includes(term);
+      const matchesMarca = s.marca_nome ? s.marca_nome.toLowerCase().includes(term) : false;
+      const matchesDescrizione = s.descrizione ? s.descrizione.toLowerCase().includes(term) : false;
+      
+      return matchesNome || matchesMarca || matchesDescrizione;
+    });
+  }
+  
+  updateStoricoTotal();
+  renderStorico(storico);
+  console.log(`🔍 Storico filtrato: ${storico.length}/${allStorico.length}`);
+}
+
+/**
+ * 👥 Filtra UTENTI in base al termine di ricerca
+ */
+function filterUtenti(searchTerm) {
+  const term = searchTerm.toLowerCase();
+  
+  if (!term) {
+    utenti = [...allUtenti];
+  } else {
+    utenti = allUtenti.filter(u => 
+      u.username.toLowerCase().includes(term)
+    );
+  }
+  
+  renderUtenti();
+  console.log(`🔍 Utenti filtrati: ${utenti.length}/${allUtenti.length}`);
+}
+
+// ==================== 🎬 INIZIALIZZAZIONE SISTEMA RICERCA ====================
+
+/**
+ * 🚀 Inizializza il sistema di ricerca con memoria per tutte le sezioni
+ */
+function initSearchMemorySystem() {
+  console.log('🚀 Inizializzazione sistema ricerca con memoria...');
+  
+  // Setup listener per tutte le sezioni
+  const searchConfigs = [
+    { section: 'marche', inputId: 'filterMarche', filterFn: filterMarche },
+    { section: 'prodotti', inputId: 'filterProdotti', filterFn: filterProdotti },
+    { section: 'movimenti', inputId: 'filterMovimenti', filterFn: filterMovimenti },
+    { section: 'riepilogo', inputId: 'filterRiepilogo', filterFn: filterRiepilogo },
+    { section: 'storico', inputId: 'filterStorico', filterFn: filterStorico },
+    { section: 'utenti', inputId: 'filterUtenti', filterFn: filterUtenti }
+  ];
+  
+  searchConfigs.forEach(config => {
+    setupSearchListener(config.section, config.inputId, config.filterFn);
+  });
+  
+  console.log('✅ Sistema ricerca inizializzato per tutte le sezioni');
+}
+
+/**
+ * 🔄 Ripristina la ricerca quando si cambia sezione
+ * @param {string} section - Nome della sezione attiva
+ */
+function restoreSearchOnSectionChange(section) {
+  const searchConfigs = {
+    'marche': { inputId: 'filterMarche', filterFn: filterMarche },
+    'prodotti': { inputId: 'filterProdotti', filterFn: filterProdotti },
+    'movimenti': { inputId: 'filterMovimenti', filterFn: filterMovimenti },
+    'riepilogo': { inputId: 'filterRiepilogo', filterFn: filterRiepilogo },
+    'storico': { inputId: 'filterStorico', filterFn: filterStorico },
+    'utenti': { inputId: 'filterUtenti', filterFn: filterUtenti }
+  };
+  
+  const config = searchConfigs[section];
+  
+  if (config) {
+    restoreAndApplySearch(section, config.inputId, config.filterFn);
+  }
+}
+
+// ==================== 🎯 INTEGRAZIONE CON NAVIGATION SYSTEM ====================
+
+/**
+ * 🔄 MODIFICA la funzione di navigazione esistente per includere il ripristino ricerca
+ * Inserisci questa versione modificata nel tuo DOMContentLoaded
+ */
+function setupNavigationWithSearch() {
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      const section = item.dataset.section;
+
+      // Aggiorna UI navigazione
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+      
+      item.classList.add('active');
+      document.getElementById(`section-${section}`).classList.add('active');
+      
+      // Salva sezione attiva
+      localStorage.setItem('activeSection', section);
+
+      // Chiudi menu mobile se aperto
+      const sidebar = document.getElementById('sidebar');
+      const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+      if (window.innerWidth <= 768) {
+        sidebar.classList.remove('mobile-open');
+        mobileMenuToggle.classList.remove('active');
+      }
+
+      // 🎯 RIPRISTINA E APPLICA RICERCA SALVATA
+      restoreSearchOnSectionChange(section);
+
+      // Carica dati sezione
+      if (section === 'marche') loadMarche();
+      if (section === 'prodotti') loadProdotti();
+      if (section === 'movimenti') loadMovimenti();
+      if (section === 'riepilogo') loadRiepilogo();
+      if (section === 'utenti') loadUtenti();
+    });
+  });
+}
+
+// ==================== 🎬 AUTO-INIZIALIZZAZIONE ====================
+
+/**
+ * 🚀 Inizializza il sistema quando il DOM è pronto
+ * AGGIUNGI QUESTA CHIAMATA nel tuo DOMContentLoaded esistente
+ */
+document.addEventListener('DOMContentLoaded', () => {
+  // ... il tuo codice esistente ...
+  
+  // 🎯 INIZIALIZZA SISTEMA RICERCA
+  initSearchMemorySystem();
+  
+  // 🎯 RIPRISTINA RICERCA SEZIONE INIZIALE
+  const savedSection = localStorage.getItem('activeSection') || 'marche';
+  setTimeout(() => {
+    restoreSearchOnSectionChange(savedSection);
+  }, 500); // Delay per assicurarsi che i dati siano caricati
+});
+
+// ==================== 🛠️ UTILITY FUNCTIONS ====================
+
+/**
+ * 🗑️ Cancella tutte le ricerche salvate
+ */
+function clearAllSearches() {
+  Object.keys(SEARCH_KEYS).forEach(section => {
+    clearSearchTerm(section);
+  });
+  console.log('🗑️ Tutte le ricerche cancellate');
+}
+
+/**
+ * 📊 Mostra statistiche ricerche salvate
+ */
+function showSearchStats() {
+  console.log('📊 STATISTICHE RICERCHE SALVATE:');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  
+  Object.entries(SEARCH_KEYS).forEach(([section, key]) => {
+    const term = localStorage.getItem(key) || '(vuoto)';
+    console.log(`  ${section.padEnd(12)} → "${term}"`);
+  });
+  
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+}
+
+// ==================== 📝 EXPORT (se usi moduli ES6) ====================
+// export {
+//   saveSearchTerm,
+//   getSearchTerm,
+//   clearSearchTerm,
+//   restoreAndApplySearch,
+//   setupSearchListener,
+//   initSearchMemorySystem,
+//   restoreSearchOnSectionChange,
+//   clearAllSearches,
+//   showSearchStats
+// };
+document.addEventListener('DOMContentLoaded', () => {
+  const username = localStorage.getItem('username');
+  if (username) {
+    document.getElementById('currentUser').textContent = username;
+  }
+
+  const savedSection = localStorage.getItem('activeSection') || 'marche';
+
+  const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+  const sidebar = document.getElementById('sidebar');
+
+  if (mobileMenuToggle) {
+    mobileMenuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('mobile-open');
+      mobileMenuToggle.classList.toggle('active');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth <= 768) {
+        if (!sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
+          sidebar.classList.remove('mobile-open');
+          mobileMenuToggle.classList.remove('active');
+        }
+      }
+    });
+  }
+
+  // NAVIGAZIONE SEZIONI + RILANCIO FILTRI
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const section = item.dataset.section;
+
+      // attiva voce menu
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+
+      // mostra sezione
+      document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+      document.getElementById(`section-${section}`).classList.add('active');
+
+      localStorage.setItem('activeSection', section);
+
+      if (window.innerWidth <= 768) {
+        sidebar.classList.remove('mobile-open');
+        mobileMenuToggle?.classList.remove('active');
+      }
+
+      // carica dati sezione
+      if (section === 'marche')     await loadMarche();
+      if (section === 'prodotti')   await loadProdotti();
+      if (section === 'movimenti')  await loadMovimenti();
+      if (section === 'riepilogo')  await loadRiepilogo();
+      if (section === 'storico')    await loadStorico();
+      if (section === 'utenti')     await loadUtenti();
+
+      // RILANCIA I FILTRI ESISTENTI IN BASE ALL'INPUT GIÀ SCRITTO
+      if (section === 'marche') {
+        const input = document.getElementById('filterMarche');
+        if (input) input.dispatchEvent(new Event('input'));
+      }
+
+      if (section === 'prodotti') {
+        const input = document.getElementById('filterProdotti');
+        if (input) input.dispatchEvent(new Event('input'));
+      }
+
+      if (section === 'movimenti') {
+        const input = document.getElementById('filterMovimenti');
+        if (input) input.dispatchEvent(new Event('input'));
+      }
+
+      if (section === 'riepilogo') {
+        const input = document.getElementById('filterRiepilogo');
+        if (input) input.dispatchEvent(new Event('input'));
+      }
+
+      if (section === 'storico') {
+        const input = document.getElementById('filterStorico');
+        if (input) input.dispatchEvent(new Event('input'));
+      }
+
+      if (section === 'utenti') {
+        const input = document.getElementById('filterUtenti');
+        if (input) input.dispatchEvent(new Event('input'));
+      }
+    });
+  });
+
+  // attiva sezione salvata all'avvio
+  document.querySelectorAll('.nav-item').forEach(item => {
+    if (item.dataset.section === savedSection) {
+      item.click();
+    }
+  });
+
+  document.getElementById('logoutBtn')?.addEventListener('click', () => {
+    localStorage.removeItem('username');
+    localStorage.removeItem('activeSection');
+    window.location.href = 'index.html';
+  });
+});
