@@ -1,4 +1,4 @@
-# 🏍️ Gestione Magazzino
+# 🏍️ Gestione Magazzino v
 
 Benvenuto nel sistema di gestione del magazzino, uno strumento essenziale per monitorare, valorizzare e tenere traccia di tutti i movimenti dei prodotti e ricambi.
 
