@@ -8410,360 +8410,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
-// ==================== 🎬 INIZIALIZZAZIONE COMPLETA CON AUTO-RIPRISTINO RICERCA ====================
 
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('🚀 Inizializzazione applicazione...');
-  
-  // 1️⃣ Setup utente corrente
-  const username = localStorage.getItem('username');
-  const currentUserEl = document.getElementById('currentUser');
-  if (currentUserEl && username) {
-    currentUserEl.textContent = username;
-  }
 
-  // 2️⃣ Riferimenti menu mobile
-  const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-  const sidebar = document.getElementById('sidebar');
-
-  // 3️⃣ HAMBURGER + CLICK FUORI MOBILE/TABLET
-  if (mobileMenuToggle && sidebar) {
-    // Toggle apertura/chiusura sidebar
-    mobileMenuToggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      sidebar.classList.toggle('mobile-open');
-      mobileMenuToggle.classList.toggle('active');
-    });
-
-    // Chiudi sidebar cliccando fuori SOLO sotto 1024px
-    document.addEventListener('click', (e) => {
-      if (window.innerWidth <= 1024) {
-        if (!sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
-          sidebar.classList.remove('mobile-open');
-          mobileMenuToggle.classList.remove('active');
-        }
-      }
-    });
-  }
-
-  // 4️⃣ 🔥 INIZIALIZZA SISTEMA RICERCA CON MEMORIA
-  initSearchMemorySystem();
-  console.log('✅ Sistema ricerca con memoria inizializzato');
-
-  // 5️⃣ NAVIGAZIONE SEZIONI + RIPRISTINO RICERCA
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', async (e) => {
-      e.preventDefault();
-      const section = item.dataset.section;
-      if (!section) return;
-
-      console.log(`📂 Cambio sezione: ${section}`);
-
-      // Attiva voce di menu
-      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-
-      // Attiva sezione contenuto
-      document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-      const sectionEl = document.getElementById(`section-${section}`);
-      if (sectionEl) sectionEl.classList.add('active');
-
-      // Salva sezione attiva
-      localStorage.setItem('activeSection', section);
-
-      // Chiudi menu mobile/tablet dopo il click
-      if (window.innerWidth <= 1024 && sidebar && mobileMenuToggle) {
-        sidebar.classList.remove('mobile-open');
-        mobileMenuToggle.classList.remove('active');
-      }
-
-      // Carica dati sezione
-      if (section === 'marche'    && typeof loadMarche === 'function')    await loadMarche();
-      if (section === 'prodotti'  && typeof loadProdotti === 'function')  await loadProdotti();
-      if (section === 'movimenti' && typeof loadMovimenti === 'function') await loadMovimenti();
-      if (section === 'riepilogo' && typeof loadRiepilogo === 'function') await loadRiepilogo();
-      if (section === 'storico'   && typeof loadStorico === 'function')   await loadStorico();
-      if (section === 'utenti'    && typeof loadUtenti === 'function')    await loadUtenti();
-
-      // 🔥 RIPRISTINA FILTRO SALVATO PER QUELLA SEZIONE
-      setTimeout(() => {
-        restoreSearchOnSectionChange(section);
-      }, 100);
-    });
-  });
-
-  // 6️⃣ 🎯 CARICA SEZIONE INIZIALE + RIPRISTINA RICERCA
-  const savedSection = localStorage.getItem('activeSection') || 'marche';
-  console.log(`📌 Sezione salvata: ${savedSection}`);
-  
-  const initialItem = document.querySelector(`.nav-item[data-section="${savedSection}"]`);
-  if (initialItem) {
-    initialItem.click();
-    
-    // 🔥 RIPRISTINA RICERCA DOPO CARICAMENTO DATI
-    setTimeout(() => {
-      console.log(`🔍 Ripristino ricerca per sezione: ${savedSection}`);
-      restoreSearchOnSectionChange(savedSection);
-    }, 300); // Attendiamo che i dati siano caricati
-  }
-
-  // 7️⃣ Logout
-  const logoutBtn = document.getElementById('logoutBtn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      console.log('👋 Logout utente');
-      localStorage.removeItem('username');
-      localStorage.removeItem('activeSection');
-      // Opzionale: cancella anche tutti i filtri salvati
-      // clearAllSearches();
-      window.location.href = 'index.html';
-    });
-  }
-
-  // 8️⃣ Listener data storico
-  document.getElementById('storicoDate')?.addEventListener('change', loadStorico);
-
-  console.log('✅ Inizializzazione completata');
-});
-
-// ==================== 🔄 FUNZIONE AUTO-RIPRISTINO RICERCA ====================
-
-/**
- * 🔄 Ripristina e applica il filtro salvato per una sezione specifica
- * Questa funzione viene chiamata automaticamente quando:
- * - Si carica la pagina
- * - Si cambia sezione
- */
-function restoreSearchOnSectionChange(section) {
-  const searchConfigs = {
-    'marche':    { inputId: 'filterMarche',    filterFn: filterMarche },
-    'prodotti':  { inputId: 'filterProdotti',  filterFn: filterProdotti },
-    'movimenti': { inputId: 'filterMovimenti', filterFn: filterMovimenti },
-    'riepilogo': { inputId: 'filterRiepilogo', filterFn: filterRiepilogo },
-    'storico':   { inputId: 'filterStorico',   filterFn: filterStorico },
-    'utenti':    { inputId: 'filterUtenti',    filterFn: filterUtenti }
-  };
-  
-  const config = searchConfigs[section];
-  
-  if (!config) {
-    console.warn(`⚠️ Nessuna configurazione ricerca per: ${section}`);
-    return;
-  }
-
-  const inputElement = document.getElementById(config.inputId);
-  
-  if (!inputElement) {
-    console.warn(`⚠️ Input non trovato: ${config.inputId}`);
-    return;
-  }
-
-  // 1️⃣ Recupera il termine salvato
-  const savedTerm = getSearchTerm(section);
-  
-  console.log(`📖 Termine salvato [${section}]: "${savedTerm}"`);
-  
-  // 2️⃣ Imposta il valore nell'input
-  inputElement.value = savedTerm;
-  
-  // 3️⃣ Applica il filtro se c'è un termine salvato
-  if (savedTerm && config.filterFn) {
-    console.log(`🔍 Applicazione filtro [${section}]: "${savedTerm}"`);
-    config.filterFn(savedTerm);
-  }
-}
-
-// ==================== MARCHE CON RIPRISTINO FILTRO ====================
-async function loadMarche() {
-  try {
-    // 💾 SALVA il filtro attuale PRIMA di ricaricare
-    const currentFilter = document.getElementById('filterMarche')?.value || '';
-    
-    const res = await fetch(`${API_URL}/marche`);
-    allMarche = await res.json();
-    marche = allMarche;
-    
-    // 🔄 RIAPPLICA il filtro SE esisteva
-    if (currentFilter) {
-      filterMarche(currentFilter);
-      // Reimposta il valore nell'input
-      const inputElement = document.getElementById('filterMarche');
-      if (inputElement) inputElement.value = currentFilter;
-    } else {
-      renderMarche();
-    }
-    
-    console.log(`✅ ${marche.length} marche caricate (filtro: "${currentFilter}")`);
-  } catch (error) {
-    console.error('❌ Errore caricamento marche:', error);
-  }
-}
-
-// ==================== PRODOTTI CON RIPRISTINO FILTRO ====================
-async function loadProdotti() {
-  try {
-    // 💾 SALVA il filtro attuale PRIMA di ricaricare
-    const currentFilter = document.getElementById('filterProdotti')?.value || '';
-    
-    const res = await fetch(`${API_URL}/prodotti`);
-    allProdotti = await res.json();
-    prodotti = allProdotti;
-    
-    // 🔄 RIAPPLICA il filtro SE esisteva
-    if (currentFilter) {
-      filterProdotti(currentFilter);
-      // Reimposta il valore nell'input
-      const inputElement = document.getElementById('filterProdotti');
-      if (inputElement) inputElement.value = currentFilter;
-    } else {
-      renderProdotti();
-    }
-    
-    console.log(`✅ ${prodotti.length} prodotti caricati (filtro: "${currentFilter}")`);
-  } catch (error) {
-    console.error('❌ Errore caricamento prodotti:', error);
-  }
-}
-
-// ==================== MOVIMENTI CON RIPRISTINO FILTRO ====================
-async function loadMovimenti() {
-  try {
-    // 💾 SALVA il filtro attuale PRIMA di ricaricare
-    const currentFilter = document.getElementById('filterMovimenti')?.value || '';
-    
-    const res = await fetch(`${API_URL}/dati`);
-    allMovimenti = await res.json();
-    movimenti = allMovimenti;
-    
-    // 🔄 RIAPPLICA il filtro SE esisteva
-    if (currentFilter) {
-      filterMovimenti(currentFilter);
-      // Reimposta il valore nell'input
-      const inputElement = document.getElementById('filterMovimenti');
-      if (inputElement) inputElement.value = currentFilter;
-    } else {
-      renderMovimenti();
-    }
-    
-    console.log(`✅ ${movimenti.length} movimenti caricati (filtro: "${currentFilter}")`);
-  } catch (error) {
-    console.error('❌ Errore caricamento movimenti:', error);
-  }
-}
-
-// ==================== RIEPILOGO CON RIPRISTINO FILTRO ====================
-async function loadRiepilogo() {
-  try {
-    // 💾 SALVA il filtro attuale PRIMA di ricaricare
-    const currentFilter = document.getElementById('filterRiepilogo')?.value || '';
-    
-    const res = await fetch(`${API_URL}/magazzino/riepilogo`);
-    const data = await res.json();
-
-    allRiepilogo = data.riepilogo || [];
-    riepilogo = allRiepilogo;
-
-    // 🔄 RIAPPLICA il filtro SE esisteva
-    if (currentFilter) {
-      filterRiepilogo(currentFilter);
-      // Reimposta il valore nell'input
-      const inputElement = document.getElementById('filterRiepilogo');
-      if (inputElement) inputElement.value = currentFilter;
-    } else {
-      updateRiepilogoTotal();
-      renderRiepilogo();
-    }
-    
-    console.log(`✅ ${riepilogo.length} prodotti in riepilogo (filtro: "${currentFilter}")`);
-  } catch (error) {
-    console.error('❌ Errore caricamento riepilogo:', error);
-  }
-}
-
-// ==================== STORICO CON RIPRISTINO FILTRO ====================
-async function loadStorico() {
-  const data = document.getElementById("storicoDate").value;
-  
-  if (!data) {
-    allStorico = [];
-    storico = [];
-    updateStoricoTotal();
-    renderStorico(storico);
-    return;
-  }
-
-  try {
-    // 💾 SALVA il filtro attuale PRIMA di ricaricare
-    const currentFilter = document.getElementById('filterStorico')?.value || '';
-    
-    const res = await fetch(`${API_URL}/magazzino/storico-giacenza/${data}`);
-    const result = await res.json();
-
-    allStorico = result.riepilogo || [];
-    storico = allStorico;
-
-    // 🔄 RIAPPLICA il filtro SE esisteva
-    if (currentFilter) {
-      filterStorico(currentFilter);
-      // Reimposta il valore nell'input
-      const inputElement = document.getElementById('filterStorico');
-      if (inputElement) inputElement.value = currentFilter;
-    } else {
-      updateStoricoTotal();
-      renderStorico(storico);
-    }
-    
-    console.log(`✅ ${storico.length} prodotti in storico (filtro: "${currentFilter}")`);
-  } catch (error) {
-    console.error('❌ Errore caricamento storico:', error);
-    showAlertModal("Errore nel caricamento dello storico", "Errore", "error");
-  }
-}
-
-// ==================== UTENTI CON RIPRISTINO FILTRO ====================
-async function loadUtenti() {
-  try {
-    // 💾 SALVA il filtro attuale PRIMA di ricaricare
-    const currentFilter = document.getElementById('filterUtenti')?.value || '';
-    
-    const res = await fetch(`${API_URL}/utenti`);
-    allUtenti = await res.json();
-    utenti = allUtenti;
-    
-    // 🔄 RIAPPLICA il filtro SE esisteva
-    if (currentFilter) {
-      filterUtenti(currentFilter);
-      // Reimposta il valore nell'input
-      const inputElement = document.getElementById('filterUtenti');
-      if (inputElement) inputElement.value = currentFilter;
-    } else {
-      renderUtenti();
-    }
-    
-    console.log(`✅ ${utenti.length} utenti caricati (filtro: "${currentFilter}")`);
-  } catch (error) {
-    console.error('❌ Errore caricamento utenti:', error);
-  }
-}
-
-/**
- * 🎨 Renderizza la tabella utenti con messaggio personalizzato
- */
 function renderUtenti() {
-  const tbody = document.getElementById("utentiTableBody");
-
+  const tbody = document.getElementById('utentiTableBody');
   if (!tbody) {
-    console.error("❌ Elemento utentiTableBody non trovato");
+    console.error('Elemento utentiTableBody non trovato');
     return;
   }
 
-  // Caso: Nessun utente presente
+  // Caso Nessun utente presente
   if (utenti.length === 0) {
     tbody.innerHTML = `
       <tr>
         <td colspan="2" class="text-center">
           <div style="padding: 40px 20px; color: var(--text-secondary);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                  style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
               <circle cx="9" cy="7" r="4"/>
@@ -8776,48 +8438,42 @@ function renderUtenti() {
             <p style="font-size: 14px;">
               ${document.getElementById('filterUtenti')?.value 
                 ? 'Prova a modificare il termine di ricerca' 
-                : 'Clicca su "Nuovo Utente" per iniziare'}
+                : 'Clicca su Nuovo Utente per iniziare'}
             </p>
           </div>
         </td>
-      </tr>
-    `;
+      </tr>`;
     return;
   }
 
   // Rendering utenti esistenti
-  tbody.innerHTML = utenti
-    .map(
-      (u) => `
+  tbody.innerHTML = utenti.map(u => `
     <tr>
       <td><strong>${escapeHtml(u.username)}</strong></td>
       <td class="text-right">
-        <button 
-          class="btn-icon" 
-          onclick="editUser(${u.id})" 
-          title="Modifica utente"
-          aria-label="Modifica ${escapeHtml(u.username)}"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <!-- MODIFICA - Blu -->
+        <button class="btn-icon btn-icononclickmodifica" 
+                onclick="editUser(${u.id})"
+                title="Modifica utente" aria-label="Modifica ${escapeHtml(u.username)}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
           </svg>
         </button>
-        <button 
-          class="btn-icon" 
-          onclick="deleteUser(${u.id}, '${escapeHtml(u.username)}')" 
-          title="Elimina utente"
-          aria-label="Elimina ${escapeHtml(u.username)}"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+        
+        <!-- ELIMINA - Rosso -->
+        <button class="btn-icon btn-icononclickelimina" 
+                onclick="deleteUser(${u.id}, '${escapeHtml(u.username)}')"
+                title="Elimina utente" aria-label="Elimina ${escapeHtml(u.username)}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18"/>
+            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
           </svg>
         </button>
       </td>
     </tr>
-  `
-    )
-    .join("");
-
-  console.log(`✅ ${utenti.length} utenti renderizzati`);
+  `).join('');
+  
+  console.log(utenti.length, 'utenti renderizzati');
 }
+
