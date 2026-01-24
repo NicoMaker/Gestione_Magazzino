@@ -8137,3 +8137,92 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = 'index.html';
   });
 });
+
+// INIZIALIZZAZIONE
+document.addEventListener("DOMContentLoaded", () => {
+    const username = localStorage.getItem("username");
+    if (username) {
+        const currentUserEl = document.getElementById("currentUser");
+        if (currentUserEl) currentUserEl.textContent = username;
+    }
+
+    const savedSection = localStorage.getItem("activeSection") || "marche";
+
+    // Riferimenti menu mobile
+    const mobileMenuToggle = document.getElementById("mobileMenuToggle");
+    const sidebar = document.getElementById("sidebar");
+
+    // HAMBURGER + CLICK FUORI (MOBILE / TABLET)
+    if (mobileMenuToggle && sidebar) {
+        // Toggle apertura/chiusura sidebar
+        mobileMenuToggle.addEventListener("click", (e) => {
+            e.stopPropagation();
+            sidebar.classList.toggle("mobile-open");
+            mobileMenuToggle.classList.toggle("active");
+        });
+
+        // Chiudi sidebar cliccando fuori SOLO sotto 1024px
+        document.addEventListener("click", (e) => {
+            if (window.innerWidth < 1024) {
+                if (!sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
+                    sidebar.classList.remove("mobile-open");
+                    mobileMenuToggle.classList.remove("active");
+                }
+            }
+        });
+    }
+
+    // NAVIGAZIONE SEZIONI
+    document.querySelectorAll(".nav-item").forEach((item) => {
+        item.addEventListener("click", async (e) => {
+            e.preventDefault();
+            const section = item.dataset.section;
+            if (!section) return;
+
+            // Attiva voce di menu
+            document.querySelectorAll(".nav-item").forEach((i) => i.classList.remove("active"));
+            item.classList.add("active");
+
+            // Attiva sezione contenuto
+            document.querySelectorAll(".content-section").forEach((s) => s.classList.remove("active"));
+            const sectionEl = document.getElementById(`section-${section}`);
+            if (sectionEl) sectionEl.classList.add("active");
+
+            // Salva sezione attiva
+            localStorage.setItem("activeSection", section);
+
+            // Chiudi menu mobile / tablet dopo il click
+            if (window.innerWidth < 1024 && sidebar && mobileMenuToggle) {
+                sidebar.classList.remove("mobile-open");
+                mobileMenuToggle.classList.remove("active");
+            }
+
+            // Carica dati sezione
+            if (section === "marche") await loadMarche();
+            if (section === "prodotti") await loadProdotti();
+            if (section === "movimenti") await loadMovimenti();
+            if (section === "riepilogo") await loadRiepilogo();
+            if (section === "storico") await loadStorico();
+            if (section === "utenti") await loadUtenti();
+        });
+    });
+
+    // Sezione iniziale
+    const initialItem = document.querySelector(`.nav-item[data-section="${savedSection}"]`);
+    if (initialItem) {
+        initialItem.click();
+    }
+
+    // Logout
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", () => {
+            localStorage.removeItem("username");
+            localStorage.removeItem("activeSection");
+            window.location.href = "index.html";
+        });
+    }
+
+    // Listener storico (già presente nel tuo codice)
+    document.getElementById("storicoDate")?.addEventListener("change", loadStorico);
+});
