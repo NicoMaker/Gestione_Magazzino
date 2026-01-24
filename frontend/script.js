@@ -8226,3 +8226,187 @@ document.addEventListener("DOMContentLoaded", () => {
     // Listener storico (già presente nel tuo codice)
     document.getElementById("storicoDate")?.addEventListener("change", loadStorico);
 });
+
+// NAVIGAZIONE SEZIONI + MEMORIA RICERCA
+document.addEventListener('DOMContentLoaded', () => {
+  const username = localStorage.getItem('username');
+  const currentUserEl = document.getElementById('currentUser');
+  if (currentUserEl && username) {
+    currentUserEl.textContent = username;
+  }
+
+  const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+  const sidebar = document.getElementById('sidebar');
+
+  // Toggle sidebar mobile/tablet
+  if (mobileMenuToggle && sidebar) {
+    mobileMenuToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sidebar.classList.toggle('mobile-open');
+      mobileMenuToggle.classList.toggle('active');
+    });
+
+    // Chiudi sidebar cliccando fuori (solo sotto 1024px)
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth <= 1024) {
+        if (!sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
+          sidebar.classList.remove('mobile-open');
+          mobileMenuToggle.classList.remove('active');
+        }
+      }
+    });
+  }
+
+  // Inizializza sistema ricerca con memoria (listener su tutti gli input filtro)
+  initSearchMemorySystem();
+
+  // Navigazione con ripristino ricerca per sezione
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const section = item.dataset.section;
+      if (!section) return;
+
+      // Attiva voce di menu
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+
+      // Attiva sezione contenuto
+      document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+      const sectionEl = document.getElementById(`section-${section}`);
+      if (sectionEl) {
+        sectionEl.classList.add('active');
+      }
+
+      // Salva sezione attiva
+      localStorage.setItem('activeSection', section);
+
+      // Chiudi menu mobile/tablet dopo il click
+      if (window.innerWidth <= 1024 && sidebar && mobileMenuToggle) {
+        sidebar.classList.remove('mobile-open');
+        mobileMenuToggle.classList.remove('active');
+      }
+
+      // Carica dati sezione
+      if (section === 'marche'   && typeof loadMarche === 'function')   await loadMarche();
+      if (section === 'prodotti' && typeof loadProdotti === 'function') await loadProdotti();
+      if (section === 'movimenti'&& typeof loadMovimenti === 'function')await loadMovimenti();
+      if (section === 'riepilogo'&& typeof loadRiepilogo === 'function')await loadRiepilogo();
+      if (section === 'storico'  && typeof loadStorico === 'function')  await loadStorico();
+      if (section === 'utenti'   && typeof loadUtenti === 'function')   await loadUtenti();
+
+      // RILANCIA / RIPRISTINA FILTRO SALVATO PER QUELLA SEZIONE
+      restoreSearchOnSectionChange(section);
+    });
+  });
+
+  // Sezione iniziale
+  const savedSection = localStorage.getItem('activeSection') || 'marche';
+  const initialItem = document.querySelector(`.nav-item[data-section="${savedSection}"]`);
+  if (initialItem) {
+    initialItem.click();
+  }
+
+  // Logout
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('username');
+      localStorage.removeItem('activeSection');
+      // cancella anche tutti i filtri salvati se vuoi
+      // clearAllSearches();
+      window.location.href = 'index.html';
+    });
+  }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const username = localStorage.getItem('username');
+  const currentUserEl = document.getElementById('currentUser');
+  if (currentUserEl && username) {
+    currentUserEl.textContent = username;
+  }
+
+  // Riferimenti menu mobile
+  const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+  const sidebar = document.getElementById('sidebar');
+
+  // HAMBURGER + CLICK FUORI MOBILE/TABLET
+  if (mobileMenuToggle && sidebar) {
+    // Toggle apertura/chiusura sidebar
+    mobileMenuToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sidebar.classList.toggle('mobile-open');
+      mobileMenuToggle.classList.toggle('active');
+    });
+
+    // Chiudi sidebar cliccando fuori SOLO sotto 1024px
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth <= 1024) {
+        if (!sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
+          sidebar.classList.remove('mobile-open');
+          mobileMenuToggle.classList.remove('active');
+        }
+      }
+    });
+  }
+
+  // 🔥 Inizializza sistema ricerca con memoria
+  initSearchMemorySystem();
+
+  // NAVIGAZIONE SEZIONI + MEMORIA RICERCA
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const section = item.dataset.section;
+      if (!section) return;
+
+      // Attiva voce di menu
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+
+      // Attiva sezione contenuto
+      document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+      const sectionEl = document.getElementById(`section-${section}`);
+      if (sectionEl) sectionEl.classList.add('active');
+
+      // Salva sezione attiva
+      localStorage.setItem('activeSection', section);
+
+      // Chiudi menu mobile/tablet dopo il click
+      if (window.innerWidth <= 1024 && sidebar && mobileMenuToggle) {
+        sidebar.classList.remove('mobile-open');
+        mobileMenuToggle.classList.remove('active');
+      }
+
+      // Carica dati sezione
+      if (section === 'marche'   && typeof loadMarche === 'function')    await loadMarche();
+      if (section === 'prodotti' && typeof loadProdotti === 'function')  await loadProdotti();
+      if (section === 'movimenti'&& typeof loadMovimenti === 'function') await loadMovimenti();
+      if (section === 'riepilogo'&& typeof loadRiepilogo === 'function') await loadRiepilogo();
+      if (section === 'storico'  && typeof loadStorico === 'function')   await loadStorico();
+      if (section === 'utenti'   && typeof loadUtenti === 'function')    await loadUtenti();
+
+      // 🔥 Ripristina filtro salvato per quella sezione
+      restoreSearchOnSectionChange(section);
+    });
+  });
+
+  // Sezione iniziale
+  const savedSection = localStorage.getItem('activeSection') || 'marche';
+  const initialItem = document.querySelector(`.nav-item[data-section="${savedSection}"]`);
+  if (initialItem) {
+    initialItem.click();
+  }
+
+  // Logout
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('username');
+      localStorage.removeItem('activeSection');
+      clearAllSearches(); // opzionale, ma ce l’hai già
+      window.location.href = 'index.html';
+    });
+  }
+});
