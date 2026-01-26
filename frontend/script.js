@@ -8477,3 +8477,358 @@ function renderUtenti() {
   console.log(utenti.length, 'utenti renderizzati');
 }
 
+// CHIAVI PER MEMORIZZARE INPUT VARI (NON SOLO RICERCA)
+const INPUT_MEMORY_KEYS = {
+  storicoData: 'input_storicoDate',
+  movimentoProdottoSearch: 'input_movimentoProdottoSearch',
+  // aggiungi qui altri campi che vuoi persistere
+  // es: filtro globale movimenti: movimentiFilter: 'input_movimentiFilter'
+};
+
+// Salva il valore di un input nel localStorage
+function saveInputValue(key, value) {
+  try {
+    localStorage.setItem(key, value ?? '');
+  } catch (error) {
+    console.error('Errore salvataggio input', key, error);
+  }
+}
+
+// Recupera il valore di un input dal localStorage
+function getInputValue(key) {
+  try {
+    const v = localStorage.getItem(key);
+    return v ?? '';
+  } catch (error) {
+    console.error('Errore lettura input', key, error);
+    return '';
+  }
+}
+/**
+ * Collega un input a localStorage e opzionalmente rilancia una funzione
+ * @param {string} inputId   - id dell'input in DOM
+ * @param {string} memoryKey - chiave in INPUT_MEMORY_KEYS
+ * @param {Function} onRestore - funzione da chiamare dopo il ripristino (opzionale)
+ */
+function setupPersistentInput(inputId, memoryKey, onRestore) {
+  const el = document.getElementById(inputId);
+  if (!el) {
+    console.warn('Input non trovato per memoria:', inputId);
+    return;
+  }
+
+  // RIPRISTINO ALL’AVVIO
+  const saved = getInputValue(memoryKey);
+  if (saved) {
+    el.value = saved;
+    if (typeof onRestore === 'function') {
+      onRestore(saved);
+    }
+  }
+
+  // SALVATAGGIO IN TEMPO REALE
+  el.addEventListener('input', e => {
+    saveInputValue(memoryKey, e.target.value);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const username = localStorage.getItem('username');
+  if (username) {
+    document.getElementById('currentUser').textContent = username;
+  }
+
+  const savedSection = localStorage.getItem('activeSection') || 'marche';
+
+  // ... tutta la tua logica esistente (menu, nav, initSearchMemorySystem, ecc.)
+
+  // 🔹 1) DATA STORICO (id="storicoDate")
+  setupPersistentInput(
+    'storicoDate',
+    INPUT_MEMORY_KEYS.storicoData,
+    (savedDate) => {
+      // se c'è una data salvata, ricarica lo storico
+      if (savedDate) {
+        // se hai già il listener change che chiama loadStorico,
+        // puoi semplicemente dispatchare l’evento:
+        const el = document.getElementById('storicoDate');
+        if (el) {
+          el.dispatchEvent(new Event('change'));
+        }
+      }
+    }
+  );
+
+  // 🔹 2) RICERCA PRODOTTO NEL MODALE MOVIMENTI (id="movimentoProdottoSearch")
+  setupPersistentInput(
+    'movimentoProdottoSearch',
+    INPUT_MEMORY_KEYS.movimentoProdottoSearch,
+    (term) => {
+      if (term && typeof searchProducts === 'function') {
+        // Assicurati che i prodotti siano caricati
+        if (Array.isArray(allProdotti) && allProdotti.length > 0) {
+          searchProducts();
+        }
+      }
+    }
+  );
+
+  // Se vuoi memorizzare altri input basta aggiungerli qui:
+  // es. filtro globale movimenti (se usi <input id="filterMovimenti">)
+  /*
+  setupPersistentInput(
+    'filterMovimenti',
+    INPUT_MEMORY_KEYS.movimentiFilter,
+    (term) => {
+      if (typeof filterMovimenti === 'function') {
+        filterMovimenti(term);
+      }
+    }
+  );
+  */
+
+  // ... resto della tua init (attivazione sezione salvata, ecc.)
+});
+
+// ==================== MEMORIA CAMPI DI RICERCA ====================
+const SEARCHKEYS = {
+  marche:   'search_marche',
+  prodotti: 'search_prodotti',
+  movimenti:'search_movimenti',
+  riepilogo:'search_riepilogo',
+  storico:  'search_storico',
+  utenti:   'search_utenti'
+};
+
+function saveSearchTerm(key, value) {
+  try {
+    localStorage.setItem(key, value ?? '');
+  } catch (e) {
+    console.error('Errore salvataggio filtro', key, e);
+  }
+}
+
+function getSearchTerm(key) {
+  try {
+    return localStorage.getItem(key) ?? '';
+  } catch (e) {
+    console.error('Errore lettura filtro', key, e);
+    return '';
+  }
+}
+
+/**
+ * Collega un input di ricerca ad una chiave di localStorage.
+ * - ripristina il valore salvato all'avvio
+ * - rilancia l'evento "input" per riapplicare il filtro
+ */
+function setupSearchPersistence(inputId, storageKey) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+
+  // RIPRISTINA valore dal localStorage
+  const saved = getSearchTerm(storageKey);
+  if (saved) {
+    input.value = saved;
+    // rilancia l'evento input per riattivare il filtro
+    setTimeout(() => {
+      input.dispatchEvent(new Event('input'));
+    }, 0);
+  }
+
+  // SALVA ad ogni digitazione
+  input.addEventListener('input', (e) => {
+    saveSearchTerm(storageKey, e.target.value);
+  });
+}
+
+// ==================== INIZIALIZZAZIONE ====================
+document.addEventListener("DOMContentLoaded", () => {
+  // Username corrente
+  const username = localStorage.getItem("username");
+  if (username) {
+    const userEl = document.getElementById("currentUser");
+    if (userEl) userEl.textContent = username;
+  }
+
+  // Sezione attiva salvata
+  const savedSection = localStorage.getItem("activeSection") || "marche";
+
+  // Mobile menu
+  const mobileMenuToggle = document.getElementById("mobileMenuToggle");
+  const sidebar = document.getElementById("sidebar");
+
+  if (mobileMenuToggle && sidebar) {
+    mobileMenuToggle.addEventListener("click", () => {
+      sidebar.classList.toggle("mobile-open");
+      mobileMenuToggle.classList.toggle("active");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (window.innerWidth <= 768) {
+        if (!sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
+          sidebar.classList.remove("mobile-open");
+          mobileMenuToggle.classList.remove("active");
+        }
+      }
+    });
+  }
+
+  // Navigazione laterale
+  document.querySelectorAll(".nav-item").forEach((item) => {
+    item.addEventListener("click", (e) => {
+      e.preventDefault();
+      const section = item.dataset.section;
+
+      document
+        .querySelectorAll(".nav-item")
+        .forEach((i) => i.classList.remove("active"));
+      document
+        .querySelectorAll(".content-section")
+        .forEach((s) => s.classList.remove("active"));
+
+      item.classList.add("active");
+      const sectionEl = document.getElementById(`section-${section}`);
+      if (sectionEl) sectionEl.classList.add("active");
+
+      localStorage.setItem("activeSection", section);
+
+      if (window.innerWidth <= 768 && sidebar && mobileMenuToggle) {
+        sidebar.classList.remove("mobile-open");
+        mobileMenuToggle.classList.remove("active");
+      }
+
+      // Carica dati sezione
+      if (section === "marche")    loadMarche();
+      if (section === "prodotti")  loadProdotti();
+      if (section === "movimenti") loadMovimenti();
+      if (section === "riepilogo") loadRiepilogo();
+      if (section === "utenti")    loadUtenti();
+    });
+  });
+
+  // Attiva la sezione salvata
+  document.querySelectorAll(".nav-item").forEach((item) => {
+    if (item.dataset.section === savedSection) {
+      item.click();
+    }
+  });
+
+  // Logout
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("username");
+      localStorage.removeItem("activeSection");
+      window.location.href = "index.html";
+    });
+  }
+
+  // =======================================================
+  // 🎯 MEMORIA FILTRI DI RICERCA (RESTANO DOPO F5)
+  // =======================================================
+  // Assicurati che questi ID esistano in home.html
+  setupSearchPersistence("filterMarche",    SEARCHKEYS.marche);
+  setupSearchPersistence("filterProdotti",  SEARCHKEYS.prodotti);
+  setupSearchPersistence("filterMovimenti", SEARCHKEYS.movimenti);
+  setupSearchPersistence("filterRiepilogo", SEARCHKEYS.riepilogo);
+  setupSearchPersistence("filterStorico",   SEARCHKEYS.storico);
+  setupSearchPersistence("filterUtenti",    SEARCHKEYS.utenti);
+
+  // =======================================================
+  // 🎯 LISTENER CAMBIO CARICO/SCARICO
+  // =======================================================
+  const movimentoTipoSelect = document.getElementById("movimentoTipo");
+  if (movimentoTipoSelect) {
+    movimentoTipoSelect.addEventListener("change", togglePrezzoField);
+  }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const username = localStorage.getItem("username");
+  const currentUserEl = document.getElementById("currentUser");
+  if (currentUserEl && username) {
+    currentUserEl.textContent = username;
+  }
+
+  // ===== HAMBURGER + SIDEBAR =====
+  const mobileMenuToggle = document.getElementById("mobileMenuToggle");
+  const sidebar = document.getElementById("sidebar");
+
+  if (mobileMenuToggle && sidebar) {
+    // Apertura/chiusura menu
+    mobileMenuToggle.addEventListener("click", (e) => {
+      e.stopPropagation(); // importantissimo per non chiudere subito
+      sidebar.classList.toggle("mobile-open");
+      mobileMenuToggle.classList.toggle("active");
+    });
+
+    // Chiudi cliccando fuori (solo sotto 1024px)
+    document.addEventListener("click", (e) => {
+      if (window.innerWidth <= 1024) {
+        if (!sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
+          sidebar.classList.remove("mobile-open");
+          mobileMenuToggle.classList.remove("active");
+        }
+      }
+    });
+  }
+
+  // ===== NAVIGAZIONE SEZIONI + MEMORIA RICERCA =====
+  const savedSection = localStorage.getItem("activeSection") || "marche";
+
+  document.querySelectorAll(".nav-item").forEach((item) => {
+    item.addEventListener("click", async (e) => {
+      e.preventDefault();
+      const section = item.dataset.section;
+      if (!section) return;
+
+      // attiva voce di menu
+      document.querySelectorAll(".nav-item").forEach((i) => i.classList.remove("active"));
+      item.classList.add("active");
+
+      // mostra sezione
+      document.querySelectorAll(".content-section").forEach((s) => s.classList.remove("active"));
+      const sectionEl = document.getElementById(`section-${section}`);
+      if (sectionEl) sectionEl.classList.add("active");
+
+      localStorage.setItem("activeSection", section);
+
+      // chiudi menu su mobile/tablet
+      if (window.innerWidth <= 1024 && sidebar && mobileMenuToggle) {
+        sidebar.classList.remove("mobile-open");
+        mobileMenuToggle.classList.remove("active");
+      }
+
+      // carica dati sezione (usa await se le funzioni sono async)
+      if (section === "marche")    await loadMarche();
+      if (section === "prodotti")  await loadProdotti();
+      if (section === "movimenti") await loadMovimenti();
+      if (section === "riepilogo") await loadRiepilogo();
+      if (section === "storico")   await loadStorico();
+      if (section === "utenti")    await loadUtenti();
+
+      // ripristina filtro salvato per quella sezione (se usi il sistema di memoria)
+      restoreSearchOnSectionChange(section);
+    });
+  });
+
+  // attiva sezione iniziale
+  const initialItem = document.querySelector(`.nav-item[data-section="${savedSection}"]`);
+  if (initialItem) initialItem.click();
+
+  // logout
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("username");
+      localStorage.removeItem("activeSection");
+      // se vuoi: clearAllSearches();
+      window.location.href = "index.html";
+    });
+  }
+
+  // se usi il sistema ricerche con memoria:
+  initSearchMemorySystem();
+  setTimeout(() => restoreSearchOnSectionChange(savedSection), 500);
+});
