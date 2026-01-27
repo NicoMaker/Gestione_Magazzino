@@ -15,7 +15,7 @@ function formatDecimal(value) {
 // GET - Lista tutti i movimenti con marca e descrizione
 router.get("/", (req, res) => {
   const query = `
-    SELECT 
+    SELECT
       d.id,
       d.prodotto_id,
       p.nome as prodotto_nome,
@@ -25,9 +25,12 @@ router.get("/", (req, res) => {
       d.quantita,
       d.prezzo,
       d.prezzo_totale_movimento as prezzo_totale,
-      CASE WHEN d.tipo = 'scarico' AND d.prezzo_totale_movimento IS NOT NULL AND d.quantita > 0 
-        THEN d.prezzo_totale_movimento / d.quantita 
-        ELSE NULL 
+      CASE
+        WHEN d.tipo = 'scarico'
+             AND d.prezzo_totale_movimento IS NOT NULL
+             AND d.quantita > 0
+        THEN d.prezzo_totale_movimento / d.quantita
+        ELSE NULL
       END as prezzo_unitario_scarico,
       d.data_movimento,
       d.data_registrazione,
@@ -36,9 +39,13 @@ router.get("/", (req, res) => {
     FROM dati d
     JOIN prodotti p ON d.prodotto_id = p.id
     LEFT JOIN marche m ON p.marca_id = m.id
-    ORDER BY d.data_movimento DESC, d.data_registrazione DESC, d.id DESC  -- ✅ ORDINAMENTO CORRETTO
+    ORDER BY
+      d.data_movimento DESC,      -- prima data più recente
+      p.nome ASC,                 -- a parità di data, nome prodotto alfabetico
+      d.tipo ASC,                 -- a parità di nome, tipo (carico prima di scarico)
+      d.data_registrazione DESC,  -- come ulteriore tie-break
+      d.id DESC
   `;
-
   db.all(query, (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
 
@@ -53,6 +60,7 @@ router.get("/", (req, res) => {
     res.json(formattedRows);
   });
 });
+
 
 // POST - Crea nuovo movimento (carico o scarico)
 router.post("/", (req, res) => {
