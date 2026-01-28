@@ -8832,3 +8832,383 @@ document.addEventListener("DOMContentLoaded", () => {
   initSearchMemorySystem();
   setTimeout(() => restoreSearchOnSectionChange(savedSection), 500);
 });
+
+function togglePrezzoField() {
+  const tipo = document.getElementById('movimentoTipo').value;
+  const prezzoGroup = document.getElementById('prezzoGroup');
+  const prezzoInput = document.getElementById('movimentoPrezzo');
+  const fornitoreGroup = document.getElementById('fornitoreGroup');
+  const fatturaInput = document.getElementById('movimentoFattura');
+  const fornitoreInput = document.getElementById('movimentoFornitore');
+  const docOptional = document.getElementById('docOptional');
+  const fornitoreOptional = document.getElementById('fornitoreOptional');
+  const fatturaGroup = fatturaInput.closest('.form-group');
+
+  if (tipo === 'carico') {
+    prezzoGroup.style.display = 'block';
+    prezzoInput.required = true;
+
+    fornitoreGroup.style.display = 'block';
+    fatturaGroup.style.display = 'block';
+    fatturaInput.required = true;
+    fornitoreInput.required = true;
+
+    docOptional.textContent = '';
+    fornitoreOptional.textContent = '';
+  } else {
+    // scarico o vuoto → niente documento
+    prezzoGroup.style.display = 'none';
+    prezzoInput.required = false;
+    prezzoInput.value = '';
+
+    fornitoreGroup.style.display = 'none';
+    fatturaGroup.style.display = 'none';
+    fornitoreInput.value = '';
+    fatturaInput.value = '';
+    fatturaInput.required = false;
+    fornitoreInput.required = false;
+
+    docOptional.textContent = '';
+    fornitoreOptional.textContent = '';
+  }
+}
+
+// ==================== MOVIMENTI ====================
+
+// Carica movimenti (lista completa)
+async function loadMovimenti() {
+  try {
+    const res = await fetch(`${API_URL}/dati/`); // NOTA: "/" finale per combaciare con router.get("/")
+    if (!res.ok) {
+      console.error("Errore HTTP movimenti:", res.status, res.statusText);
+      movimenti = [];
+      allMovimenti = [];
+      renderMovimenti();
+      return;
+    }
+
+    const data = await res.json();
+
+    if (!Array.isArray(data)) {
+      console.warn("ATTENZIONE: /dati non ha restituito un array:", data);
+      movimenti = [];
+      allMovimenti = [];
+    } else {
+      allMovimenti = data;
+      movimenti = allMovimenti;
+    }
+
+    renderMovimenti();
+  } catch (error) {
+    console.error("Errore caricamento movimenti", error);
+  }
+}
+
+// Render tabella movimenti
+function renderMovimenti() {
+  const tbody = document.getElementById("movimentiTableBody");
+  if (!tbody) {
+    console.error("Elemento movimentiTableBody non trovato");
+    return;
+  }
+
+  if (!Array.isArray(movimenti) || movimenti.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="11" class="text-center">
+          <div style="padding: 40px 20px; color: var(--text-secondary);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+              <polyline points="17 6 23 6 23 12"></polyline>
+            </svg>
+            <p style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Nessun movimento presente</p>
+            <p style="font-size: 14px;">
+              Clicca su <strong>Nuovo</strong> per registrare un carico o uno scarico
+            </p>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = movimenti
+    .map((m) => {
+      const prefix = m.tipo === "scarico" ? "-" : "";
+
+      let prezzoUnitarioRaw = "-";
+      if (m.tipo === "carico") {
+        prezzoUnitarioRaw = formatCurrency(m.prezzo);        // carico: prezzo campo prezzo
+      } else if (m.tipo === "scarico" && m.prezzo_unitario_scarico != null) {
+        prezzoUnitarioRaw = formatCurrency(m.prezzo_unitario_scarico); // scarico: costo medio FIFO
+      }
+      const prezzoUnitarioHtml =
+        prezzoUnitarioRaw !== "-"
+          ? prezzoUnitarioRaw.replace("€", `${prefix}€`)
+          : prezzoUnitarioRaw;
+
+      const prezzoTotaleRaw = formatCurrency(m.prezzo_totale_movimento || 0);
+      const prezzoTotaleHtml = prezzoTotaleRaw.replace("€", `${prefix}€`);
+
+      const colorClass = m.tipo === "carico" ? "text-green" : "text-red";
+
+      const descr =
+        m.prodotto_descrizione
+          ? `<small>${escapeHtml(
+              m.prodotto_descrizione.substring(0, 30)
+            )}${m.prodotto_descrizione.length > 30 ? "…" : ""}</small>`
+          : '<span style="color:#999;">-</span>';
+
+      return `
+        <tr>
+          <td>${new Date(m.data_movimento).toLocaleDateString("it-IT")}</td>
+          <td><strong>${escapeHtml(m.prodotto_nome)}</strong></td>
+          <td>${
+            m.marca_nome
+              ? escapeHtml(m.marca_nome)
+              : '<span style="color:#999;">-</span>'
+          }</td>
+          <td>${descr}</td>
+          <td>
+            <span class="badge ${
+              m.tipo === "carico" ? "badge-success" : "badge-danger"
+            }">${m.tipo.toUpperCase()}</span>
+          </td>
+          <td class="${colorClass}">${formatQuantity(m.quantita)} pz</td>
+          <td class="${colorClass}">${prezzoUnitarioHtml}</td>
+          <td class="${colorClass}"><strong>${prezzoTotaleHtml}</strong></td>
+          <td>${m.fattura_doc || '<span style="color:#999;">-</span>'}</td>
+          <td>${m.fornitore_cliente_id || '<span style="color:#999;">-</span>'}</td>
+          <td class="text-right">
+            <button class="btn-icon"
+              onclick="deleteMovimento(${m.id}, '${escapeHtml(m.prodotto_nome)}', '${m.tipo}')"
+              title="Elimina movimento"
+              aria-label="Elimina movimento ${m.tipo}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 6h18"></path>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </td>
+        </tr>
+      `;
+    })
+    .join("");
+}
+
+// Filtro ricerca movimenti
+document.getElementById("filterMovimenti")?.addEventListener("input", (e) => {
+  const searchTerm = e.target.value.toLowerCase().trim();
+
+  if (!searchTerm) {
+    movimenti = allMovimenti;
+    renderMovimenti();
+    console.log("✅ Ricerca ripristinata [movimenti]");
+    return;
+  }
+
+  movimenti = allMovimenti.filter((m) => {
+    const nome = (m.prodotto_nome || "").toLowerCase();
+    const marca = (m.marca_nome || "").toLowerCase();
+    const tipo = (m.tipo || "").toLowerCase();
+    const descr = (m.prodotto_descrizione || "").toLowerCase();
+
+    return (
+      nome.includes(searchTerm) ||
+      marca.includes(searchTerm) ||
+      tipo.includes(searchTerm) ||
+      descr.includes(searchTerm)
+    );
+  });
+
+  renderMovimenti();
+});
+
+// Apre il modal per inserire / modificare un movimento
+async function openMovimentoModal(movimento = null) {
+  console.log("Apertura modal movimento...", movimento);
+
+  // Carica prodotti se non già caricati
+  if (!prodotti || prodotti.length === 0) {
+    const res = await fetch(`${API_URL}/prodotti`);
+    allProdotti = await res.json();
+    prodotti = allProdotti;
+  }
+
+  const modal = document.getElementById("modalMovimento");
+  const title = document.getElementById("modalMovimentoTitle");
+  const form = document.getElementById("formMovimento");
+  const selectProdotto = document.getElementById("movimentoProdotto");
+  const tipoSelect = document.getElementById("movimentoTipo");
+
+  // reset form
+  form.reset();
+  document.getElementById("movimentoId").value = "";
+
+  // popola select prodotto
+  selectProdotto.innerHTML = `
+    <option value="">Seleziona prodotto...</option>
+    ${prodotti
+      .map((p) => {
+        const marcaNome = p.marca_nome ? p.marca_nome.toUpperCase() : "";
+        return `<option value="${p.id}">${p.nome}${marcaNome ? " - " + marcaNome : ""}</option>`;
+      })
+      .join("")}
+  `;
+
+  // nuova riga
+  if (!movimento) {
+    title.textContent = "Nuovo Movimento";
+    document.getElementById("giacenzaInfo").style.display = "none";
+    tipoSelect.value = "";
+    togglePrezzoField();
+  } else {
+    // modifica
+    title.textContent = "Modifica Movimento";
+    document.getElementById("movimentoId").value = movimento.id;
+    selectProdotto.value = movimento.prodotto_id;
+    tipoSelect.value = movimento.tipo;
+    document.getElementById("movimentoData").value = movimento.data_movimento;
+    document.getElementById("movimentoQuantita").value = movimento.quantita;
+
+    if (movimento.tipo === "carico") {
+      document.getElementById("movimentoPrezzo").value =
+        movimento.prezzo != null ? movimento.prezzo : "";
+      document.getElementById("movimentoFattura").value =
+        movimento.fattura_doc || "";
+      document.getElementById("movimentoFornitore").value =
+        movimento.fornitore_cliente_id || "";
+    } else {
+      // scarico: niente prezzo/doc/fornitore
+      document.getElementById("movimentoPrezzo").value = "";
+      document.getElementById("movimentoFattura").value = "";
+      document.getElementById("movimentoFornitore").value = "";
+    }
+
+    togglePrezzoField();
+    // mostra info giacenza del prodotto selezionato
+    await showGiacenzaInfo(selectProdotto.value);
+  }
+
+  // setup gestione decimali (se hai le funzioni già definite)
+  if (typeof setupDecimalInputs === "function") {
+    setTimeout(() => {
+      setupDecimalInputs();
+    }, 150);
+  }
+
+  modal.classList.add("active");
+}
+
+// Render tabella movimenti COMPLETA
+function renderMovimenti() {
+  const tbody = document.getElementById("movimentiTableBody");
+  if (!tbody) {
+    console.error("Elemento movimentiTableBody non trovato");
+    return;
+  }
+
+  if (!Array.isArray(movimenti) || movimenti.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="11" class="text-center">
+          <div style="padding: 40px 20px; color: var(--text-secondary);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+              <polyline points="17 6 23 6 23 12"></polyline>
+            </svg>
+            <p style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Nessun movimento presente</p>
+            <p style="font-size: 14px;">
+              Clicca su <strong>Nuovo</strong> per registrare un carico o uno scarico
+            </p>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = movimenti
+    .map((m) => {
+      const prefix = m.tipo === "scarico" ? "-" : "";
+
+      let prezzoUnitarioRaw = "-";
+      if (m.tipo === "carico") {
+        prezzoUnitarioRaw = formatCurrency(m.prezzo);
+      } else if (m.tipo === "scarico" && m.prezzo_unitario_scarico != null) {
+        prezzoUnitarioRaw = formatCurrency(m.prezzo_unitario_scarico);
+      }
+      const prezzoUnitarioHtml =
+        prezzoUnitarioRaw !== "-"
+          ? prezzoUnitarioRaw.replace("€", `${prefix}€`)
+          : prezzoUnitarioRaw;
+
+      const prezzoTotaleRaw = formatCurrency(m.prezzo_totale_movimento || 0);
+      const prezzoTotaleHtml = prezzoTotaleRaw.replace("€", `${prefix}€`);
+
+      const colorClass = m.tipo === "carico" ? "text-green" : "text-red";
+
+      const descr =
+        m.prodotto_descrizione
+          ? `<small>${escapeHtml(
+              m.prodotto_descrizione.substring(0, 30)
+            )}${m.prodotto_descrizione.length > 30 ? "…" : ""}</small>`
+          : '<span style="color:#999;">-</span>';
+
+      return `
+        <tr>
+          <td>${new Date(m.data_movimento).toLocaleDateString("it-IT")}</td>
+          <td><strong>${escapeHtml(m.prodotto_nome)}</strong></td>
+          <td>${
+            m.marca_nome
+              ? escapeHtml(m.marca_nome)
+              : '<span style="color:#999;">-</span>'
+          }</td>
+          <td>${descr}</td>
+          <td>
+            <span class="badge ${
+              m.tipo === "carico" ? "badge-success" : "badge-danger"
+            }">${m.tipo.toUpperCase()}</span>
+          </td>
+          <td class="${colorClass}">${formatQuantity(m.quantita)} pz</td>
+          <td class="${colorClass}">${prezzoUnitarioHtml}</td>
+          <td class="${colorClass}"><strong>${prezzoTotaleHtml}</strong></td>
+          <td>${m.fattura_doc || '<span style="color:#999;">-</span>'}</td>
+          <td>${
+            m.fornitore_cliente_id ||
+            '<span style="color:#999;">-</span>'
+          }</td>
+          <td class="text-right">
+            <!-- PENNA MODIFICA -->
+            <button class="btn-icon"
+              onclick="editMovimento(${m.id})"
+              title="Modifica movimento"
+              aria-label="Modifica movimento ${m.tipo}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </button>
+
+            <!-- CESTINO ELIMINA -->
+            <button class="btn-icon"
+              onclick="deleteMovimento(${m.id}, '${escapeHtml(
+        m.prodotto_nome
+      )}', '${m.tipo}')"
+              title="Elimina movimento"
+              aria-label="Elimina movimento ${m.tipo}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 6h18"></path>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </td>
+        </tr>
+      `;
+    })
+    .join("");
+}
