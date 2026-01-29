@@ -1,4 +1,4 @@
-# 🏍️ Gestione Magazzino 
+# 🏍️ Gestione Magazzino
 
 Benvenuto nel sistema di gestione del magazzino, uno strumento essenziale per monitorare, valorizzare e tenere traccia di tutti i movimenti dei prodotti e ricambi.
 
@@ -29,7 +29,6 @@ cliccando sul bottone nuova marca
   - _Il Nome deve essere univoco._
 - **Modifica:** Modifica il nome di una marca esistente.
 - **Eliminazione:**
-
   - Una marca può essere eliminata **solo se nessun prodotto è collegato ad essa**. In caso contrario, l'eliminazione verrà bloccata.
 
 ### 2. Prodotti
@@ -60,10 +59,13 @@ Questa sezione permette di registrare le entrate e le uscite dei prodotti.
   - È possibile registrare il **Prezzo Totale di Vendita/Scarico** per tracciare il valore di uscita.
   - non è possibile scaricare più prodotti di quelli presenti in magazzino.
 - **Visualizzazione Movimenti:** La tabella mostra la cronologia di tutti i carichi e scarichi, inclusi i dettagli come il prezzo totale del movimento e, per gli scarichi, il prezzo unitario di scarico calcolato.
+
 - **Eliminazione Movimenti:** È possibile **eliminare un movimento** (carico o scarico).
   - **Importante:** L'eliminazione di un **Carico** rimuove il lotto e riduce la giacenza. L'eliminazione di uno **Scarico** ripristina la quantità prelevata nei lotti originali (annullando l'operazione).
 
-### 4. Magazzino - Riepilogo (Giacenze e Valore) sezione Riepilogo
+- **Modifica Movimenti:** È possibile **modificare un movimento esistente** (carico o scarico) per aggiornare dati come quantità, prezzo o data. In caso di variazione delle quantità, il sistema ricalcola automaticamente le giacenze dei lotti interessati.
+
+### 4. Riepilogo (Giacenze e Valore)
 
 Questa è la sezione principale per il controllo delle scorte.
 
@@ -72,7 +74,6 @@ Questa è la sezione principale per il controllo delle scorte.
   - Mostra tutti i **Prodotti** con la loro **Marca** e **Descrizione**.
   - Indica la **Giacenza** attuale (quantità totale disponibile) e il **Valore Totale** di quella giacenza.
 - sotto a ogni prodotto vedi la scritta **Dettagli Lotti:** dove vedrai:
-
   - I **Lotti** specifici di quel prodotto ancora in giacenza, ordinati per data di carico.
   - La **Quantità Rimanente** in quel lotto.
   - Il **Prezzo di Acquisto** unitario del lotto.
@@ -80,7 +81,7 @@ Questa è la sezione principale per il controllo delle scorte.
 
 - il bottone stampa vede quello che vedi nella tabella, con una stampa a schermo del riepilogo.
 
-### 5. Magazzino - Riepilogo (Giacenze e Valore) sezione Storico
+### 5. Storico (Giacenze e Valore)
 
 Questa è la sezione principale per il controllo delle scorte a una data specifica.
 
@@ -91,7 +92,6 @@ Questa è la sezione principale per il controllo delle scorte a una data specifi
   - Mostra tutti i **Prodotti** con la loro **Marca** e **Descrizione**.
   - Indica la **Giacenza** attuale (quantità totale disponibile) e il **Valore Totale** di quella giacenza.
 - sotto a ogni prodotto vedi la scritta **Dettagli Lotti:** dove vedrai:
-
   - I **Lotti** specifici di quel prodotto ancora in giacenza, ordinati per data di carico.
   - La **Quantità Rimanente** in quel lotto.
   - Il **Prezzo di Acquisto** unitario del lotto.
@@ -110,7 +110,6 @@ Gestione degli account utente (accessibile agli utenti con privilegi amministrat
   - Modifica l'username o la password di un utente esistente con l'icona della penna.
   - _Quando si modifica un utente, la password è opzionale: se lasciata vuota, non verrà cambiata._
 - **Eliminazione:**
-
   - È possibile eliminare un utente **solo se non è l'unico utente rimasto** nel sistema (per evitare di perdere l'accesso).
 
   - se modifici o elimini nome utente con il quale sono entrato esce in automatico.
