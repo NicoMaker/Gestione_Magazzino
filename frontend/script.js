@@ -9212,3 +9212,88 @@ function renderMovimenti() {
     })
     .join("");
 }
+
+// Apre il modal per inserire un nuovo movimento o modificarne uno esistente
+async function openMovimentoModal(movimento = null) {
+    console.log("Apertura modal movimento...", movimento);
+
+    const modal          = document.getElementById("modalMovimento");
+    const title          = document.getElementById("modalMovimentoTitle");
+    const form           = document.getElementById("formMovimento");
+    const tipoSelect     = document.getElementById("movimentoTipo");
+    const hiddenProdotto = document.getElementById("movimentoProdotto");
+    const searchInput    = document.getElementById("movimentoProdottoSearch");
+    const resultsBox     = document.getElementById("prodottoSearchResults");
+
+    form.reset();
+    document.getElementById("movimentoId").value = "";
+
+    // NUOVO MOVIMENTO
+    if (!movimento) {
+        title.textContent = "Nuovo Movimento";
+
+        // reset ricerca prodotto
+        if (hiddenProdotto) hiddenProdotto.value = "";
+        if (searchInput)    searchInput.value = "";
+        if (resultsBox)     resultsBox.classList.remove("show");
+
+        // nascondi info giacenza
+        const giacenzaInfo = document.getElementById("giacenzaInfo");
+        if (giacenzaInfo) giacenzaInfo.style.display = "none";
+
+        // 🔥 preimposta TIPO su CARICO
+        if (tipoSelect) tipoSelect.value = "carico";
+    } else {
+        // MODIFICA MOVIMENTO
+        title.textContent = "Modifica Movimento";
+        document.getElementById("movimentoId").value = movimento.id;
+
+        // prodotto selezionato
+        if (hiddenProdotto) hiddenProdotto.value = movimento.prodotto_id || movimento.prodottoid;
+
+        if (searchInput) {
+            const prodotto = allProdotti.find(
+                (p) => p.id === (movimento.prodotto_id || movimento.prodottoid)
+            );
+            if (prodotto) {
+                const marca = prodotto.marca_nome || prodotto.marcanome || "";
+                const display = marca ? `${prodotto.nome} - ${marca.toUpperCase()}` : prodotto.nome;
+                searchInput.value = display;
+                searchInput.classList.add("has-selection");
+            }
+        }
+
+        // tipo (carico/scarico)
+        if (tipoSelect) tipoSelect.value = movimento.tipo;
+
+        // altri campi
+        document.getElementById("movimentoQuantita").value = formatNumber(movimento.quantita);
+        document.getElementById("movimentoData").value     = movimento.data_movimento || movimento.datamovimento || "";
+
+        if (movimento.tipo === "carico") {
+            if (document.getElementById("movimentoPrezzo"))
+                document.getElementById("movimentoPrezzo").value =
+                    movimento.prezzo ? formatNumber(movimento.prezzo) : "";
+            if (document.getElementById("movimentoFattura"))
+                document.getElementById("movimentoFattura").value = movimento.fattura_doc || movimento.fatturadoc || "";
+            if (document.getElementById("movimentoFornitore"))
+                document.getElementById("movimentoFornitore").value = movimento.fornitore || "";
+        }
+
+        // mostra giacenza prodotto selezionato
+        const pid = movimento.prodotto_id || movimento.prodottoid;
+        if (pid) await showGiacenzaInfo(pid);
+    }
+
+    // aggiorna visibilità dei campi prezzo/fornitore in base al tipo
+    togglePrezzoField();
+
+    // mostra modal
+    modal.classList.add("active");
+
+    // dopo breve timeout: decimali + ricerca prodotto
+    setTimeout(() => {
+        if (typeof setupDecimalInputs === "function") setupDecimalInputs();
+        if (typeof setupProductSearch === "function") setupProductSearch();
+    }, 150);
+}
