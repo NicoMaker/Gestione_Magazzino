@@ -41,11 +41,14 @@ router.get("/", (req, res) => {
       JOIN prodotti p ON d.prodotto_id = p.id
       LEFT JOIN marche m ON p.marca_id = m.id
     ORDER BY
-      d.data_movimento DESC,
-      p.nome ASC,
-      d.tipo ASC,
-      d.data_registrazione DESC,
-      d.id DESC
+      d.data_movimento DESC,           -- 1️⃣ Prima le date più recenti
+      p.nome ASC,                      -- 2️⃣ Poi per nome prodotto
+      CASE 
+        WHEN d.tipo = 'scarico' THEN 0  -- 3️⃣ SCARICO prima (sopra) ✅
+        WHEN d.tipo = 'carico' THEN 1   -- 3️⃣ CARICO dopo (sotto) ✅
+      END ASC,
+      d.data_registrazione DESC,       -- 4️⃣ Più recenti prima
+      d.id DESC                         -- 5️⃣ ID decrescente
   `;
 
   db.all(query, (err, rows) => {
