@@ -3320,11 +3320,6 @@ tbody tr:hover {
   transition: all 0.3s ease;
 }
 
-.prodotti-badge:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
-}
-
 /* Badge vuoto (0 prodotti) */
 .prodotti-badge.empty {
   background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
