@@ -15,7 +15,7 @@ router.get("/", (req, res) => {
     FROM marche m
     LEFT JOIN prodotti p ON m.id = p.marca_id
     GROUP BY m.id, m.nome, m.data_creazione
-    ORDER BY m.nome COLLATE NOCASE
+    ORDER BY m.nome COLLATE NOCASE, m.nome
   `;
 
   db.all(query, (err, rows) => {

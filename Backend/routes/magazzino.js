@@ -44,7 +44,7 @@ router.get("/riepilogo", (req, res) => {
     LEFT JOIN lotti l ON p.id = l.prodotto_id AND l.quantita_rimanente > 0
     GROUP BY p.id, p.nome, m.nome, p.descrizione
     HAVING giacenza >= 0
-    ORDER BY p.nome COLLATE NOCASE
+    ORDER BY p.nome COLLATE NOCASE, p.nome
   `;
 
   db.all(query, (err, rows) => {
@@ -153,7 +153,7 @@ router.get("/storico-giacenza/:date", (req, res) => {
     SELECT p.id, p.nome, m.nome as marca_nome, p.descrizione
     FROM prodotti p
     LEFT JOIN marche m ON p.marca_id = m.id
-    ORDER BY p.nome COLLATE NOCASE
+    ORDER BY p.nome COLLATE NOCASE, p.nome
   `,
     (err, prodotti) => {
       if (err) {
@@ -284,8 +284,12 @@ router.get("/storico-giacenza/:date", (req, res) => {
 
             productsProcessed++;
             if (productsProcessed === prodotti.length) {
-              // ORDINA I RISULTATI ALFABETICAMENTE (case-insensitive) PRIMA DI INVIARLI
-              results.sort((a, b) => a.nome.localeCompare(b.nome, 'it', { sensitivity: 'base' }));
+              // ORDINA I RISULTATI: prima case-insensitive, poi maiuscole prima
+              results.sort((a, b) => {
+                const caseInsensitive = a.nome.localeCompare(b.nome, 'it', { sensitivity: 'base' });
+                if (caseInsensitive !== 0) return caseInsensitive;
+                return a.nome.localeCompare(b.nome); // maiuscole prima
+              });
               res.json({
                 riepilogo: results,
                 valore_totale: formatDecimal(totalValue),
