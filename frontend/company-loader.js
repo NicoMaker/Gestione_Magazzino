@@ -4,6 +4,40 @@
 let companyInfo = null;
 
 /**
+ * Formatta un numero di telefono per la visualizzazione
+ * Rimuove caratteri non numerici (eccetto +) e aggiunge spazi per leggibilità
+ */
+function formatPhoneNumber(phone) {
+  if (!phone || phone === "-") return phone;
+  
+  // Rimuovi tutti gli spazi esistenti
+  let cleaned = phone.replace(/\s+/g, '');
+  
+  // Se inizia con +39 (Italia)
+  if (cleaned.startsWith('+39')) {
+    // +39 XXX XXX XXXX
+    return cleaned.replace(/(\+39)(\d{3})(\d{3})(\d{4})/, '$1 $2 $3 $4');
+  }
+  // Se inizia con +
+  else if (cleaned.startsWith('+')) {
+    // Formato generico internazionale: +XX XXX XXX XXXX
+    return cleaned.replace(/(\+\d{1,3})(\d{3})(\d{3})(\d{4})/, '$1 $2 $3 $4');
+  }
+  // Se è un numero italiano senza prefisso (10 cifre)
+  else if (cleaned.length === 10) {
+    // XXX XXX XXXX
+    return cleaned.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3');
+  }
+  // Formato generico per altri numeri
+  else if (cleaned.length > 6) {
+    // Dividi in gruppi di 3 cifre
+    return cleaned.replace(/(\d{3})(?=\d)/g, '$1 ');
+  }
+  
+  return phone;
+}
+
+/**
  * Carica le informazioni aziendali dal file JSON
  * @returns {Promise<Object>} - Oggetto con i dati aziendali
  */
@@ -125,7 +159,7 @@ function insertCompanyInfoPrint(html) {
     .replace(/{{company\.province}}/g, company.province)
     .replace(/{{company\.piva}}/g, company.piva)
     .replace(/{{company\.name}}/g, company.name)
-    .replace(/{{company\.phone}}/g, company.phone)
+    .replace(/{{company\.phone}}/g, formatPhoneNumber(company.phone))
     .replace(/{{company\.email}}/g, company.email)
     .replace(/{{company\.logo}}/g, company.logo);
   
@@ -173,6 +207,16 @@ function getLogoPath() {
   if (!companyInfo) return 'img/Logo.png';
   
   return companyInfo.company.logo;
+}
+
+/**
+ * Restituisce il telefono formattato
+ * @returns {string} - Telefono formattato
+ */
+function getPhoneNumber() {
+  if (!companyInfo) return 'Telefono non disponibile';
+  
+  return formatPhoneNumber(companyInfo.company.phone);
 }
 
 /**
