@@ -115,49 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==================== MARCHE ====================
-async function loadMarche() {
-  try {
-    const res = await fetch(`${API_URL}/marche`);
-    allMarche = await res.json(); // CHANGE: Salva tutte le marche in allMarche
-    marche = allMarche; // CHANGE: Reimposta marche alla copia di allMarche per il rendering iniziale
-    renderMarche();
-  } catch (error) {
-    console.error("Errore caricamento marche:", error);
-  }
-}
 
-function renderMarche() {
-  const tbody = document.getElementById("marcheTableBody");
-
-  if (marche.length === 0) {
-    tbody.innerHTML =
-      '<tr><td colspan="2" class="text-center">Nessuna marca presente</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = marche
-    .map(
-      (m) => `
-    <tr>
-      <td><strong>${m.nome}</strong></td>
-      <td class="text-right">
-        <button class="btn-icon" onclick="editMarca(${m.id})" title="Modifica">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-          </svg>
-        </button>
-        <button class="btn-icon" onclick="deleteMarca(${m.id})" title="Elimina">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-          </svg>
-        </button>
-      </td>
-    </tr>
-  `
-    )
-    .join("");
-}
 
 document.getElementById("filterMarche")?.addEventListener("input", (e) => {
   const searchTerm = e.target.value.toLowerCase();
@@ -193,25 +151,6 @@ function editMarca(id) {
   if (marca) openMarcaModal(marca);
 }
 
-async function deleteMarca(id) {
-  if (!(await confirm("Sei sicuro di voler eliminare questa marca?"))) return;
-
-  try {
-    const res = await fetch(`${API_URL}/marche/${id}`, { method: "DELETE" });
-    const data = await res.json();
-
-    if (res.ok) {
-      if (typeof ignoreNextSocketUpdate === "function")
-        ignoreNextSocketUpdate();
-      alert("Marca eliminata con successo!");
-      loadMarche();
-    } else {
-      alert(data.error || "Errore durante l'eliminazione");
-    }
-  } catch (error) {
-    alert("Errore di connessione");
-  }
-}
 
 document.getElementById("formMarca").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -257,49 +196,6 @@ async function loadProdotti() {
   }
 }
 
-function renderProdotti() {
-  const tbody = document.getElementById("prodottiTableBody");
-
-  if (prodotti.length === 0) {
-    tbody.innerHTML =
-      '<tr><td colspan="5" class="text-center">Nessun prodotto presente</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = prodotti
-    .map(
-      (p) => `
-    <tr>
-      <td><strong>${p.nome}</strong></td>
-      <td><span class="badge badge-marca">${
-        p.marca_nome ? p.marca_nome.toUpperCase() : "N/A"
-      }</span></td>
-      <td><span class="badge-giacenza">${formatQuantity(
-        p.giacenza ?? 0
-      )} pz</span></td>
-      <td>${p.descrizione || "-"}</td>
-      <td class="text-right">
-        <button class="btn-icon" onclick="editProdotto(${
-          p.id
-        })" title="Modifica">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-          </svg>
-        </button>
-        <button class="btn-icon" onclick="deleteProdotto(${
-          p.id
-        })" title="Elimina">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-          </svg>
-        </button>
-      </td>
-    </tr>
-  `
-    )
-    .join("");
-}
 
 document.getElementById("filterProdotti")?.addEventListener("input", (e) => {
   const searchTerm = e.target.value.toLowerCase().trim();
@@ -337,82 +233,17 @@ document.getElementById("filterProdotti")?.addEventListener("input", (e) => {
   );
 });
 
-async function openProdottoModal(prodotto = null) {
-  if (marche.length === 0) {
-    const res = await fetch(`${API_URL}/marche`);
-    marche = await res.json();
-  }
 
-  const modal = document.getElementById("modalProdotto");
-  const title = document.getElementById("modalProdottoTitle");
-  const form = document.getElementById("formProdotto");
-  const selectMarca = document.getElementById("prodottoMarca");
-
-  form.reset();
-
-  // CHANGE: Aggiunta opzione vuota come prima scelta per non preselezionare nessuna marca
-  selectMarca.innerHTML = marche
-    .map((m) => `<option value="${m.id}">${m.nome.toUpperCase()}</option>`)
-    .join("");
-
-  if (prodotto) {
-    title.textContent = "Modifica Prodotto";
-    document.getElementById("prodottoId").value = prodotto.id;
-    document.getElementById("prodottoNome").value = prodotto.nome;
-    document.getElementById("prodottoMarca").value = prodotto.marca_id || "";
-    document.getElementById("prodottoDescrizione").value =
-      prodotto.descrizione || "";
-  } else {
-    title.textContent = "Nuovo Prodotto";
-    document.getElementById("prodottoId").value = "";
-  }
-
-  modal.classList.add("active");
-}
-
-function closeProdottoModal() {
-  document.getElementById("modalProdotto").classList.remove("active");
-}
 
 function editProdotto(id) {
   const prodotto = prodotti.find((p) => p.id === id);
   if (prodotto) openProdottoModal(prodotto);
 }
 
-async function deleteProdotto(id) {
-  if (!(await confirm("Sei sicuro di voler eliminare questo prodotto?")))
-    return;
-
-  try {
-    const res = await fetch(`${API_URL}/prodotti/${id}`, { method: "DELETE" });
-    const data = await res.json();
-
-    if (res.ok) {
-      if (typeof ignoreNextSocketUpdate === "function")
-        ignoreNextSocketUpdate();
-      alert("Prodotto eliminato con successo!");
-      loadProdotti();
-    } else {
-      alert(data.error || "Errore durante l'eliminazione");
-    }
-  } catch (error) {
-    alert("Errore di connessione");
-  }
-}
 
 // listener di submit spostato più sotto per evitare registrazioni duplicate
 
 // ==================== MOVIMENTI ====================
-async function loadMovimenti() {
-  try {
-    const res = await fetch(`${API_URL}/dati`);
-    allMovimenti = await res.json(); // CHANGE: Salva tutte le marche in allMovimenti
-    movimenti = allMovimenti; // CHANGE: Reimposta movimenti alla copia di allMovimenti per il rendering iniziale
-    renderMovimenti();
-  } catch (error) {
-    console.error("Errore caricamento movimenti:", error);
-  }
-}
 
 document.getElementById("filterMovimenti")?.addEventListener("input", (e) => {
   const searchTerm = e.target.value.toLowerCase();
@@ -427,79 +258,7 @@ document.getElementById("filterMovimenti")?.addEventListener("input", (e) => {
   renderMovimenti();
 });
 
-function togglePrezzoField() {
-  const tipo = document.getElementById("movimentoTipo").value;
-  const prezzoGroup = document.getElementById("prezzoGroup");
-  const prezzoInput = document.getElementById("movimentoPrezzo");
-  const fornitoreGroup = document.getElementById("fornitoreGroup");
-  const fatturaInput = document.getElementById("movimentoFattura");
-  const fornitoreInput = document.getElementById("movimentoFornitore");
-  const docOptional = document.getElementById("docOptional");
-  const fornitoreOptional = document.getElementById("fornitoreOptional");
-  const fatturaGroup = fatturaInput.closest(".form-group");
 
-  // CHANGE: Gestione anche dell'opzione vuota (nessuna selezione)
-  if (tipo === "carico") {
-    prezzoGroup.style.display = "block";
-    prezzoInput.required = true;
-    fornitoreGroup.style.display = "block";
-    fatturaGroup.style.display = "block";
-    fatturaInput.required = true;
-    fornitoreInput.required = true;
-    docOptional.textContent = "*";
-    fornitoreOptional.textContent = "*";
-  } else {
-    // Per 'scarico' o valore vuoto, nascondi i campi
-    prezzoGroup.style.display = "none";
-    prezzoInput.required = false;
-    prezzoInput.value = "";
-    fornitoreGroup.style.display = "none";
-    fatturaGroup.style.display = "none";
-    fornitoreInput.value = "";
-    fatturaInput.value = "";
-    fatturaInput.required = false;
-    fornitoreInput.required = false;
-    docOptional.textContent = "";
-    fornitoreOptional.textContent = "";
-  }
-}
-
-async function openMovimentoModal(movimento = null) {
-  if (prodotti.length === 0) {
-    const res = await fetch(`${API_URL}/prodotti`);
-    prodotti = await res.json();
-  }
-
-  const modal = document.getElementById("modalMovimento");
-  const title = document.getElementById("modalMovimentoTitle");
-  const form = document.getElementById("formMovimento");
-  const selectProdotto = document.getElementById("movimentoProdotto");
-
-  form.reset();
-
-  // CHANGE: Aggiunta opzione vuota iniziale nel select prodotto
-  selectProdotto.innerHTML =
-    '<option value="">Seleziona prodotto...</option>' +
-    prodotti
-      .map((p) => {
-        const marcaNome = p.marca_nome
-          ? ` (${p.marca_nome.toUpperCase()})`
-          : "";
-        return `<option value="${p.id}">${p.nome}${marcaNome}</option>`;
-      })
-      .join("");
-
-  title.textContent = "Nuovo Movimento";
-  document.getElementById("movimentoId").value = "";
-  // CHANGE: Nascondi info giacenza all'apertura del modale se non è in modalità modifica
-  if (!movimento) {
-    document.getElementById("giacenzaInfo").style.display = "none";
-  }
-
-  togglePrezzoField();
-
-  modal.classList.add("active");
-}
 
 function closeMovimentoModal() {
   document.getElementById("modalMovimento").classList.remove("active");
@@ -510,27 +269,6 @@ function editMovimento(id) {
   if (movimento) openMovimentoModal(movimento);
 }
 
-async function deleteMovimento(id) {
-  if (!(await confirm("Sei sicuro di voler eliminare questo movimento?")))
-    return;
-
-  try {
-    const res = await fetch(`${API_URL}/dati/${id}`, { method: "DELETE" });
-    const data = await res.json();
-
-    if (res.ok) {
-      if (typeof ignoreNextSocketUpdate === "function")
-        ignoreNextSocketUpdate();
-      alert("Movimento eliminato con successo!");
-      loadMovimenti();
-      loadProdotti();
-    } else {
-      alert(data.error || "Errore durante l'eliminazione");
-    }
-  } catch (error) {
-    alert("Errore di connessione");
-  }
-}
 
 document
   .getElementById("formMovimento")
@@ -676,93 +414,6 @@ function updateRiepilogoTotal() {
     formatCurrency(valoreTotaleFiltrato);
 }
 
-function renderRiepilogo() {
-  const tbody = document.getElementById("riepilogoTableBody");
-
-  if (riepilogo.length === 0) {
-    tbody.innerHTML =
-      '<tr><td colspan="4" class="text-center">Nessun prodotto in magazzino</td></tr>';
-    return;
-  }
-
-  let html = "";
-
-  riepilogo.forEach((r) => {
-    html += `
-    <tr class="product-main-row">
-      <td><strong>${r.nome}</strong>${
-      r.marca_nome
-        ? ` <span class="badge-marca">${r.marca_nome.toUpperCase()}</span>`
-        : ""
-    }</td>
-      <td>${
-        r.descrizione
-          ? `<small>${r.descrizione.substring(0, 50)}${
-              r.descrizione.length > 50 ? "..." : ""
-            }</small>`
-          : '<span style="color: #999;">-</span>'
-      }</td>
-      <td><span class="badge-giacenza">${formatQuantity(
-        r.giacenza
-      )} pz</span></td>
-      <td><strong>${formatCurrency(r.valore_totale)}</strong></td>
-    </tr>
-    `;
-
-    if (r.giacenza > 0 && r.lotti && r.lotti.length > 0) {
-      html += `
-      <tr class="lotti-row">
-        <td colspan="4" class="lotti-container">
-          <div class="lotti-table-wrapper">
-            <table class="lotti-table">
-              <thead>
-                <tr>
-                  <th>Data Carico</th>
-                  <th>Quantità</th>
-                  <th>Prezzo Unit.</th>
-                  <th>Valore</th>
-                  <th>Documento/Fattura</th>
-                  <th>Fornitore</th>
-                </tr>
-              </thead>
-              <tbody>
-      `;
-
-      r.lotti.forEach((lotto) => {
-        html += `
-                <tr>
-                  <td>${new Date(lotto.data_carico).toLocaleDateString(
-                    "it-IT"
-                  )}</td>
-                  <td><strong>${formatQuantity(
-                    lotto.quantita_rimanente
-                  )} pz</strong></td>
-                  <td>${formatCurrency(lotto.prezzo)}</td>
-                  <td><strong>${formatCurrency(
-                    lotto.quantita_rimanente * lotto.prezzo
-                  )}</strong></td>
-                  <td>${
-                    lotto.fattura_doc || '<span style="color: #999;">-</span>'
-                  }</td>
-                  <td>${
-                    lotto.fornitore || '<span style="color: #999;">-</span>'
-                  }</td>
-                </tr>
-        `;
-      });
-
-      html += `
-              </tbody>
-            </table>
-          </div>
-        </td>
-      </tr>
-      `;
-    }
-  });
-
-  tbody.innerHTML = html;
-}
 
 document.getElementById("filterRiepilogo")?.addEventListener("input", (e) => {
   const searchTerm = e.target.value.toLowerCase();
@@ -779,133 +430,9 @@ document.getElementById("filterRiepilogo")?.addEventListener("input", (e) => {
 // ==================== STORICO ====================
 
 // ==================== STORICO ====================
-async function loadStorico() {
-  const data = document.getElementById("storicoDate").value;
-  if (!data) {
-    // Se non c'è una data, resetta la visualizzazione
-    allStorico = [];
-    storico = [];
-    updateStoricoTotal();
-    const tbody = document.getElementById("storicoTableBody");
-    tbody.innerHTML =
-      '<tr><td colspan="4" class="text-center">Seleziona una data per visualizzare lo storico</td></tr>';
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API_URL}/magazzino/storico-giacenza/${data}`);
-    const result = await res.json();
-
-    allStorico = result.riepilogo || [];
-    storico = allStorico;
-
-    // CHANGE: Aggiorna il totale in base ai prodotti visibili
-    updateStoricoTotal();
-    renderStorico(storico);
-  } catch (error) {
-    console.error("Errore caricamento storico:", error);
-    alert("Errore nel caricamento dello storico");
-  }
-}
 
 // CHANGE: Nuova funzione per aggiornare il totale dello storico
-function updateStoricoTotal() {
-  const valoreStoricoFiltrato = storico.reduce(
-    (sum, s) => sum + Number.parseFloat(s.valore_totale || 0),
-    0
-  );
-  document.getElementById("valoreStorico").textContent = formatCurrency(
-    valoreStoricoFiltrato
-  );
-}
 
-function renderStorico(storico) {
-  const tbody = document.getElementById("storicoTableBody");
-
-  if (storico.length === 0) {
-    tbody.innerHTML =
-      '<tr><td colspan="4" class="text-center">Nessun dato disponibile</td></tr>';
-    return;
-  }
-
-  let html = "";
-
-  storico.forEach((s) => {
-    html += `
-    <tr class="product-main-row">
-      <td><strong>${s.nome}</strong>${
-      s.marca_nome
-        ? ` <span class="badge-marca">${s.marca_nome.toUpperCase()}</span>`
-        : ""
-    }</td>
-      <td>${
-        s.descrizione
-          ? `<small>${s.descrizione.substring(0, 50)}${
-              s.descrizione.length > 50 ? "..." : ""
-            }</small>`
-          : '<span style="color: #999;">-</span>'
-      }</td>
-      <td><span class="badge-giacenza">${formatQuantity(
-        s.giacenza
-      )} pz</span></td>
-      <td><strong>${formatCurrency(s.valore_totale)}</strong></td>
-    </tr>
-    `;
-
-    if (s.giacenza > 0 && s.lotti && s.lotti.length > 0) {
-      html += `
-      <tr class="lotti-row">
-        <td colspan="4" class="lotti-container">
-          <div class="lotti-table-wrapper">
-            <table class="lotti-table">
-              <thead>
-                <tr>
-                  <th>Data Carico</th>
-                  <th>Quantità</th>
-                  <th>Prezzo Unit.</th>
-                  <th>Valore</th>
-                  <th>Documento/Fattura</th>
-                  <th>Fornitore</th>
-                </tr>
-              </thead>
-              <tbody>
-      `;
-
-      s.lotti.forEach((lotto) => {
-        html += `
-                <tr>
-                                  <td>${new Date(
-                                    lotto.data_carico
-                                  ).toLocaleDateString("it-IT")}</td>
-                  <td><strong>${formatQuantity(
-                    lotto.quantita_rimanente
-                  )} pz</strong></td>
-                  <td>${formatCurrency(lotto.prezzo)}</td>
-                  <td><strong>${formatCurrency(
-                    lotto.quantita_rimanente * lotto.prezzo
-                  )}</strong></td>
-                  <td>${
-                    lotto.fattura_doc || '<span style="color: #999;">-</span>'
-                  }</td>
-                  <td>${
-                    lotto.fornitore || '<span style="color: #999;">-</span>'
-                  }</td>
-                </tr>
-        `;
-      });
-
-      html += `
-              </tbody>
-            </table>
-          </div>
-        </td>
-      </tr>
-      `;
-    }
-  });
-
-  tbody.innerHTML = html;
-}
 
 document.getElementById("filterStorico")?.addEventListener("input", (e) => {
   const searchTerm = e.target.value.toLowerCase();
@@ -932,39 +459,6 @@ async function loadUtenti() {
   }
 }
 
-function renderUtenti() {
-  const tbody = document.getElementById("utentiTableBody");
-
-  if (utenti.length === 0) {
-    tbody.innerHTML =
-      '<tr><td colspan="2" class="text-center">Nessun utente presente</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = utenti
-    .map(
-      (u) => `
-    <tr>
-      <!-- Rimosso ID utente -->
-      <td><strong>${u.username}</strong></td>
-      <td class="text-right">
-        <button class="btn-icon" onclick="editUser(${u.id})" title="Modifica">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-          </svg>
-        </button>
-        <button class="btn-icon" onclick="deleteUser(${u.id})" title="Elimina">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-          </svg>
-        </button>
-      </td>
-    </tr>
-  `
-    )
-    .join("");
-}
 
 document.getElementById("filterUtenti")?.addEventListener("input", (e) => {
   const searchTerm = e.target.value.toLowerCase();
@@ -974,30 +468,6 @@ document.getElementById("filterUtenti")?.addEventListener("input", (e) => {
   renderUtenti();
 });
 
-function openUserModal(user = null) {
-  const modal = document.getElementById("modalUser");
-  const title = document.getElementById("modalUserTitle");
-  const form = document.getElementById("formUser");
-  const passwordOptional = document.getElementById("passwordOptional");
-  const passwordInput = document.getElementById("userPassword");
-
-  form.reset();
-
-  if (user) {
-    title.textContent = "Modifica Utente";
-    document.getElementById("userId").value = user.id;
-    document.getElementById("userUsername").value = user.username;
-    passwordOptional.textContent = "(opzionale)";
-    passwordInput.required = false;
-  } else {
-    title.textContent = "Nuovo Utente";
-    document.getElementById("userId").value = "";
-    passwordOptional.textContent = "*";
-    passwordInput.required = true;
-  }
-
-  modal.classList.add("active");
-}
 
 function closeUserModal() {
   document.getElementById("modalUser").classList.remove("active");
@@ -1090,128 +560,19 @@ document.getElementById("formUser").addEventListener("submit", async (e) => {
 
 // ==================== FUNZIONI DI UTILITA ====================
 // CHANGE: Aggiornata funzione formatCurrency per garantire € sempre davanti al numero
-function formatCurrency(num) {
-  const n = Number.parseFloat(num);
-  if (isNaN(n)) return "€ 0,00";
-
-  return `€ ${formatNumber(n)}`;
-}
 
 // CHANGE: Funzione helper per formattare valuta con simbolo €
-function formatNumber(num) {
-  const n = Number.parseFloat(num);
-  if (isNaN(n)) return "0";
-
-  // Separa parte intera e decimali
-  const parts = n.toFixed(2).split(".");
-
-  // Aggiungi il punto ogni 3 cifre nella parte intera
-  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-
-  return parts.join(",");
-}
 
 // ==================== UTILITY PER INPUT DECIMALI ====================
 
 // Funzione per limitare a 2 decimali durante la digitazione
-function limitToTwoDecimals(inputElement) {
-  inputElement.addEventListener("input", function (e) {
-    let value = this.value;
-
-    // Sostituisci virgola con punto
-    value = value.replace(",", ".");
-
-    // Rimuovi caratteri non validi (solo numeri, punto e virgola)
-    value = value.replace(/[^\d.,]/g, "");
-
-    // Gestisci multipli punti/virgole
-    const parts = value.split(".");
-    if (parts.length > 2) {
-      value = parts[0] + "." + parts.slice(1).join("");
-    }
-
-    // Limita a 2 decimali
-    if (parts.length === 2 && parts[1].length > 2) {
-      value = parts[0] + "." + parts[1].substring(0, 2);
-    }
-
-    this.value = value;
-  });
-
-  // Formatta al blur (quando l'utente esce dal campo)
-  inputElement.addEventListener("blur", function (e) {
-    let value = this.value;
-    if (value === "" || value === ".") {
-      this.value = "";
-      return;
-    }
-
-    value = value.replace(",", ".");
-    const num = Number.parseFloat(value);
-
-    if (!isNaN(num)) {
-      // Formatta con 2 decimali
-      this.value = num.toFixed(2).replace(".", ",");
-    }
-  });
-}
 
 // Applica la limitazione agli input quando si apre il modal
-function setupDecimalInputs() {
-  const quantitaInput = document.getElementById("movimentoQuantita");
-  const prezzoInput = document.getElementById("movimentoPrezzo");
 
-  if (quantitaInput) limitToTwoDecimals(quantitaInput);
-  if (prezzoInput) limitToTwoDecimals(prezzoInput);
-}
-
-async function openMovimentoModal(movimento = null) {
-  if (prodotti.length === 0) {
-    const res = await fetch(`${API_URL}/prodotti`);
-    prodotti = await res.json();
-  }
-
-  const modal = document.getElementById("modalMovimento");
-  const title = document.getElementById("modalMovimentoTitle");
-  const form = document.getElementById("formMovimento");
-  const selectProdotto = document.getElementById("movimentoProdotto");
-
-  form.reset();
-
-  selectProdotto.innerHTML =
-    '<option value="">Seleziona prodotto...</option>' +
-    prodotti
-      .map((p) => {
-        const marcaNome = p.marca_nome
-          ? ` (${p.marca_nome.toUpperCase()})`
-          : "";
-        return `<option value="${p.id}">${p.nome}${marcaNome}</option>`;
-      })
-      .join("");
-
-  title.textContent = "Nuovo Movimento";
-  document.getElementById("movimentoId").value = "";
-
-  if (!movimento) {
-    document.getElementById("giacenzaInfo").style.display = "none";
-  }
-
-  togglePrezzoField();
-
-  // ⭐ AGGIUNGI QUESTA RIGA
-  setupDecimalInputs();
-
-  modal.classList.add("active");
-}
 
 // ==================== GESTIONE SEPARATORE DECIMALE ====================
 
 // Rileva il separatore decimale del browser dell'utente
-function getDecimalSeparator() {
-  const numberWithDecimal = 1.1;
-  const formatted = numberWithDecimal.toLocaleString();
-  return formatted.charAt(1); // Restituisce '.' o ','
-}
 
 // Formatta numero con separatore corretto per l'utente
 function formatNumberWithLocale(num) {
@@ -1230,41 +591,10 @@ function formatNumberWithLocale(num) {
 }
 
 // Aggiorna la funzione formatCurrency esistente
-function formatCurrency(num) {
-  const n = Number.parseFloat(num);
-  if (isNaN(n)) return "€ 0,00";
-
-  return `€ ${formatNumber(n)}`;
-}
 
 // Aggiorna formatNumber per usare il separatore locale
-function formatNumber(num) {
-  const n = Number.parseFloat(num);
-  if (isNaN(n)) return "0";
-
-  const separator = getDecimalSeparator();
-  const parts = n.toFixed(2).split(".");
-
-  // Aggiungi il punto ogni 3 cifre nella parte intera
-  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-
-  // Usa il separatore decimale corretto
-  if (separator === ",") {
-    return parts.join(",");
-  } else {
-    return parts.join(".");
-  }
-}
 
 // Formatta quantità: senza decimali se intero, altrimenti 2 decimali con virgola
-function formatQuantity(num) {
-  const n = Number.parseFloat(num);
-  if (isNaN(n)) return "0";
-  if (Number.isInteger(n)) {
-    return n.toString();
-  }
-  return formatNumber(n);
-}
 
 // ==================== GESTIONE INPUT DECIMALI (MAX 2 CIFRE) ====================
 
@@ -1272,178 +602,17 @@ function formatQuantity(num) {
  * Limita l'input a massimo 2 cifre decimali in tempo reale
  * Accetta sia punto che virgola come separatore
  */
-function limitToTwoDecimals(inputElement) {
-  inputElement.addEventListener("input", function (e) {
-    let value = this.value;
-
-    // Permetti solo numeri, punto e virgola
-    value = value.replace(/[^\d.,]/g, "");
-
-    // Sostituisci virgola con punto per gestione interna
-    value = value.replace(",", ".");
-
-    // Rimuovi punti multipli (mantieni solo il primo)
-    const parts = value.split(".");
-    if (parts.length > 2) {
-      value = parts[0] + "." + parts.slice(1).join("");
-    }
-
-    // Limita i decimali a 2 cifre
-    if (parts.length === 2) {
-      if (parts[1].length > 2) {
-        parts[1] = parts[1].substring(0, 2);
-        value = parts.join(".");
-      }
-    }
-
-    // Aggiorna il valore con virgola per visualizzazione italiana
-    this.value = value.replace(".", ",");
-  });
-
-  // Formatta correttamente quando l'utente esce dal campo
-  inputElement.addEventListener("blur", function (e) {
-    let value = this.value;
-
-    // Campo vuoto o solo separatore
-    if (value === "" || value === "," || value === ".") {
-      this.value = "";
-      return;
-    }
-
-    // Converti in numero
-    value = value.replace(",", ".");
-    const num = Number.parseFloat(value);
-
-    if (!isNaN(num) && num >= 0) {
-      // Formatta con esattamente 2 decimali e virgola
-      this.value = num.toFixed(2).replace(".", ",");
-    } else {
-      this.value = "";
-    }
-  });
-
-  // Previeni incolla di testo non valido
-  inputElement.addEventListener("paste", function (e) {
-    e.preventDefault();
-    const pastedText = (e.clipboardData || window.clipboardData).getData(
-      "text"
-    );
-    const cleaned = pastedText.replace(/[^\d.,]/g, "").replace(",", ".");
-    const num = Number.parseFloat(cleaned);
-
-    if (!isNaN(num) && num >= 0) {
-      this.value = num.toFixed(2).replace(".", ",");
-    }
-  });
-}
 
 /**
  * Converte il valore dell'input in numero float
  * Gestisce sia punto che virgola
  */
-function parseDecimalInput(value) {
-  if (!value || value === "") return 0;
-  const cleaned = String(value).replace(",", ".");
-  const num = Number.parseFloat(cleaned);
-  return isNaN(num) ? 0 : num;
-}
 
 /**
  * Applica la limitazione decimale agli input quantità e prezzo
  */
-function setupDecimalInputs() {
-  const quantitaInput = document.getElementById("movimentoQuantita");
-  const prezzoInput = document.getElementById("movimentoPrezzo");
 
-  if (quantitaInput) {
-    // Rimuovi listener esistenti per evitare duplicati
-    const newQuantitaInput = quantitaInput.cloneNode(true);
-    quantitaInput.parentNode.replaceChild(newQuantitaInput, quantitaInput);
-    limitToTwoDecimals(newQuantitaInput);
-  }
 
-  if (prezzoInput) {
-    // Rimuovi listener esistenti per evitare duplicati
-    const newPrezzoInput = prezzoInput.cloneNode(true);
-    prezzoInput.parentNode.replaceChild(newPrezzoInput, prezzoInput);
-    limitToTwoDecimals(newPrezzoInput);
-  }
-}
-
-async function openMovimentoModal(movimento = null) {
-  if (prodotti.length === 0) {
-    const res = await fetch(`${API_URL}/prodotti`);
-    prodotti = await res.json();
-  }
-
-  const modal = document.getElementById("modalMovimento");
-  const title = document.getElementById("modalMovimentoTitle");
-  const form = document.getElementById("formMovimento");
-  const selectProdotto = document.getElementById("movimentoProdotto");
-
-  form.reset();
-
-  selectProdotto.innerHTML =
-    '<option value="">Seleziona prodotto...</option>' +
-    prodotti
-      .map((p) => {
-        const marcaNome = p.marca_nome
-          ? ` (${p.marca_nome.toUpperCase()})`
-          : "";
-        return `<option value="${p.id}">${p.nome}${marcaNome}</option>`;
-      })
-      .join("");
-
-  title.textContent = "Nuovo Movimento";
-  document.getElementById("movimentoId").value = "";
-
-  if (!movimento) {
-    document.getElementById("giacenzaInfo").style.display = "none";
-  }
-
-  togglePrezzoField();
-
-  // ⭐ APPLICA I CONTROLLI DECIMALI
-  setTimeout(() => {
-    setupDecimalInputs();
-  }, 100);
-
-  modal.classList.add("active");
-}
-
-async function openMovimentoModal(movimento = null) {
-  if (prodotti.length === 0) {
-    const res = await fetch(`${API_URL}/prodotti`);
-    prodotti = await res.json();
-  }
-
-  const modal = document.getElementById("modalMovimento");
-  const title = document.getElementById("modalMovimentoTitle");
-  const form = document.getElementById("formMovimento");
-
-  form.reset();
-
-  title.textContent = "Nuovo Movimento";
-  document.getElementById("movimentoId").value = "";
-
-  if (!movimento) {
-    document.getElementById("giacenzaInfo").style.display = "none";
-  }
-
-  // Reset search input
-  document.getElementById("movimentoProdottoSearch").value = "";
-  document.getElementById("movimentoProdotto").value = "";
-  document.getElementById("prodottoSearchResults").classList.remove("show");
-
-  togglePrezzoField();
-
-  setTimeout(() => {
-    setupDecimalInputs();
-    setupProductSearch(); // 🎯 NUOVA FUNZIONE
-  }, 100);
-
-  modal.classList.add("active");
-}
 
 // ==================== RICERCA PRODOTTI NEL MOVIMENTO ====================
 
@@ -1579,15 +748,6 @@ function renderProductSearchResults(filtered, searchTerm) {
   resultsContainer.classList.add("show");
 }
 
-function highlightMatch(text, searchTerm) {
-  if (!searchTerm) return text;
-
-  const regex = new RegExp(`(${searchTerm})`, "gi");
-  return text.replace(
-    regex,
-    '<mark style="background: #fef08a; padding: 2px 4px; border-radius: 3px; font-weight: 700;">$1</mark>'
-  );
-}
 
 function selectProduct(id, nome, marca, giacenza) {
   const searchInput = document.getElementById("movimentoProdottoSearch");
@@ -1610,579 +770,12 @@ function selectProduct(id, nome, marca, giacenza) {
 }
 
 // script.js (Intorno a riga 485)
-function togglePrezzoField() {
-  // 🎯 CORREZIONE: Controlla se l'elemento esiste prima di usarlo
-  const tipoElement = document.getElementById("movimentoTipo");
-
-  if (!tipoElement) {
-    // L'elemento non è stato trovato (è null).
-    // Interrompi la funzione per evitare il crash.
-    // Puoi anche aggiungere un console.error per debugging.
-    console.error("Elemento 'movimentoTipo' non trovato.");
-    return;
-  }
-
-  // Usa il valore solo dopo aver verificato che l'elemento esiste
-  const tipo = tipoElement.value;
-
-  const prezzoGroup = document.getElementById("prezzoGroup");
-  const prezzoInput = document.getElementById("movimentoPrezzo");
-  const fornitoreGroup = document.getElementById("fornitoreGroup");
-  const fatturaInput = document.getElementById("movimentoFattura");
-  const fornitoreInput = document.getElementById("movimentoFornitore");
-  const docOptional = document.getElementById("docOptional");
-  const fornitoreOptional = document.getElementById("fornitoreOptional");
-
-  // Utilizzo di closest() per trovare l'antenato .form-group
-  const fatturaGroup = fatturaInput
-    ? fatturaInput.closest(".form-group")
-    : null;
-
-  // CHANGE: Gestione anche dell'opzione vuota (nessuna selezione)
-  if (tipo === "carico") {
-    if (prezzoGroup) prezzoGroup.style.display = "block";
-    if (prezzoInput) prezzoInput.required = true;
-    if (fornitoreGroup) fornitoreGroup.style.display = "block";
-    if (fatturaGroup) fatturaGroup.style.display = "block";
-    if (fatturaInput) fatturaInput.required = true;
-    if (fornitoreInput) fornitoreInput.required = true;
-    if (docOptional) docOptional.textContent = "*";
-    if (fornitoreOptional) fornitoreOptional.textContent = "*";
-  } else {
-    // Per 'scarico' o valore vuoto, nascondi i campi
-    if (prezzoGroup) prezzoGroup.style.display = "none";
-    if (prezzoInput) {
-      prezzoInput.required = false;
-      prezzoInput.value = "";
-    }
-    if (fornitoreGroup) fornitoreGroup.style.display = "none";
-    if (fatturaGroup) fatturaGroup.style.display = "none";
-    if (fornitoreInput) fornitoreInput.value = "";
-    if (fatturaInput) fatturaInput.value = "";
-    if (fatturaInput) fatturaInput.required = false;
-    if (fornitoreInput) fornitoreInput.required = false;
-    if (docOptional) docOptional.textContent = "";
-    if (fornitoreOptional) fornitoreOptional.textContent = "";
-  }
-}
 
 // script.js (Intorno a riga 1120, o dove si trova la tua funzione searchProducts)
-function searchProducts() {
-  const searchInput = document.getElementById("movimentoProdottoSearch");
-  const resultsContainer = document.getElementById("prodottoSearchResults");
-  const searchTerm = searchInput.value.toLowerCase().trim();
 
-  // 🎯 CORREZIONE: Se il termine di ricerca è vuoto, mostra TUTTI i prodotti.
-  const filteredProducts = allProdotti.filter((p) => {
-    if (!searchTerm) {
-      // Se la ricerca è vuota, includi tutti i prodotti (pulisci il filtro)
-      return true;
-    }
 
-    // Logica di ricerca esistente (cerca in nome, marca, descrizione)
-    const matchesNome = p.nome.toLowerCase().includes(searchTerm);
-    const matchesMarca = p.marca.toLowerCase().includes(searchTerm);
-    const matchesDescrizione = p.descrizione
-      ? p.descrizione.toLowerCase().includes(searchTerm)
-      : false;
 
-    return matchesNome || matchesMarca || matchesDescrizione;
-  });
 
-  if (filteredProducts.length === 0) {
-    resultsContainer.innerHTML = `<div class="search-no-results">Nessun prodotto trovato.</div>`;
-    resultsContainer.classList.add("show");
-    return;
-  }
-
-  // Costruisci l'HTML per i risultati
-  resultsContainer.innerHTML = filteredProducts
-    .map((p) => {
-      const nomeHighlighted = highlightMatch(p.nome, searchTerm);
-      const marcaHighlighted = highlightMatch(p.marca, searchTerm);
-
-      return `
-      <div 
-        class="search-result-item" 
-        data-id="${p.id}" 
-        data-nome="${p.nome}" 
-        data-marca="${p.marca}" 
-        data-giacenza="${p.giacenza}"
-      >
-        <div class="search-result-header">
-          <div class="search-result-title">${nomeHighlighted}</div>
-          <div class="search-result-meta">
-            <span class="search-result-marca">${marcaHighlighted}</span>
-            <span class="search-result-giacenza">Giacenza: ${formatQuantity(
-              p.giacenza
-            )} pz</span>
-          </div>
-        </div>
-        <div class="search-result-body">
-          ${
-            p.descrizione
-              ? `<span style="opacity: 0.7; font-size: 13px;">• ${p.descrizione.substring(
-                  0,
-                  40
-                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
-              : ""
-          }
-        </div>
-      </div>
-    `;
-    })
-    .join("");
-
-  // Aggiungi event listener ai risultati
-  resultsContainer.querySelectorAll(".search-result-item").forEach((item) => {
-    item.addEventListener("click", function () {
-      selectProduct(
-        this.dataset.id,
-        this.dataset.nome,
-        this.dataset.marca,
-        this.dataset.giacenza
-      );
-    });
-  });
-
-  resultsContainer.classList.add("show");
-}
-
-function togglePrezzoField() {
-  const tipoElement = document.getElementById("movimentoTipo");
-
-  if (!tipoElement) {
-    console.error("Elemento 'movimentoTipo' non trovato.");
-    return;
-  }
-
-  const tipo = tipoElement.value;
-
-  const prezzoGroup = document.getElementById("prezzoGroup"); // 👈 Gruppo Prezzo Unitario
-  const prezzoInput = document.getElementById("movimentoPrezzo");
-  const fornitoreGroup = document.getElementById("fornitoreGroup"); // 👈 Gruppo Fornitore
-  const fatturaInput = document.getElementById("movimentoFattura");
-  const fornitoreInput = document.getElementById("movimentoFornitore");
-  const docOptional = document.getElementById("docOptional");
-  const fornitoreOptional = document.getElementById(
-    "movimentoFornitoreOptional"
-  );
-
-  const fatturaGroup = fatturaInput
-    ? fatturaInput.closest(".form-group")
-    : null; // 👈 Gruppo Documento (Fattura)
-
-  // =================================================================
-  // LOGICA CARICO (tutti i campi visibili e richiesti)
-  // =================================================================
-  if (tipo === "carico") {
-    if (prezzoGroup) prezzoGroup.style.display = "block"; // ✅ MOSTRA Prezzo Unitario
-    if (prezzoInput) prezzoInput.required = true;
-    if (fornitoreGroup) fornitoreGroup.style.display = "block"; // ✅ MOSTRA Fornitore
-    if (fatturaGroup) fatturaGroup.style.display = "block"; // ✅ MOSTRA Documento
-    if (fatturaInput) fatturaInput.required = true;
-    if (fornitoreInput) fornitoreInput.required = true;
-    if (docOptional) docOptional.textContent = "*";
-    if (fornitoreOptional) fornitoreOptional.textContent = "*";
-  }
-  // =================================================================
-  // LOGICA SCARICO (campi nascosti, non richiesti e resettati)
-  // =================================================================
-  else {
-    // Per 'scarico' o valore vuoto, nascondi i campi
-    if (prezzoGroup) prezzoGroup.style.display = "none";
-    if (prezzoInput) {
-      prezzoInput.required = false;
-      prezzoInput.value = "";
-    }
-    if (fornitoreGroup) fornitoreGroup.style.display = "none";
-    if (fatturaGroup) fatturaGroup.style.display = "none";
-    if (fornitoreInput) fornitoreInput.value = "";
-    if (fatturaInput) fatturaInput.value = "";
-    if (fatturaInput) fatturaInput.required = false;
-    if (fornitoreInput) fornitoreInput.required = false;
-    if (docOptional) docOptional.textContent = "";
-    if (fornitoreOptional) fornitoreOptional.textContent = "";
-  }
-}
-function searchProducts() {
-  const searchInput = document.getElementById("movimentoProdottoSearch");
-  const resultsContainer = document.getElementById("prodottoSearchResults");
-  const searchTerm = searchInput.value.toLowerCase().trim();
-
-  // 🎯 LOGICA CHIAVE: Filtra i prodotti. Se la ricerca è vuota, include TUTTI i prodotti.
-  const filteredProducts = allProdotti.filter((p) => {
-    // Se la stringa di ricerca è vuota (searchTerm === ""),
-    // l'espressione !searchTerm è true e restituisce tutti gli elementi.
-    if (!searchTerm) {
-      return true;
-    }
-
-    // Logica di ricerca esistente (solo quando c'è un termine inserito)
-    const matchesNome = p.nome.toLowerCase().includes(searchTerm);
-    const matchesMarca = p.marca.toLowerCase().includes(searchTerm);
-    const matchesDescrizione = p.descrizione
-      ? p.descrizione.toLowerCase().includes(searchTerm)
-      : false;
-
-    return matchesNome || matchesMarca || matchesDescrizione;
-  });
-
-  // Se non ci sono prodotti filtrati (e non erano tutti i prodotti)
-  if (filteredProducts.length === 0) {
-    resultsContainer.innerHTML = `<div class="search-no-results">Nessun prodotto trovato.</div>`;
-    resultsContainer.classList.add("show");
-    return;
-  }
-
-  // Costruisci l'HTML per i risultati
-  resultsContainer.innerHTML = filteredProducts
-    .map((p) => {
-      // highlightMatch è una funzione di supporto che probabilmente hai già
-      const nomeHighlighted = highlightMatch(p.nome, searchTerm);
-      const marcaHighlighted = highlightMatch(p.marca, searchTerm);
-
-      return `
-      <div 
-        class="search-result-item" 
-        data-id="${p.id}" 
-        data-nome="${p.nome}" 
-        data-marca="${p.marca}" 
-        data-giacenza="${p.giacenza}"
-      >
-        <div class="search-result-header">
-          <div class="search-result-title">${nomeHighlighted}</div>
-          <div class="search-result-meta">
-            <span class="search-result-marca">${marcaHighlighted}</span>
-            <span class="search-result-giacenza">Giacenza: ${formatQuantity(
-              p.giacenza
-            )} pz</span>
-          </div>
-        </div>
-        <div class="search-result-body">
-          ${
-            p.descrizione
-              ? `<span style="opacity: 0.7; font-size: 13px;">• ${p.descrizione.substring(
-                  0,
-                  40
-                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
-              : ""
-          }
-        </div>
-      </div>
-    `;
-    })
-    .join("");
-
-  // Aggiungi event listener ai risultati
-  resultsContainer.querySelectorAll(".search-result-item").forEach((item) => {
-    item.addEventListener("click", function () {
-      selectProduct(
-        this.dataset.id,
-        this.dataset.nome,
-        this.dataset.marca,
-        this.dataset.giacenza
-      );
-    });
-  });
-
-  // Assicura che il contenitore dei risultati sia visibile
-  resultsContainer.classList.add("show");
-}
-
-function searchProducts() {
-  const searchInput = document.getElementById("movimentoProdottoSearch");
-  const resultsContainer = document.getElementById("prodottoSearchResults");
-  const searchTerm = searchInput.value.toLowerCase().trim();
-
-  // 🎯 Filtra i prodotti: se vuoto mostra TUTTI, altrimenti filtra
-  const filteredProducts = allProdotti.filter((p) => {
-    // Se non c'è testo di ricerca, mostra tutti i prodotti
-    if (!searchTerm) {
-      return true;
-    }
-
-    // Altrimenti filtra in base al termine di ricerca
-    const matchesNome = p.nome.toLowerCase().includes(searchTerm);
-    const matchesMarca = (p.marca_nome || "")
-      .toLowerCase()
-      .includes(searchTerm);
-    const matchesDescrizione = p.descrizione
-      ? p.descrizione.toLowerCase().includes(searchTerm)
-      : false;
-
-    return matchesNome || matchesMarca || matchesDescrizione;
-  });
-
-  // Se nessun prodotto trovato
-  if (filteredProducts.length === 0) {
-    resultsContainer.innerHTML = `
-      <div class="search-no-results">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 32px; height: 32px; margin: 0 auto 8px; opacity: 0.5;">
-          <circle cx="11" cy="11" r="8"/>
-          <path d="M21 21l-4.35-4.35"/>
-        </svg>
-        Nessun prodotto trovato per "<strong>${searchTerm}</strong>"
-      </div>
-    `;
-    resultsContainer.classList.add("show");
-    return;
-  }
-
-  // Costruisci l'HTML per i risultati
-  resultsContainer.innerHTML = filteredProducts
-    .map((p) => {
-      const nomeHighlighted = highlightMatch(p.nome, searchTerm);
-      const marcaHighlighted = highlightMatch(p.marca_nome || "", searchTerm);
-
-      return `
-      <div 
-        class="search-result-item" 
-        data-id="${p.id}" 
-        data-nome="${p.nome}" 
-        data-marca="${p.marca_nome || ""}" 
-        data-giacenza="${p.giacenza || 0}"
-      >
-        <div class="search-result-name">${nomeHighlighted}</div>
-        <div class="search-result-meta">
-          ${
-            p.marca_nome
-              ? `<span class="search-result-marca">${marcaHighlighted}</span>`
-              : ""
-          }
-          <span class="search-result-giacenza">${formatQuantity(
-            p.giacenza || 0
-          )} pz</span>
-          ${
-            p.descrizione
-              ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
-                  0,
-                  40
-                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
-              : ""
-          }
-        </div>
-      </div>
-    `;
-    })
-    .join("");
-
-  // Aggiungi event listener ai risultati
-  resultsContainer.querySelectorAll(".search-result-item").forEach((item) => {
-    item.addEventListener("click", function () {
-      selectProduct(
-        this.dataset.id,
-        this.dataset.nome,
-        this.dataset.marca,
-        this.dataset.giacenza
-      );
-    });
-  });
-
-  resultsContainer.classList.add("show");
-}
-
-function searchProducts() {
-  const searchInput = document.getElementById("movimentoProdottoSearch");
-  const resultsContainer = document.getElementById("prodottoSearchResults");
-  const searchTerm = searchInput.value.toLowerCase().trim();
-
-  // 🎯 Filtra i prodotti: se vuoto mostra TUTTI, altrimenti filtra
-  const filteredProducts = allProdotti.filter((p) => {
-    // Se non c'è testo di ricerca, mostra tutti i prodotti
-    if (!searchTerm) {
-      return true;
-    }
-
-    // Altrimenti filtra in base al termine di ricerca
-    const matchesNome = p.nome.toLowerCase().includes(searchTerm);
-    const matchesMarca = (p.marca_nome || "")
-      .toLowerCase()
-      .includes(searchTerm);
-    const matchesDescrizione = p.descrizione
-      ? p.descrizione.toLowerCase().includes(searchTerm)
-      : false;
-
-    return matchesNome || matchesMarca || matchesDescrizione;
-  });
-
-  // Se nessun prodotto trovato
-  if (filteredProducts.length === 0) {
-    resultsContainer.innerHTML = `
-      <div class="search-no-results">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 32px; height: 32px; margin: 0 auto 8px; opacity: 0.5;">
-          <circle cx="11" cy="11" r="8"/>
-          <path d="M21 21l-4.35-4.35"/>
-        </svg>
-        Nessun prodotto trovato per "<strong>${searchTerm}</strong>"
-      </div>
-    `;
-    resultsContainer.classList.add("show");
-    return;
-  }
-
-  // Costruisci l'HTML per i risultati
-  resultsContainer.innerHTML = filteredProducts
-    .map((p) => {
-      const nomeHighlighted = highlightMatch(p.nome, searchTerm);
-      const marcaHighlighted = highlightMatch(p.marca_nome || "", searchTerm);
-
-      return `
-      <div 
-        class="search-result-item" 
-        data-id="${p.id}" 
-        data-nome="${p.nome}" 
-        data-marca="${p.marca_nome || ""}" 
-        data-giacenza="${p.giacenza || 0}"
-      >
-        <div class="search-result-name">${nomeHighlighted}</div>
-        <div class="search-result-meta">
-          ${
-            p.marca_nome
-              ? `<span class="search-result-marca">${marcaHighlighted}</span>`
-              : ""
-          }
-          <span class="search-result-giacenza">${formatQuantity(
-            p.giacenza || 0
-          )} pz</span>
-          ${
-            p.descrizione
-              ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
-                  0,
-                  40
-                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
-              : ""
-          }
-        </div>
-      </div>
-    `;
-    })
-    .join("");
-
-  // Aggiungi event listener ai risultati
-  resultsContainer.querySelectorAll(".search-result-item").forEach((item) => {
-    item.addEventListener("click", function () {
-      selectProduct(
-        this.dataset.id,
-        this.dataset.nome,
-        this.dataset.marca,
-        this.dataset.giacenza
-      );
-    });
-  });
-
-  resultsContainer.classList.add("show");
-}
-
-function searchProducts() {
-  const searchInput = document.getElementById("movimentoProdottoSearch");
-  const resultsContainer = document.getElementById("prodottoSearchResults");
-
-  if (!searchInput || !resultsContainer) return;
-
-  const searchTerm = searchInput.value.toLowerCase().trim();
-
-  // 🎯 Filtra i prodotti: se vuoto mostra TUTTI, altrimenti filtra
-  const filteredProducts = allProdotti.filter((p) => {
-    // Se non c'è testo di ricerca, mostra tutti i prodotti
-    if (!searchTerm) {
-      return true;
-    }
-
-    // Altrimenti filtra in base al termine di ricerca
-    const matchesNome = p.nome.toLowerCase().includes(searchTerm);
-    const matchesMarca = (p.marca_nome || "")
-      .toLowerCase()
-      .includes(searchTerm);
-    const matchesDescrizione = p.descrizione
-      ? p.descrizione.toLowerCase().includes(searchTerm)
-      : false;
-
-    return matchesNome || matchesMarca || matchesDescrizione;
-  });
-
-  // Se nessun prodotto trovato (solo quando c'è una ricerca attiva)
-  if (filteredProducts.length === 0 && searchTerm) {
-    resultsContainer.innerHTML = `
-      <div class="search-no-results">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 32px; height: 32px; margin: 0 auto 8px; opacity: 0.5;">
-          <circle cx="11" cy="11" r="8"/>
-          <path d="M21 21l-4.35-4.35"/>
-        </svg>
-        Nessun prodotto trovato per "<strong>${searchTerm}</strong>"
-      </div>
-    `;
-    resultsContainer.classList.add("show");
-    return;
-  }
-
-  // Se non ci sono prodotti in assoluto nel sistema
-  if (filteredProducts.length === 0 && !searchTerm) {
-    resultsContainer.innerHTML = `
-      <div class="search-no-results">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 32px; height: 32px; margin: 0 auto 8px; opacity: 0.5;">
-          <circle cx="11" cy="11" r="8"/>
-          <path d="M21 21l-4.35-4.35"/>
-        </svg>
-        Nessun prodotto disponibile
-      </div>
-    `;
-    resultsContainer.classList.add("show");
-    return;
-  }
-
-  // Costruisci l'HTML per i risultati
-  resultsContainer.innerHTML = filteredProducts
-    .map((p) => {
-      const nomeHighlighted = highlightMatch(p.nome, searchTerm);
-      const marcaHighlighted = highlightMatch(p.marca_nome || "", searchTerm);
-
-      return `
-      <div 
-        class="search-result-item" 
-        data-id="${p.id}" 
-        data-nome="${p.nome}" 
-        data-marca="${p.marca_nome || ""}" 
-        data-giacenza="${p.giacenza || 0}"
-      >
-        <div class="search-result-name">${nomeHighlighted}</div>
-        <div class="search-result-meta">
-          ${
-            p.marca_nome
-              ? `<span class="search-result-marca">${marcaHighlighted}</span>`
-              : ""
-          }
-          <span class="search-result-giacenza">${formatQuantity(
-            p.giacenza || 0
-          )} pz</span>
-          ${
-            p.descrizione
-              ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
-                  0,
-                  40
-                )}${p.descrizione.length > 40 ? "..." : ""}</span>`
-              : ""
-          }
-        </div>
-      </div>
-    `;
-    })
-    .join("");
-
-  // Aggiungi event listener ai risultati
-  resultsContainer.querySelectorAll(".search-result-item").forEach((item) => {
-    item.addEventListener("click", function () {
-      selectProduct(
-        this.dataset.id,
-        this.dataset.nome,
-        this.dataset.marca,
-        this.dataset.giacenza
-      );
-    });
-  });
-
-  resultsContainer.classList.add("show");
-}
 
 function searchProducts() {
   const searchInput = document.getElementById("movimentoProdottoSearch");
@@ -2309,120 +902,31 @@ function searchProducts() {
  * Converte il valore dell'input in numero float.
  * Gestisce sia punto che virgola, convertendo tutto in punto per il parseFloat.
  */
-function parseDecimalInput(value) {
-  if (!value || value === "") return 0;
-  const cleaned = String(value).replace(",", ".");
-  const num = Number.parseFloat(cleaned);
-  return isNaN(num) ? 0 : num;
-}
 
 /**
  * Limita l'input a massimo 2 cifre decimali in tempo reale.
  * Usa toFixed(2) per visualizzare sempre lo zero finale (es. 0.5 diventa 0.50).
  */
-function limitToTwoDecimals(inputElement) {
-  // Listener per la digitazione in tempo reale
-  inputElement.addEventListener("input", function (e) {
-    const value = this.value;
-    // Rimuovi caratteri non validi
-    const cleaned = value.replace(/[^\d.,]/g, "");
-
-    // ... (Logica per la gestione di separatori multipli)
-
-    const valueAsDot = cleaned.replace(",", ".");
-    const num = Number.parseFloat(valueAsDot);
-
-    if (isNaN(num)) {
-      this.value = "";
-      return;
-    }
-
-    if (num > 0) {
-      // PUNTO CHIAVE: Forzatura a 2 decimali.
-      // Se 'num' è 1.5, .toFixed(2) lo converte in "1.50".
-      this.value = num.toFixed(2).replace(".", getDecimalSeparator());
-    } else {
-      this.value = cleaned;
-    }
-  });
-
-  // Listener per l'incolla da clipboard (stessa logica di forzatura)
-  inputElement.addEventListener("paste", function (e) {
-    e.preventDefault();
-    const pastedText = (e.clipboardData || window.clipboardData).getData(
-      "text"
-    );
-    const cleaned = pastedText.replace(/[^\d.,]/g, "").replace(",", ".");
-    const num = Number.parseFloat(cleaned);
-
-    if (!isNaN(num) && num >= 0) {
-      // Forzatura a 2 decimali anche all'atto di incollare.
-      this.value = num.toFixed(2).replace(".", getDecimalSeparator());
-    }
-  });
-}
 
 // File: script.js
 
 // Determina il separatore decimale locale (virgola o punto)
-function getDecimalSeparator() {
-  const numberWithDecimal = 1.1;
-  const localeString = numberWithDecimal.toLocaleString(undefined, {
-    minimumFractionDigits: 1,
-  });
-  return localeString.includes(".") ? "." : ",";
-}
 
 /**
  * Formatta numero con separatore corretto per l'utente,
  * garantendo sempre 2 decimali con toFixed(2).
  */
-function formatNumber(num) {
-  const n = Number.parseFloat(num);
-  if (isNaN(n)) return "0";
-  const separator = getDecimalSeparator();
-  // PUNTO CHIAVE: toFixed(2) garantisce lo zero finale per la visualizzazione.
-  const parts = n.toFixed(2).split(".");
-
-  // Aggiungi il punto ogni 3 cifre nella parte intera
-  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-
-  // Usa il separatore decimale corretto
-  if (separator === ",") {
-    return parts.join(",");
-  } else {
-    return parts.join(".");
-  }
-}
 
 // Formatta un numero come valuta (es. € 1.234,56)
-function formatCurrency(num) {
-  const n = Number.parseFloat(num);
-  if (isNaN(n)) return "€ 0,00";
-  return `€ ${formatNumber(n)}`;
-}
 
 // ==================== FUNZIONI DI UTILITA (già presenti) ====================
 
 // Determina il separatore decimale locale (virgola o punto)
-function getDecimalSeparator() {
-  const numberWithDecimal = 1.1;
-  const localeString = numberWithDecimal.toLocaleString(undefined, {
-    minimumFractionDigits: 1,
-  });
-  return localeString.includes(".") ? "." : ",";
-}
 
 /**
  * Converte il valore dell'input in numero float.
  * Gestisce sia punto che virgola, convertendo tutto in punto per il parseFloat.
  */
-function parseDecimalInput(value) {
-  if (!value || value === "") return 0;
-  const cleaned = String(value).replace(",", ".");
-  const num = Number.parseFloat(cleaned);
-  return isNaN(num) ? 0 : num;
-}
 
 // ==================== NUOVE FUNZIONI CORRETTE ====================
 
@@ -2431,63 +935,6 @@ function parseDecimalInput(value) {
  * La formattazione finale a .00 viene applicata solo al BLUR.
  *
  */
-function limitToTwoDecimals(inputElement) {
-  const separator = getDecimalSeparator();
-  const separatorRegex = separator === "." ? /\./g : /,/g;
-
-  // 1. Listener per la digitazione in tempo reale (solo pulizia)
-  inputElement.addEventListener("input", function (e) {
-    const value = this.value;
-
-    // Rimuovi tutti i caratteri non numerici, punti e virgole
-    let cleaned = value.replace(/[^\d.,]/g, "");
-
-    // Assicurati che ci sia al massimo UN separatore decimale
-    const parts = cleaned.split(separatorRegex);
-
-    if (parts.length > 2) {
-      // Se ci sono troppi separatori, mantiene solo il primo
-      cleaned = parts[0] + separator + parts.slice(1).join("");
-    } else if (parts.length === 2) {
-      // Limita a 2 cifre dopo il separatore, ma non applica toFixed(2)
-      parts[1] = parts[1].substring(0, 2);
-      cleaned = parts[0] + separator + parts[1];
-    }
-
-    // Imposta il valore pulito (PERMETTE DI DIGITARE 1,2 E NON FORZA 1,20)
-    this.value = cleaned;
-  });
-
-  // 2. Listener per il BLUR (quando l'utente esce dal campo) - Applica toFixed(2)
-  inputElement.addEventListener("blur", function (e) {
-    const value = this.value;
-    const num = parseDecimalInput(value);
-
-    if (!isNaN(num) && value !== "") {
-      // PUNTO CHIAVE: Applica toFixed(2) solo quando si esce dal campo
-      this.value = num.toFixed(2).replace(".", getDecimalSeparator());
-    } else if (value === "") {
-      // Se il campo è vuoto, lo imposta a 0.00
-      this.value = `0${separator}00`;
-    }
-  });
-
-  // Listener per l'incolla da clipboard (mantiene la formattazione forzata, è più sicuro)
-  inputElement.addEventListener("paste", function (e) {
-    e.preventDefault();
-    const pastedText = (e.clipboardData || window.clipboardData).getData(
-      "text"
-    );
-
-    const cleaned = pastedText.replace(/[^\d.,]/g, "").replace(",", ".");
-    const num = Number.parseFloat(cleaned);
-
-    if (!isNaN(num) && num >= 0) {
-      // Formatta a 2 decimali e usa il separatore decimale locale
-      this.value = num.toFixed(2).replace(".", getDecimalSeparator());
-    }
-  });
-}
 
 // File: script.js
 
@@ -2495,51 +942,17 @@ function limitToTwoDecimals(inputElement) {
  * Formatta numero con separatore corretto per l'utente,
  * garantendo sempre 2 decimali con toFixed(2).
  */
-function formatNumber(num) {
-  const n = Number.parseFloat(num);
-  if (isNaN(n)) return "0";
-  const separator = getDecimalSeparator();
-  // toFixed(2) forza 2 cifre decimali (es. 0.5 -> "0.50")
-  const parts = n.toFixed(2).split(".");
-
-  // ... logica separatore migliaia ...
-
-  // Usa il separatore decimale corretto
-  if (separator === ",") {
-    return parts.join(",");
-  } else {
-    return parts.join(".");
-  }
-}
 
 // Formatta un numero come valuta (es. € 1.234,56)
-function formatCurrency(num) {
-  const n = Number.parseFloat(num);
-  if (isNaN(n)) return "€ 0,00";
-  return `€ ${formatNumber(n)}`;
-}
 
 // File: script.js
 
 // Determina il separatore decimale locale (virgola o punto)
-function getDecimalSeparator() {
-  const numberWithDecimal = 1.1;
-  const localeString = numberWithDecimal.toLocaleString(undefined, {
-    minimumFractionDigits: 1,
-  });
-  return localeString.includes(".") ? "." : ",";
-}
 
 /**
  * Converte il valore dell'input in numero float.
  * Gestisce sia punto che virgola, convertendo tutto in punto per il parseFloat.
  */
-function parseDecimalInput(value) {
-  if (!value || value === "") return 0;
-  const cleaned = String(value).replace(",", ".");
-  const num = Number.parseFloat(cleaned);
-  return isNaN(num) ? 0 : num;
-}
 
 // File: script.js
 
@@ -2547,86 +960,11 @@ function parseDecimalInput(value) {
  * Limita l'input a massimo 2 cifre decimali durante la digitazione
  * e forza la formattazione a due decimali (.00) all'uscita dal campo (blur).
  */
-function limitToTwoDecimals(inputElement) {
-  const separator = getDecimalSeparator();
-  // Crea una regex per dividere in base al separatore locale
-  const separatorRegex = separator === "." ? /\./g : /,/g;
-
-  // 1. Listener per la digitazione in tempo reale (ENFORCES MAX 2 DECIMALI)
-  inputElement.addEventListener("input", function (e) {
-    const value = this.value;
-
-    // Rimuovi tutti i caratteri non numerici, punti e virgole
-    let cleaned = value.replace(/[^\d.,]/g, "");
-
-    // Dividi la stringa in parte intera e parte decimale
-    const parts = cleaned.split(separatorRegex);
-
-    if (parts.length > 2) {
-      // Gestione di separatori multipli inseriti per errore
-      cleaned = parts[0] + separator + parts.slice(1).join("");
-    } else if (parts.length === 2) {
-      // PUNTO CHIAVE: Limita la parte decimale a 2 caratteri (cifre)
-      parts[1] = parts[1].substring(0, 2);
-      cleaned = parts[0] + separator + parts[1];
-    }
-
-    // Aggiorna il valore pulito (l'utente non vedrà mai più di due decimali)
-    this.value = cleaned;
-  });
-
-  // 2. Listener per il BLUR (quando l'utente esce dal campo) - FORZA .00
-  inputElement.addEventListener("blur", function (e) {
-    const value = this.value;
-    const num = parseDecimalInput(value);
-
-    if (!isNaN(num) && value !== "") {
-      // Applica toFixed(2) per formattare con due decimali (es. 0.5 -> 0.50)
-      this.value = num.toFixed(2).replace(".", getDecimalSeparator());
-    } else if (value === "") {
-      // Se il campo è vuoto, lo imposta a 0.00
-      this.value = `0${separator}00`;
-    }
-  });
-
-  // 3. Listener per l'incolla da clipboard
-  inputElement.addEventListener("paste", function (e) {
-    e.preventDefault();
-    const pastedText = (e.clipboardData || window.clipboardData).getData(
-      "text"
-    );
-
-    const cleaned = pastedText.replace(/[^\d.,]/g, "").replace(",", ".");
-    const num = Number.parseFloat(cleaned);
-
-    if (!isNaN(num) && num >= 0) {
-      // Formatta a 2 decimali anche quando si incolla
-      this.value = num.toFixed(2).replace(".", getDecimalSeparator());
-    }
-  });
-}
 
 /**
  * Applica la limitazione decimale agli input quantità e prezzo
  * Questa funzione dovrebbe essere chiamata all'apertura del modal Movimenti.
  */
-function setupDecimalInputs() {
-  const quantitaInput = document.getElementById("movimentoQuantita");
-  const prezzoInput = document.getElementById("movimentoPrezzo");
-
-  // Clonare e sostituire per rimuovere listener precedenti
-  if (quantitaInput) {
-    const newQuantitaInput = quantitaInput.cloneNode(true);
-    quantitaInput.parentNode.replaceChild(newQuantitaInput, quantitaInput);
-    limitToTwoDecimals(newQuantitaInput);
-  }
-
-  if (prezzoInput) {
-    const newPrezzoInput = prezzoInput.cloneNode(true);
-    prezzoInput.parentNode.replaceChild(newPrezzoInput, prezzoInput);
-    limitToTwoDecimals(newPrezzoInput);
-  }
-}
 
 // File: script.js
 
@@ -2634,30 +972,8 @@ function setupDecimalInputs() {
  * Formatta numero con separatore corretto per l'utente,
  * garantendo sempre 2 decimali con toFixed(2).
  */
-function formatNumber(num) {
-  const n = Number.parseFloat(num);
-  if (isNaN(n)) return "0";
-  const separator = getDecimalSeparator();
-  // toFixed(2) forza 2 cifre decimali (es. 0.5 -> "0.50")
-  const parts = n.toFixed(2).split(".");
-
-  // Aggiungi il punto ogni 3 cifre nella parte intera
-  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-
-  // Usa il separatore decimale corretto
-  if (separator === ",") {
-    return parts.join(",");
-  } else {
-    return parts.join(".");
-  }
-}
 
 // Formatta un numero come valuta (es. € 1.234,56)
-function formatCurrency(num) {
-  const n = Number.parseFloat(num);
-  if (isNaN(n)) return "€ 0,00";
-  return `€ ${formatNumber(n)}`;
-}
 
 // ==================== GESTIONE DECIMALI A 2 CIFRE ====================
 
@@ -2879,49 +1195,6 @@ function formatCurrency(num) {
  * Apre il modal per inserire un nuovo movimento
  * IMPORTANTE: Chiama setupDecimalInputs() dopo un breve timeout
  */
-async function openMovimentoModal(movimento = null) {
-  console.log("📂 Apertura modal movimento...");
-
-  // Carica prodotti se necessario
-  if (prodotti.length === 0) {
-    const res = await fetch(`${API_URL}/prodotti`);
-    prodotti = await res.json();
-  }
-
-  const modal = document.getElementById("modalMovimento");
-  const title = document.getElementById("modalMovimentoTitle");
-  const form = document.getElementById("formMovimento");
-
-  form.reset();
-  title.textContent = "Nuovo Movimento";
-  document.getElementById("movimentoId").value = "";
-
-  if (!movimento) {
-    document.getElementById("giacenzaInfo").style.display = "none";
-  }
-
-  // Resetta ricerca prodotto
-  const searchInput = document.getElementById("movimentoProdottoSearch");
-  const hiddenInput = document.getElementById("movimentoProdotto");
-  const resultsContainer = document.getElementById("prodottoSearchResults");
-
-  if (searchInput) searchInput.value = "";
-  if (hiddenInput) hiddenInput.value = "";
-  if (resultsContainer) resultsContainer.classList.remove("show");
-
-  // Resetta campi prezzo/fornitore
-  togglePrezzoField();
-
-  // Mostra modal
-  modal.classList.add("active");
-
-  // ⭐ IMPORTANTE: Applica setup decimali dopo breve timeout
-  setTimeout(() => {
-    console.log("⏱️ Timeout scaduto, applico setup decimali...");
-    setupDecimalInputs();
-    setupProductSearch();
-  }, 150); // 150ms di attesa per assicurarsi che il DOM sia pronto
-}
 
 // ==================== ESPORTA FUNZIONI (se usi moduli) ====================
 // Se usi ES6 modules, decommenta:
@@ -3271,35 +1544,6 @@ document
 //   closeProdottoModal,
 //   highlightMatch
 // };
-function openUserModal(user = null) {
-  const modal = document.getElementById("modalUser");
-  const title = document.getElementById("modalUserTitle");
-  const form = document.getElementById("formUser");
-  const passwordInput = document.getElementById("userPassword");
-  const passwordLabel = passwordInput?.previousElementSibling;
-
-  form.reset();
-
-  if (user) {
-    title.textContent = "Modifica Utente";
-    document.getElementById("userId").value = user.id;
-    document.getElementById("userUsername").value = user.username;
-    if (passwordLabel) {
-      passwordLabel.innerHTML =
-        'Password <span style="opacity: 0.6;">(opzionale)</span>';
-    }
-    passwordInput.required = false;
-  } else {
-    title.textContent = "Nuovo Utente";
-    document.getElementById("userId").value = "";
-    if (passwordLabel) {
-      passwordLabel.innerHTML = "Password *";
-    }
-    passwordInput.required = true;
-  }
-
-  modal.classList.add("active");
-}
 
 // ========== EVENTO KEYDOWN (previeni caratteri non validi) ==========
 const handleKeydown = function (e) {
@@ -3358,51 +1602,6 @@ const handleKeydown = function (e) {
  * Apre il modal per inserire un nuovo movimento
  * IMPORTANTE: Chiama setupDecimalInputs() dopo un breve timeout
  */
-async function openMovimentoModal(movimento = null) {
-  console.log("📂 Apertura modal movimento...");
-
-  // Carica prodotti se necessario
-  if (prodotti.length === 0) {
-    const res = await fetch(`${API_URL}/prodotti`);
-    prodotti = await res.json();
-  }
-
-  const modal = document.getElementById("modalMovimento");
-  const title = document.getElementById("modalMovimentoTitle");
-  const form = document.getElementById("formMovimento");
-
-  form.reset();
-  title.textContent = "Nuovo Movimento";
-  document.getElementById("movimentoId").value = "";
-
-  if (!movimento) {
-    document.getElementById("giacenzaInfo").style.display = "none";
-  }
-
-  // Resetta ricerca prodotto
-  const searchInput = document.getElementById("movimentoProdottoSearch");
-  const hiddenInput = document.getElementById("movimentoProdotto");
-  const resultsContainer = document.getElementById("prodottoSearchResults");
-
-  if (searchInput) searchInput.value = "";
-  if (hiddenInput) hiddenInput.value = "";
-  if (resultsContainer) resultsContainer.classList.remove("show");
-
-  // Resetta campi prezzo/fornitore
-  togglePrezzoField();
-
-  // Mostra modal
-  modal.classList.add("active");
-
-  // ⭐ IMPORTANTE: Applica setup decimali e validazione date dopo breve timeout
-  setTimeout(() => {
-    console.log(
-      "⏱️ Timeout scaduto, applico setup decimali e validazione date..."
-    );
-    setupDecimalInputs();
-    setupProductSearch();
-  }, 150); // 150ms di attesa per assicurarsi che il DOM sia pronto
-}
 
 /**
  * Inizializza la funzione di toggle visibilità password per un campo specifico.
@@ -3452,116 +1651,7 @@ function setupPasswordToggle(inputId, toggleId) {
 
 // ... (nel file script.js)
 
-function openUserModal(utente = null) {
-  const modal = document.getElementById("modalUser");
-  const title = document.getElementById("modalUserTitle");
-  const form = document.getElementById("formUser");
-  const passwordInput = document.getElementById("userPassword");
-  const passwordOptional = document.getElementById("passwordOptional");
-  // 🎯 NUOVA: Ottengo l'elemento toggle
-  const togglePassword = document.getElementById("toggleUserPassword");
 
-  form.reset();
-
-  // ⭐ AGGIUNTA: Reimposta l'icona a occhio aperto ogni volta che il modal si apre
-  // Questo è essenziale se il modal viene riaperto dopo aver attivato il toggle
-  if (togglePassword) {
-    togglePassword.innerHTML = `
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-        <circle cx="12" cy="12" r="3"/>
-      `;
-  }
-
-  if (utente) {
-    title.textContent = "Modifica Utente";
-    document.getElementById("userId").value = utente.id;
-    document.getElementById("userName").value = utente.username;
-    passwordInput.placeholder = "Lascia vuoto per non modificare";
-    passwordOptional.textContent = "(Opzionale)";
-  } else {
-    title.textContent = "Nuovo Utente";
-    document.getElementById("userId").value = "";
-    passwordInput.placeholder = "Inserisci password";
-    passwordOptional.textContent = "*";
-  }
-
-  modal.classList.add("active");
-
-  // ⭐ AGGIUNTA: Attiva la funzione di toggle password
-  setupPasswordToggle("userPassword", "toggleUserPassword");
-}
-
-function renderMovimenti() {
-  const tbody = document.getElementById("movimentiTableBody");
-
-  if (movimenti.length === 0) {
-    tbody.innerHTML =
-      '<tr><td colspan="11" class="text-center">Nessun movimento presente</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = movimenti
-    .map((m) => {
-      const prefix = m.tipo === "scarico" ? "- " : "";
-
-      // Calcolo prezzo unitario
-      let prezzoUnitarioRaw = "-";
-      if (m.tipo === "carico" && m.prezzo) {
-        prezzoUnitarioRaw = formatCurrency(m.prezzo);
-      } else if (m.tipo === "scarico" && m.prezzo_unitario_scarico) {
-        prezzoUnitarioRaw = formatCurrency(m.prezzo_unitario_scarico);
-      }
-
-      const prezzoUnitarioHtml =
-        prezzoUnitarioRaw !== "-"
-          ? prezzoUnitarioRaw.replace("€ ", `${prefix}€ `)
-          : "-";
-
-      const prezzoTotaleRaw = formatCurrency(m.prezzo_totale || 0);
-      const prezzoTotaleHtml = prezzoTotaleRaw.replace("€ ", `${prefix}€ `);
-
-      // 🎨 Classe colore: verde per carico, rosso per scarico
-      const colorClass = m.tipo === "carico" ? "text-green" : "text-red";
-
-      return `
-    <tr>
-      <td>${new Date(m.data_movimento).toLocaleDateString("it-IT")}</td>
-      <td><strong>${m.prodotto_nome}</strong></td>
-      <td>${m.marca_nome || '<span style="color: #999;">-</span>'}</td>
-      <td>${
-        m.prodotto_descrizione
-          ? `<small>${m.prodotto_descrizione.substring(0, 30)}${
-              m.prodotto_descrizione.length > 30 ? "..." : ""
-            }</small>`
-          : '<span style="color: #999;">-</span>'
-      }</td>
-      <td><span class="badge ${
-        m.tipo === "carico" ? "badge-success" : "badge-danger"
-      }">${m.tipo.toUpperCase()}</span></td>
-
-      <!-- 🎨 Colori dinamici -->
-      <td class="${colorClass}">${formatQuantity(m.quantita)} pz</td>
-      <td class="${colorClass}">${prezzoUnitarioHtml}</td>
-      <td class="${colorClass}"><strong>${prezzoTotaleHtml}</strong></td>
-
-      <td>${m.fattura_doc || '<span style="color: #999;">-</span>'}</td>
-      <td>${
-        m.fornitore_cliente_id || '<span style="color: #999;">-</span>'
-      }</td>
-      <td class="text-right">
-        <button class="btn-icon" onclick="deleteMovimento(${
-          m.id
-        })" title="Elimina">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-          </svg>
-        </button>
-      </td>
-    </tr>
-  `;
-    })
-    .join("");
-}
 
 function openUserModal(utente = null) {
   const modal = document.getElementById("modalUser");
@@ -3609,63 +1699,10 @@ function openUserModal(utente = null) {
 /**
  * Estrae testo dal PDF usando PDF.js (da CDN)
  */
-async function extractTextFromPDF(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = async (e) => {
-      try {
-        const typedarray = new Uint8Array(e.target.result);
-
-        // Carica PDF.js da CDN se non è già caricato
-        if (!window.pdfjsLib) {
-          await loadPDFJS();
-        }
-
-        const pdf = await pdfjsLib.getDocument(typedarray).promise;
-        let fullText = "";
-
-        // Estrai testo da ogni pagina
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const textContent = await page.getTextContent();
-          const pageText = textContent.items.map((item) => item.str).join(" ");
-          fullText += pageText + "\n";
-        }
-
-        resolve(fullText);
-      } catch (error) {
-        reject(error);
-      }
-    };
-
-    reader.onerror = reject;
-    reader.readAsArrayBuffer(file);
-  });
-}
 
 /**
  * Carica PDF.js da CDN
  */
-async function loadPDFJS() {
-  return new Promise((resolve, reject) => {
-    if (window.pdfjsLib) {
-      resolve();
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src =
-      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
-    script.onload = () => {
-      pdfjsLib.GlobalWorkerOptions.workerSrc =
-        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-      resolve();
-    };
-    script.onerror = reject;
-    document.head.appendChild(script);
-  });
-}
 
 /**
  * Parser per estrarre SCARICHI dal PDF
@@ -3751,301 +1788,38 @@ function parseScarichiFromText(text) {
 /**
  * Normalizza data in formato ISO (YYYY-MM-DD)
  */
-function normalizeDate(dateStr) {
-  dateStr = dateStr.trim();
-
-  // Formato DD/MM/YYYY o DD-MM-YYYY
-  if (dateStr.includes("/") || dateStr.includes("-") || dateStr.includes(".")) {
-    const separator = dateStr.includes("/")
-      ? "/"
-      : dateStr.includes("-")
-      ? "-"
-      : ".";
-    const parts = dateStr.split(separator);
-
-    if (parts.length === 3) {
-      if (parts[0].length === 4) {
-        // YYYY-MM-DD (già corretto)
-        return dateStr.replace(/\./g, "-").replace(/\//g, "-");
-      } else {
-        // DD-MM-YYYY
-        const day = parts[0].padStart(2, "0");
-        const month = parts[1].padStart(2, "0");
-        const year = parts[2].length === 2 ? "20" + parts[2] : parts[2];
-        return `${year}-${month}-${day}`;
-      }
-    }
-  }
-
-  // Fallback: usa data odierna
-  return new Date().toISOString().split("T")[0];
-}
 
 /**
  * Verifica se un prodotto esiste nel database
  */
-async function checkProductExists(code) {
-  try {
-    const res = await fetch(`${API_URL}/prodotti`);
-    const prodotti = await res.json();
-    return prodotti.find((p) => p.nome.toUpperCase() === code.toUpperCase());
-  } catch (error) {
-    console.error("Errore verifica prodotto:", error);
-    return null;
-  }
-}
 
 /**
  * Crea gli SCARICHI dal PDF
  */
-async function processScarichi(scarichi) {
-  const results = {
-    success: [],
-    failed: [],
-    notFound: [],
-    insufficientStock: [],
-  };
-
-  for (const scarico of scarichi) {
-    try {
-      // 1. Verifica se il prodotto esiste
-      const prodotto = await checkProductExists(scarico.code);
-
-      if (!prodotto) {
-        results.notFound.push({
-          code: scarico.code,
-          quantity: scarico.quantity,
-          date: scarico.date,
-          reason: "Prodotto non trovato nel database",
-        });
-        continue;
-      }
-
-      // 2. Verifica giacenza disponibile
-      if (prodotto.giacenza < scarico.quantity) {
-        results.insufficientStock.push({
-          code: scarico.code,
-          nome: prodotto.nome,
-          quantity: scarico.quantity,
-          available: prodotto.giacenza,
-          date: scarico.date,
-          reason: `Giacenza insufficiente (disponibile: ${prodotto.giacenza}, richiesto: ${scarico.quantity})`,
-        });
-        continue;
-      }
-
-      // 3. Crea lo SCARICO
-      const movementData = {
-        prodotto_id: prodotto.id,
-        tipo: "scarico",
-        quantita: scarico.quantity,
-        data_movimento: scarico.date,
-        fattura_doc: null,
-        fornitore: null,
-        prezzo: null,
-      };
-
-      const res = await fetch(`${API_URL}/dati`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(movementData),
-      });
-
-      if (res.ok) {
-        results.success.push({
-          code: scarico.code,
-          nome: prodotto.nome,
-          quantity: scarico.quantity,
-          date: scarico.date,
-        });
-      } else {
-        const error = await res.json();
-        results.failed.push({
-          code: scarico.code,
-          quantity: scarico.quantity,
-          date: scarico.date,
-          reason: error.error || "Errore sconosciuto",
-        });
-      }
-    } catch (error) {
-      results.failed.push({
-        code: scarico.code,
-        quantity: scarico.quantity,
-        date: scarico.date,
-        reason: error.message,
-      });
-    }
-  }
-
-  return results;
-}
 
 /**
  * Funzione principale per gestire l'import PDF
  */
-async function handlePDFImport(file) {
-  try {
-    // Mostra loading
-    showImportLoading();
-
-    // 1. Estrai testo dal PDF
-    const text = await extractTextFromPDF(file);
-    console.log("📄 Testo estratto dal PDF:", text);
-
-    // 2. Parsa gli SCARICHI
-    const scarichi = parseScarichiFromText(text);
-    console.log("📦 Scarichi trovati:", scarichi);
-
-    if (scarichi.length === 0) {
-      throw new Error(
-        "❌ Nessun prodotto trovato nel PDF.\n\nVerifica che il PDF contenga:\n• Codici prodotto (es. ABC123)\n• Quantità (es. 5 pz)\n• Date (es. 19/12/2025)"
-      );
-    }
-
-    // 3. Processa gli SCARICHI
-    const results = await processScarichi(scarichi);
-
-    // 4. Mostra risultati
-    showImportResults(results);
-
-    // 5. Ricarica le tabelle se ci sono stati successi
-    if (results.success.length > 0) {
-      await loadMovimenti();
-      await loadProdotti();
-    }
-
-    return results;
-  } catch (error) {
-    console.error("❌ Errore import PDF:", error);
-    alert("❌ Errore durante l'importazione:\n\n" + error.message);
-    hideImportLoading();
-    throw error;
-  }
-}
 
 /**
  * Mostra loading durante l'import
  */
-function showImportLoading() {
-  const modal = document.getElementById("modalImportPDF");
-  const importBtn = modal.querySelector(".btn-import-confirm");
-  const originalText = importBtn.innerHTML;
-
-  importBtn.disabled = true;
-  importBtn.innerHTML = `
-    <div class="loading-spinner-inline"></div>
-    <span>Elaborazione in corso...</span>
-  `;
-  importBtn.dataset.originalText = originalText;
-}
 
 /**
  * Nasconde loading
  */
-function hideImportLoading() {
-  const modal = document.getElementById("modalImportPDF");
-  const importBtn = modal.querySelector(".btn-import-confirm");
-
-  if (importBtn.dataset.originalText) {
-    importBtn.innerHTML = importBtn.dataset.originalText;
-    importBtn.disabled = false;
-  }
-}
 
 /**
  * Mostra i risultati dell'import in modo dettagliato
  */
-function showImportResults(results) {
-  hideImportLoading();
-
-  const total =
-    results.success.length +
-    results.failed.length +
-    results.notFound.length +
-    results.insufficientStock.length;
-
-  let message = `📊 IMPORT COMPLETATO\n`;
-  message += `━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-  message += `✅ Scarichi importati: ${results.success.length}/${total}\n\n`;
-
-  // SUCCESSI
-  if (results.success.length > 0) {
-    message += `✅ SCARICHI CREATI CON SUCCESSO:\n`;
-    results.success.forEach((r) => {
-      const dateFormatted = new Date(r.date).toLocaleDateString("it-IT");
-      message += `  • ${r.code} (${r.nome})\n`;
-      message += `    Quantità: ${formatQuantity(
-        r.quantity
-      )} pz | Data: ${dateFormatted}\n`;
-    });
-    message += `\n`;
-  }
-
-  // PRODOTTI NON TROVATI
-  if (results.notFound.length > 0) {
-    message += `⚠️ PRODOTTI NON TROVATI (${results.notFound.length}):\n`;
-    results.notFound.forEach((r) => {
-      const dateFormatted = new Date(r.date).toLocaleDateString("it-IT");
-      message += `  • ${r.code} - ${formatQuantity(
-        r.quantity
-      )} pz (${dateFormatted})\n`;
-      message += `    → Crea prima il prodotto nella sezione "Prodotti"\n`;
-    });
-    message += `\n`;
-  }
-
-  // GIACENZA INSUFFICIENTE
-  if (results.insufficientStock.length > 0) {
-    message += `❌ GIACENZA INSUFFICIENTE (${results.insufficientStock.length}):\n`;
-    results.insufficientStock.forEach((r) => {
-      const dateFormatted = new Date(r.date).toLocaleDateString("it-IT");
-      message += `  • ${r.code} (${r.nome})\n`;
-      message += `    Richiesto: ${formatQuantity(
-        r.quantity
-      )} pz | Disponibile: ${formatQuantity(r.available)} pz\n`;
-      message += `    Data: ${dateFormatted}\n`;
-    });
-    message += `\n`;
-  }
-
-  // ERRORI
-  if (results.failed.length > 0) {
-    message += `❌ ERRORI (${results.failed.length}):\n`;
-    results.failed.forEach((r) => {
-      message += `  • ${r.code}: ${r.reason}\n`;
-    });
-  }
-
-  alert(message);
-
-  // Chiudi il modal solo se tutto è andato bene
-  if (
-    results.failed.length === 0 &&
-    results.notFound.length === 0 &&
-    results.insufficientStock.length === 0
-  ) {
-    closeImportPDFModal();
-  }
-}
 
 /**
  * Apre il modal di import PDF
  */
-function openImportPDFModal() {
-  const modal = document.getElementById("modalImportPDF");
-  const form = document.getElementById("formImportPDF");
-
-  form.reset();
-  modal.classList.add("active");
-}
 
 /**
  * Chiude il modal di import PDF
  */
-function closeImportPDFModal() {
-  const modal = document.getElementById("modalImportPDF");
-  modal.classList.remove("active");
-}
 
 /**
  * Gestisce il submit del form
@@ -4117,42 +1891,9 @@ function formatQuantity(num) {
 
 // Aggiungi queste funzioni in script.js [cite: 6]
 
-function openImportPDFModal() {
-  document.getElementById("modalImportPDF").classList.add("active");
-}
 
-function closeImportPDFModal() {
-  document.getElementById("modalImportPDF").classList.remove("active");
-  document.getElementById("formImportPDF").reset();
-  document.getElementById("filePreview").textContent =
-    "Trascina qui il file o clicca per selezionare";
-}
 
 // Gestione dell'importazione PDF
-async function handlePDFImport(file) {
-  // Nota: L'estrazione effettiva del testo da un PDF lato client
-  // richiede solitamente librerie come pdf.js.
-  // Qui implementiamo la logica basata sulla struttura di prova.pdf.
-
-  console.log("Elaborazione file:", file.name);
-
-  // Esempio di logica di parsing (simulata) per prova.pdf:
-  // In prova.pdf troviamo "CODICE RICAMBIO", "QUANTITA'".
-
-  // 1. Invia il file al server o usa pdf.js per estrarre il testo
-  // 2. Cerca le righe sotto la sezione "RICAMBI"
-  // 3. Esegui il mapping con i prodotti esistenti
-
-  alert(
-    "Lettura di " +
-      file.name +
-      " completata. Dati trovati: " +
-      "Codici Ricambio e Quantità pronti per l'importazione."
-  );
-
-  closeImportPDFModal();
-  loadMovimenti(); // Ricarica la tabella
-}
 
 // Aggiungi il listener al caricamento del DOM
 document.addEventListener("DOMContentLoaded", () => {
@@ -4170,39 +1911,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-function openImportPDFModal() {
-  document.getElementById("modalImportPDF").classList.add("active");
-}
 
-function closeImportPDFModal() {
-  document.getElementById("modalImportPDF").classList.remove("active");
-  document.getElementById("formImportPDF").reset();
-  document.getElementById("filePreview").textContent =
-    "Trascina il PDF qui o clicca per sfogliare";
-}
 
 // Funzione che simula la lettura dei dati da prova.pdf
-async function handlePDFImport(file) {
-  // Qui andrebbe la libreria PDF.js per leggere il contenuto reale.
-  // Basandoci su prova.pdf, sappiamo che cerchiamo: CODICE RICAMBIO e QUANTITA'
-
-  console.log("Analisi file PDF in corso...");
-
-  // Esempio di dati estratti dal PDF (logica basata su prova.pdf)
-  const datiEstratti = [
-    { codice: "RIC-001", qta: 2, desc: "Filtro Olio", prezzo: 15.5 },
-    { codice: "RIC-002", qta: 1, desc: "Pastiglie Freno", prezzo: 45.0 },
-  ];
-
-  // Logica per aggiungere i movimenti estratti alla tabella
-  // (Qui dovresti chiamare la tua API per salvare i nuovi movimenti)
-  alert(
-    `Trovati ${datiEstratti.length} ricambi nel file. Importazione completata.`
-  );
-
-  closeImportPDFModal();
-  loadMovimenti(); // Ricarica la tabella principale
-}
 
 // Inizializzazione listener
 document.addEventListener("DOMContentLoaded", () => {
@@ -4232,148 +1943,18 @@ document.addEventListener("DOMContentLoaded", () => {
  * 🔧 Carica PDF.js da CDN (Cloudflare)
  * Versione: 3.11.174 (stabile e testata)
  */
-async function loadPDFJS() {
-  return new Promise((resolve, reject) => {
-    // Se PDF.js è già caricato, esci
-    if (window.pdfjsLib) {
-      console.log("✅ PDF.js già caricato");
-      resolve();
-      return;
-    }
-
-    console.log("⏳ Caricamento PDF.js da CDN...");
-
-    const script = document.createElement("script");
-    script.src =
-      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
-
-    script.onload = () => {
-      // Configura il worker per PDF.js
-      pdfjsLib.GlobalWorkerOptions.workerSrc =
-        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-      console.log("✅ PDF.js caricato con successo");
-      resolve();
-    };
-
-    script.onerror = () => {
-      console.error("❌ Errore caricamento PDF.js");
-      reject(new Error("Impossibile caricare la libreria PDF.js"));
-    };
-
-    document.head.appendChild(script);
-  });
-}
 
 /**
  * 📖 Estrae tutto il testo dal PDF
  * @param {File} file - File PDF da leggere
  * @returns {Promise<string>} - Testo completo estratto
  */
-async function extractTextFromPDF(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = async (e) => {
-      try {
-        console.log("📖 Inizio lettura PDF...");
-
-        const typedarray = new Uint8Array(e.target.result);
-
-        // Carica PDF.js se non è già presente
-        if (!window.pdfjsLib) {
-          await loadPDFJS();
-        }
-
-        // Carica il documento PDF
-        const loadingTask = pdfjsLib.getDocument(typedarray);
-        const pdf = await loadingTask.promise;
-
-        console.log(`📄 PDF caricato: ${pdf.numPages} pagine`);
-
-        let fullText = "";
-
-        // Estrai testo da ogni pagina
-        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-          const page = await pdf.getPage(pageNum);
-          const textContent = await page.getTextContent();
-
-          // Unisci tutti gli elementi di testo
-          const pageText = textContent.items.map((item) => item.str).join(" ");
-
-          fullText += pageText + "\n";
-
-          console.log(`📄 Pagina ${pageNum}/${pdf.numPages} letta`);
-        }
-
-        console.log("✅ Estrazione testo completata");
-        console.log("📝 Testo estratto:", fullText.substring(0, 500) + "...");
-
-        resolve(fullText);
-      } catch (error) {
-        console.error("❌ Errore estrazione PDF:", error);
-        reject(
-          new Error("Errore durante la lettura del PDF: " + error.message)
-        );
-      }
-    };
-
-    reader.onerror = () => {
-      console.error("❌ Errore lettura file");
-      reject(new Error("Impossibile leggere il file PDF"));
-    };
-
-    // Inizia la lettura del file
-    reader.readAsArrayBuffer(file);
-  });
-}
 
 /**
  * 📅 Estrae la DATA dal PDF (cerca "DATA___")
  * @param {string} text - Testo completo del PDF
  * @returns {string} - Data in formato YYYY-MM-DD
  */
-function extractDateFromPDF(text) {
-  console.log("📅 Ricerca DATA nel PDF...");
-
-  const lines = text.split("\n");
-
-  // Cerca nelle prime 15 righe (la data dovrebbe essere in alto)
-  for (let i = 0; i < Math.min(15, lines.length); i++) {
-    const line = lines[i].trim();
-
-    // Pattern principale: DATA______19/12/2025
-    const datePattern = /DATA[_\s]*(\d{1,2}[/\-.]\d{1,2}[/\-.]\d{2,4})/i;
-    const match = line.match(datePattern);
-
-    if (match && match[1]) {
-      const normalizedDate = normalizeDate(match[1]);
-      console.log(`✅ Data trovata: ${match[1]} → ${normalizedDate}`);
-      return normalizedDate;
-    }
-  }
-
-  // Fallback: cerca qualsiasi data nelle prime righe
-  console.log("⚠️ Pattern DATA___ non trovato, cerco date generiche...");
-
-  for (let i = 0; i < Math.min(15, lines.length); i++) {
-    const line = lines[i];
-    const anyDatePattern = /(\d{1,2}[/\-.]\d{1,2}[/\-.]\d{2,4})/;
-    const match = line.match(anyDatePattern);
-
-    if (match && match[1]) {
-      const normalizedDate = normalizeDate(match[1]);
-      console.log(
-        `✅ Data trovata (generica): ${match[1]} → ${normalizedDate}`
-      );
-      return normalizedDate;
-    }
-  }
-
-  // Se non trova nessuna data, usa oggi
-  const today = new Date().toISOString().split("T")[0];
-  console.warn(`⚠️ Nessuna data trovata nel PDF, uso data odierna: ${today}`);
-  return today;
-}
 
 /**
  * 📦 Estrae gli SCARICHI dalla sezione RICAMBI
@@ -4381,356 +1962,30 @@ function extractDateFromPDF(text) {
  * @param {string} date - Data degli scarichi
  * @returns {Array} - Array di oggetti {code, quantity, date}
  */
-function extractScarichiFromPDF(text, date) {
-  console.log("📦 Ricerca sezione RICAMBI...");
-
-  const scarichi = [];
-  const lines = text.split("\n");
-
-  // 1️⃣ TROVA LA SEZIONE "RICAMBI"
-  let ricambiStartIndex = -1;
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim().toUpperCase();
-    if (line.includes("RICAMBI")) {
-      ricambiStartIndex = i;
-      console.log(`✅ Sezione RICAMBI trovata alla riga ${i}: "${lines[i]}"`);
-      break;
-    }
-  }
-
-  if (ricambiStartIndex === -1) {
-    console.warn("⚠️ Sezione RICAMBI non trovata nel PDF");
-    return scarichi;
-  }
-
-  // 2️⃣ SALTA LE RIGHE DI INTESTAZIONE
-  // (CODICE RICAMBIO, DESCRIZIONE, QUANTITA', ecc.)
-  let dataStartIndex = ricambiStartIndex + 1;
-
-  for (
-    let i = ricambiStartIndex + 1;
-    i < Math.min(ricambiStartIndex + 5, lines.length);
-    i++
-  ) {
-    const line = lines[i].trim().toUpperCase();
-
-    if (
-      line.includes("CODICE") ||
-      line.includes("DESCRIZIONE") ||
-      line.includes("QUANTITA") ||
-      line.includes("PREZZO")
-    ) {
-      dataStartIndex = i + 1;
-      console.log(`⏭️  Riga intestazione saltata: "${lines[i]}"`);
-    }
-  }
-
-  console.log(`🔍 Inizio analisi dati dalla riga ${dataStartIndex}`);
-
-  // 3️⃣ ANALIZZA LE RIGHE SUCCESSIVE
-  for (let i = dataStartIndex; i < lines.length; i++) {
-    const line = lines[i].trim();
-
-    // Stop se incontriamo una sezione diversa
-    if (
-      !line ||
-      /MANODOPERA|TOTALE|IVA COMPRESA|DESCRIZIONE LAVORAZIONI|Descrizione Lavorazioni/i.test(
-        line
-      )
-    ) {
-      console.log(`🛑 Fine sezione RICAMBI alla riga ${i}: "${line}"`);
-      break;
-    }
-
-    // 4️⃣ ESTRAI CODICE E QUANTITÀ
-    // Formato atteso: "ABC123 Descrizione... 2" oppure "ABC123  2"
-    const words = line.split(/\s+/).filter((w) => w.length > 0);
-
-    if (words.length < 2) {
-      console.log(`⏭️  Riga ignorata (troppo corta): "${line}"`);
-      continue;
-    }
-
-    // Il primo elemento dovrebbe essere il CODICE
-    const potentialCode = words[0].toUpperCase();
-
-    // Validazione codice: almeno 3 caratteri alfanumerici
-    if (!/^[A-Z0-9]{3,}$/i.test(potentialCode)) {
-      console.log(`⏭️  Codice non valido: "${potentialCode}" in "${line}"`);
-      continue;
-    }
-
-    // L'ultimo elemento dovrebbe essere la QUANTITÀ
-    const potentialQty = words[words.length - 1];
-
-    // Rimuovi eventuali simboli (es. "2," → "2")
-    const cleanQty = potentialQty.replace(/[^\d.,]/g, "");
-    const qty = Number.parseFloat(cleanQty.replace(",", "."));
-
-    // Validazione quantità
-    if (isNaN(qty) || qty <= 0 || qty > 9999) {
-      console.log(
-        `⏭️  Quantità non valida: "${potentialQty}" → ${qty} in "${line}"`
-      );
-      continue;
-    }
-
-    // ✅ SUCCESSO: abbiamo trovato un codice e una quantità validi
-    scarichi.push({
-      code: potentialCode,
-      quantity: qty,
-      date: date,
-    });
-
-    console.log(`✅ Scarico trovato: ${potentialCode} - ${qty} pz (riga ${i})`);
-  }
-
-  console.log(`📊 Totale scarichi trovati: ${scarichi.length}`);
-
-  return scarichi;
-}
 
 /**
  * 📅 Normalizza data in formato ISO (YYYY-MM-DD)
  * @param {string} dateStr - Data in formato DD/MM/YYYY, DD-MM-YYYY, ecc.
  * @returns {string} - Data in formato YYYY-MM-DD
  */
-function normalizeDate(dateStr) {
-  dateStr = dateStr.trim();
-
-  // Determina il separatore (/, -, .)
-  const separator = dateStr.includes("/")
-    ? "/"
-    : dateStr.includes("-")
-    ? "-"
-    : ".";
-
-  const parts = dateStr.split(separator);
-
-  if (parts.length === 3) {
-    // Formato DD/MM/YYYY o YYYY/MM/DD
-    if (parts[0].length === 4) {
-      // YYYY-MM-DD (già corretto)
-      return dateStr.replace(/\./g, "-").replace(/\//g, "-");
-    } else {
-      // DD-MM-YYYY → YYYY-MM-DD
-      const day = parts[0].padStart(2, "0");
-      const month = parts[1].padStart(2, "0");
-      const year = parts[2].length === 2 ? "20" + parts[2] : parts[2];
-      return `${year}-${month}-${day}`;
-    }
-  }
-
-  // Fallback: usa data odierna
-  console.warn(
-    `⚠️ Formato data non riconosciuto: "${dateStr}", uso data odierna`
-  );
-  return new Date().toISOString().split("T")[0];
-}
 
 /**
  * 🔍 Verifica se un prodotto esiste nel database
  * @param {string} code - Codice prodotto da cercare
  * @returns {Promise<Object|null>} - Oggetto prodotto o null
  */
-async function checkProductExists(code) {
-  try {
-    const res = await fetch(`${API_URL}/prodotti`);
-
-    if (!res.ok) {
-      throw new Error("Errore caricamento prodotti dal server");
-    }
-
-    const prodotti = await res.json();
-
-    // Cerca il prodotto confrontando il codice (case-insensitive)
-    const prodotto = prodotti.find(
-      (p) => p.nome.toUpperCase() === code.toUpperCase()
-    );
-
-    if (prodotto) {
-      console.log(
-        `✅ Prodotto trovato: ${code} → ${prodotto.nome} (ID: ${prodotto.id})`
-      );
-    } else {
-      console.warn(`⚠️ Prodotto NON trovato: ${code}`);
-    }
-
-    return prodotto;
-  } catch (error) {
-    console.error("❌ Errore verifica prodotto:", error);
-    return null;
-  }
-}
 
 /**
  * ✅ Crea gli SCARICHI nel database
  * @param {Array} scarichi - Array di oggetti {code, quantity, date}
  * @returns {Promise<Object>} - Risultati {success, failed, notFound, insufficientStock}
  */
-async function processScarichi(scarichi) {
-  console.log(`🚀 Inizio elaborazione ${scarichi.length} scarichi...`);
-
-  const results = {
-    success: [],
-    failed: [],
-    notFound: [],
-    insufficientStock: [],
-  };
-
-  for (let i = 0; i < scarichi.length; i++) {
-    const scarico = scarichi[i];
-
-    console.log(
-      `📦 [${i + 1}/${scarichi.length}] Elaborazione: ${scarico.code} - ${
-        scarico.quantity
-      } pz`
-    );
-
-    try {
-      // 1️⃣ Verifica se il prodotto esiste
-      const prodotto = await checkProductExists(scarico.code);
-
-      if (!prodotto) {
-        results.notFound.push({
-          code: scarico.code,
-          quantity: scarico.quantity,
-          date: scarico.date,
-          reason: "Prodotto non trovato nel database",
-        });
-        console.warn(`⚠️ Prodotto non trovato: ${scarico.code}`);
-        continue;
-      }
-
-      // 2️⃣ Verifica giacenza disponibile
-      if (prodotto.giacenza < scarico.quantity) {
-        results.insufficientStock.push({
-          code: scarico.code,
-          nome: prodotto.nome,
-          quantity: scarico.quantity,
-          available: prodotto.giacenza,
-          date: scarico.date,
-        });
-        console.warn(
-          `⚠️ Giacenza insufficiente: ${scarico.code} (richiesto: ${scarico.quantity}, disponibile: ${prodotto.giacenza})`
-        );
-        continue;
-      }
-
-      // 3️⃣ Crea lo SCARICO
-      const movementData = {
-        prodotto_id: prodotto.id,
-        tipo: "scarico",
-        quantita: scarico.quantity,
-        data_movimento: scarico.date,
-        fattura_doc: null,
-        fornitore: null,
-        prezzo: null,
-      };
-
-      console.log("📤 Invio scarico al server:", movementData);
-
-      const res = await fetch(`${API_URL}/dati`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(movementData),
-      });
-
-      if (res.ok) {
-        results.success.push({
-          code: scarico.code,
-          nome: prodotto.nome,
-          quantity: scarico.quantity,
-          date: scarico.date,
-        });
-        console.log(
-          `✅ Scarico creato: ${scarico.code} - ${scarico.quantity} pz`
-        );
-      } else {
-        const error = await res.json();
-        results.failed.push({
-          code: scarico.code,
-          quantity: scarico.quantity,
-          date: scarico.date,
-          reason: error.error || "Errore sconosciuto dal server",
-        });
-        console.error(`❌ Errore creazione scarico: ${error.error}`);
-      }
-    } catch (error) {
-      results.failed.push({
-        code: scarico.code,
-        quantity: scarico.quantity,
-        date: scarico.date,
-        reason: error.message,
-      });
-      console.error(`❌ Errore elaborazione: ${error.message}`);
-    }
-  }
-
-  console.log("📊 Elaborazione completata:", results);
-
-  return results;
-}
 
 /**
  * 🚀 Funzione principale per gestire l'import PDF
  * @param {File} file - File PDF da importare
  * @returns {Promise<Object>} - Risultati dell'importazione
  */
-async function handlePDFImport(file) {
-  try {
-    console.log("🚀 Inizio importazione PDF:", file.name);
-
-    showImportLoading();
-
-    // 1️⃣ Estrai testo dal PDF
-    const text = await extractTextFromPDF(file);
-
-    // 2️⃣ Estrai la DATA
-    const date = extractDateFromPDF(text);
-
-    // 3️⃣ Estrai gli SCARICHI
-    const scarichi = extractScarichiFromPDF(text, date);
-
-    console.log(`📦 ${scarichi.length} scarichi trovati per la data ${date}`);
-
-    if (scarichi.length === 0) {
-      throw new Error(
-        "❌ Nessun prodotto trovato nel PDF.\n\n" +
-          "Verifica che il PDF contenga:\n" +
-          '• Sezione "RICAMBI"\n' +
-          "• CODICE RICAMBIO (es. ABC123)\n" +
-          "• QUANTITÀ (es. 2)\n\n" +
-          "Formato atteso:\n" +
-          "RICAMBI\n" +
-          "CODICE RICAMBIO   DESCRIZIONE   QUANTITA'\n" +
-          "ABC123           Filtro Olio    2"
-      );
-    }
-
-    // 4️⃣ Processa gli SCARICHI
-    const results = await processScarichi(scarichi);
-
-    // 5️⃣ Mostra risultati
-    showImportResults(results);
-
-    // 6️⃣ Ricarica le tabelle se ci sono stati successi
-    if (results.success.length > 0) {
-      console.log("🔄 Ricarico tabelle Movimenti e Prodotti...");
-      await loadMovimenti();
-      await loadProdotti();
-      console.log("✅ Tabelle ricaricate");
-    }
-
-    return results;
-  } catch (error) {
-    console.error("❌ Errore import PDF:", error);
-    alert("❌ Errore durante l'importazione:\n\n" + error.message);
-    hideImportLoading();
-    throw error;
-  }
-}
 
 /**
  * ⏳ Mostra loading durante l'import
@@ -5947,154 +3202,9 @@ async function handlePDFImport(file) {
 window.handlePDFImport = handlePDFImport;
 window.loadPDFJS = loadPDFJS;
 
-function extractScarichiFromPDF(text, date) {
-  console.log("Ricerca sezione RICAMBI...");
-  const scarichi = [];
-  const lines = text.split("\n");
-
-  // 1. TROVA LA SEZIONE RICAMBI
-  let ricambiStartIndex = -1;
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim().toUpperCase();
-    if (line.includes("RICAMBI")) {
-      ricambiStartIndex = i;
-      console.log("Sezione RICAMBI trovata alla riga", i, lines[i]);
-      break;
-    }
-  }
-
-  if (ricambiStartIndex === -1) {
-    console.warn("Sezione RICAMBI non trovata nel PDF");
-    return scarichi;
-  }
-
-  // 2. SALTA LE RIGHE DI INTESTAZIONE
-  let dataStartIndex = ricambiStartIndex + 1;
-  for (
-    let i = ricambiStartIndex + 1;
-    i < Math.min(ricambiStartIndex + 10, lines.length);
-    i++
-  ) {
-    const line = lines[i].toUpperCase();
-    if (
-      ["CODICE", "RICAMBIO", "DESCRIZIONE", "QUANTITA", "PREZZO", "IVA"].some(
-        (keyword) => line.includes(keyword)
-      )
-    ) {
-      dataStartIndex = i + 1;
-      console.log("Riga intestazione saltata:", lines[i]);
-      break;
-    }
-  }
-
-  console.log("Inizio analisi dati dalla riga", dataStartIndex);
-
-  // 3. ANALIZZA LE RIGHE SUCCESSIVE (UN SOLO LOOP)
-  for (let i = dataStartIndex; i < lines.length; i++) {
-    const line = lines[i].trim();
-
-    if (!line) continue;
-
-    // Stop se incontriamo una sezione diversa
-    const lineUpper = line.toUpperCase();
-    if (
-      ["MANODOPERA", "TOTALE", "IVA COMPRESA", "DESCRIZIONE LAVORAZIONI"].some(
-        (keyword) => lineUpper.includes(keyword)
-      )
-    ) {
-      console.log("Fine sezione RICAMBI alla riga", i, line);
-      break;
-    }
-
-    // 4. ESTRAI CODICE E QUANTITÀ
-    const parsed = parseRicamboLine(line);
-    if (parsed) {
-      scarichi.push({
-        code: parsed.code,
-        quantity: parsed.quantity,
-        date: date,
-      });
-      console.log(
-        "Scarico trovato:",
-        parsed.code,
-        "-",
-        parsed.quantity,
-        "pz",
-        "riga",
-        i
-      );
-    } else {
-      console.log("Riga ignorata:", line);
-    }
-  }
-
-  console.log("Totale scarichi trovati:", scarichi.length);
-  return scarichi;
-}
 
 // IMPORT PDF SCARICHI - FUNZIONE UNICA CORRETTA
 
-async function handlePDFImport(file) {
-  try {
-    console.log("Inizio importazione PDF:", file.name);
-
-    // 1) Mostra loading nel bottone del modal
-    showImportLoading(); // usa showImportLoading/hideImportLoading già definiti
-
-    // 2) Estrai il testo dal PDF
-    const text = await extractTextFromPDF(file);
-    console.log(
-      "Testo estratto dal PDF (prime 1000 chars):",
-      text.substring(0, 1000)
-    );
-
-    // 3) Estrai la DATA dal PDF
-    const date = extractDateFromPDF(text);
-    console.log("Data trovata nel PDF:", date);
-
-    // 4) Estrai gli SCARICHI dalla sezione RICAMBI
-    const scarichi = extractScarichiFromPDF(text, date);
-    console.log(
-      scarichi.length,
-      "scarichi trovati per la data",
-      date,
-      scarichi
-    );
-
-    if (scarichi.length === 0) {
-      throw new Error(
-        "Nessun prodotto trovato nel PDF.\n" +
-          "Verifica che il PDF contenga:\n" +
-          "- Sezione 'RICAMBI'\n" +
-          "- Codice prodotto (es. 101)\n" +
-          "- Quantità (es. 2)"
-      );
-    }
-
-    // 5) Processa gli SCARICHI: crea solo uno SCARICO per riga PDF
-    const results = await processScarichi(scarichi);
-
-    // 6) Mostra risultati dettagliati
-    showImportResults(results);
-
-    // 7) Se ci sono successi, ricarica Movimenti e Prodotti UNA SOLA VOLTA
-    if (results.success.length > 0) {
-      console.log("Ricarico tabelle Movimenti e Prodotti...");
-      await loadMovimenti();
-      await loadProdotti();
-      console.log("Tabelle ricaricate");
-    }
-
-    return results;
-  } catch (error) {
-    console.error("Errore import PDF:", error);
-    alert("Errore durante l'importazione: " + error.message);
-    throw error;
-  } finally {
-    // nasconde sempre il loading e chiude il modal
-    hideImportLoading();
-  }
-}
 
 // 🧾 Importa ordine da PDF e crea UN movimento di scarico per riga prodotto
 async function importaOrdineDaPdf(righePdf, dataOrdine, nomeFilePdf) {
@@ -6272,61 +3382,6 @@ function renderMarche() {
 /**
  * 🗑️ Elimina marca con controllo prodotti relazionati
  */
-async function deleteMarca(id, nome, prodottiCount) {
-  console.log(`🗑️ Tentativo eliminazione marca: ${nome} (ID: ${id}, Prodotti: ${prodottiCount})`);
-
-  // ⚠️ AVVISO SE CI SONO PRODOTTI RELAZIONATI
-  let confirmMessage = `Sei sicuro di voler eliminare la marca "${nome}"?`;
-  
-  if (prodottiCount > 0) {
-    confirmMessage = `⚠️ ATTENZIONE!\n\nLa marca "${nome}" ha ${prodottiCount} prodotto/i relazionato/i.\n\nEliminando questa marca, ${prodottiCount === 1 ? 'il prodotto perderà' : 'i prodotti perderanno'} il riferimento alla marca.\n\nVuoi continuare?`;
-  }
-
-  // Conferma eliminazione
-  const conferma = await showConfirmModal(confirmMessage, 'Conferma Eliminazione');
-  
-  if (!conferma) {
-    console.log('❌ Eliminazione annullata dall\'utente');
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API_URL}/marche/${id}`, { 
-      method: 'DELETE' 
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      // Ignora prossimo aggiornamento socket
-      if (typeof ignoreNextSocketUpdate === 'function') {
-        ignoreNextSocketUpdate();
-      }
-
-      showNotification(
-        `Marca "${nome}" eliminata con successo!`, 
-        'success'
-      );
-
-      // Ricarica marche e prodotti (per aggiornare i conteggi)
-      await loadMarche();
-      
-      if (prodottiCount > 0) {
-        await loadProdotti();
-      }
-
-      console.log(`✅ Marca "${nome}" eliminata con successo`);
-    } else {
-      throw new Error(data.error || 'Errore durante l\'eliminazione');
-    }
-  } catch (error) {
-    console.error('❌ Errore eliminazione marca:', error);
-    showNotification(
-      `Errore: ${error.message}`, 
-      'error'
-    );
-  }
-}
 
 /**
  * 🔍 Filtra marche in base alla ricerca
@@ -6354,19 +3409,6 @@ document.getElementById('filterMarche')?.addEventListener('input', (e) => {
 /**
  * 🛡️ Helper: Escape HTML per prevenire XSS
  */
-function escapeHtml(text) {
-  if (!text) return '';
-  
-  const map = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;'
-  };
-  
-  return String(text).replace(/[&<>"']/g, m => map[m]);
-}
 
 // ==================== ESPORTA FUNZIONI (se usi moduli) ====================
 // export { loadMarche, renderMarche, deleteMarca, escapeHtml };
@@ -6433,556 +3475,42 @@ async function deleteMarca(id, nome) {
 /**
  * 🎨 Renderizza la tabella prodotti con messaggio personalizzato
  */
-function renderProdotti() {
-  const tbody = document.getElementById("prodottiTableBody");
-
-  if (!tbody) {
-    console.error("❌ Elemento prodottiTableBody non trovato");
-    return;
-  }
-
-  // Caso: Nessun prodotto presente
-  if (prodotti.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="5" class="text-center">
-          <div style="padding: 40px 20px; color: var(--text-secondary);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
-                 style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-              <line x1="3" y1="9" x2="21" y2="9"/>
-              <line x1="9" y1="21" x2="9" y2="9"/>
-            </svg>
-            <p style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">
-              Nessun prodotto presente
-            </p>
-            <p style="font-size: 14px;">
-              Clicca su "Nuovo Prodotto" per iniziare
-            </p>
-          </div>
-        </td>
-      </tr>
-    `;
-    return;
-  }
-
-  // Rendering prodotti
-  tbody.innerHTML = prodotti
-    .map((p) => `
-      <tr>
-        <td><strong>${escapeHtml(p.nome)}</strong></td>
-        <td>
-          <span class="badge badge-marca">
-            ${p.marca_nome ? escapeHtml(p.marca_nome).toUpperCase() : "N/A"}
-          </span>
-        </td>
-        <td>
-          <span class="badge-giacenza">
-            ${formatQuantity(p.giacenza ?? 0)} pz
-          </span>
-        </td>
-        <td>${p.descrizione ? escapeHtml(p.descrizione) : "-"}</td>
-        <td class="text-right">
-          <button 
-            class="btn-icon" 
-            onclick="editProdotto(${p.id})" 
-            title="Modifica prodotto"
-            aria-label="Modifica ${escapeHtml(p.nome)}"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-            </svg>
-          </button>
-          <button 
-            class="btn-icon" 
-            onclick="deleteProdotto(${p.id}, '${escapeHtml(p.nome)}')" 
-            title="Elimina prodotto"
-            aria-label="Elimina ${escapeHtml(p.nome)}"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-            </svg>
-          </button>
-        </td>
-      </tr>
-    `)
-    .join("");
-
-  console.log(`✅ ${prodotti.length} prodotti renderizzati`);
-}
 
 /**
  * 🗑️ Elimina prodotto con controllo movimenti
  */
-async function deleteProdotto(id, nome) {
-  // Verifica se ci sono movimenti collegati
-  const movimentiCollegati = allMovimenti.filter(m => m.prodotto_id === id).length;
-  
-  let messaggio = `Sei sicuro di voler eliminare il prodotto "<strong>${escapeHtml(nome)}</strong>"?`;
-  
-  if (movimentiCollegati > 0) {
-    messaggio += `
-      <div style="margin-top: 15px; padding: 12px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.2);">
-        <span style="color: var(--danger); font-weight: 700; display: block; margin-bottom: 4px;">⚠️ ATTENZIONE</span>
-        Ci sono <strong>${movimentiCollegati}</strong> movimenti collegati a questo prodotto.
-        Eliminando il prodotto, verranno eliminati anche tutti i movimenti associati!
-      </div>`;
-  }
-
-  const confermato = await showConfirmModal(messaggio, 'Elimina Prodotto');
-  if (!confermato) return;
-
-  try {
-    const res = await fetch(`${API_URL}/prodotti/${id}`, { method: "DELETE" });
-    const data = await res.json();
-
-    if (res.ok) {
-      if (typeof ignoreNextSocketUpdate === "function") {
-        ignoreNextSocketUpdate();
-      }
-      
-      showAlertModal(
-        `Prodotto "${nome}" eliminato con successo!`,
-        'Operazione Completata',
-        'success'
-      );
-      
-      await loadProdotti();
-      if (movimentiCollegati > 0) {
-        await loadMovimenti();
-      }
-    } else {
-      throw new Error(data.error || "Errore durante l'eliminazione");
-    }
-  } catch (error) {
-    console.error("❌ Errore eliminazione prodotto:", error);
-    showAlertModal(`Errore: ${error.message}`, 'Errore', 'error');
-  }
-}
 
 // ==================== MOVIMENTI CON ICONA VUOTA ====================
 
 /**
  * 🎨 Renderizza la tabella movimenti con messaggio personalizzato
  */
-function renderMovimenti() {
-  const tbody = document.getElementById("movimentiTableBody");
-
-  if (!tbody) {
-    console.error("❌ Elemento movimentiTableBody non trovato");
-    return;
-  }
-
-  // Caso: Nessun movimento presente
-  if (movimenti.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="11" class="text-center">
-          <div style="padding: 40px 20px; color: var(--text-secondary);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
-                 style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;">
-              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-              <polyline points="17 6 23 6 23 12"/>
-            </svg>
-            <p style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">
-              Nessun movimento presente
-            </p>
-            <p style="font-size: 14px;">
-              Clicca su "Nuovo Movimento" per registrare il primo carico o scarico
-            </p>
-          </div>
-        </td>
-      </tr>
-    `;
-    return;
-  }
-
-  // Rendering movimenti
-  tbody.innerHTML = movimenti.map((m) => {
-    const prefix = m.tipo === "scarico" ? "- " : "";
-    const colorClass = m.tipo === "carico" ? "text-green" : "text-red";
-
-    let prezzoUnitarioRaw = "-";
-    if (m.tipo === "carico" && m.prezzo) {
-      prezzoUnitarioRaw = formatCurrency(m.prezzo);
-    } else if (m.tipo === "scarico" && m.prezzo_unitario_scarico) {
-      prezzoUnitarioRaw = formatCurrency(m.prezzo_unitario_scarico);
-    }
-
-    const prezzoUnitarioHtml = prezzoUnitarioRaw !== "-" 
-      ? prezzoUnitarioRaw.replace("€ ", `${prefix}€ `) 
-      : "-";
-
-    const prezzoTotaleRaw = formatCurrency(m.prezzo_totale || 0);
-    const prezzoTotaleHtml = prezzoTotaleRaw.replace("€ ", `${prefix}€ `);
-
-    return `
-      <tr>
-        <td>${new Date(m.data_movimento).toLocaleDateString("it-IT")}</td>
-        <td><strong>${escapeHtml(m.prodotto_nome)}</strong></td>
-        <td>${m.marca_nome ? escapeHtml(m.marca_nome) : '<span style="color: #999;">-</span>'}</td>
-        <td>${m.prodotto_descrizione 
-          ? `<small>${escapeHtml(m.prodotto_descrizione.substring(0, 30))}${m.prodotto_descrizione.length > 30 ? "..." : ""}</small>`
-          : '<span style="color: #999;">-</span>'
-        }</td>
-        <td>
-          <span class="badge ${m.tipo === "carico" ? "badge-success" : "badge-danger"}">
-            ${m.tipo.toUpperCase()}
-          </span>
-        </td>
-        <td class="${colorClass}">${formatQuantity(m.quantita)} pz</td>
-        <td class="${colorClass}">${prezzoUnitarioHtml}</td>
-        <td class="${colorClass}"><strong>${prezzoTotaleHtml}</strong></td>
-        <td>${m.fattura_doc || '<span style="color: #999;">-</span>'}</td>
-        <td>${m.fornitore_cliente_id || '<span style="color: #999;">-</span>'}</td>
-        <td class="text-right">
-          <button 
-            class="btn-icon" 
-            onclick="deleteMovimento(${m.id}, '${escapeHtml(m.prodotto_nome)}', '${m.tipo}')" 
-            title="Elimina movimento"
-            aria-label="Elimina movimento ${m.tipo}"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-            </svg>
-          </button>
-        </td>
-      </tr>
-    `;
-  }).join("");
-
-  console.log(`✅ ${movimenti.length} movimenti renderizzati`);
-}
 
 /**
  * 🗑️ Elimina movimento con conferma
  */
-async function deleteMovimento(id, prodottoNome, tipo) {
-  const tipoLabel = tipo === 'carico' ? 'CARICO' : 'SCARICO';
-  
-  const messaggio = `
-    Sei sicuro di voler eliminare questo movimento di <strong>${tipoLabel}</strong>?
-    <div style="margin-top: 12px; padding: 10px; background: rgba(99, 102, 241, 0.1); border-radius: 6px;">
-      <strong>Prodotto:</strong> ${escapeHtml(prodottoNome)}
-    </div>
-  `;
-
-  const confermato = await showConfirmModal(messaggio, 'Elimina Movimento');
-  if (!confermato) return;
-
-  try {
-    const res = await fetch(`${API_URL}/dati/${id}`, { method: "DELETE" });
-    const data = await res.json();
-
-    if (res.ok) {
-      if (typeof ignoreNextSocketUpdate === "function") {
-        ignoreNextSocketUpdate();
-      }
-      
-      showAlertModal(
-        'Movimento eliminato con successo!',
-        'Operazione Completata',
-        'success'
-      );
-      
-      await loadMovimenti();
-      await loadProdotti();
-    } else {
-      throw new Error(data.error || "Errore durante l'eliminazione");
-    }
-  } catch (error) {
-    console.error("❌ Errore eliminazione movimento:", error);
-    showAlertModal(`Errore: ${error.message}`, 'Errore', 'error');
-  }
-}
 
 // ==================== RIEPILOGO CON ICONA VUOTA ====================
 
 /**
  * 🎨 Renderizza il riepilogo con messaggio personalizzato
  */
-function renderRiepilogo() {
-  const tbody = document.getElementById("riepilogoTableBody");
-
-  if (!tbody) {
-    console.error("❌ Elemento riepilogoTableBody non trovato");
-    return;
-  }
-
-  // Caso: Nessun prodotto in magazzino
-  if (riepilogo.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="4" class="text-center">
-          <div style="padding: 40px 20px; color: var(--text-secondary);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
-                 style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;">
-              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-              <line x1="12" y1="22.08" x2="12" y2="12"/>
-            </svg>
-            <p style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">
-              Nessun prodotto in magazzino
-            </p>
-            <p style="font-size: 14px;">
-              Registra dei movimenti di carico per iniziare
-            </p>
-          </div>
-        </td>
-      </tr>
-    `;
-    return;
-  }
-
-  // Rendering riepilogo con lotti
-  let html = "";
-
-  riepilogo.forEach((r) => {
-    html += `
-      <tr class="product-main-row">
-        <td>
-          <strong>${escapeHtml(r.nome)}</strong>
-          ${r.marca_nome 
-            ? ` <span class="badge-marca">${escapeHtml(r.marca_nome).toUpperCase()}</span>` 
-            : ""
-          }
-        </td>
-        <td>
-          ${r.descrizione
-            ? `<small>${escapeHtml(r.descrizione.substring(0, 50))}${r.descrizione.length > 50 ? "..." : ""}</small>`
-            : '<span style="color: #999;">-</span>'
-          }
-        </td>
-        <td>
-          <span class="badge-giacenza">${formatQuantity(r.giacenza)} pz</span>
-        </td>
-        <td>
-          <strong>${formatCurrency(r.valore_totale)}</strong>
-        </td>
-      </tr>
-    `;
-
-    // Lotti (se presenti)
-    if (r.giacenza > 0 && r.lotti && r.lotti.length > 0) {
-      html += `
-        <tr class="lotti-row">
-          <td colspan="4" class="lotti-container">
-            <div class="lotti-table-wrapper">
-              <table class="lotti-table">
-                <thead>
-                  <tr>
-                    <th>Data Carico</th>
-                    <th>Quantità</th>
-                    <th>Prezzo Unit.</th>
-                    <th>Valore</th>
-                    <th>Documento/Fattura</th>
-                    <th>Fornitore</th>
-                  </tr>
-                </thead>
-                <tbody>
-      `;
-
-      r.lotti.forEach((lotto) => {
-        html += `
-          <tr>
-            <td>${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
-            <td><strong>${formatQuantity(lotto.quantita_rimanente)} pz</strong></td>
-            <td>${formatCurrency(lotto.prezzo)}</td>
-            <td><strong>${formatCurrency(lotto.quantita_rimanente * lotto.prezzo)}</strong></td>
-            <td>${lotto.fattura_doc || '<span style="color: #999;">-</span>'}</td>
-            <td>${lotto.fornitore || '<span style="color: #999;">-</span>'}</td>
-          </tr>
-        `;
-      });
-
-      html += `
-                </tbody>
-              </table>
-            </div>
-          </td>
-        </tr>
-      `;
-    }
-  });
-
-  tbody.innerHTML = html;
-  console.log(`✅ ${riepilogo.length} prodotti nel riepilogo`);
-}
 
 // ==================== STORICO CON ICONA VUOTA ====================
 
 /**
  * 🎨 Renderizza lo storico con messaggio personalizzato
  */
-function renderStorico(storico) {
-  const tbody = document.getElementById("storicoTableBody");
-
-  if (!tbody) {
-    console.error("❌ Elemento storicoTableBody non trovato");
-    return;
-  }
-
-  // Caso: Nessuna data selezionata
-  if (!document.getElementById("storicoDate").value) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="4" class="text-center">
-          <div style="padding: 40px 20px; color: var(--text-secondary);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
-                 style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-              <line x1="16" y1="2" x2="16" y2="6"/>
-              <line x1="8" y1="2" x2="8" y2="6"/>
-              <line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-            <p style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">
-              Seleziona una data
-            </p>
-            <p style="font-size: 14px;">
-              Scegli una data dal calendario per visualizzare lo storico
-            </p>
-          </div>
-        </td>
-      </tr>
-    `;
-    return;
-  }
-
-  // Caso: Nessun dato disponibile per la data
-  if (storico.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="4" class="text-center">
-          <div style="padding: 40px 20px; color: var(--text-secondary);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
-                 style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-            <p style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">
-              Nessun dato disponibile
-            </p>
-            <p style="font-size: 14px;">
-              Non ci sono prodotti in magazzino per questa data
-            </p>
-          </div>
-        </td>
-      </tr>
-    `;
-    return;
-  }
-
-  // Rendering storico con lotti
-  let html = "";
-
-  storico.forEach((s) => {
-    html += `
-      <tr class="product-main-row">
-        <td>
-          <strong>${escapeHtml(s.nome)}</strong>
-          ${s.marca_nome 
-            ? ` <span class="badge-marca">${escapeHtml(s.marca_nome).toUpperCase()}</span>` 
-            : ""
-          }
-        </td>
-        <td>
-          ${s.descrizione
-            ? `<small>${escapeHtml(s.descrizione.substring(0, 50))}${s.descrizione.length > 50 ? "..." : ""}</small>`
-            : '<span style="color: #999;">-</span>'
-          }
-        </td>
-        <td>
-          <span class="badge-giacenza">${formatQuantity(s.giacenza)} pz</span>
-        </td>
-        <td>
-          <strong>${formatCurrency(s.valore_totale)}</strong>
-        </td>
-      </tr>
-    `;
-
-    // Lotti (se presenti)
-    if (s.giacenza > 0 && s.lotti && s.lotti.length > 0) {
-      html += `
-        <tr class="lotti-row">
-          <td colspan="4" class="lotti-container">
-            <div class="lotti-table-wrapper">
-              <table class="lotti-table">
-                <thead>
-                  <tr>
-                    <th>Data Carico</th>
-                    <th>Quantità</th>
-                    <th>Prezzo Unit.</th>
-                    <th>Valore</th>
-                    <th>Documento/Fattura</th>
-                    <th>Fornitore</th>
-                  </tr>
-                </thead>
-                <tbody>
-      `;
-
-      s.lotti.forEach((lotto) => {
-        html += `
-          <tr>
-            <td>${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
-            <td><strong>${formatQuantity(lotto.quantita_rimanente)} pz</strong></td>
-            <td>${formatCurrency(lotto.prezzo)}</td>
-            <td><strong>${formatCurrency(lotto.quantita_rimanente * lotto.prezzo)}</strong></td>
-            <td>${lotto.fattura_doc || '<span style="color: #999;">-</span>'}</td>
-            <td>${lotto.fornitore || '<span style="color: #999;">-</span>'}</td>
-          </tr>
-        `;
-      });
-
-      html += `
-                </tbody>
-              </table>
-            </div>
-          </td>
-        </tr>
-      `;
-    }
-  });
-
-  tbody.innerHTML = html;
-  console.log(`✅ ${storico.length} prodotti nello storico`);
-}
 
 // ==================== HELPER FUNZIONI ====================
 
 /**
  * 🛡️ Escape HTML per prevenire XSS
  */
-function escapeHtml(text) {
-  if (!text) return '';
-  
-  const map = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;'
-  };
-  
-  return String(text).replace(/[&<>"']/g, m => map[m]);
-}
 
 /**
  * 🔔 Mostra notifica (opzionale, se hai un sistema di notifiche)
  */
-function showNotification(message, type = 'info') {
-  // Se hai un sistema di notifiche toast, usalo qui
-  // Altrimenti, usa semplicemente alert
-  console.log(`[${type.toUpperCase()}] ${message}`);
-  
-  if (type === 'error') {
-    alert('❌ ' + message);
-  } else if (type === 'success') {
-    // Potresti usare una libreria come Toastify.js o una modale custom
-    console.log('✅ ' + message);
-  }
-}
 
 // ==================== ESPORTA FUNZIONI ====================
 // Se usi moduli ES6, decommenta:
@@ -7134,94 +3662,6 @@ async function deleteProdotto(id, nome) {
 /**
  * 🎨 Renderizza la tabella movimenti con messaggio personalizzato
  */
-function renderMovimenti() {
-  const tbody = document.getElementById("movimentiTableBody");
-
-  if (!tbody) {
-    console.error("❌ Elemento movimentiTableBody non trovato");
-    return;
-  }
-
-  // Caso: Nessun movimento presente
-  if (movimenti.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="11" class="text-center">
-          <div style="padding: 40px 20px; color: var(--text-secondary);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
-                 style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;">
-              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-              <polyline points="17 6 23 6 23 12"/>
-            </svg>
-            <p style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">
-              Nessun movimento presente
-            </p>
-            <p style="font-size: 14px;">
-              Clicca su "Nuovo Movimento" per registrare il primo carico o scarico
-            </p>
-          </div>
-        </td>
-      </tr>
-    `;
-    return;
-  }
-
-  // Rendering movimenti
-  tbody.innerHTML = movimenti.map((m) => {
-    const prefix = m.tipo === "scarico" ? "- " : "";
-    const colorClass = m.tipo === "carico" ? "text-green" : "text-red";
-
-    let prezzoUnitarioRaw = "-";
-    if (m.tipo === "carico" && m.prezzo) {
-      prezzoUnitarioRaw = formatCurrency(m.prezzo);
-    } else if (m.tipo === "scarico" && m.prezzo_unitario_scarico) {
-      prezzoUnitarioRaw = formatCurrency(m.prezzo_unitario_scarico);
-    }
-
-    const prezzoUnitarioHtml = prezzoUnitarioRaw !== "-" 
-      ? prezzoUnitarioRaw.replace("€ ", `${prefix}€ `) 
-      : "-";
-
-    const prezzoTotaleRaw = formatCurrency(m.prezzo_totale || 0);
-    const prezzoTotaleHtml = prezzoTotaleRaw.replace("€ ", `${prefix}€ `);
-
-    return `
-      <tr>
-        <td>${new Date(m.data_movimento).toLocaleDateString("it-IT")}</td>
-        <td><strong>${escapeHtml(m.prodotto_nome)}</strong></td>
-        <td>${m.marca_nome ? escapeHtml(m.marca_nome) : '<span style="color: #999;">-</span>'}</td>
-        <td>${m.prodotto_descrizione 
-          ? `<small>${escapeHtml(m.prodotto_descrizione.substring(0, 30))}${m.prodotto_descrizione.length > 30 ? "..." : ""}</small>`
-          : '<span style="color: #999;">-</span>'
-        }</td>
-        <td>
-          <span class="badge ${m.tipo === "carico" ? "badge-success" : "badge-danger"}">
-            ${m.tipo.toUpperCase()}
-          </span>
-        </td>
-        <td class="${colorClass}">${formatQuantity(m.quantita)} pz</td>
-        <td class="${colorClass}">${prezzoUnitarioHtml}</td>
-        <td class="${colorClass}"><strong>${prezzoTotaleHtml}</strong></td>
-        <td>${m.fattura_doc || '<span style="color: #999;">-</span>'}</td>
-        <td>${m.fornitore_cliente_id || '<span style="color: #999;">-</span>'}</td>
-        <td class="text-right">
-          <button 
-            class="btn-icon" 
-            onclick="deleteMovimento(${m.id}, '${escapeHtml(m.prodotto_nome)}', '${m.tipo}')" 
-            title="Elimina movimento"
-            aria-label="Elimina movimento ${m.tipo}"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-            </svg>
-          </button>
-        </td>
-      </tr>
-    `;
-  }).join("");
-
-  console.log(`✅ ${movimenti.length} movimenti renderizzati`);
-}
 
 /**
  * 🗑️ Elimina movimento con conferma
@@ -7643,37 +4083,12 @@ const SEARCH_KEYS = {
  * @param {string} section - Nome della sezione (es. 'marche', 'prodotti')
  * @param {string} searchTerm - Termine di ricerca da salvare
  */
-function saveSearchTerm(section, searchTerm) {
-  try {
-    const key = SEARCH_KEYS[section];
-    if (key) {
-      localStorage.setItem(key, searchTerm);
-      console.log(`💾 Ricerca salvata [${section}]: "${searchTerm}"`);
-    }
-  } catch (error) {
-    console.error('❌ Errore salvataggio ricerca:', error);
-  }
-}
 
 /**
  * 📖 Recupera il termine di ricerca dal localStorage
  * @param {string} section - Nome della sezione
  * @returns {string} - Termine di ricerca salvato (o stringa vuota)
  */
-function getSearchTerm(section) {
-  try {
-    const key = SEARCH_KEYS[section];
-    if (key) {
-      const savedTerm = localStorage.getItem(key) || '';
-      console.log(`📖 Ricerca caricata [${section}]: "${savedTerm}"`);
-      return savedTerm;
-    }
-    return '';
-  } catch (error) {
-    console.error('❌ Errore caricamento ricerca:', error);
-    return '';
-  }
-}
 
 /**
  * 🗑️ Cancella il termine di ricerca dal localStorage
@@ -7983,18 +4398,6 @@ function setupNavigationWithSearch() {
  * 🚀 Inizializza il sistema quando il DOM è pronto
  * AGGIUNGI QUESTA CHIAMATA nel tuo DOMContentLoaded esistente
  */
-document.addEventListener('DOMContentLoaded', () => {
-  // ... il tuo codice esistente ...
-  
-  // 🎯 INIZIALIZZA SISTEMA RICERCA
-  initSearchMemorySystem();
-  
-  // 🎯 RIPRISTINA RICERCA SEZIONE INIZIALE
-  const savedSection = localStorage.getItem('activeSection') || 'marche';
-  setTimeout(() => {
-    restoreSearchOnSectionChange(savedSection);
-  }, 500); // Delay per assicurarsi che i dati siano caricati
-});
 
 // ==================== 🛠️ UTILITY FUNCTIONS ====================
 
@@ -8228,188 +4631,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // NAVIGAZIONE SEZIONI + MEMORIA RICERCA
-document.addEventListener('DOMContentLoaded', () => {
-  const username = localStorage.getItem('username');
-  const currentUserEl = document.getElementById('currentUser');
-  if (currentUserEl && username) {
-    currentUserEl.textContent = username;
-  }
 
-  const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-  const sidebar = document.getElementById('sidebar');
-
-  // Toggle sidebar mobile/tablet
-  if (mobileMenuToggle && sidebar) {
-    mobileMenuToggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      sidebar.classList.toggle('mobile-open');
-      mobileMenuToggle.classList.toggle('active');
-    });
-
-    // Chiudi sidebar cliccando fuori (solo sotto 1024px)
-    document.addEventListener('click', (e) => {
-      if (window.innerWidth <= 1024) {
-        if (!sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
-          sidebar.classList.remove('mobile-open');
-          mobileMenuToggle.classList.remove('active');
-        }
-      }
-    });
-  }
-
-  // Inizializza sistema ricerca con memoria (listener su tutti gli input filtro)
-  initSearchMemorySystem();
-
-  // Navigazione con ripristino ricerca per sezione
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', async (e) => {
-      e.preventDefault();
-      const section = item.dataset.section;
-      if (!section) return;
-
-      // Attiva voce di menu
-      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-
-      // Attiva sezione contenuto
-      document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-      const sectionEl = document.getElementById(`section-${section}`);
-      if (sectionEl) {
-        sectionEl.classList.add('active');
-      }
-
-      // Salva sezione attiva
-      localStorage.setItem('activeSection', section);
-
-      // Chiudi menu mobile/tablet dopo il click
-      if (window.innerWidth <= 1024 && sidebar && mobileMenuToggle) {
-        sidebar.classList.remove('mobile-open');
-        mobileMenuToggle.classList.remove('active');
-      }
-
-      // Carica dati sezione
-      if (section === 'marche'   && typeof loadMarche === 'function')   await loadMarche();
-      if (section === 'prodotti' && typeof loadProdotti === 'function') await loadProdotti();
-      if (section === 'movimenti'&& typeof loadMovimenti === 'function')await loadMovimenti();
-      if (section === 'riepilogo'&& typeof loadRiepilogo === 'function')await loadRiepilogo();
-      if (section === 'storico'  && typeof loadStorico === 'function')  await loadStorico();
-      if (section === 'utenti'   && typeof loadUtenti === 'function')   await loadUtenti();
-
-      // RILANCIA / RIPRISTINA FILTRO SALVATO PER QUELLA SEZIONE
-      restoreSearchOnSectionChange(section);
-    });
-  });
-
-  // Sezione iniziale
-  const savedSection = localStorage.getItem('activeSection') || 'marche';
-  const initialItem = document.querySelector(`.nav-item[data-section="${savedSection}"]`);
-  if (initialItem) {
-    initialItem.click();
-  }
-
-  // Logout
-  const logoutBtn = document.getElementById('logoutBtn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      localStorage.removeItem('username');
-      localStorage.removeItem('activeSection');
-      // cancella anche tutti i filtri salvati se vuoi
-      // clearAllSearches();
-      window.location.href = 'index.html';
-    });
-  }
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-  const username = localStorage.getItem('username');
-  const currentUserEl = document.getElementById('currentUser');
-  if (currentUserEl && username) {
-    currentUserEl.textContent = username;
-  }
-
-  // Riferimenti menu mobile
-  const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-  const sidebar = document.getElementById('sidebar');
-
-  // HAMBURGER + CLICK FUORI MOBILE/TABLET
-  if (mobileMenuToggle && sidebar) {
-    // Toggle apertura/chiusura sidebar
-    mobileMenuToggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      sidebar.classList.toggle('mobile-open');
-      mobileMenuToggle.classList.toggle('active');
-    });
-
-    // Chiudi sidebar cliccando fuori SOLO sotto 1024px
-    document.addEventListener('click', (e) => {
-      if (window.innerWidth <= 1024) {
-        if (!sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
-          sidebar.classList.remove('mobile-open');
-          mobileMenuToggle.classList.remove('active');
-        }
-      }
-    });
-  }
-
-  // 🔥 Inizializza sistema ricerca con memoria
-  initSearchMemorySystem();
-
-  // NAVIGAZIONE SEZIONI + MEMORIA RICERCA
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', async (e) => {
-      e.preventDefault();
-      const section = item.dataset.section;
-      if (!section) return;
-
-      // Attiva voce di menu
-      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-
-      // Attiva sezione contenuto
-      document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-      const sectionEl = document.getElementById(`section-${section}`);
-      if (sectionEl) sectionEl.classList.add('active');
-
-      // Salva sezione attiva
-      localStorage.setItem('activeSection', section);
-
-      // Chiudi menu mobile/tablet dopo il click
-      if (window.innerWidth <= 1024 && sidebar && mobileMenuToggle) {
-        sidebar.classList.remove('mobile-open');
-        mobileMenuToggle.classList.remove('active');
-      }
-
-      // Carica dati sezione
-      if (section === 'marche'   && typeof loadMarche === 'function')    await loadMarche();
-      if (section === 'prodotti' && typeof loadProdotti === 'function')  await loadProdotti();
-      if (section === 'movimenti'&& typeof loadMovimenti === 'function') await loadMovimenti();
-      if (section === 'riepilogo'&& typeof loadRiepilogo === 'function') await loadRiepilogo();
-      if (section === 'storico'  && typeof loadStorico === 'function')   await loadStorico();
-      if (section === 'utenti'   && typeof loadUtenti === 'function')    await loadUtenti();
-
-      // 🔥 Ripristina filtro salvato per quella sezione
-      restoreSearchOnSectionChange(section);
-    });
-  });
-
-  // Sezione iniziale
-  const savedSection = localStorage.getItem('activeSection') || 'marche';
-  const initialItem = document.querySelector(`.nav-item[data-section="${savedSection}"]`);
-  if (initialItem) {
-    initialItem.click();
-  }
-
-  // Logout
-  const logoutBtn = document.getElementById('logoutBtn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      localStorage.removeItem('username');
-      localStorage.removeItem('activeSection');
-      clearAllSearches(); // opzionale, ma ce l’hai già
-      window.location.href = 'index.html';
-    });
-  }
-});
 
 
 function renderUtenti() {
@@ -8532,63 +4754,6 @@ function setupPersistentInput(inputId, memoryKey, onRestore) {
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const username = localStorage.getItem('username');
-  if (username) {
-    document.getElementById('currentUser').textContent = username;
-  }
-
-  const savedSection = localStorage.getItem('activeSection') || 'marche';
-
-  // ... tutta la tua logica esistente (menu, nav, initSearchMemorySystem, ecc.)
-
-  // 🔹 1) DATA STORICO (id="storicoDate")
-  setupPersistentInput(
-    'storicoDate',
-    INPUT_MEMORY_KEYS.storicoData,
-    (savedDate) => {
-      // se c'è una data salvata, ricarica lo storico
-      if (savedDate) {
-        // se hai già il listener change che chiama loadStorico,
-        // puoi semplicemente dispatchare l’evento:
-        const el = document.getElementById('storicoDate');
-        if (el) {
-          el.dispatchEvent(new Event('change'));
-        }
-      }
-    }
-  );
-
-  // 🔹 2) RICERCA PRODOTTO NEL MODALE MOVIMENTI (id="movimentoProdottoSearch")
-  setupPersistentInput(
-    'movimentoProdottoSearch',
-    INPUT_MEMORY_KEYS.movimentoProdottoSearch,
-    (term) => {
-      if (term && typeof searchProducts === 'function') {
-        // Assicurati che i prodotti siano caricati
-        if (Array.isArray(allProdotti) && allProdotti.length > 0) {
-          searchProducts();
-        }
-      }
-    }
-  );
-
-  // Se vuoi memorizzare altri input basta aggiungerli qui:
-  // es. filtro globale movimenti (se usi <input id="filterMovimenti">)
-  /*
-  setupPersistentInput(
-    'filterMovimenti',
-    INPUT_MEMORY_KEYS.movimentiFilter,
-    (term) => {
-      if (typeof filterMovimenti === 'function') {
-        filterMovimenti(term);
-      }
-    }
-  );
-  */
-
-  // ... resto della tua init (attivazione sezione salvata, ecc.)
-});
 
 // ==================== MEMORIA CAMPI DI RICERCA ====================
 const SEARCHKEYS = {
@@ -8905,98 +5070,6 @@ async function loadMovimenti() {
 }
 
 // Render tabella movimenti
-function renderMovimenti() {
-  const tbody = document.getElementById("movimentiTableBody");
-  if (!tbody) {
-    console.error("Elemento movimentiTableBody non trovato");
-    return;
-  }
-
-  if (!Array.isArray(movimenti) || movimenti.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="11" class="text-center">
-          <div style="padding: 40px 20px; color: var(--text-secondary);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                 style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;">
-              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-              <polyline points="17 6 23 6 23 12"></polyline>
-            </svg>
-            <p style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Nessun movimento presente</p>
-            <p style="font-size: 14px;">
-              Clicca su <strong>Nuovo</strong> per registrare un carico o uno scarico
-            </p>
-          </div>
-        </td>
-      </tr>
-    `;
-    return;
-  }
-
-  tbody.innerHTML = movimenti
-    .map((m) => {
-      const prefix = m.tipo === "scarico" ? "-" : "";
-
-      let prezzoUnitarioRaw = "-";
-      if (m.tipo === "carico") {
-        prezzoUnitarioRaw = formatCurrency(m.prezzo);        // carico: prezzo campo prezzo
-      } else if (m.tipo === "scarico" && m.prezzo_unitario_scarico != null) {
-        prezzoUnitarioRaw = formatCurrency(m.prezzo_unitario_scarico); // scarico: costo medio FIFO
-      }
-      const prezzoUnitarioHtml =
-        prezzoUnitarioRaw !== "-"
-          ? prezzoUnitarioRaw.replace("€", `${prefix}€`)
-          : prezzoUnitarioRaw;
-
-      const prezzoTotaleRaw = formatCurrency(m.prezzo_totale_movimento || 0);
-      const prezzoTotaleHtml = prezzoTotaleRaw.replace("€", `${prefix}€`);
-
-      const colorClass = m.tipo === "carico" ? "text-green" : "text-red";
-
-      const descr =
-        m.prodotto_descrizione
-          ? `<small>${escapeHtml(
-              m.prodotto_descrizione.substring(0, 30)
-            )}${m.prodotto_descrizione.length > 30 ? "…" : ""}</small>`
-          : '<span style="color:#999;">-</span>';
-
-      return `
-        <tr>
-          <td>${new Date(m.data_movimento).toLocaleDateString("it-IT")}</td>
-          <td><strong>${escapeHtml(m.prodotto_nome)}</strong></td>
-          <td>${
-            m.marca_nome
-              ? escapeHtml(m.marca_nome)
-              : '<span style="color:#999;">-</span>'
-          }</td>
-          <td>${descr}</td>
-          <td>
-            <span class="badge ${
-              m.tipo === "carico" ? "badge-success" : "badge-danger"
-            }">${m.tipo.toUpperCase()}</span>
-          </td>
-          <td class="${colorClass}">${formatQuantity(m.quantita)} pz</td>
-          <td class="${colorClass}">${prezzoUnitarioHtml}</td>
-          <td class="${colorClass}"><strong>${prezzoTotaleHtml}</strong></td>
-          <td>${m.fattura_doc || '<span style="color:#999;">-</span>'}</td>
-          <td>${m.fornitore_cliente_id || '<span style="color:#999;">-</span>'}</td>
-          <td class="text-right">
-            <button class="btn-icon"
-              onclick="deleteMovimento(${m.id}, '${escapeHtml(m.prodotto_nome)}', '${m.tipo}')"
-              title="Elimina movimento"
-              aria-label="Elimina movimento ${m.tipo}">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 6h18"></path>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
-                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-              </svg>
-            </button>
-          </td>
-        </tr>
-      `;
-    })
-    .join("");
-}
 
 // Filtro ricerca movimenti
 document.getElementById("filterMovimenti")?.addEventListener("input", (e) => {
@@ -9027,80 +5100,6 @@ document.getElementById("filterMovimenti")?.addEventListener("input", (e) => {
 });
 
 // Apre il modal per inserire / modificare un movimento
-async function openMovimentoModal(movimento = null) {
-  console.log("Apertura modal movimento...", movimento);
-
-  // Carica prodotti se non già caricati
-  if (!prodotti || prodotti.length === 0) {
-    const res = await fetch(`${API_URL}/prodotti`);
-    allProdotti = await res.json();
-    prodotti = allProdotti;
-  }
-
-  const modal = document.getElementById("modalMovimento");
-  const title = document.getElementById("modalMovimentoTitle");
-  const form = document.getElementById("formMovimento");
-  const selectProdotto = document.getElementById("movimentoProdotto");
-  const tipoSelect = document.getElementById("movimentoTipo");
-
-  // reset form
-  form.reset();
-  document.getElementById("movimentoId").value = "";
-
-  // popola select prodotto
-  selectProdotto.innerHTML = `
-    <option value="">Seleziona prodotto...</option>
-    ${prodotti
-      .map((p) => {
-        const marcaNome = p.marca_nome ? p.marca_nome.toUpperCase() : "";
-        return `<option value="${p.id}">${p.nome}${marcaNome ? " - " + marcaNome : ""}</option>`;
-      })
-      .join("")}
-  `;
-
-  // nuova riga
-  if (!movimento) {
-    title.textContent = "Nuovo Movimento";
-    document.getElementById("giacenzaInfo").style.display = "none";
-    tipoSelect.value = "";
-    togglePrezzoField();
-  } else {
-    // modifica
-    title.textContent = "Modifica Movimento";
-    document.getElementById("movimentoId").value = movimento.id;
-    selectProdotto.value = movimento.prodotto_id;
-    tipoSelect.value = movimento.tipo;
-    document.getElementById("movimentoData").value = movimento.data_movimento;
-    document.getElementById("movimentoQuantita").value = movimento.quantita;
-
-    if (movimento.tipo === "carico") {
-      document.getElementById("movimentoPrezzo").value =
-        movimento.prezzo != null ? movimento.prezzo : "";
-      document.getElementById("movimentoFattura").value =
-        movimento.fattura_doc || "";
-      document.getElementById("movimentoFornitore").value =
-        movimento.fornitore_cliente_id || "";
-    } else {
-      // scarico: niente prezzo/doc/fornitore
-      document.getElementById("movimentoPrezzo").value = "";
-      document.getElementById("movimentoFattura").value = "";
-      document.getElementById("movimentoFornitore").value = "";
-    }
-
-    togglePrezzoField();
-    // mostra info giacenza del prodotto selezionato
-    await showGiacenzaInfo(selectProdotto.value);
-  }
-
-  // setup gestione decimali (se hai le funzioni già definite)
-  if (typeof setupDecimalInputs === "function") {
-    setTimeout(() => {
-      setupDecimalInputs();
-    }, 150);
-  }
-
-  modal.classList.add("active");
-}
 
 // Render tabella movimenti COMPLETA
 function renderMovimenti() {
