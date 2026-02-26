@@ -116,7 +116,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // ==================== MARCHE ====================
 
-
 document.getElementById("filterMarche")?.addEventListener("input", (e) => {
   const searchTerm = e.target.value.toLowerCase();
   marche = allMarche.filter((m) => m.nome.toLowerCase().includes(searchTerm));
@@ -150,7 +149,6 @@ function editMarca(id) {
   const marca = marche.find((m) => m.id === id);
   if (marca) openMarcaModal(marca);
 }
-
 
 document.getElementById("formMarca").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -196,7 +194,6 @@ async function loadProdotti() {
   }
 }
 
-
 document.getElementById("filterProdotti")?.addEventListener("input", (e) => {
   const searchTerm = e.target.value.toLowerCase().trim();
 
@@ -229,17 +226,14 @@ document.getElementById("filterProdotti")?.addEventListener("input", (e) => {
 
   // 📊 LOG per debug (opzionale)
   console.log(
-    `🔍 Ricerca: "${searchTerm}" → ${prodotti.length} prodotti trovati`
+    `🔍 Ricerca: "${searchTerm}" → ${prodotti.length} prodotti trovati`,
   );
 });
-
-
 
 function editProdotto(id) {
   const prodotto = prodotti.find((p) => p.id === id);
   if (prodotto) openProdottoModal(prodotto);
 }
-
 
 // listener di submit spostato più sotto per evitare registrazioni duplicate
 
@@ -253,12 +247,10 @@ document.getElementById("filterMovimenti")?.addEventListener("input", (e) => {
       (m.marca_nome && m.marca_nome.toLowerCase().includes(searchTerm)) ||
       m.tipo.toLowerCase().includes(searchTerm) ||
       (m.prodotto_descrizione &&
-        m.prodotto_descrizione.toLowerCase().includes(searchTerm))
+        m.prodotto_descrizione.toLowerCase().includes(searchTerm)),
   );
   renderMovimenti();
 });
-
-
 
 function closeMovimentoModal() {
   document.getElementById("modalMovimento").classList.remove("active");
@@ -268,7 +260,6 @@ function editMovimento(id) {
   const movimento = movimenti.find((m) => m.id === id);
   if (movimento) openMovimentoModal(movimento);
 }
-
 
 document
   .getElementById("formMovimento")
@@ -408,12 +399,11 @@ async function loadRiepilogo() {
 function updateRiepilogoTotal() {
   const valoreTotaleFiltrato = riepilogo.reduce(
     (sum, r) => sum + Number.parseFloat(r.valore_totale || 0),
-    0
+    0,
   );
   document.getElementById("valoreTotale").textContent =
     formatCurrency(valoreTotaleFiltrato);
 }
-
 
 document.getElementById("filterRiepilogo")?.addEventListener("input", (e) => {
   const searchTerm = e.target.value.toLowerCase();
@@ -421,7 +411,7 @@ document.getElementById("filterRiepilogo")?.addEventListener("input", (e) => {
     (r) =>
       r.nome.toLowerCase().includes(searchTerm) ||
       (r.marca_nome && r.marca_nome.toLowerCase().includes(searchTerm)) ||
-      (r.descrizione && r.descrizione.toLowerCase().includes(searchTerm))
+      (r.descrizione && r.descrizione.toLowerCase().includes(searchTerm)),
   );
   updateRiepilogoTotal();
   renderRiepilogo();
@@ -433,14 +423,13 @@ document.getElementById("filterRiepilogo")?.addEventListener("input", (e) => {
 
 // CHANGE: Nuova funzione per aggiornare il totale dello storico
 
-
 document.getElementById("filterStorico")?.addEventListener("input", (e) => {
   const searchTerm = e.target.value.toLowerCase();
   storico = allStorico.filter(
     (s) =>
       s.nome.toLowerCase().includes(searchTerm) ||
       (s.marca_nome && s.marca_nome.toLowerCase().includes(searchTerm)) ||
-      (s.descrizione && s.descrizione.toLowerCase().includes(searchTerm))
+      (s.descrizione && s.descrizione.toLowerCase().includes(searchTerm)),
   );
   // CHANGE: Aggiunto ricalcolo del totale dopo il filtro
   updateStoricoTotal();
@@ -459,15 +448,13 @@ async function loadUtenti() {
   }
 }
 
-
 document.getElementById("filterUtenti")?.addEventListener("input", (e) => {
   const searchTerm = e.target.value.toLowerCase();
   utenti = allUtenti.filter((u) =>
-    u.username.toLowerCase().includes(searchTerm)
+    u.username.toLowerCase().includes(searchTerm),
   );
   renderUtenti();
 });
-
 
 function closeUserModal() {
   document.getElementById("modalUser").classList.remove("active");
@@ -487,14 +474,14 @@ async function deleteUser(id) {
       `${API_URL}/utenti/${id}?current_user=${encodeURIComponent(currentUser)}`,
       {
         method: "DELETE",
-      }
+      },
     );
     const data = await res.json();
 
     if (res.ok) {
       if (data.utente_eliminato) {
         forceLogout(
-          "Hai eliminato il tuo account. Verrai disconnesso e dovrai effettuare di nuovo il login."
+          "Hai eliminato il tuo account. Verrai disconnesso e dovrai effettuare di nuovo il login.",
         );
       } else {
         if (typeof ignoreNextSocketUpdate === "function")
@@ -545,7 +532,7 @@ document.getElementById("formUser").addEventListener("submit", async (e) => {
       closeUserModal();
       if (mustLogout) {
         forceLogout(
-          "Le tue credenziali sono cambiate. Effettua di nuovo l'accesso."
+          "Le tue credenziali sono cambiate. Effettua di nuovo l'accesso.",
         );
       } else {
         loadUtenti();
@@ -568,7 +555,6 @@ document.getElementById("formUser").addEventListener("submit", async (e) => {
 // Funzione per limitare a 2 decimali durante la digitazione
 
 // Applica la limitazione agli input quando si apre il modal
-
 
 // ==================== GESTIONE SEPARATORE DECIMALE ====================
 
@@ -611,8 +597,6 @@ function formatNumberWithLocale(num) {
 /**
  * Applica la limitazione decimale agli input quantità e prezzo
  */
-
-
 
 // ==================== RICERCA PRODOTTI NEL MOVIMENTO ====================
 
@@ -705,7 +689,7 @@ function renderProductSearchResults(filtered, searchTerm) {
         : "";
 
       const giacenzaBadge = `<span class="search-result-giacenza">${formatQuantity(
-        p.giacenza || 0
+        p.giacenza || 0,
       )} pz</span>`;
 
       return `
@@ -714,7 +698,7 @@ function renderProductSearchResults(filtered, searchTerm) {
       }" data-marca="${p.marca_nome || ""}" data-giacenza="${p.giacenza || 0}">
         <div class="search-result-name">${highlightMatch(
           p.nome,
-          searchTerm
+          searchTerm,
         )}</div>
         <div class="search-result-meta">
           ${marcaBadge}
@@ -723,7 +707,7 @@ function renderProductSearchResults(filtered, searchTerm) {
             p.descrizione
               ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
                   0,
-                  40
+                  40,
                 )}${p.descrizione.length > 40 ? "..." : ""}</span>`
               : ""
           }
@@ -740,14 +724,13 @@ function renderProductSearchResults(filtered, searchTerm) {
         this.dataset.id,
         this.dataset.nome,
         this.dataset.marca,
-        this.dataset.giacenza
+        this.dataset.giacenza,
       );
     });
   });
 
   resultsContainer.classList.add("show");
 }
-
 
 function selectProduct(id, nome, marca, giacenza) {
   const searchInput = document.getElementById("movimentoProdottoSearch");
@@ -772,10 +755,6 @@ function selectProduct(id, nome, marca, giacenza) {
 // script.js (Intorno a riga 485)
 
 // script.js (Intorno a riga 1120, o dove si trova la tua funzione searchProducts)
-
-
-
-
 
 function searchProducts() {
   const searchInput = document.getElementById("movimentoProdottoSearch");
@@ -864,13 +843,13 @@ function searchProducts() {
               : ""
           }
           <span class="search-result-giacenza">${formatQuantity(
-            p.giacenza || 0
+            p.giacenza || 0,
           )} pz</span>
           ${
             p.descrizione
               ? `<span style="opacity: 0.7;">• ${p.descrizione.substring(
                   0,
-                  40
+                  40,
                 )}${p.descrizione.length > 40 ? "..." : ""}</span>`
               : ""
           }
@@ -887,7 +866,7 @@ function searchProducts() {
         this.dataset.id,
         this.dataset.nome,
         this.dataset.marca,
-        this.dataset.giacenza
+        this.dataset.giacenza,
       );
     });
   });
@@ -1065,7 +1044,7 @@ function limitToTwoDecimals(inputElement) {
   const handlePaste = function (e) {
     e.preventDefault();
     const pastedText = (e.clipboardData || window.clipboardData).getData(
-      "text"
+      "text",
     );
     const cleaned = pastedText.replace(/[^\d.,]/g, "").replace(",", ".");
     const num = Number.parseFloat(cleaned);
@@ -1388,7 +1367,7 @@ function highlightMatch(text, searchTerm) {
   const regex = new RegExp(`(${searchTerm})`, "gi");
   return text.replace(
     regex,
-    '<mark style="background: #fef08a; padding: 2px 4px; border-radius: 3px; font-weight: 700;">$1</mark>'
+    '<mark style="background: #fef08a; padding: 2px 4px; border-radius: 3px; font-weight: 700;">$1</mark>',
   );
 }
 
@@ -1614,7 +1593,7 @@ function setupPasswordToggle(inputId, toggleId) {
 
   if (!passwordInput || !togglePassword) {
     console.error(
-      `Elementi non trovati per il toggle: ${inputId} o ${toggleId}`
+      `Elementi non trovati per il toggle: ${inputId} o ${toggleId}`,
     );
     return;
   }
@@ -1650,8 +1629,6 @@ function setupPasswordToggle(inputId, toggleId) {
 }
 
 // ... (nel file script.js)
-
-
 
 function openUserModal(utente = null) {
   const modal = document.getElementById("modalUser");
@@ -1871,7 +1848,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (file && preview) {
         preview.textContent = `📄 ${file.name} (${(file.size / 1024).toFixed(
-          1
+          1,
         )} KB)`;
         preview.style.display = "block";
       }
@@ -1891,8 +1868,6 @@ function formatQuantity(num) {
 
 // Aggiungi queste funzioni in script.js [cite: 6]
 
-
-
 // Gestione dell'importazione PDF
 
 // Aggiungi il listener al caricamento del DOM
@@ -1910,8 +1885,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
-
-
 
 // Funzione che simula la lettura dei dati da prova.pdf
 
@@ -2056,7 +2029,7 @@ function showImportResults(results) {
       const dateFormatted = new Date(r.date).toLocaleDateString("it-IT");
       message += `  • ${r.code} (${r.nome})\n`;
       message += `    Quantità: ${formatQuantity(
-        r.quantity
+        r.quantity,
       )} pz | Data: ${dateFormatted}\n`;
     });
     message += `\n`;
@@ -2068,7 +2041,7 @@ function showImportResults(results) {
     results.notFound.forEach((r) => {
       const dateFormatted = new Date(r.date).toLocaleDateString("it-IT");
       message += `  • ${r.code} - ${formatQuantity(
-        r.quantity
+        r.quantity,
       )} pz (${dateFormatted})\n`;
       message += `    → Crea prima il prodotto nella sezione "Prodotti"\n`;
     });
@@ -2081,9 +2054,10 @@ function showImportResults(results) {
     results.insufficientStock.forEach((r) => {
       const dateFormatted = new Date(r.date).toLocaleDateString("it-IT");
       message += `  • ${r.code} (${r.nome})\n`;
-      message += `    Richiesto: ${formatQuantity(r.quantity)} pz | `;
-      message += `Disponibile: ${formatQuantity(r.available)} pz\n`;
-      message += `    Data: ${dateFormatted}\n`;
+      message += `    Richiesto: ${formatQuantity(r.quantity)} pz | Data: ${dateFormatted}\n`;
+      if (r.reason) {
+        message += `    Motivo: ${r.reason}\n`;
+      }
     });
     message += `\n`;
   }
@@ -2227,7 +2201,7 @@ function printRiepilogo() {
 
   const valoreTotaleFiltrato = riepilogo.reduce(
     (sum, r) => sum + Number.parseFloat(r.valore_totale || 0),
-    0
+    0,
   );
 
   let printContent = `
@@ -2309,10 +2283,10 @@ function printRiepilogo() {
       <h1>Riepilogo Giacenze Magazzino</h1>
       <div class="info">
         <p><strong>Valore Totale (Filtrato):</strong> ${formatCurrency(
-          valoreTotaleFiltrato
+          valoreTotaleFiltrato,
         )}</p>
         <p><strong>Data Stampa:</strong> ${new Date().toLocaleDateString(
-          "it-IT"
+          "it-IT",
         )} ${new Date().toLocaleTimeString("it-IT")}</p>
       </div>
   `;
@@ -2325,13 +2299,13 @@ function printRiepilogo() {
             <div class="prodotto-info">
               <span><strong>Prodotto:</strong> ${prodotto.nome}</span>
               <span><strong>Giacenza Totale:</strong> ${formatQuantity(
-                prodotto.giacenza
+                prodotto.giacenza,
               )} pz</span>
             </div>
             <div class="prodotto-info">
               <span><strong>Marca:</strong> ${prodotto.marca_nome || "-"}</span>
               <span><strong>Valore Totale:</strong> ${formatCurrency(
-                prodotto.valore_totale
+                prodotto.valore_totale,
               )}</span>
             </div>
             ${
@@ -2362,12 +2336,12 @@ function printRiepilogo() {
           printContent += `
             <tr class="lotto-row">
               <td>${new Date(lotto.data_carico).toLocaleDateString(
-                "it-IT"
+                "it-IT",
               )}</td>
               <td>${formatQuantity(lotto.quantita_rimanente)} pz</td>
               <td>${formatCurrency(lotto.prezzo)}</td>
               <td><strong>${formatCurrency(
-                lotto.quantita_rimanente * lotto.prezzo
+                lotto.quantita_rimanente * lotto.prezzo,
               )}</strong></td>
               <td>${lotto.fattura_doc || "-"}</td>
               <td>${lotto.fornitore || "-"}</td>
@@ -2423,7 +2397,7 @@ function printStorico() {
 
   const valoreStoricoFiltrato = storico.reduce(
     (sum, s) => sum + Number.parseFloat(s.valore_totale || 0),
-    0
+    0,
   );
 
   const dataSelezionata = document.getElementById("storicoDate").value;
@@ -2510,10 +2484,10 @@ function printStorico() {
       <div class="info">
         <p><strong>Data Selezionata:</strong> ${dataItalianaSelezionata}</p>
         <p><strong>Valore Totale (Filtrato):</strong> ${formatCurrency(
-          valoreStoricoFiltrato
+          valoreStoricoFiltrato,
         )}</p>
         <p><strong>Data Stampa:</strong> ${new Date().toLocaleDateString(
-          "it-IT"
+          "it-IT",
         )} ${new Date().toLocaleTimeString("it-IT")}</p>
       </div>
   `;
@@ -2526,13 +2500,13 @@ function printStorico() {
             <div class="prodotto-info">
               <span><strong>Prodotto:</strong> ${prodotto.nome}</span>
               <span><strong>Giacenza Totale:</strong> ${formatQuantity(
-                prodotto.giacenza
+                prodotto.giacenza,
               )} pz</span>
             </div>
             <div class="prodotto-info">
               <span><strong>Marca:</strong> ${prodotto.marca_nome || "-"}</span>
               <span><strong>Valore Totale:</strong> ${formatCurrency(
-                prodotto.valore_totale
+                prodotto.valore_totale,
               )}</span>
             </div>
             ${
@@ -2563,12 +2537,12 @@ function printStorico() {
           printContent += `
             <tr class="lotto-row">
               <td>${new Date(lotto.data_carico).toLocaleDateString(
-                "it-IT"
+                "it-IT",
               )}</td>
               <td>${formatQuantity(lotto.quantita_rimanente)} pz</td>
               <td>${formatCurrency(lotto.prezzo)}</td>
               <td><strong>${formatCurrency(
-                lotto.quantita_rimanente * lotto.prezzo
+                lotto.quantita_rimanente * lotto.prezzo,
               )}</strong></td>
               <td>${lotto.fattura_doc || "-"}</td>
               <td>${lotto.fornitore || "-"}</td>
@@ -2719,7 +2693,7 @@ async function extractTextFromPDF(file) {
       } catch (error) {
         console.error("❌ Errore estrazione PDF:", error);
         reject(
-          new Error("Errore durante la lettura del PDF: " + error.message)
+          new Error("Errore durante la lettura del PDF: " + error.message),
         );
       }
     };
@@ -2773,7 +2747,7 @@ function extractDateFromPDF(text) {
     if (match && match[1]) {
       const normalizedDate = normalizeDate(match[1]);
       console.log(
-        `✅ Data trovata (generica): ${match[1]} → ${normalizedDate}`
+        `✅ Data trovata (generica): ${match[1]} → ${normalizedDate}`,
       );
       return normalizedDate;
     }
@@ -2882,7 +2856,7 @@ function extractScarichiFromPDF(text, date) {
       });
 
       console.log(
-        `✅ Scarico trovato: ${parsed.code} - ${parsed.quantity} pz (riga ${i})`
+        `✅ Scarico trovato: ${parsed.code} - ${parsed.quantity} pz (riga ${i})`,
       );
     } else {
       console.log(`⏭️ Riga ignorata: "${line}"`);
@@ -2982,8 +2956,8 @@ function normalizeDate(dateStr) {
   const separator = dateStr.includes("/")
     ? "/"
     : dateStr.includes("-")
-    ? "-"
-    : ".";
+      ? "-"
+      : ".";
 
   const parts = dateStr.split(separator);
 
@@ -3001,7 +2975,7 @@ function normalizeDate(dateStr) {
   }
 
   console.warn(
-    `⚠️ Formato data non riconosciuto: "${dateStr}", uso data odierna`
+    `⚠️ Formato data non riconosciuto: "${dateStr}", uso data odierna`,
   );
   return new Date().toISOString().split("T")[0];
 }
@@ -3020,12 +2994,12 @@ async function checkProductExists(code) {
     const prodotti = await res.json();
 
     const prodotto = prodotti.find(
-      (p) => p.nome.toUpperCase() === code.toUpperCase()
+      (p) => p.nome.toUpperCase() === code.toUpperCase(),
     );
 
     if (prodotto) {
       console.log(
-        `✅ Prodotto trovato: ${code} → ${prodotto.nome} (ID: ${prodotto.id})`
+        `✅ Prodotto trovato: ${code} → ${prodotto.nome} (ID: ${prodotto.id})`,
       );
     } else {
       console.warn(`⚠️ Prodotto NON trovato: ${code}`);
@@ -3057,7 +3031,7 @@ async function processScarichi(scarichi) {
     console.log(
       `📦 [${i + 1}/${scarichi.length}] Elaborazione: ${scarico.code} - ${
         scarico.quantity
-      } pz`
+      } pz`,
     );
 
     try {
@@ -3074,19 +3048,7 @@ async function processScarichi(scarichi) {
         continue;
       }
 
-      // 2️⃣ Verifica giacenza disponibile
-      if (prodotto.giacenza < scarico.quantity) {
-        results.insufficientStock.push({
-          code: scarico.code,
-          nome: prodotto.nome,
-          quantity: scarico.quantity,
-          available: prodotto.giacenza,
-          date: scarico.date,
-        });
-        continue;
-      }
-
-      // 3️⃣ Crea lo SCARICO
+      // 2️⃣ Crea lo SCARICO (il server verifica la giacenza alla data corretta)
       const movementData = {
         prodotto_id: prodotto.id,
         tipo: "scarico",
@@ -3113,17 +3075,38 @@ async function processScarichi(scarichi) {
           date: scarico.date,
         });
         console.log(
-          `✅ Scarico creato: ${scarico.code} - ${scarico.quantity} pz`
+          `✅ Scarico creato: ${scarico.code} - ${scarico.quantity} pz`,
         );
       } else {
         const error = await res.json();
-        results.failed.push({
-          code: scarico.code,
-          quantity: scarico.quantity,
-          date: scarico.date,
-          reason: error.error || "Errore sconosciuto dal server",
-        });
-        console.error(`❌ Errore creazione scarico: ${error.error}`);
+        const errMsg = error.error || "Errore sconosciuto dal server";
+
+        // Distingui giacenza insufficiente da altri errori
+        if (
+          errMsg.includes("Giacenza insufficiente") ||
+          errMsg.includes("giacenza") ||
+          errMsg.includes("Nessun carico disponibile")
+        ) {
+          results.insufficientStock.push({
+            code: scarico.code,
+            nome: prodotto.nome,
+            quantity: scarico.quantity,
+            available: prodotto.giacenza,
+            date: scarico.date,
+            reason: errMsg,
+          });
+          console.warn(
+            `⚠️ Giacenza insufficiente: ${scarico.code} - ${errMsg}`,
+          );
+        } else {
+          results.failed.push({
+            code: scarico.code,
+            quantity: scarico.quantity,
+            date: scarico.date,
+            reason: errMsg,
+          });
+          console.error(`❌ Errore creazione scarico: ${errMsg}`);
+        }
       }
     } catch (error) {
       results.failed.push({
@@ -3171,7 +3154,7 @@ async function handlePDFImport(file) {
           "Formato atteso:\n" +
           "RICAMBI\n" +
           "CODICE RICAMBIO   DESCRIZIONE   QUANTITA'\n" +
-          "101               Filtro Olio    2"
+          "101               Filtro Olio    2",
       );
     }
 
@@ -3202,9 +3185,7 @@ async function handlePDFImport(file) {
 window.handlePDFImport = handlePDFImport;
 window.loadPDFJS = loadPDFJS;
 
-
 // IMPORT PDF SCARICHI - FUNZIONE UNICA CORRETTA
-
 
 // 🧾 Importa ordine da PDF e crea UN movimento di scarico per riga prodotto
 async function importaOrdineDaPdf(righePdf, dataOrdine, nomeFilePdf) {
@@ -3231,7 +3212,7 @@ async function importaOrdineDaPdf(righePdf, dataOrdine, nomeFilePdf) {
     for (const mov of movimentiDaInviare) {
       // trova il prodotto_id a partire dal codice (adatta a come hai salvato i prodotti)
       const prodotto = allProdotti.find(
-        (p) => String(p.codice) === String(mov.codice)
+        (p) => String(p.codice) === String(mov.codice),
       );
       if (!prodotto) {
         console.warn("Prodotto non trovato per codice", mov.codice);
@@ -3274,23 +3255,23 @@ async function importaOrdineDaPdf(righePdf, dataOrdine, nomeFilePdf) {
  */
 async function loadMarche() {
   try {
-    console.log('📦 Caricamento marche con conteggio prodotti...');
-    
+    console.log("📦 Caricamento marche con conteggio prodotti...");
+
     const res = await fetch(`${API_URL}/marche`);
-    
+
     if (!res.ok) {
       throw new Error(`Errore HTTP: ${res.status}`);
     }
-    
+
     allMarche = await res.json();
     marche = allMarche;
-    
+
     console.log(`✅ ${marche.length} marche caricate:`, marche);
-    
+
     renderMarche();
   } catch (error) {
-    console.error('❌ Errore caricamento marche:', error);
-    showNotification('Errore nel caricamento delle marche', 'error');
+    console.error("❌ Errore caricamento marche:", error);
+    showNotification("Errore nel caricamento delle marche", "error");
   }
 }
 
@@ -3298,10 +3279,10 @@ async function loadMarche() {
  * 🎨 Renderizza la tabella marche con conteggio prodotti
  */
 function renderMarche() {
-  const tbody = document.getElementById('marcheTableBody');
+  const tbody = document.getElementById("marcheTableBody");
 
   if (!tbody) {
-    console.error('❌ Elemento marcheTableBody non trovato');
+    console.error("❌ Elemento marcheTableBody non trovato");
     return;
   }
 
@@ -3324,14 +3305,15 @@ function renderMarche() {
   }
 
   // Rendering marche con badge conteggio
-  tbody.innerHTML = marche.map(m => {
-    // Determina il numero di prodotti (fallback a 0 se mancante)
-    const prodottiCount = parseInt(m.prodotti_count) || 0;
-    
-    // Classe badge dinamica
-    const badgeClass = prodottiCount > 0 ? 'has-products' : 'empty';
+  tbody.innerHTML = marche
+    .map((m) => {
+      // Determina il numero di prodotti (fallback a 0 se mancante)
+      const prodottiCount = parseInt(m.prodotti_count) || 0;
 
-    return `
+      // Classe badge dinamica
+      const badgeClass = prodottiCount > 0 ? "has-products" : "empty";
+
+      return `
       <tr>
         <!-- 📝 NOME MARCA -->
         <td>
@@ -3343,7 +3325,7 @@ function renderMarche() {
         <!-- 🎯 BADGE CONTEGGIO PRODOTTI -->
         <td class="text-center-badge">
           <span class="prodotti-badge ${badgeClass}"">
-            ${prodottiCount} Prodott${prodottiCount === 1 ? 'o' : 'i'}
+            ${prodottiCount} Prodott${prodottiCount === 1 ? "o" : "i"}
           </span>
         </td>
         
@@ -3374,7 +3356,8 @@ function renderMarche() {
         </td>
       </tr>
     `;
-  }).join('');
+    })
+    .join("");
 
   console.log(`✅ ${marche.length} marche renderizzate`);
 }
@@ -3386,9 +3369,9 @@ function renderMarche() {
 /**
  * 🔍 Filtra marche in base alla ricerca
  */
-document.getElementById('filterMarche')?.addEventListener('input', (e) => {
+document.getElementById("filterMarche")?.addEventListener("input", (e) => {
   const searchTerm = e.target.value.toLowerCase().trim();
-  
+
   console.log(`🔍 Ricerca marca: "${searchTerm}"`);
 
   if (!searchTerm) {
@@ -3396,13 +3379,13 @@ document.getElementById('filterMarche')?.addEventListener('input', (e) => {
     marche = [...allMarche];
   } else {
     // Filtra per nome marca
-    marche = allMarche.filter(m => 
-      m.nome.toLowerCase().includes(searchTerm)
-    );
+    marche = allMarche.filter((m) => m.nome.toLowerCase().includes(searchTerm));
   }
 
-  console.log(`📊 ${marche.length} marche trovate su ${allMarche.length} totali`);
-  
+  console.log(
+    `📊 ${marche.length} marche trovate su ${allMarche.length} totali`,
+  );
+
   renderMarche();
 });
 
@@ -3418,11 +3401,11 @@ document.getElementById('filterMarche')?.addEventListener('input', (e) => {
  */
 async function deleteMarca(id, nome) {
   // 1. Calcola quanti prodotti appartengono a questa marca
-  const prodottiCount = allProdotti.filter(p => p.marca_id === id).length;
-  
+  const prodottiCount = allProdotti.filter((p) => p.marca_id === id).length;
+
   // 2. Prepara il messaggio personalizzato
   let messaggio = `Sei sicuro di voler eliminare la marca "<strong>${escapeHtml(nome)}</strong>"?`;
-  
+
   if (prodottiCount > 0) {
     messaggio += `
       <div style="margin-top: 15px; padding: 12px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.2);">
@@ -3433,16 +3416,16 @@ async function deleteMarca(id, nome) {
   }
 
   // 3. Mostra la modale (funzione definita in realtime.js)
-  const confermato = await showConfirmModal(messaggio, 'Elimina Marca');
+  const confermato = await showConfirmModal(messaggio, "Elimina Marca");
 
   // Se l'utente clicca "Annulla", interrompiamo
   if (!confermato) return;
 
   try {
     console.log(`♻️ Eliminazione marca ${id} in corso...`);
-    
+
     const response = await fetch(`${API_URL}/marche/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
 
     const data = await response.json();
@@ -3450,9 +3433,9 @@ async function deleteMarca(id, nome) {
     if (response.ok) {
       // Notifica di successo
       showAlertModal(
-        `Marca "${nome}" e relativi prodotti eliminati correttamente.`, 
-        'Operazione Completata', 
-        'success'
+        `Marca "${nome}" e relativi prodotti eliminati correttamente.`,
+        "Operazione Completata",
+        "success",
       );
 
       // Aggiorna i dati locali
@@ -3461,14 +3444,13 @@ async function deleteMarca(id, nome) {
         await loadProdotti();
       }
     } else {
-      throw new Error(data.error || 'Errore durante l\'eliminazione');
+      throw new Error(data.error || "Errore durante l'eliminazione");
     }
   } catch (error) {
-    console.error('❌ Errore eliminazione marca:', error);
-    showAlertModal(`Errore: ${error.message}`, 'Errore', 'error');
+    console.error("❌ Errore eliminazione marca:", error);
+    showAlertModal(`Errore: ${error.message}`, "Errore", "error");
   }
 }
-
 
 // ==================== PRODOTTI CON ICONA VUOTA ====================
 
@@ -3564,7 +3546,8 @@ function renderProdotti() {
 
   // Rendering prodotti
   tbody.innerHTML = prodotti
-    .map((p) => `
+    .map(
+      (p) => `
       <tr>
         <td><strong>${escapeHtml(p.nome)}</strong></td>
         <td>
@@ -3602,7 +3585,8 @@ function renderProdotti() {
           </button>
         </td>
       </tr>
-    `)
+    `,
+    )
     .join("");
 
   console.log(`✅ ${prodotti.length} prodotti renderizzati`);
@@ -3613,10 +3597,12 @@ function renderProdotti() {
  */
 async function deleteProdotto(id, nome) {
   // Verifica se ci sono movimenti collegati
-  const movimentiCollegati = allMovimenti.filter(m => m.prodotto_id === id).length;
-  
+  const movimentiCollegati = allMovimenti.filter(
+    (m) => m.prodotto_id === id,
+  ).length;
+
   let messaggio = `Sei sicuro di voler eliminare il prodotto "<strong>${escapeHtml(nome)}</strong>"?`;
-  
+
   if (movimentiCollegati > 0) {
     messaggio += `
       <div style="margin-top: 15px; padding: 12px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.2);">
@@ -3626,7 +3612,7 @@ async function deleteProdotto(id, nome) {
       </div>`;
   }
 
-  const confermato = await showConfirmModal(messaggio, 'Elimina Prodotto');
+  const confermato = await showConfirmModal(messaggio, "Elimina Prodotto");
   if (!confermato) return;
 
   try {
@@ -3637,13 +3623,13 @@ async function deleteProdotto(id, nome) {
       if (typeof ignoreNextSocketUpdate === "function") {
         ignoreNextSocketUpdate();
       }
-      
+
       showAlertModal(
         `Prodotto "${nome}" eliminato con successo!`,
-        'Operazione Completata',
-        'success'
+        "Operazione Completata",
+        "success",
       );
-      
+
       await loadProdotti();
       if (movimentiCollegati > 0) {
         await loadMovimenti();
@@ -3653,7 +3639,7 @@ async function deleteProdotto(id, nome) {
     }
   } catch (error) {
     console.error("❌ Errore eliminazione prodotto:", error);
-    showAlertModal(`Errore: ${error.message}`, 'Errore', 'error');
+    showAlertModal(`Errore: ${error.message}`, "Errore", "error");
   }
 }
 
@@ -3667,8 +3653,8 @@ async function deleteProdotto(id, nome) {
  * 🗑️ Elimina movimento con conferma
  */
 async function deleteMovimento(id, prodottoNome, tipo) {
-  const tipoLabel = tipo === 'carico' ? 'CARICO' : 'SCARICO';
-  
+  const tipoLabel = tipo === "carico" ? "CARICO" : "SCARICO";
+
   const messaggio = `
     Sei sicuro di voler eliminare questo movimento di <strong>${tipoLabel}</strong>?
     <div style="margin-top: 12px; padding: 10px; background: rgba(99, 102, 241, 0.1); border-radius: 6px;">
@@ -3676,7 +3662,7 @@ async function deleteMovimento(id, prodottoNome, tipo) {
     </div>
   `;
 
-  const confermato = await showConfirmModal(messaggio, 'Elimina Movimento');
+  const confermato = await showConfirmModal(messaggio, "Elimina Movimento");
   if (!confermato) return;
 
   try {
@@ -3687,13 +3673,13 @@ async function deleteMovimento(id, prodottoNome, tipo) {
       if (typeof ignoreNextSocketUpdate === "function") {
         ignoreNextSocketUpdate();
       }
-      
+
       showAlertModal(
-        'Movimento eliminato con successo!',
-        'Operazione Completata',
-        'success'
+        "Movimento eliminato con successo!",
+        "Operazione Completata",
+        "success",
       );
-      
+
       await loadMovimenti();
       await loadProdotti();
     } else {
@@ -3701,7 +3687,7 @@ async function deleteMovimento(id, prodottoNome, tipo) {
     }
   } catch (error) {
     console.error("❌ Errore eliminazione movimento:", error);
-    showAlertModal(`Errore: ${error.message}`, 'Errore', 'error');
+    showAlertModal(`Errore: ${error.message}`, "Errore", "error");
   }
 }
 
@@ -3751,15 +3737,17 @@ function renderRiepilogo() {
       <tr class="product-main-row">
         <td>
           <strong>${escapeHtml(r.nome)}</strong>
-          ${r.marca_nome 
-            ? ` <span class="badge-marca">${escapeHtml(r.marca_nome).toUpperCase()}</span>` 
-            : ""
+          ${
+            r.marca_nome
+              ? ` <span class="badge-marca">${escapeHtml(r.marca_nome).toUpperCase()}</span>`
+              : ""
           }
         </td>
         <td>
-          ${r.descrizione
-            ? `<small>${escapeHtml(r.descrizione.substring(0, 50))}${r.descrizione.length > 50 ? "..." : ""}</small>`
-            : '<span style="color: #999;">-</span>'
+          ${
+            r.descrizione
+              ? `<small>${escapeHtml(r.descrizione.substring(0, 50))}${r.descrizione.length > 50 ? "..." : ""}</small>`
+              : '<span style="color: #999;">-</span>'
           }
         </td>
         <td>
@@ -3825,7 +3813,7 @@ function renderRiepilogo() {
  */
 async function loadStorico() {
   const data = document.getElementById("storicoDate").value;
-  
+
   if (!data) {
     // Se non c'è una data, resetta la visualizzazione
     allStorico = [];
@@ -3920,15 +3908,17 @@ function renderStorico(storico) {
       <tr class="product-main-row">
         <td>
           <strong>${escapeHtml(s.nome)}</strong>
-          ${s.marca_nome 
-            ? ` <span class="badge-marca">${escapeHtml(s.marca_nome).toUpperCase()}</span>` 
-            : ""
+          ${
+            s.marca_nome
+              ? ` <span class="badge-marca">${escapeHtml(s.marca_nome).toUpperCase()}</span>`
+              : ""
           }
         </td>
         <td>
-          ${s.descrizione
-            ? `<small>${escapeHtml(s.descrizione.substring(0, 50))}${s.descrizione.length > 50 ? "..." : ""}</small>`
-            : '<span style="color: #999;">-</span>'
+          ${
+            s.descrizione
+              ? `<small>${escapeHtml(s.descrizione.substring(0, 50))}${s.descrizione.length > 50 ? "..." : ""}</small>`
+              : '<span style="color: #999;">-</span>'
           }
         </td>
         <td>
@@ -3996,7 +3986,7 @@ document.getElementById("filterStorico")?.addEventListener("input", (e) => {
     (s) =>
       s.nome.toLowerCase().includes(searchTerm) ||
       (s.marca_nome && s.marca_nome.toLowerCase().includes(searchTerm)) ||
-      (s.descrizione && s.descrizione.toLowerCase().includes(searchTerm))
+      (s.descrizione && s.descrizione.toLowerCase().includes(searchTerm)),
   );
   updateStoricoTotal();
   renderStorico(storico);
@@ -4008,7 +3998,7 @@ document.getElementById("filterStorico")?.addEventListener("input", (e) => {
 function updateStoricoTotal() {
   const valoreStoricoFiltrato = storico.reduce(
     (sum, s) => sum + Number.parseFloat(s.valore_totale || 0),
-    0
+    0,
   );
   const totalElement = document.getElementById("valoreStorico");
   if (totalElement) {
@@ -4022,32 +4012,32 @@ function updateStoricoTotal() {
  * 🛡️ Escape HTML per prevenire XSS
  */
 function escapeHtml(text) {
-  if (!text) return '';
-  
+  if (!text) return "";
+
   const map = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;'
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;",
   };
-  
-  return String(text).replace(/[&<>"']/g, m => map[m]);
+
+  return String(text).replace(/[&<>"']/g, (m) => map[m]);
 }
 
 /**
  * 🔔 Mostra notifica (opzionale, se hai un sistema di notifiche)
  */
-function showNotification(message, type = 'info') {
+function showNotification(message, type = "info") {
   // Se hai un sistema di notifiche toast, usalo qui
   // Altrimenti, usa semplicemente alert
   console.log(`[${type.toUpperCase()}] ${message}`);
-  
-  if (type === 'error') {
-    alert('❌ ' + message);
-  } else if (type === 'success') {
+
+  if (type === "error") {
+    alert("❌ " + message);
+  } else if (type === "success") {
     // Potresti usare una libreria come Toastify.js o una modale custom
-    console.log('✅ ' + message);
+    console.log("✅ " + message);
   }
 }
 
@@ -4070,12 +4060,12 @@ function showNotification(message, type = 'info') {
  * 💾 STORAGE KEYS per ogni sezione
  */
 const SEARCH_KEYS = {
-  marche: 'search_marche',
-  prodotti: 'search_prodotti',
-  movimenti: 'search_movimenti',
-  riepilogo: 'search_riepilogo',
-  storico: 'search_storico',
-  utenti: 'search_utenti'
+  marche: "search_marche",
+  prodotti: "search_prodotti",
+  movimenti: "search_movimenti",
+  riepilogo: "search_riepilogo",
+  storico: "search_storico",
+  utenti: "search_utenti",
 };
 
 /**
@@ -4102,7 +4092,7 @@ function clearSearchTerm(section) {
       console.log(`🗑️ Ricerca cancellata [${section}]`);
     }
   } catch (error) {
-    console.error('❌ Errore cancellazione ricerca:', error);
+    console.error("❌ Errore cancellazione ricerca:", error);
   }
 }
 
@@ -4115,7 +4105,7 @@ function clearSearchTerm(section) {
 function restoreAndApplySearch(section, inputId, filterFunction) {
   try {
     const inputElement = document.getElementById(inputId);
-    
+
     if (!inputElement) {
       console.warn(`⚠️ Input non trovato: ${inputId}`);
       return;
@@ -4123,19 +4113,21 @@ function restoreAndApplySearch(section, inputId, filterFunction) {
 
     // 1️⃣ Recupera il termine salvato
     const savedTerm = getSearchTerm(section);
-    
+
     // 2️⃣ Imposta il valore nell'input
     inputElement.value = savedTerm;
-    
+
     // 3️⃣ Applica il filtro se c'è un termine salvato
     if (savedTerm && filterFunction) {
-      console.log(`🔍 Applicazione filtro salvato [${section}]: "${savedTerm}"`);
+      console.log(
+        `🔍 Applicazione filtro salvato [${section}]: "${savedTerm}"`,
+      );
       filterFunction(savedTerm);
     }
-    
+
     console.log(`✅ Ricerca ripristinata [${section}]`);
   } catch (error) {
-    console.error('❌ Errore ripristino ricerca:', error);
+    console.error("❌ Errore ripristino ricerca:", error);
   }
 }
 
@@ -4148,28 +4140,28 @@ function restoreAndApplySearch(section, inputId, filterFunction) {
 function setupSearchListener(section, inputId, filterFunction) {
   try {
     const inputElement = document.getElementById(inputId);
-    
+
     if (!inputElement) {
       console.warn(`⚠️ Input non trovato per listener: ${inputId}`);
       return;
     }
 
     // Listener per input in tempo reale
-    inputElement.addEventListener('input', function(e) {
+    inputElement.addEventListener("input", function (e) {
       const searchTerm = e.target.value.trim();
-      
+
       // Salva nel localStorage
       saveSearchTerm(section, searchTerm);
-      
+
       // Applica il filtro
       if (filterFunction) {
         filterFunction(searchTerm);
       }
     });
-    
+
     console.log(`✅ Listener ricerca attivo [${section}]`);
   } catch (error) {
-    console.error('❌ Errore setup listener:', error);
+    console.error("❌ Errore setup listener:", error);
   }
 }
 
@@ -4180,15 +4172,13 @@ function setupSearchListener(section, inputId, filterFunction) {
  */
 function filterMarche(searchTerm) {
   const term = searchTerm.toLowerCase();
-  
+
   if (!term) {
     marche = [...allMarche];
   } else {
-    marche = allMarche.filter(m => 
-      m.nome.toLowerCase().includes(term)
-    );
+    marche = allMarche.filter((m) => m.nome.toLowerCase().includes(term));
   }
-  
+
   renderMarche();
   console.log(`🔍 Marche filtrate: ${marche.length}/${allMarche.length}`);
 }
@@ -4198,19 +4188,23 @@ function filterMarche(searchTerm) {
  */
 function filterProdotti(searchTerm) {
   const term = searchTerm.toLowerCase();
-  
+
   if (!term) {
     prodotti = [...allProdotti];
   } else {
-    prodotti = allProdotti.filter(p => {
+    prodotti = allProdotti.filter((p) => {
       const matchesNome = p.nome.toLowerCase().includes(term);
-      const matchesMarca = p.marca_nome ? p.marca_nome.toLowerCase().includes(term) : false;
-      const matchesDescrizione = p.descrizione ? p.descrizione.toLowerCase().includes(term) : false;
-      
+      const matchesMarca = p.marca_nome
+        ? p.marca_nome.toLowerCase().includes(term)
+        : false;
+      const matchesDescrizione = p.descrizione
+        ? p.descrizione.toLowerCase().includes(term)
+        : false;
+
       return matchesNome || matchesMarca || matchesDescrizione;
     });
   }
-  
+
   renderProdotti();
   console.log(`🔍 Prodotti filtrati: ${prodotti.length}/${allProdotti.length}`);
 }
@@ -4220,23 +4214,30 @@ function filterProdotti(searchTerm) {
  */
 function filterMovimenti(searchTerm) {
   const term = searchTerm.toLowerCase();
-  
+
   if (!term) {
     movimenti = [...allMovimenti];
   } else {
-    movimenti = allMovimenti.filter(m => {
+    movimenti = allMovimenti.filter((m) => {
       const matchesProdotto = m.prodotto_nome.toLowerCase().includes(term);
-      const matchesMarca = m.marca_nome ? m.marca_nome.toLowerCase().includes(term) : false;
+      const matchesMarca = m.marca_nome
+        ? m.marca_nome.toLowerCase().includes(term)
+        : false;
       const matchesTipo = m.tipo.toLowerCase().includes(term);
-      const matchesDescrizione = m.prodotto_descrizione ? 
-        m.prodotto_descrizione.toLowerCase().includes(term) : false;
-      
-      return matchesProdotto || matchesMarca || matchesTipo || matchesDescrizione;
+      const matchesDescrizione = m.prodotto_descrizione
+        ? m.prodotto_descrizione.toLowerCase().includes(term)
+        : false;
+
+      return (
+        matchesProdotto || matchesMarca || matchesTipo || matchesDescrizione
+      );
     });
   }
-  
+
   renderMovimenti();
-  console.log(`🔍 Movimenti filtrati: ${movimenti.length}/${allMovimenti.length}`);
+  console.log(
+    `🔍 Movimenti filtrati: ${movimenti.length}/${allMovimenti.length}`,
+  );
 }
 
 /**
@@ -4244,22 +4245,28 @@ function filterMovimenti(searchTerm) {
  */
 function filterRiepilogo(searchTerm) {
   const term = searchTerm.toLowerCase();
-  
+
   if (!term) {
     riepilogo = [...allRiepilogo];
   } else {
-    riepilogo = allRiepilogo.filter(r => {
+    riepilogo = allRiepilogo.filter((r) => {
       const matchesNome = r.nome.toLowerCase().includes(term);
-      const matchesMarca = r.marca_nome ? r.marca_nome.toLowerCase().includes(term) : false;
-      const matchesDescrizione = r.descrizione ? r.descrizione.toLowerCase().includes(term) : false;
-      
+      const matchesMarca = r.marca_nome
+        ? r.marca_nome.toLowerCase().includes(term)
+        : false;
+      const matchesDescrizione = r.descrizione
+        ? r.descrizione.toLowerCase().includes(term)
+        : false;
+
       return matchesNome || matchesMarca || matchesDescrizione;
     });
   }
-  
+
   updateRiepilogoTotal();
   renderRiepilogo();
-  console.log(`🔍 Riepilogo filtrato: ${riepilogo.length}/${allRiepilogo.length}`);
+  console.log(
+    `🔍 Riepilogo filtrato: ${riepilogo.length}/${allRiepilogo.length}`,
+  );
 }
 
 /**
@@ -4267,19 +4274,23 @@ function filterRiepilogo(searchTerm) {
  */
 function filterStorico(searchTerm) {
   const term = searchTerm.toLowerCase();
-  
+
   if (!term) {
     storico = [...allStorico];
   } else {
-    storico = allStorico.filter(s => {
+    storico = allStorico.filter((s) => {
       const matchesNome = s.nome.toLowerCase().includes(term);
-      const matchesMarca = s.marca_nome ? s.marca_nome.toLowerCase().includes(term) : false;
-      const matchesDescrizione = s.descrizione ? s.descrizione.toLowerCase().includes(term) : false;
-      
+      const matchesMarca = s.marca_nome
+        ? s.marca_nome.toLowerCase().includes(term)
+        : false;
+      const matchesDescrizione = s.descrizione
+        ? s.descrizione.toLowerCase().includes(term)
+        : false;
+
       return matchesNome || matchesMarca || matchesDescrizione;
     });
   }
-  
+
   updateStoricoTotal();
   renderStorico(storico);
   console.log(`🔍 Storico filtrato: ${storico.length}/${allStorico.length}`);
@@ -4290,15 +4301,13 @@ function filterStorico(searchTerm) {
  */
 function filterUtenti(searchTerm) {
   const term = searchTerm.toLowerCase();
-  
+
   if (!term) {
     utenti = [...allUtenti];
   } else {
-    utenti = allUtenti.filter(u => 
-      u.username.toLowerCase().includes(term)
-    );
+    utenti = allUtenti.filter((u) => u.username.toLowerCase().includes(term));
   }
-  
+
   renderUtenti();
   console.log(`🔍 Utenti filtrati: ${utenti.length}/${allUtenti.length}`);
 }
@@ -4309,23 +4318,35 @@ function filterUtenti(searchTerm) {
  * 🚀 Inizializza il sistema di ricerca con memoria per tutte le sezioni
  */
 function initSearchMemorySystem() {
-  console.log('🚀 Inizializzazione sistema ricerca con memoria...');
-  
+  console.log("🚀 Inizializzazione sistema ricerca con memoria...");
+
   // Setup listener per tutte le sezioni
   const searchConfigs = [
-    { section: 'marche', inputId: 'filterMarche', filterFn: filterMarche },
-    { section: 'prodotti', inputId: 'filterProdotti', filterFn: filterProdotti },
-    { section: 'movimenti', inputId: 'filterMovimenti', filterFn: filterMovimenti },
-    { section: 'riepilogo', inputId: 'filterRiepilogo', filterFn: filterRiepilogo },
-    { section: 'storico', inputId: 'filterStorico', filterFn: filterStorico },
-    { section: 'utenti', inputId: 'filterUtenti', filterFn: filterUtenti }
+    { section: "marche", inputId: "filterMarche", filterFn: filterMarche },
+    {
+      section: "prodotti",
+      inputId: "filterProdotti",
+      filterFn: filterProdotti,
+    },
+    {
+      section: "movimenti",
+      inputId: "filterMovimenti",
+      filterFn: filterMovimenti,
+    },
+    {
+      section: "riepilogo",
+      inputId: "filterRiepilogo",
+      filterFn: filterRiepilogo,
+    },
+    { section: "storico", inputId: "filterStorico", filterFn: filterStorico },
+    { section: "utenti", inputId: "filterUtenti", filterFn: filterUtenti },
   ];
-  
-  searchConfigs.forEach(config => {
+
+  searchConfigs.forEach((config) => {
     setupSearchListener(config.section, config.inputId, config.filterFn);
   });
-  
-  console.log('✅ Sistema ricerca inizializzato per tutte le sezioni');
+
+  console.log("✅ Sistema ricerca inizializzato per tutte le sezioni");
 }
 
 /**
@@ -4334,16 +4355,16 @@ function initSearchMemorySystem() {
  */
 function restoreSearchOnSectionChange(section) {
   const searchConfigs = {
-    'marche': { inputId: 'filterMarche', filterFn: filterMarche },
-    'prodotti': { inputId: 'filterProdotti', filterFn: filterProdotti },
-    'movimenti': { inputId: 'filterMovimenti', filterFn: filterMovimenti },
-    'riepilogo': { inputId: 'filterRiepilogo', filterFn: filterRiepilogo },
-    'storico': { inputId: 'filterStorico', filterFn: filterStorico },
-    'utenti': { inputId: 'filterUtenti', filterFn: filterUtenti }
+    marche: { inputId: "filterMarche", filterFn: filterMarche },
+    prodotti: { inputId: "filterProdotti", filterFn: filterProdotti },
+    movimenti: { inputId: "filterMovimenti", filterFn: filterMovimenti },
+    riepilogo: { inputId: "filterRiepilogo", filterFn: filterRiepilogo },
+    storico: { inputId: "filterStorico", filterFn: filterStorico },
+    utenti: { inputId: "filterUtenti", filterFn: filterUtenti },
   };
-  
+
   const config = searchConfigs[section];
-  
+
   if (config) {
     restoreAndApplySearch(section, config.inputId, config.filterFn);
   }
@@ -4356,38 +4377,42 @@ function restoreSearchOnSectionChange(section) {
  * Inserisci questa versione modificata nel tuo DOMContentLoaded
  */
 function setupNavigationWithSearch() {
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', (e) => {
+  document.querySelectorAll(".nav-item").forEach((item) => {
+    item.addEventListener("click", (e) => {
       e.preventDefault();
       const section = item.dataset.section;
 
       // Aggiorna UI navigazione
-      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-      document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-      
-      item.classList.add('active');
-      document.getElementById(`section-${section}`).classList.add('active');
-      
+      document
+        .querySelectorAll(".nav-item")
+        .forEach((i) => i.classList.remove("active"));
+      document
+        .querySelectorAll(".content-section")
+        .forEach((s) => s.classList.remove("active"));
+
+      item.classList.add("active");
+      document.getElementById(`section-${section}`).classList.add("active");
+
       // Salva sezione attiva
-      localStorage.setItem('activeSection', section);
+      localStorage.setItem("activeSection", section);
 
       // Chiudi menu mobile se aperto
-      const sidebar = document.getElementById('sidebar');
-      const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+      const sidebar = document.getElementById("sidebar");
+      const mobileMenuToggle = document.getElementById("mobileMenuToggle");
       if (window.innerWidth <= 768) {
-        sidebar.classList.remove('mobile-open');
-        mobileMenuToggle.classList.remove('active');
+        sidebar.classList.remove("mobile-open");
+        mobileMenuToggle.classList.remove("active");
       }
 
       // 🎯 RIPRISTINA E APPLICA RICERCA SALVATA
       restoreSearchOnSectionChange(section);
 
       // Carica dati sezione
-      if (section === 'marche') loadMarche();
-      if (section === 'prodotti') loadProdotti();
-      if (section === 'movimenti') loadMovimenti();
-      if (section === 'riepilogo') loadRiepilogo();
-      if (section === 'utenti') loadUtenti();
+      if (section === "marche") loadMarche();
+      if (section === "prodotti") loadProdotti();
+      if (section === "movimenti") loadMovimenti();
+      if (section === "riepilogo") loadRiepilogo();
+      if (section === "utenti") loadUtenti();
     });
   });
 }
@@ -4405,25 +4430,25 @@ function setupNavigationWithSearch() {
  * 🗑️ Cancella tutte le ricerche salvate
  */
 function clearAllSearches() {
-  Object.keys(SEARCH_KEYS).forEach(section => {
+  Object.keys(SEARCH_KEYS).forEach((section) => {
     clearSearchTerm(section);
   });
-  console.log('🗑️ Tutte le ricerche cancellate');
+  console.log("🗑️ Tutte le ricerche cancellate");
 }
 
 /**
  * 📊 Mostra statistiche ricerche salvate
  */
 function showSearchStats() {
-  console.log('📊 STATISTICHE RICERCHE SALVATE:');
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  
+  console.log("📊 STATISTICHE RICERCHE SALVATE:");
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+
   Object.entries(SEARCH_KEYS).forEach(([section, key]) => {
-    const term = localStorage.getItem(key) || '(vuoto)';
+    const term = localStorage.getItem(key) || "(vuoto)";
     console.log(`  ${section.padEnd(12)} → "${term}"`);
   });
-  
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 }
 
 // ==================== 📝 EXPORT (se usi moduli ES6) ====================
@@ -4438,206 +4463,222 @@ function showSearchStats() {
 //   clearAllSearches,
 //   showSearchStats
 // };
-document.addEventListener('DOMContentLoaded', () => {
-  const username = localStorage.getItem('username');
+document.addEventListener("DOMContentLoaded", () => {
+  const username = localStorage.getItem("username");
   if (username) {
-    document.getElementById('currentUser').textContent = username;
+    document.getElementById("currentUser").textContent = username;
   }
 
-  const savedSection = localStorage.getItem('activeSection') || 'marche';
+  const savedSection = localStorage.getItem("activeSection") || "marche";
 
-  const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-  const sidebar = document.getElementById('sidebar');
+  const mobileMenuToggle = document.getElementById("mobileMenuToggle");
+  const sidebar = document.getElementById("sidebar");
 
   if (mobileMenuToggle) {
-    mobileMenuToggle.addEventListener('click', () => {
-      sidebar.classList.toggle('mobile-open');
-      mobileMenuToggle.classList.toggle('active');
+    mobileMenuToggle.addEventListener("click", () => {
+      sidebar.classList.toggle("mobile-open");
+      mobileMenuToggle.classList.toggle("active");
     });
 
-    document.addEventListener('click', (e) => {
+    document.addEventListener("click", (e) => {
       if (window.innerWidth <= 768) {
-        if (!sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
-          sidebar.classList.remove('mobile-open');
-          mobileMenuToggle.classList.remove('active');
+        if (
+          !sidebar.contains(e.target) &&
+          !mobileMenuToggle.contains(e.target)
+        ) {
+          sidebar.classList.remove("mobile-open");
+          mobileMenuToggle.classList.remove("active");
         }
       }
     });
   }
 
   // NAVIGAZIONE SEZIONI + RILANCIO FILTRI
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', async (e) => {
+  document.querySelectorAll(".nav-item").forEach((item) => {
+    item.addEventListener("click", async (e) => {
       e.preventDefault();
       const section = item.dataset.section;
 
       // attiva voce menu
-      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
+      document
+        .querySelectorAll(".nav-item")
+        .forEach((i) => i.classList.remove("active"));
+      item.classList.add("active");
 
       // mostra sezione
-      document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-      document.getElementById(`section-${section}`).classList.add('active');
+      document
+        .querySelectorAll(".content-section")
+        .forEach((s) => s.classList.remove("active"));
+      document.getElementById(`section-${section}`).classList.add("active");
 
-      localStorage.setItem('activeSection', section);
+      localStorage.setItem("activeSection", section);
 
       if (window.innerWidth <= 768) {
-        sidebar.classList.remove('mobile-open');
-        mobileMenuToggle?.classList.remove('active');
+        sidebar.classList.remove("mobile-open");
+        mobileMenuToggle?.classList.remove("active");
       }
 
       // carica dati sezione
-      if (section === 'marche')     await loadMarche();
-      if (section === 'prodotti')   await loadProdotti();
-      if (section === 'movimenti')  await loadMovimenti();
-      if (section === 'riepilogo')  await loadRiepilogo();
-      if (section === 'storico')    await loadStorico();
-      if (section === 'utenti')     await loadUtenti();
+      if (section === "marche") await loadMarche();
+      if (section === "prodotti") await loadProdotti();
+      if (section === "movimenti") await loadMovimenti();
+      if (section === "riepilogo") await loadRiepilogo();
+      if (section === "storico") await loadStorico();
+      if (section === "utenti") await loadUtenti();
 
       // RILANCIA I FILTRI ESISTENTI IN BASE ALL'INPUT GIÀ SCRITTO
-      if (section === 'marche') {
-        const input = document.getElementById('filterMarche');
-        if (input) input.dispatchEvent(new Event('input'));
+      if (section === "marche") {
+        const input = document.getElementById("filterMarche");
+        if (input) input.dispatchEvent(new Event("input"));
       }
 
-      if (section === 'prodotti') {
-        const input = document.getElementById('filterProdotti');
-        if (input) input.dispatchEvent(new Event('input'));
+      if (section === "prodotti") {
+        const input = document.getElementById("filterProdotti");
+        if (input) input.dispatchEvent(new Event("input"));
       }
 
-      if (section === 'movimenti') {
-        const input = document.getElementById('filterMovimenti');
-        if (input) input.dispatchEvent(new Event('input'));
+      if (section === "movimenti") {
+        const input = document.getElementById("filterMovimenti");
+        if (input) input.dispatchEvent(new Event("input"));
       }
 
-      if (section === 'riepilogo') {
-        const input = document.getElementById('filterRiepilogo');
-        if (input) input.dispatchEvent(new Event('input'));
+      if (section === "riepilogo") {
+        const input = document.getElementById("filterRiepilogo");
+        if (input) input.dispatchEvent(new Event("input"));
       }
 
-      if (section === 'storico') {
-        const input = document.getElementById('filterStorico');
-        if (input) input.dispatchEvent(new Event('input'));
+      if (section === "storico") {
+        const input = document.getElementById("filterStorico");
+        if (input) input.dispatchEvent(new Event("input"));
       }
 
-      if (section === 'utenti') {
-        const input = document.getElementById('filterUtenti');
-        if (input) input.dispatchEvent(new Event('input'));
+      if (section === "utenti") {
+        const input = document.getElementById("filterUtenti");
+        if (input) input.dispatchEvent(new Event("input"));
       }
     });
   });
 
   // attiva sezione salvata all'avvio
-  document.querySelectorAll('.nav-item').forEach(item => {
+  document.querySelectorAll(".nav-item").forEach((item) => {
     if (item.dataset.section === savedSection) {
       item.click();
     }
   });
 
-  document.getElementById('logoutBtn')?.addEventListener('click', () => {
-    localStorage.removeItem('username');
-    localStorage.removeItem('activeSection');
-    window.location.href = 'index.html';
+  document.getElementById("logoutBtn")?.addEventListener("click", () => {
+    localStorage.removeItem("username");
+    localStorage.removeItem("activeSection");
+    window.location.href = "index.html";
   });
 });
 
 // INIZIALIZZAZIONE
 document.addEventListener("DOMContentLoaded", () => {
-    const username = localStorage.getItem("username");
-    if (username) {
-        const currentUserEl = document.getElementById("currentUser");
-        if (currentUserEl) currentUserEl.textContent = username;
-    }
+  const username = localStorage.getItem("username");
+  if (username) {
+    const currentUserEl = document.getElementById("currentUser");
+    if (currentUserEl) currentUserEl.textContent = username;
+  }
 
-    const savedSection = localStorage.getItem("activeSection") || "marche";
+  const savedSection = localStorage.getItem("activeSection") || "marche";
 
-    // Riferimenti menu mobile
-    const mobileMenuToggle = document.getElementById("mobileMenuToggle");
-    const sidebar = document.getElementById("sidebar");
+  // Riferimenti menu mobile
+  const mobileMenuToggle = document.getElementById("mobileMenuToggle");
+  const sidebar = document.getElementById("sidebar");
 
-    // HAMBURGER + CLICK FUORI (MOBILE / TABLET)
-    if (mobileMenuToggle && sidebar) {
-        // Toggle apertura/chiusura sidebar
-        mobileMenuToggle.addEventListener("click", (e) => {
-            e.stopPropagation();
-            sidebar.classList.toggle("mobile-open");
-            mobileMenuToggle.classList.toggle("active");
-        });
-
-        // Chiudi sidebar cliccando fuori SOLO sotto 1024px
-        document.addEventListener("click", (e) => {
-            if (window.innerWidth < 1024) {
-                if (!sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
-                    sidebar.classList.remove("mobile-open");
-                    mobileMenuToggle.classList.remove("active");
-                }
-            }
-        });
-    }
-
-    // NAVIGAZIONE SEZIONI
-    document.querySelectorAll(".nav-item").forEach((item) => {
-        item.addEventListener("click", async (e) => {
-            e.preventDefault();
-            const section = item.dataset.section;
-            if (!section) return;
-
-            // Attiva voce di menu
-            document.querySelectorAll(".nav-item").forEach((i) => i.classList.remove("active"));
-            item.classList.add("active");
-
-            // Attiva sezione contenuto
-            document.querySelectorAll(".content-section").forEach((s) => s.classList.remove("active"));
-            const sectionEl = document.getElementById(`section-${section}`);
-            if (sectionEl) sectionEl.classList.add("active");
-
-            // Salva sezione attiva
-            localStorage.setItem("activeSection", section);
-
-            // Chiudi menu mobile / tablet dopo il click
-            if (window.innerWidth < 1024 && sidebar && mobileMenuToggle) {
-                sidebar.classList.remove("mobile-open");
-                mobileMenuToggle.classList.remove("active");
-            }
-
-            // Carica dati sezione
-            if (section === "marche") await loadMarche();
-            if (section === "prodotti") await loadProdotti();
-            if (section === "movimenti") await loadMovimenti();
-            if (section === "riepilogo") await loadRiepilogo();
-            if (section === "storico") await loadStorico();
-            if (section === "utenti") await loadUtenti();
-        });
+  // HAMBURGER + CLICK FUORI (MOBILE / TABLET)
+  if (mobileMenuToggle && sidebar) {
+    // Toggle apertura/chiusura sidebar
+    mobileMenuToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      sidebar.classList.toggle("mobile-open");
+      mobileMenuToggle.classList.toggle("active");
     });
 
-    // Sezione iniziale
-    const initialItem = document.querySelector(`.nav-item[data-section="${savedSection}"]`);
-    if (initialItem) {
-        initialItem.click();
-    }
+    // Chiudi sidebar cliccando fuori SOLO sotto 1024px
+    document.addEventListener("click", (e) => {
+      if (window.innerWidth < 1024) {
+        if (
+          !sidebar.contains(e.target) &&
+          !mobileMenuToggle.contains(e.target)
+        ) {
+          sidebar.classList.remove("mobile-open");
+          mobileMenuToggle.classList.remove("active");
+        }
+      }
+    });
+  }
 
-    // Logout
-    const logoutBtn = document.getElementById("logoutBtn");
-    if (logoutBtn) {
-        logoutBtn.addEventListener("click", () => {
-            localStorage.removeItem("username");
-            localStorage.removeItem("activeSection");
-            window.location.href = "index.html";
-        });
-    }
+  // NAVIGAZIONE SEZIONI
+  document.querySelectorAll(".nav-item").forEach((item) => {
+    item.addEventListener("click", async (e) => {
+      e.preventDefault();
+      const section = item.dataset.section;
+      if (!section) return;
 
-    // Listener storico (già presente nel tuo codice)
-    document.getElementById("storicoDate")?.addEventListener("change", loadStorico);
+      // Attiva voce di menu
+      document
+        .querySelectorAll(".nav-item")
+        .forEach((i) => i.classList.remove("active"));
+      item.classList.add("active");
+
+      // Attiva sezione contenuto
+      document
+        .querySelectorAll(".content-section")
+        .forEach((s) => s.classList.remove("active"));
+      const sectionEl = document.getElementById(`section-${section}`);
+      if (sectionEl) sectionEl.classList.add("active");
+
+      // Salva sezione attiva
+      localStorage.setItem("activeSection", section);
+
+      // Chiudi menu mobile / tablet dopo il click
+      if (window.innerWidth < 1024 && sidebar && mobileMenuToggle) {
+        sidebar.classList.remove("mobile-open");
+        mobileMenuToggle.classList.remove("active");
+      }
+
+      // Carica dati sezione
+      if (section === "marche") await loadMarche();
+      if (section === "prodotti") await loadProdotti();
+      if (section === "movimenti") await loadMovimenti();
+      if (section === "riepilogo") await loadRiepilogo();
+      if (section === "storico") await loadStorico();
+      if (section === "utenti") await loadUtenti();
+    });
+  });
+
+  // Sezione iniziale
+  const initialItem = document.querySelector(
+    `.nav-item[data-section="${savedSection}"]`,
+  );
+  if (initialItem) {
+    initialItem.click();
+  }
+
+  // Logout
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("username");
+      localStorage.removeItem("activeSection");
+      window.location.href = "index.html";
+    });
+  }
+
+  // Listener storico (già presente nel tuo codice)
+  document
+    .getElementById("storicoDate")
+    ?.addEventListener("change", loadStorico);
 });
 
 // NAVIGAZIONE SEZIONI + MEMORIA RICERCA
 
-
-
 function renderUtenti() {
-  const tbody = document.getElementById('utentiTableBody');
+  const tbody = document.getElementById("utentiTableBody");
   if (!tbody) {
-    console.error('Elemento utentiTableBody non trovato');
+    console.error("Elemento utentiTableBody non trovato");
     return;
   }
 
@@ -4658,9 +4699,11 @@ function renderUtenti() {
               Nessun utente trovato
             </p>
             <p style="font-size: 14px;">
-              ${document.getElementById('filterUtenti')?.value 
-                ? 'Prova a modificare il termine di ricerca' 
-                : 'Clicca su Nuovo Utente per iniziare'}
+              ${
+                document.getElementById("filterUtenti")?.value
+                  ? "Prova a modificare il termine di ricerca"
+                  : "Clicca su Nuovo Utente per iniziare"
+              }
             </p>
           </div>
         </td>
@@ -4669,7 +4712,9 @@ function renderUtenti() {
   }
 
   // Rendering utenti esistenti
-  tbody.innerHTML = utenti.map(u => `
+  tbody.innerHTML = utenti
+    .map(
+      (u) => `
     <tr>
       <td><strong>${escapeHtml(u.username)}</strong></td>
       <td class="text-right">
@@ -4694,15 +4739,17 @@ function renderUtenti() {
         </button>
       </td>
     </tr>
-  `).join('');
-  
-  console.log(utenti.length, 'utenti renderizzati');
+  `,
+    )
+    .join("");
+
+  console.log(utenti.length, "utenti renderizzati");
 }
 
 // CHIAVI PER MEMORIZZARE INPUT VARI (NON SOLO RICERCA)
 const INPUT_MEMORY_KEYS = {
-  storicoData: 'input_storicoDate',
-  movimentoProdottoSearch: 'input_movimentoProdottoSearch',
+  storicoData: "input_storicoDate",
+  movimentoProdottoSearch: "input_movimentoProdottoSearch",
   // aggiungi qui altri campi che vuoi persistere
   // es: filtro globale movimenti: movimentiFilter: 'input_movimentiFilter'
 };
@@ -4710,9 +4757,9 @@ const INPUT_MEMORY_KEYS = {
 // Salva il valore di un input nel localStorage
 function saveInputValue(key, value) {
   try {
-    localStorage.setItem(key, value ?? '');
+    localStorage.setItem(key, value ?? "");
   } catch (error) {
-    console.error('Errore salvataggio input', key, error);
+    console.error("Errore salvataggio input", key, error);
   }
 }
 
@@ -4720,10 +4767,10 @@ function saveInputValue(key, value) {
 function getInputValue(key) {
   try {
     const v = localStorage.getItem(key);
-    return v ?? '';
+    return v ?? "";
   } catch (error) {
-    console.error('Errore lettura input', key, error);
-    return '';
+    console.error("Errore lettura input", key, error);
+    return "";
   }
 }
 /**
@@ -4735,7 +4782,7 @@ function getInputValue(key) {
 function setupPersistentInput(inputId, memoryKey, onRestore) {
   const el = document.getElementById(inputId);
   if (!el) {
-    console.warn('Input non trovato per memoria:', inputId);
+    console.warn("Input non trovato per memoria:", inputId);
     return;
   }
 
@@ -4743,42 +4790,41 @@ function setupPersistentInput(inputId, memoryKey, onRestore) {
   const saved = getInputValue(memoryKey);
   if (saved) {
     el.value = saved;
-    if (typeof onRestore === 'function') {
+    if (typeof onRestore === "function") {
       onRestore(saved);
     }
   }
 
   // SALVATAGGIO IN TEMPO REALE
-  el.addEventListener('input', e => {
+  el.addEventListener("input", (e) => {
     saveInputValue(memoryKey, e.target.value);
   });
 }
 
-
 // ==================== MEMORIA CAMPI DI RICERCA ====================
 const SEARCHKEYS = {
-  marche:   'search_marche',
-  prodotti: 'search_prodotti',
-  movimenti:'search_movimenti',
-  riepilogo:'search_riepilogo',
-  storico:  'search_storico',
-  utenti:   'search_utenti'
+  marche: "search_marche",
+  prodotti: "search_prodotti",
+  movimenti: "search_movimenti",
+  riepilogo: "search_riepilogo",
+  storico: "search_storico",
+  utenti: "search_utenti",
 };
 
 function saveSearchTerm(key, value) {
   try {
-    localStorage.setItem(key, value ?? '');
+    localStorage.setItem(key, value ?? "");
   } catch (e) {
-    console.error('Errore salvataggio filtro', key, e);
+    console.error("Errore salvataggio filtro", key, e);
   }
 }
 
 function getSearchTerm(key) {
   try {
-    return localStorage.getItem(key) ?? '';
+    return localStorage.getItem(key) ?? "";
   } catch (e) {
-    console.error('Errore lettura filtro', key, e);
-    return '';
+    console.error("Errore lettura filtro", key, e);
+    return "";
   }
 }
 
@@ -4797,12 +4843,12 @@ function setupSearchPersistence(inputId, storageKey) {
     input.value = saved;
     // rilancia l'evento input per riattivare il filtro
     setTimeout(() => {
-      input.dispatchEvent(new Event('input'));
+      input.dispatchEvent(new Event("input"));
     }, 0);
   }
 
   // SALVA ad ogni digitazione
-  input.addEventListener('input', (e) => {
+  input.addEventListener("input", (e) => {
     saveSearchTerm(storageKey, e.target.value);
   });
 }
@@ -4831,7 +4877,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.addEventListener("click", (e) => {
       if (window.innerWidth <= 768) {
-        if (!sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
+        if (
+          !sidebar.contains(e.target) &&
+          !mobileMenuToggle.contains(e.target)
+        ) {
           sidebar.classList.remove("mobile-open");
           mobileMenuToggle.classList.remove("active");
         }
@@ -4864,11 +4913,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Carica dati sezione
-      if (section === "marche")    loadMarche();
-      if (section === "prodotti")  loadProdotti();
+      if (section === "marche") loadMarche();
+      if (section === "prodotti") loadProdotti();
       if (section === "movimenti") loadMovimenti();
       if (section === "riepilogo") loadRiepilogo();
-      if (section === "utenti")    loadUtenti();
+      if (section === "utenti") loadUtenti();
     });
   });
 
@@ -4893,12 +4942,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // 🎯 MEMORIA FILTRI DI RICERCA (RESTANO DOPO F5)
   // =======================================================
   // Assicurati che questi ID esistano in home.html
-  setupSearchPersistence("filterMarche",    SEARCHKEYS.marche);
-  setupSearchPersistence("filterProdotti",  SEARCHKEYS.prodotti);
+  setupSearchPersistence("filterMarche", SEARCHKEYS.marche);
+  setupSearchPersistence("filterProdotti", SEARCHKEYS.prodotti);
   setupSearchPersistence("filterMovimenti", SEARCHKEYS.movimenti);
   setupSearchPersistence("filterRiepilogo", SEARCHKEYS.riepilogo);
-  setupSearchPersistence("filterStorico",   SEARCHKEYS.storico);
-  setupSearchPersistence("filterUtenti",    SEARCHKEYS.utenti);
+  setupSearchPersistence("filterStorico", SEARCHKEYS.storico);
+  setupSearchPersistence("filterUtenti", SEARCHKEYS.utenti);
 
   // =======================================================
   // 🎯 LISTENER CAMBIO CARICO/SCARICO
@@ -4931,7 +4980,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Chiudi cliccando fuori (solo sotto 1024px)
     document.addEventListener("click", (e) => {
       if (window.innerWidth <= 1024) {
-        if (!sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
+        if (
+          !sidebar.contains(e.target) &&
+          !mobileMenuToggle.contains(e.target)
+        ) {
           sidebar.classList.remove("mobile-open");
           mobileMenuToggle.classList.remove("active");
         }
@@ -4949,11 +5001,15 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!section) return;
 
       // attiva voce di menu
-      document.querySelectorAll(".nav-item").forEach((i) => i.classList.remove("active"));
+      document
+        .querySelectorAll(".nav-item")
+        .forEach((i) => i.classList.remove("active"));
       item.classList.add("active");
 
       // mostra sezione
-      document.querySelectorAll(".content-section").forEach((s) => s.classList.remove("active"));
+      document
+        .querySelectorAll(".content-section")
+        .forEach((s) => s.classList.remove("active"));
       const sectionEl = document.getElementById(`section-${section}`);
       if (sectionEl) sectionEl.classList.add("active");
 
@@ -4966,12 +5022,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // carica dati sezione (usa await se le funzioni sono async)
-      if (section === "marche")    await loadMarche();
-      if (section === "prodotti")  await loadProdotti();
+      if (section === "marche") await loadMarche();
+      if (section === "prodotti") await loadProdotti();
       if (section === "movimenti") await loadMovimenti();
       if (section === "riepilogo") await loadRiepilogo();
-      if (section === "storico")   await loadStorico();
-      if (section === "utenti")    await loadUtenti();
+      if (section === "storico") await loadStorico();
+      if (section === "utenti") await loadUtenti();
 
       // ripristina filtro salvato per quella sezione (se usi il sistema di memoria)
       restoreSearchOnSectionChange(section);
@@ -4979,7 +5035,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // attiva sezione iniziale
-  const initialItem = document.querySelector(`.nav-item[data-section="${savedSection}"]`);
+  const initialItem = document.querySelector(
+    `.nav-item[data-section="${savedSection}"]`,
+  );
   if (initialItem) initialItem.click();
 
   // logout
@@ -4999,42 +5057,42 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function togglePrezzoField() {
-  const tipo = document.getElementById('movimentoTipo').value;
-  const prezzoGroup = document.getElementById('prezzoGroup');
-  const prezzoInput = document.getElementById('movimentoPrezzo');
-  const fornitoreGroup = document.getElementById('fornitoreGroup');
-  const fatturaInput = document.getElementById('movimentoFattura');
-  const fornitoreInput = document.getElementById('movimentoFornitore');
-  const docOptional = document.getElementById('docOptional');
-  const fornitoreOptional = document.getElementById('fornitoreOptional');
-  const fatturaGroup = fatturaInput.closest('.form-group');
+  const tipo = document.getElementById("movimentoTipo").value;
+  const prezzoGroup = document.getElementById("prezzoGroup");
+  const prezzoInput = document.getElementById("movimentoPrezzo");
+  const fornitoreGroup = document.getElementById("fornitoreGroup");
+  const fatturaInput = document.getElementById("movimentoFattura");
+  const fornitoreInput = document.getElementById("movimentoFornitore");
+  const docOptional = document.getElementById("docOptional");
+  const fornitoreOptional = document.getElementById("fornitoreOptional");
+  const fatturaGroup = fatturaInput.closest(".form-group");
 
-  if (tipo === 'carico') {
-    prezzoGroup.style.display = 'block';
+  if (tipo === "carico") {
+    prezzoGroup.style.display = "block";
     prezzoInput.required = true;
 
-    fornitoreGroup.style.display = 'block';
-    fatturaGroup.style.display = 'block';
+    fornitoreGroup.style.display = "block";
+    fatturaGroup.style.display = "block";
     fatturaInput.required = true;
     fornitoreInput.required = true;
 
-    docOptional.textContent = '';
-    fornitoreOptional.textContent = '';
+    docOptional.textContent = "";
+    fornitoreOptional.textContent = "";
   } else {
     // scarico o vuoto → niente documento
-    prezzoGroup.style.display = 'none';
+    prezzoGroup.style.display = "none";
     prezzoInput.required = false;
-    prezzoInput.value = '';
+    prezzoInput.value = "";
 
-    fornitoreGroup.style.display = 'none';
-    fatturaGroup.style.display = 'none';
-    fornitoreInput.value = '';
-    fatturaInput.value = '';
+    fornitoreGroup.style.display = "none";
+    fatturaGroup.style.display = "none";
+    fornitoreInput.value = "";
+    fatturaInput.value = "";
     fatturaInput.required = false;
     fornitoreInput.required = false;
 
-    docOptional.textContent = '';
-    fornitoreOptional.textContent = '';
+    docOptional.textContent = "";
+    fornitoreOptional.textContent = "";
   }
 }
 
@@ -5150,12 +5208,11 @@ function renderMovimenti() {
 
       const colorClass = m.tipo === "carico" ? "text-green" : "text-red";
 
-      const descr =
-        m.prodotto_descrizione
-          ? `<small>${escapeHtml(
-              m.prodotto_descrizione.substring(0, 30)
-            )}${m.prodotto_descrizione.length > 30 ? "…" : ""}</small>`
-          : '<span style="color:#999;">-</span>';
+      const descr = m.prodotto_descrizione
+        ? `<small>${escapeHtml(
+            m.prodotto_descrizione.substring(0, 30),
+          )}${m.prodotto_descrizione.length > 30 ? "…" : ""}</small>`
+        : '<span style="color:#999;">-</span>';
 
       return `
         <tr>
@@ -5177,8 +5234,7 @@ function renderMovimenti() {
           <td class="${colorClass}"><strong>${prezzoTotaleHtml}</strong></td>
           <td>${m.fattura_doc || '<span style="color:#999;">-</span>'}</td>
           <td>${
-            m.fornitore_cliente_id ||
-            '<span style="color:#999;">-</span>'
+            m.fornitore_cliente_id || '<span style="color:#999;">-</span>'
           }</td>
           <td class="text-right">
             <!-- PENNA MODIFICA -->
@@ -5195,8 +5251,8 @@ function renderMovimenti() {
             <!-- CESTINO ELIMINA -->
             <button class="btn-icon"
               onclick="deleteMovimento(${m.id}, '${escapeHtml(
-        m.prodotto_nome
-      )}', '${m.tipo}')"
+                m.prodotto_nome,
+              )}', '${m.tipo}')"
               title="Elimina movimento"
               aria-label="Elimina movimento ${m.tipo}">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -5214,85 +5270,94 @@ function renderMovimenti() {
 
 // Apre il modal per inserire un nuovo movimento o modificarne uno esistente
 async function openMovimentoModal(movimento = null) {
-    console.log("Apertura modal movimento...", movimento);
+  console.log("Apertura modal movimento...", movimento);
 
-    const modal          = document.getElementById("modalMovimento");
-    const title          = document.getElementById("modalMovimentoTitle");
-    const form           = document.getElementById("formMovimento");
-    const tipoSelect     = document.getElementById("movimentoTipo");
-    const hiddenProdotto = document.getElementById("movimentoProdotto");
-    const searchInput    = document.getElementById("movimentoProdottoSearch");
-    const resultsBox     = document.getElementById("prodottoSearchResults");
+  const modal = document.getElementById("modalMovimento");
+  const title = document.getElementById("modalMovimentoTitle");
+  const form = document.getElementById("formMovimento");
+  const tipoSelect = document.getElementById("movimentoTipo");
+  const hiddenProdotto = document.getElementById("movimentoProdotto");
+  const searchInput = document.getElementById("movimentoProdottoSearch");
+  const resultsBox = document.getElementById("prodottoSearchResults");
 
-    form.reset();
-    document.getElementById("movimentoId").value = "";
+  form.reset();
+  document.getElementById("movimentoId").value = "";
 
-    // NUOVO MOVIMENTO
-    if (!movimento) {
-        title.textContent = "Nuovo Movimento";
+  // NUOVO MOVIMENTO
+  if (!movimento) {
+    title.textContent = "Nuovo Movimento";
 
-        // reset ricerca prodotto
-        if (hiddenProdotto) hiddenProdotto.value = "";
-        if (searchInput)    searchInput.value = "";
-        if (resultsBox)     resultsBox.classList.remove("show");
+    // reset ricerca prodotto
+    if (hiddenProdotto) hiddenProdotto.value = "";
+    if (searchInput) searchInput.value = "";
+    if (resultsBox) resultsBox.classList.remove("show");
 
-        // nascondi info giacenza
-        const giacenzaInfo = document.getElementById("giacenzaInfo");
-        if (giacenzaInfo) giacenzaInfo.style.display = "none";
+    // nascondi info giacenza
+    const giacenzaInfo = document.getElementById("giacenzaInfo");
+    if (giacenzaInfo) giacenzaInfo.style.display = "none";
 
-        // 🔥 preimposta TIPO su CARICO
-        if (tipoSelect) tipoSelect.value = "carico";
-    } else {
-        // MODIFICA MOVIMENTO
-        title.textContent = "Modifica Movimento";
-        document.getElementById("movimentoId").value = movimento.id;
+    // 🔥 preimposta TIPO su CARICO
+    if (tipoSelect) tipoSelect.value = "carico";
+  } else {
+    // MODIFICA MOVIMENTO
+    title.textContent = "Modifica Movimento";
+    document.getElementById("movimentoId").value = movimento.id;
 
-        // prodotto selezionato
-        if (hiddenProdotto) hiddenProdotto.value = movimento.prodotto_id || movimento.prodottoid;
+    // prodotto selezionato
+    if (hiddenProdotto)
+      hiddenProdotto.value = movimento.prodotto_id || movimento.prodottoid;
 
-        if (searchInput) {
-            const prodotto = allProdotti.find(
-                (p) => p.id === (movimento.prodotto_id || movimento.prodottoid)
-            );
-            if (prodotto) {
-                const marca = prodotto.marca_nome || prodotto.marcanome || "";
-                const display = marca ? `${prodotto.nome} - ${marca.toUpperCase()}` : prodotto.nome;
-                searchInput.value = display;
-                searchInput.classList.add("has-selection");
-            }
-        }
-
-        // tipo (carico/scarico)
-        if (tipoSelect) tipoSelect.value = movimento.tipo;
-
-        // altri campi
-        document.getElementById("movimentoQuantita").value = formatNumber(movimento.quantita);
-        document.getElementById("movimentoData").value     = movimento.data_movimento || movimento.datamovimento || "";
-
-        if (movimento.tipo === "carico") {
-            if (document.getElementById("movimentoPrezzo"))
-                document.getElementById("movimentoPrezzo").value =
-                    movimento.prezzo ? formatNumber(movimento.prezzo) : "";
-            if (document.getElementById("movimentoFattura"))
-                document.getElementById("movimentoFattura").value = movimento.fattura_doc || movimento.fatturadoc || "";
-            if (document.getElementById("movimentoFornitore"))
-                document.getElementById("movimentoFornitore").value = movimento.fornitore || "";
-        }
-
-        // mostra giacenza prodotto selezionato
-        const pid = movimento.prodotto_id || movimento.prodottoid;
-        if (pid) await showGiacenzaInfo(pid);
+    if (searchInput) {
+      const prodotto = allProdotti.find(
+        (p) => p.id === (movimento.prodotto_id || movimento.prodottoid),
+      );
+      if (prodotto) {
+        const marca = prodotto.marca_nome || prodotto.marcanome || "";
+        const display = marca
+          ? `${prodotto.nome} - ${marca.toUpperCase()}`
+          : prodotto.nome;
+        searchInput.value = display;
+        searchInput.classList.add("has-selection");
+      }
     }
 
-    // aggiorna visibilità dei campi prezzo/fornitore in base al tipo
-    togglePrezzoField();
+    // tipo (carico/scarico)
+    if (tipoSelect) tipoSelect.value = movimento.tipo;
 
-    // mostra modal
-    modal.classList.add("active");
+    // altri campi
+    document.getElementById("movimentoQuantita").value = formatNumber(
+      movimento.quantita,
+    );
+    document.getElementById("movimentoData").value =
+      movimento.data_movimento || movimento.datamovimento || "";
 
-    // dopo breve timeout: decimali + ricerca prodotto
-    setTimeout(() => {
-        if (typeof setupDecimalInputs === "function") setupDecimalInputs();
-        if (typeof setupProductSearch === "function") setupProductSearch();
-    }, 150);
+    if (movimento.tipo === "carico") {
+      if (document.getElementById("movimentoPrezzo"))
+        document.getElementById("movimentoPrezzo").value = movimento.prezzo
+          ? formatNumber(movimento.prezzo)
+          : "";
+      if (document.getElementById("movimentoFattura"))
+        document.getElementById("movimentoFattura").value =
+          movimento.fattura_doc || movimento.fatturadoc || "";
+      if (document.getElementById("movimentoFornitore"))
+        document.getElementById("movimentoFornitore").value =
+          movimento.fornitore || "";
+    }
+
+    // mostra giacenza prodotto selezionato
+    const pid = movimento.prodotto_id || movimento.prodottoid;
+    if (pid) await showGiacenzaInfo(pid);
+  }
+
+  // aggiorna visibilità dei campi prezzo/fornitore in base al tipo
+  togglePrezzoField();
+
+  // mostra modal
+  modal.classList.add("active");
+
+  // dopo breve timeout: decimali + ricerca prodotto
+  setTimeout(() => {
+    if (typeof setupDecimalInputs === "function") setupDecimalInputs();
+    if (typeof setupProductSearch === "function") setupProductSearch();
+  }, 150);
 }
