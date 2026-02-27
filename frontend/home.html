@@ -379,43 +379,90 @@
         <div id="modalImportPDF" class="modal">
           <div class="modal-content">
             <div class="modal-header">
-              <h2>Scarica da PDF</h2>
+              <h2>📄 Scarica da PDF</h2>
               <button class="modal-close" onclick="closeImportPDFModal()">
                 &times;
               </button>
             </div>
             <form id="formImportPDF">
               <div class="modal-body">
-                <p style="margin-bottom: 15px; color: var(--text-secondary)">
-                  Seleziona il file PDF per estrarre automaticamente i Codici
-                  Ricambio e le Quantità.
-                </p>
+
+                <!-- Istruzioni -->
+                <div style="
+                  background: #eff6ff;
+                  border: 1px solid #bfdbfe;
+                  border-radius: 10px;
+                  padding: 14px 16px;
+                  margin-bottom: 18px;
+                ">
+                  <p style="font-weight: 700; color: #1d4ed8; margin-bottom: 6px; font-size: 13px;">
+                    ℹ️ Come funziona
+                  </p>
+                  <p style="color: #1e40af; font-size: 13px; line-height: 1.5; margin: 0;">
+                    Carica il PDF del documento di lavoro. Il sistema leggerà automaticamente
+                    la sezione <strong>RICAMBI</strong> ed eseguirà uno <strong>scarico di magazzino</strong>
+                    per ogni prodotto trovato con il rispettivo codice e quantità.
+                  </p>
+                </div>
+
+                <!-- Area upload -->
                 <div class="file-upload-container">
-                  <label for="importPDFFile" class="file-upload-label">
+                  <label for="importPDFFile" class="file-upload-label" style="cursor: pointer;">
                     <input
                       type="file"
                       id="importPDFFile"
                       accept=".pdf"
                       hidden
                     />
-                    <div class="file-upload-design">
+                    <div class="file-upload-design" style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      justify-content: center;
+                      padding: 28px 20px;
+                      gap: 8px;
+                    ">
                       <svg
                         viewBox="0 0 24 24"
                         fill="none"
-                        stroke="currentColor"
+                        stroke="#6366f1"
                         stroke-width="2"
-                        style="width: 40px; height: 40px; margin-bottom: 10px"
+                        style="width: 44px; height: 44px;"
                       >
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                         <polyline points="17 8 12 3 7 8" />
                         <line x1="12" y1="3" x2="12" y2="15" />
                       </svg>
-                      <span id="filePreview"
-                        >Trascina il PDF qui o clicca per sfogliare</span
-                      >
+                      <p style="font-weight: 700; font-size: 15px; color: #374151; margin: 0;">
+                        Clicca per selezionare il PDF
+                      </p>
+                      <p style="font-size: 13px; color: #6b7280; margin: 0;">
+                        oppure trascinalo qui dentro
+                      </p>
+                      <span id="filePreview" style="
+                        margin-top: 6px;
+                        font-size: 13px;
+                        font-weight: 600;
+                        color: #6366f1;
+                        display: none;
+                      "></span>
                     </div>
                   </label>
                 </div>
+
+                <!-- Formato atteso -->
+                <div style="margin-top: 14px; padding: 12px 14px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
+                  <p style="font-size: 12px; font-weight: 700; color: #6b7280; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">
+                    ✅ Requisiti del PDF
+                  </p>
+                  <ul style="margin: 0; padding-left: 16px; font-size: 12px; color: #6b7280; line-height: 1.8;">
+                    <li>Deve contenere la sezione <strong style="color:#374151;">RICAMBI</strong></li>
+                    <li>Ogni riga: <strong style="color:#374151;">CODICE PRODOTTO</strong> + <strong style="color:#374151;">QUANTITÀ</strong></li>
+                    <li>Data del documento (se presente verrà usata automaticamente)</li>
+                    <li>Dimensione massima: <strong style="color:#374151;">10 MB</strong></li>
+                  </ul>
+                </div>
+
               </div>
               <div class="modal-footer">
                 <button
@@ -426,6 +473,12 @@
                   Annulla
                 </button>
                 <button type="submit" class="btn btn-primary">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                  </svg>
                   Elabora Documento
                 </button>
               </div>
