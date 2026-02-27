@@ -2012,6 +2012,18 @@ function hideImportLoading() {
 function showImportResults(results) {
   hideImportLoading();
 
+  // ⚠️ CASO SPECIALE: documento duplicato → messaggio dedicato
+  const duplicato = results.failed.find((f) => f.duplicato);
+  if (duplicato) {
+    alert(
+      `⚠️ IMPORTAZIONE BLOCCATA\n\n` +
+        `${duplicato.reason}\n\n` +
+        `Per evitare doppi scarichi, ogni PDF può essere importato una sola volta.\n` +
+        `Se hai bisogno di reimportarlo, elimina prima i movimenti corrispondenti dalla sezione "Movimenti".`,
+    );
+    return;
+  }
+
   const total =
     results.success.length +
     results.failed.length +
@@ -3013,10 +3025,16 @@ async function checkProductExists(code) {
 }
 
 /**
- * ✅ Crea gli SCARICHI nel database
+ * ✅ Crea gli SCARICHI nel database tramite endpoint bulk (anti-duplicato)
+ *
+ * - Aggrega le righe PDF per codice (una sola riga per prodotto)
+ * - Usa POST /api/dati/bulk-scarico che salva fattura_doc = nome PDF
+ * - Se lo stesso PDF viene reimportato il backend lo blocca con 409
  */
-async function processScarichi(scarichi) {
-  console.log(`🚀 Inizio elaborazione ${scarichi.length} scarichi...`);
+async function processScarichi(scarichi, nomeFilePdf) {
+  console.log(
+    `🚀 Inizio elaborazione bulk: ${scarichi.length} righe PDF → nome file: "${nomeFilePdf}"`,
+  );
 
   const results = {
     success: [],
@@ -3025,102 +3043,133 @@ async function processScarichi(scarichi) {
     insufficientStock: [],
   };
 
-  for (let i = 0; i < scarichi.length; i++) {
-    const scarico = scarichi[i];
-
-    console.log(
-      `📦 [${i + 1}/${scarichi.length}] Elaborazione: ${scarico.code} - ${
-        scarico.quantity
-      } pz`,
-    );
-
-    try {
-      // 1️⃣ Verifica se il prodotto esiste
-      const prodotto = await checkProductExists(scarico.code);
-
-      if (!prodotto) {
-        results.notFound.push({
-          code: scarico.code,
-          quantity: scarico.quantity,
-          date: scarico.date,
-          reason: "Prodotto non trovato nel database",
-        });
-        continue;
-      }
-
-      // 2️⃣ Crea lo SCARICO (il server verifica la giacenza alla data corretta)
-      const movementData = {
-        prodotto_id: prodotto.id,
-        tipo: "scarico",
-        quantita: scarico.quantity,
-        data_movimento: scarico.date,
-        fattura_doc: null,
-        fornitore: null,
-        prezzo: null,
-      };
-
-      console.log("📤 Invio scarico al server:", movementData);
-
-      const res = await fetch(`${API_URL}/dati`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(movementData),
-      });
-
-      if (res.ok) {
-        results.success.push({
-          code: scarico.code,
-          nome: prodotto.nome,
-          quantity: scarico.quantity,
-          date: scarico.date,
-        });
-        console.log(
-          `✅ Scarico creato: ${scarico.code} - ${scarico.quantity} pz`,
-        );
-      } else {
-        const error = await res.json();
-        const errMsg = error.error || "Errore sconosciuto dal server";
-
-        // Distingui giacenza insufficiente da altri errori
-        if (
-          errMsg.includes("Giacenza insufficiente") ||
-          errMsg.includes("giacenza") ||
-          errMsg.includes("Nessun carico disponibile")
-        ) {
-          results.insufficientStock.push({
-            code: scarico.code,
-            nome: prodotto.nome,
-            quantity: scarico.quantity,
-            available: prodotto.giacenza,
-            date: scarico.date,
-            reason: errMsg,
-          });
-          console.warn(
-            `⚠️ Giacenza insufficiente: ${scarico.code} - ${errMsg}`,
-          );
-        } else {
-          results.failed.push({
-            code: scarico.code,
-            quantity: scarico.quantity,
-            date: scarico.date,
-            reason: errMsg,
-          });
-          console.error(`❌ Errore creazione scarico: ${errMsg}`);
-        }
-      }
-    } catch (error) {
-      results.failed.push({
-        code: scarico.code,
-        quantity: scarico.quantity,
-        date: scarico.date,
-        reason: error.message,
-      });
-      console.error(`❌ Errore elaborazione: ${error.message}`);
-    }
+  // 1️⃣ Carica tutti i prodotti freschi dal server
+  let prodottiDB = [];
+  try {
+    const r = await fetch(`${API_URL}/prodotti`);
+    prodottiDB = await r.json();
+  } catch (e) {
+    console.error("❌ Impossibile caricare prodotti:", e);
+    results.failed.push({
+      code: "–",
+      reason: "Errore caricamento prodotti dal server",
+    });
+    return results;
   }
 
-  console.log("📊 Elaborazione completata:", results);
+  // 2️⃣ Aggrega per codice: una sola riga per prodotto (somma quantità se codice ripetuto nel PDF)
+  const aggregati = {};
+  for (const s of scarichi) {
+    const codice = String(s.code).trim().toUpperCase();
+    if (!codice) continue;
+    if (!aggregati[codice]) {
+      aggregati[codice] = { code: codice, quantity: 0, date: s.date };
+    }
+    aggregati[codice].quantity += s.quantity;
+  }
 
+  // 3️⃣ Risolvi prodotto_id per ogni codice aggregato
+  const scarichiDaInviare = [];
+  for (const [codice, agg] of Object.entries(aggregati)) {
+    const prodotto = prodottiDB.find(
+      (p) => p.nome.trim().toUpperCase() === codice,
+    );
+    if (!prodotto) {
+      results.notFound.push({
+        code: codice,
+        quantity: agg.quantity,
+        date: agg.date,
+        reason: "Prodotto non trovato nel database",
+      });
+      console.warn(`⚠️ Prodotto non trovato: ${codice}`);
+      continue;
+    }
+    scarichiDaInviare.push({
+      codice,
+      prodotto_id: prodotto.id,
+      quantita: parseFloat(agg.quantity.toFixed(2)),
+      data_movimento: agg.date,
+    });
+    console.log(
+      `✅ Prodotto trovato: ${codice} → ID ${prodotto.id}, qty ${agg.quantity}`,
+    );
+  }
+
+  // Se non ci sono scarichi validi (tutti notFound), esci subito
+  if (scarichiDaInviare.length === 0) {
+    console.warn("⚠️ Nessun prodotto valido trovato, skip chiamata bulk");
+    return results;
+  }
+
+  // 4️⃣ Chiama l'endpoint bulk: UNA sola chiamata, il backend controlla i duplicati
+  console.log(
+    `📤 Invio ${scarichiDaInviare.length} scarichi al backend (bulk)...`,
+  );
+  try {
+    const res = await fetch(`${API_URL}/dati/bulk-scarico`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        scarichi: scarichiDaInviare,
+        nome_documento: nomeFilePdf,
+      }),
+    });
+
+    const data = await res.json();
+
+    // 409 = documento già importato
+    if (res.status === 409) {
+      console.warn("⚠️ Documento duplicato:", data.error);
+      results.failed.push({
+        code: nomeFilePdf,
+        reason: data.error,
+        duplicato: true,
+      });
+      return results;
+    }
+
+    if (!res.ok) {
+      console.error("❌ Errore bulk:", data.error);
+      results.failed.push({
+        code: "–",
+        reason: data.error || "Errore sconosciuto",
+      });
+      return results;
+    }
+
+    // 5️⃣ Mappa i risultati restituiti dal backend
+    const r = data.risultati;
+
+    for (const s of r.success) {
+      results.success.push({
+        code: s.codice,
+        nome: s.codice,
+        quantity: s.quantita,
+        date: s.data_movimento,
+      });
+    }
+    for (const s of r.insufficientStock) {
+      results.insufficientStock.push({
+        code: s.codice,
+        nome: s.codice,
+        quantity: s.quantita,
+        available: s.disponibile,
+        date: s.data_movimento,
+        reason: s.reason,
+      });
+    }
+    for (const s of r.failed) {
+      results.failed.push({
+        code: s.codice || "–",
+        reason: s.reason,
+      });
+    }
+  } catch (e) {
+    console.error("❌ Errore chiamata bulk:", e);
+    results.failed.push({ code: "–", reason: e.message });
+  }
+
+  console.log("📊 Elaborazione bulk completata:", results);
   return results;
 }
 
@@ -3158,8 +3207,8 @@ async function handlePDFImport(file) {
       );
     }
 
-    // 4️⃣ Processa gli SCARICHI
-    const results = await processScarichi(scarichi);
+    // 4️⃣ Processa gli SCARICHI (passa il nome file per controllo duplicati)
+    const results = await processScarichi(scarichi, file.name);
 
     // 5️⃣ Mostra risultati
     showImportResults(results);
