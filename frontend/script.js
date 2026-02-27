@@ -189,6 +189,7 @@ async function loadProdotti() {
     allProdotti = await res.json();
     prodotti = allProdotti;
     renderProdotti();
+    reapplyFilter("filterProdotti");
   } catch (error) {
     console.error("Errore caricamento prodotti:", error);
   }
@@ -390,6 +391,7 @@ async function loadRiepilogo() {
     // CHANGE: Aggiorna il totale in base ai prodotti visibili
     updateRiepilogoTotal();
     renderRiepilogo();
+    reapplyFilter("filterRiepilogo");
   } catch (error) {
     console.error("Errore caricamento riepilogo:", error);
   }
@@ -443,6 +445,7 @@ async function loadUtenti() {
     allUtenti = await res.json(); // CHANGE: Salva tutte le marche in allUtenti
     utenti = allUtenti; // CHANGE: Reimposta utenti alla copia di allUtenti per il rendering iniziale
     renderUtenti();
+    reapplyFilter("filterUtenti");
   } catch (error) {
     console.error("Errore caricamento utenti:", error);
   }
@@ -3318,6 +3321,7 @@ async function loadMarche() {
     console.log(`✅ ${marche.length} marche caricate:`, marche);
 
     renderMarche();
+    reapplyFilter("filterMarche");
   } catch (error) {
     console.error("❌ Errore caricamento marche:", error);
     showNotification("Errore nel caricamento delle marche", "error");
@@ -3881,6 +3885,7 @@ async function loadStorico() {
 
     updateStoricoTotal();
     renderStorico(storico);
+    reapplyFilter("filterStorico");
   } catch (error) {
     console.error("❌ Errore caricamento storico:", error);
     showAlertModal("Errore nel caricamento dello storico", "Errore", "error");
@@ -4104,6 +4109,21 @@ function showNotification(message, type = "info") {
 // };
 
 // ==================== 🔍 SISTEMA RICERCA CON MEMORIA LOCALSTORAGE ====================
+
+/**
+ * 🔄 Riapplica il filtro attivo dopo un reload dei dati.
+ * Se c'è testo nell'input di ricerca, rilancia l'evento "input"
+ * così la lista aggiornata viene subito filtrata — il nuovo elemento
+ * creato/modificato che corrisponde al filtro compare immediatamente.
+ * @param {string} inputId - ID dell'input (es. "filterProdotti")
+ */
+function reapplyFilter(inputId) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  if (input.value.trim()) {
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+}
 
 /**
  * 💾 STORAGE KEYS per ogni sezione
@@ -5171,6 +5191,7 @@ async function loadMovimenti() {
     }
 
     renderMovimenti();
+    reapplyFilter("filterMovimenti");
   } catch (error) {
     console.error("Errore caricamento movimenti", error);
   }
