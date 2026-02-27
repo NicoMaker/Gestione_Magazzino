@@ -1802,62 +1802,8 @@ function parseScarichiFromText(text) {
  */
 
 /**
- * Gestisce il submit del form
+ * Gestisce il submit del form - vedere listener principale più avanti
  */
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("formImportPDF");
-
-  if (form) {
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const fileInput = document.getElementById("importPDFFile");
-
-      // Validazioni
-      if (!fileInput.files[0]) {
-        alert("⚠️ Seleziona un file PDF");
-        return;
-      }
-
-      const file = fileInput.files[0];
-
-      // Verifica che sia un PDF
-      if (file.type !== "application/pdf") {
-        alert("⚠️ Il file deve essere un PDF");
-        return;
-      }
-
-      // Verifica dimensione (max 10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        alert("⚠️ Il file è troppo grande (max 10MB)");
-        return;
-      }
-
-      // Avvia import
-      try {
-        await handlePDFImport(file);
-      } catch (error) {
-        // Errore già gestito in handlePDFImport
-      }
-    });
-  }
-
-  // Preview del file selezionato
-  const fileInput = document.getElementById("importPDFFile");
-  if (fileInput) {
-    fileInput.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      const preview = document.getElementById("filePreview");
-
-      if (file && preview) {
-        preview.textContent = `📄 ${file.name} (${(file.size / 1024).toFixed(
-          1,
-        )} KB)`;
-        preview.style.display = "block";
-      }
-    });
-  }
-});
 
 // Funzione helper per formattare quantità (già presente in script.js)
 function formatQuantity(num) {
@@ -1873,45 +1819,11 @@ function formatQuantity(num) {
 
 // Gestione dell'importazione PDF
 
-// Aggiungi il listener al caricamento del DOM
-document.addEventListener("DOMContentLoaded", () => {
-  const formPDF = document.getElementById("formImportPDF");
-  if (formPDF) {
-    formPDF.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const fileInput = document.getElementById("importPDFFile");
-      if (fileInput.files.length > 0) {
-        await handlePDFImport(fileInput.files[0]);
-      } else {
-        alert("Seleziona un file PDF.");
-      }
-    });
-  }
-});
+// Gestione dell'importazione PDF - listener principale definito più avanti
 
 // Funzione che simula la lettura dei dati da prova.pdf
 
-// Inizializzazione listener
-document.addEventListener("DOMContentLoaded", () => {
-  const fileInput = document.getElementById("importPDFFile");
-  if (fileInput) {
-    fileInput.addEventListener("change", (e) => {
-      if (e.target.files[0]) {
-        document.getElementById("filePreview").textContent =
-          e.target.files[0].name;
-      }
-    });
-  }
-
-  const formPDF = document.getElementById("formImportPDF");
-  if (formPDF) {
-    formPDF.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const file = document.getElementById("importPDFFile").files[0];
-      if (file) handlePDFImport(file);
-    });
-  }
-});
+// Inizializzazione listener - vedere listener principale più avanti
 
 // ==================== 📄 IMPORT PDF SCARICHI - SISTEMA COMPLETO ====================
 
@@ -1968,10 +1880,14 @@ document.addEventListener("DOMContentLoaded", () => {
  */
 function showImportLoading() {
   const modal = document.getElementById("modalImportPDF");
-  const importBtn = modal.querySelector(".btn-import-confirm");
+  // Cerca il bottone submit del form (sia .btn-import-confirm che btn-primary nel footer)
+  const importBtn =
+    modal.querySelector(".btn-import-confirm") ||
+    modal.querySelector('[type="submit"]') ||
+    modal.querySelector(".btn-primary");
 
   if (!importBtn) {
-    console.error("❌ Bottone import non trovato");
+    console.warn("⚠️ Bottone import non trovato, continuo senza loading UI");
     return;
   }
 
@@ -1979,10 +1895,7 @@ function showImportLoading() {
 
   importBtn.disabled = true;
   importBtn.dataset.originalHTML = originalHTML;
-  importBtn.innerHTML = `
-    <div class="loading-spinner-inline"></div>
-    <span>⏳ Elaborazione in corso...</span>
-  `;
+  importBtn.innerHTML = `<span>⏳ Elaborazione in corso...</span>`;
 
   console.log("⏳ Loading mostrato");
 }
@@ -1992,10 +1905,13 @@ function showImportLoading() {
  */
 function hideImportLoading() {
   const modal = document.getElementById("modalImportPDF");
-  const importBtn = modal.querySelector(".btn-import-confirm");
+  const importBtn =
+    modal.querySelector(".btn-import-confirm") ||
+    modal.querySelector('[type="submit"]') ||
+    modal.querySelector(".btn-primary");
 
   if (!importBtn) {
-    console.error("❌ Bottone import non trovato");
+    console.warn("⚠️ Bottone import non trovato");
     return;
   }
 
@@ -2113,10 +2029,13 @@ function openImportPDFModal() {
 
   form.reset();
 
-  const filePreview = document.getElementById("filePreviewBox");
+  // Supporta sia 'filePreview' che 'filePreviewBox'
+  const filePreview =
+    document.getElementById("filePreview") ||
+    document.getElementById("filePreviewBox");
   if (filePreview) {
     filePreview.style.display = "none";
-    filePreview.textContent = "";
+    filePreview.textContent = "Trascina il PDF qui o clicca per sfogliare";
   }
 
   modal.classList.add("active");
@@ -2188,7 +2107,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (fileInput) {
     fileInput.addEventListener("change", (e) => {
       const file = e.target.files[0];
-      const preview = document.getElementById("filePreviewBox");
+      // Supporta sia 'filePreview' che 'filePreviewBox' come id
+      const preview =
+        document.getElementById("filePreview") ||
+        document.getElementById("filePreviewBox");
 
       if (file && preview) {
         const sizeKB = (file.size / 1024).toFixed(1);
