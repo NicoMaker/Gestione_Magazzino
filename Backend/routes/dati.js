@@ -380,9 +380,10 @@ router.post("/", (req, res) => {
 // ========================= POST /api/dati/bulk-scarico =========================
 // Importazione bulk da PDF con controllo duplicati (una riga per prodotto per documento)
 router.post("/bulk-scarico", (req, res) => {
-  const { scarichi, nome_documento } = req.body;
+  const { scarichi, nome_documento, forza_reimport } = req.body;
   // scarichi: array di { prodotto_id, quantita, data_movimento, codice }
   // nome_documento: nome del file PDF (usato come chiave anti-duplicato)
+  // forza_reimport: se true, salta il controllo duplicati e processa comunque
 
   if (!Array.isArray(scarichi) || scarichi.length === 0) {
     return res.status(400).json({ error: "Array scarichi vuoto o non valido" });
@@ -405,14 +406,15 @@ router.post("/bulk-scarico", (req, res) => {
         return res.status(500).json({ error: errCheck.message });
       }
 
-      if (rigaEsistente) {
+      // Se esiste già E non è un reimport forzato → avvisa con 409
+      if (rigaEsistente && !forza_reimport) {
         return res.status(409).json({
-          error: `Il documento "${nomeDoc}" è già stato importato. Reimportarlo causerebbe doppi scarichi.`,
+          error: `Il documento "${nomeDoc}" è già stato importato in precedenza.`,
           duplicato: true,
         });
       }
 
-      // 2) Nessun duplicato → processa ogni scarico in sequenza
+      // 2) Nessun duplicato (o reimport confermato) → processa ogni scarico in sequenza
       const risultati = {
         success: [],
         failed: [],

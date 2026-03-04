@@ -1931,15 +1931,10 @@ function hideImportLoading() {
 function showImportResults(results) {
   hideImportLoading();
 
-  // ⚠️ CASO SPECIALE: documento duplicato → messaggio dedicato
+  // ⚠️ CASO SPECIALE: importazione annullata dall'utente
   const duplicato = results.failed.find((f) => f.duplicato);
-  if (duplicato) {
-    alert(
-      `⚠️ IMPORTAZIONE BLOCCATA\n\n` +
-        `${duplicato.reason}\n\n` +
-        `Per evitare doppi scarichi, ogni PDF può essere importato una sola volta.\n` +
-        `Se hai bisogno di reimportarlo, elimina prima i movimenti corrispondenti dalla sezione "Movimenti".`,
-    );
+  if (duplicato && results.success.length === 0 && results.insufficientStock.length === 0) {
+    alert(`⚠️ IMPORTAZIONE ANNULLATA\n\n${duplicato.reason}`);
     return;
   }
 
@@ -3030,26 +3025,67 @@ async function processScarichi(scarichi, nomeFilePdf) {
   console.log(
     `📤 Invio ${scarichiDaInviare.length} scarichi al backend (bulk)...`,
   );
-  try {
+
+  async function chiamaBulk(forzaReimport) {
     const res = await fetch(`${API_URL}/dati/bulk-scarico`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         scarichi: scarichiDaInviare,
         nome_documento: nomeFilePdf,
+        forza_reimport: forzaReimport || false,
       }),
     });
+    return res;
+  }
 
+  try {
+    let res = await chiamaBulk(false);
     const data = await res.json();
 
-    // 409 = documento già importato
+    // 409 = documento già importato → chiedi conferma all'utente
     if (res.status === 409) {
-      console.warn("⚠️ Documento duplicato:", data.error);
-      results.failed.push({
-        code: nomeFilePdf,
-        reason: data.error,
-        duplicato: true,
-      });
+      console.warn("⚠️ Documento già importato:", data.error);
+      hideImportLoading();
+      const conferma = confirm(
+        `⚠️ ATTENZIONE: DOCUMENTO GIÀ IMPORTATO\n\n` +
+        `"${nomeFilePdf}" risulta già importato in precedenza.\n\n` +
+        `Vuoi procedere comunque?\n` +
+        `(La giacenza disponibile verrà verificata normalmente)\n\n` +
+        `Premi OK per confermare, Annulla per interrompere.`
+      );
+      if (!conferma) {
+        results.failed.push({
+          code: nomeFilePdf,
+          reason: "Importazione annullata dall'utente (documento già importato).",
+          duplicato: true,
+        });
+        return results;
+      }
+      showImportLoading();
+      // Rilancia con forza_reimport = true
+      res = await chiamaBulk(true);
+      const data2 = await res.json();
+      if (!res.ok) {
+        console.error("❌ Errore bulk (reimport):", data2.error);
+        results.failed.push({
+          code: "–",
+          reason: data2.error || "Errore sconosciuto",
+        });
+        return results;
+      }
+      // Usa data2 per i risultati
+      const r2 = data2.risultati;
+      for (const s of r2.success) {
+        results.success.push({ code: s.codice, nome: s.codice, quantity: s.quantita, date: s.data_movimento });
+      }
+      for (const s of r2.insufficientStock) {
+        results.insufficientStock.push({ code: s.codice, nome: s.codice, quantity: s.quantita, available: s.disponibile, date: s.data_movimento, reason: s.reason });
+      }
+      for (const s of r2.failed) {
+        results.failed.push({ code: s.codice || "–", reason: s.reason });
+      }
+      console.log("📊 Elaborazione bulk (reimport) completata:", results);
       return results;
     }
 
