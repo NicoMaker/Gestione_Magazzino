@@ -406,15 +406,8 @@ router.post("/bulk-scarico", (req, res) => {
         return res.status(500).json({ error: errCheck.message });
       }
 
-      // Se esiste già E non è un reimport forzato → avvisa con 409
-      if (rigaEsistente && !forza_reimport) {
-        return res.status(409).json({
-          error: `Il documento "${nomeDoc}" è già stato importato in precedenza.`,
-          duplicato: true,
-        });
-      }
-
-      // 2) Nessun duplicato (o reimport confermato) → processa ogni scarico in sequenza
+      // Il controllo duplicati è disabilitato: la giacenza viene sempre verificata normalmente
+      // 2) Processa ogni scarico in sequenza
       const risultati = {
         success: [],
         failed: [],

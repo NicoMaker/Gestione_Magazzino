@@ -2949,7 +2949,7 @@ async function checkProductExists(code) {
  *
  * - Aggrega le righe PDF per codice (una sola riga per prodotto)
  * - Usa POST /api/dati/bulk-scarico che salva fattura_doc = nome PDF
- * - Se lo stesso PDF viene reimportato il backend lo blocca con 409
+
  */
 async function processScarichi(scarichi, nomeFilePdf) {
   console.log(
@@ -3026,68 +3026,18 @@ async function processScarichi(scarichi, nomeFilePdf) {
     `📤 Invio ${scarichiDaInviare.length} scarichi al backend (bulk)...`,
   );
 
-  async function chiamaBulk(forzaReimport) {
+  try {
+    // forza_reimport: true → salta sempre il blocco duplicati, la giacenza viene verificata normalmente
     const res = await fetch(`${API_URL}/dati/bulk-scarico`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         scarichi: scarichiDaInviare,
         nome_documento: nomeFilePdf,
-        forza_reimport: forzaReimport || false,
+        forza_reimport: true,
       }),
     });
-    return res;
-  }
-
-  try {
-    let res = await chiamaBulk(false);
     const data = await res.json();
-
-    // 409 = documento già importato → chiedi conferma all'utente
-    if (res.status === 409) {
-      console.warn("⚠️ Documento già importato:", data.error);
-      hideImportLoading();
-      const conferma = confirm(
-        `⚠️ ATTENZIONE: DOCUMENTO GIÀ IMPORTATO\n\n` +
-        `"${nomeFilePdf}" risulta già importato in precedenza.\n\n` +
-        `Vuoi procedere comunque?\n` +
-        `(La giacenza disponibile verrà verificata normalmente)\n\n` +
-        `Premi OK per confermare, Annulla per interrompere.`
-      );
-      if (!conferma) {
-        results.failed.push({
-          code: nomeFilePdf,
-          reason: "Importazione annullata dall'utente (documento già importato).",
-          duplicato: true,
-        });
-        return results;
-      }
-      showImportLoading();
-      // Rilancia con forza_reimport = true
-      res = await chiamaBulk(true);
-      const data2 = await res.json();
-      if (!res.ok) {
-        console.error("❌ Errore bulk (reimport):", data2.error);
-        results.failed.push({
-          code: "–",
-          reason: data2.error || "Errore sconosciuto",
-        });
-        return results;
-      }
-      // Usa data2 per i risultati
-      const r2 = data2.risultati;
-      for (const s of r2.success) {
-        results.success.push({ code: s.codice, nome: s.codice, quantity: s.quantita, date: s.data_movimento });
-      }
-      for (const s of r2.insufficientStock) {
-        results.insufficientStock.push({ code: s.codice, nome: s.codice, quantity: s.quantita, available: s.disponibile, date: s.data_movimento, reason: s.reason });
-      }
-      for (const s of r2.failed) {
-        results.failed.push({ code: s.codice || "–", reason: s.reason });
-      }
-      console.log("📊 Elaborazione bulk (reimport) completata:", results);
-      return results;
-    }
 
     if (!res.ok) {
       console.error("❌ Errore bulk:", data.error);
