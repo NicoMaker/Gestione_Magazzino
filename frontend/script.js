@@ -1933,7 +1933,11 @@ function showImportResults(results) {
 
   // ⚠️ CASO SPECIALE: importazione annullata dall'utente
   const duplicato = results.failed.find((f) => f.duplicato);
-  if (duplicato && results.success.length === 0 && results.insufficientStock.length === 0) {
+  if (
+    duplicato &&
+    results.success.length === 0 &&
+    results.insufficientStock.length === 0
+  ) {
     alert(`⚠️ IMPORTAZIONE ANNULLATA\n\n${duplicato.reason}`);
     return;
   }
@@ -3033,7 +3037,10 @@ async function processScarichi(scarichi, nomeFilePdf) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         scarichi: scarichiDaInviare,
-        nome_documento: (nomeFilePdf || "").replace(/\.pdf$/i, "").replace(/^scaricato da /i, "").trim(),
+        nome_documento: (nomeFilePdf || "")
+          .replace(/\.pdf$/i, "")
+          .replace(/^scaricato da /i, "")
+          .trim(),
         forza_reimport: true,
       }),
     });
@@ -3185,7 +3192,10 @@ async function importaOrdineDaPdf(righePdf, dataOrdine, nomeFilePdf) {
         quantita: mov.quantita,
         prezzo: null, // il costo lo calcola il backend
         data_movimento: dataOrdine, // es. "2026-01-07"
-        fattura_doc: (nomeFilePdf || "").replace(/\.pdf$/i, "").replace(/^scaricato da /i, "").trim(),
+        fattura_doc: (nomeFilePdf || "")
+          .replace(/\.pdf$/i, "")
+          .replace(/^scaricato da /i, "")
+          .trim(),
         fornitore: null,
       };
 
@@ -5056,7 +5066,6 @@ function togglePrezzoField() {
     fornitoreGroup.style.display = "block";
     fornitoreInput.required = true;
     if (fornitoreOptional) fornitoreOptional.textContent = "*";
-
   } else {
     // SCARICO: prezzo, documento e fornitore tutti NASCOSTI
     prezzoGroup.style.display = "none";
@@ -5212,11 +5221,14 @@ function renderMovimenti() {
           <td class="${colorClass}">${formatQuantity(m.quantita)} pz</td>
           <td class="${colorClass}">${prezzoUnitarioHtml}</td>
           <td class="${colorClass}"><strong>${prezzoTotaleHtml}</strong></td>
-          <td>${m.tipo === 'scarico' ? '' : (() => {
-            const doc = m.fattura_doc || '';
-            if (/\.pdf$/i.test(doc.trim())) {
-              const nome = doc.trim();
-              return `<span style="display:inline-flex;align-items:center;gap:5px;">
+          <td>${
+            m.tipo === "scarico"
+              ? ""
+              : (() => {
+                  const doc = m.fattura_doc || "";
+                  if (/\.pdf$/i.test(doc.trim())) {
+                    const nome = doc.trim();
+                    return `<span style="display:inline-flex;align-items:center;gap:5px;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" style="width:16px;height:16px;flex-shrink:0;" title="${escapeHtml(nome)}">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                   <polyline points="14 2 14 8 20 8"/>
@@ -5224,12 +5236,13 @@ function renderMovimenti() {
                   <line x1="12" y1="11" x2="12" y2="17"/>
                   <line x1="15" y1="14" x2="15" y2="17"/>
                 </svg>
-                <span style="font-size:12px;color:#64748b;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(nome)}">${escapeHtml(nome.replace(/\.pdf$/i, ''))}</span>
+                <span style="font-size:12px;color:#64748b;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(nome)}">${escapeHtml(nome.replace(/\.pdf$/i, ""))}</span>
               </span>`;
-            }
-            return doc ? escapeHtml(doc) : '';
-          })()}</td>
-          <td>${m.tipo === 'scarico' ? '' : (m.fornitore_cliente_id || '')}</td>
+                  }
+                  return doc ? escapeHtml(doc) : "";
+                })()
+          }</td>
+          <td>${m.tipo === "scarico" ? "" : m.fornitore_cliente_id || ""}</td>
           <td class="text-right">
             <!-- PENNA MODIFICA -->
             <button class="btn-icon"
@@ -5362,21 +5375,22 @@ async function openMovimentoModal(movimento = null) {
 // ================================================================
 
 (function () {
-  'use strict';
+  "use strict";
 
-  let _cfpFile     = null;
-  let _cfpRighe    = [];
+  let _cfpFile = null;
+  let _cfpRighe = [];
   let _cfpProdotti = [];
 
   // ---- PDF.js ----
   function _loadPDFjs() {
     return new Promise((resolve, reject) => {
       if (window.pdfjsLib) return resolve();
-      const s = document.createElement('script');
-      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      const s = document.createElement("script");
+      s.src =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
       s.onload = () => {
         window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+          "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
         resolve();
       };
       s.onerror = reject;
@@ -5388,11 +5402,15 @@ async function openMovimentoModal(movimento = null) {
     await _loadPDFjs();
     const buf = await file.arrayBuffer();
     const pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
-    let testo = '';
+    let testo = "";
     for (let i = 1; i <= pdf.numPages; i++) {
-      const page    = await pdf.getPage(i);
+      const page = await pdf.getPage(i);
       const content = await page.getTextContent();
-      testo += '\n--- PAG ' + i + ' ---\n' + content.items.map(it => it.str).join(' ');
+      testo +=
+        "\n--- PAG " +
+        i +
+        " ---\n" +
+        content.items.map((it) => it.str).join(" ");
     }
     return testo;
   }
@@ -5417,32 +5435,34 @@ Ignora IVA, sconti, spese trasporto, subtotali.
 Risposta (SOLO JSON):
 {"numero_documento":null,"fornitore":null,"data_documento":null,"righe":[{"nome_prodotto":"","quantita":1,"prezzo_unitario":null}]}`;
 
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
+        "Content-Type": "application/json",
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true",
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: "claude-sonnet-4-20250514",
         max_tokens: 2000,
-        messages: [{ role: 'user', content: prompt }]
-      })
+        messages: [{ role: "user", content: prompt }],
+      }),
     });
     if (!resp.ok) {
       const e = await resp.json().catch(() => ({}));
-      throw new Error(e.error?.message || 'Errore AI (' + resp.status + ')');
+      throw new Error(e.error?.message || "Errore AI (" + resp.status + ")");
     }
     const data = await resp.json();
-    const raw  = (data.content?.[0]?.text || '')
-      .replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    const raw = (data.content?.[0]?.text || "")
+      .replace(/```json\n?/g, "")
+      .replace(/```\n?/g, "")
+      .trim();
     return JSON.parse(raw);
   }
 
   async function _loadProdotti() {
     if (_cfpProdotti.length > 0) return _cfpProdotti;
-    const r = await fetch(API_URL + '/prodotti');
+    const r = await fetch(API_URL + "/prodotti");
     _cfpProdotti = await r.json();
     return _cfpProdotti;
   }
@@ -5450,83 +5470,103 @@ Risposta (SOLO JSON):
   function _matchProdotto(nomePDF) {
     if (!nomePDF) return null;
     const q = nomePDF.toLowerCase().trim();
-    let m = _cfpProdotti.find(p => p.nome.toLowerCase() === q);
+    let m = _cfpProdotti.find((p) => p.nome.toLowerCase() === q);
     if (m) return m;
-    m = _cfpProdotti.find(p => q.includes(p.nome.toLowerCase()) || p.nome.toLowerCase().includes(q));
+    m = _cfpProdotti.find(
+      (p) =>
+        q.includes(p.nome.toLowerCase()) || p.nome.toLowerCase().includes(q),
+    );
     if (m) return m;
-    const pw = q.split(/\s+/).filter(w => w.length > 2);
-    let best = 0, bestM = null;
-    _cfpProdotti.forEach(p => {
-      const pp = p.nome.toLowerCase().split(/\s+/).filter(w => w.length > 2);
-      const n  = pw.filter(w => pp.includes(w)).length;
-      if (n >= 2 && n > best) { best = n; bestM = p; }
+    const pw = q.split(/\s+/).filter((w) => w.length > 2);
+    let best = 0,
+      bestM = null;
+    _cfpProdotti.forEach((p) => {
+      const pp = p.nome
+        .toLowerCase()
+        .split(/\s+/)
+        .filter((w) => w.length > 2);
+      const n = pw.filter((w) => pp.includes(w)).length;
+      if (n >= 2 && n > best) {
+        best = n;
+        bestM = p;
+      }
     });
     return bestM;
   }
 
   // ---- UI helpers ----
   function _showErr(msg) {
-    const el = document.getElementById('cfp-error');
-    if (el) { el.innerHTML = msg; el.style.display = 'block'; }
+    const el = document.getElementById("cfp-error");
+    if (el) {
+      el.innerHTML = msg;
+      el.style.display = "block";
+    }
   }
   function _hideErr() {
-    const el = document.getElementById('cfp-error');
-    if (el) el.style.display = 'none';
+    const el = document.getElementById("cfp-error");
+    if (el) el.style.display = "none";
   }
   function _setStep(step) {
-    ['upload','loading','risultati'].forEach(s => {
-      const el = document.getElementById('cfp-step-' + s);
-      if (el) el.style.display = 'none';
+    ["upload", "loading", "risultati"].forEach((s) => {
+      const el = document.getElementById("cfp-step-" + s);
+      if (el) el.style.display = "none";
     });
-    const t = document.getElementById('cfp-step-' + step);
-    if (t) t.style.display = 'block';
+    const t = document.getElementById("cfp-step-" + step);
+    if (t) t.style.display = "block";
   }
   function _setMsg(msg) {
-    const el = document.getElementById('cfp-loading-msg');
+    const el = document.getElementById("cfp-loading-msg");
     if (el) el.textContent = msg;
   }
 
   // ---- render tabella ----
   function _renderRighe() {
-    const tbody   = document.getElementById('cfp-tbody');
-    const counter = document.getElementById('cfp-counter');
+    const tbody = document.getElementById("cfp-tbody");
+    const counter = document.getElementById("cfp-counter");
     if (!tbody) return;
 
-    const trovati = _cfpRighe.filter(r => r.prodotto_id).length;
+    const trovati = _cfpRighe.filter((r) => r.prodotto_id).length;
     if (counter) {
-      counter.textContent = trovati + ' di ' + _cfpRighe.length + ' trovati nel DB';
-      counter.style.color = trovati === _cfpRighe.length ? '#10b981' : '#f59e0b';
+      counter.textContent =
+        trovati + " di " + _cfpRighe.length + " trovati nel DB";
+      counter.style.color =
+        trovati === _cfpRighe.length ? "#10b981" : "#f59e0b";
     }
 
-    tbody.innerHTML = _cfpRighe.map((r, idx) => `
-      <tr class="${r.prodotto_id ? 'cfp-row-ok' : 'cfp-row-warn'}" id="cfp-tr-${idx}">
+    tbody.innerHTML = _cfpRighe
+      .map(
+        (r, idx) => `
+      <tr class="${r.prodotto_id ? "cfp-row-ok" : "cfp-row-warn"}" id="cfp-tr-${idx}">
         <td style="text-align:center;">
-          <input type="checkbox" ${r.includi ? 'checked' : ''}
+          <input type="checkbox" ${r.includi ? "checked" : ""}
             onchange="cfpToggle(${idx},this.checked)"
             style="width:16px;height:16px;cursor:pointer;" />
         </td>
         <td>
-          <div class="cfp-pdf-nome" title="${escapeHtml(r.nome_pdf||'')}">${escapeHtml(r.nome_pdf||'—')}</div>
+          <div class="cfp-pdf-nome" title="${escapeHtml(r.nome_pdf || "")}">${escapeHtml(r.nome_pdf || "—")}</div>
         </td>
         <td>
           <select class="cfp-select" onchange="cfpSetProdotto(${idx},this.value)">
             <option value="">— Non associare —</option>
-            ${_cfpProdotti.map(p =>
-              `<option value="${p.id}" ${p.id === r.prodotto_id ? 'selected' : ''}>
-                ${escapeHtml(p.nome)}${p.marca_nome ? ' — ' + escapeHtml(p.marca_nome) : ''}
-              </option>`
-            ).join('')}
+            ${_cfpProdotti
+              .map(
+                (p) =>
+                  `<option value="${p.id}" ${p.id === r.prodotto_id ? "selected" : ""}>
+                ${escapeHtml(p.nome)}${p.marca_nome ? " — " + escapeHtml(p.marca_nome) : ""}
+              </option>`,
+              )
+              .join("")}
           </select>
-          <span id="cfp-badge-${idx}" class="${r.prodotto_id ? 'cfp-badge-ok' : 'cfp-badge-warn'}">
-            ${r.prodotto_id ? '✓ Trovato' : '⚠ Non trovato'}
+          <span id="cfp-badge-${idx}" class="${r.prodotto_id ? "cfp-badge-ok" : "cfp-badge-warn"}">
+            ${r.prodotto_id ? "✓ Trovato" : "⚠ Non trovato"}
           </span>
         </td>
         <td>
-          <input type="number" class="cfp-num-input" value="${r.quantita ?? ''}"
+          <input type="number" class="cfp-num-input" value="${r.quantita ?? ""}"
             min="0.01" step="0.01" onchange="cfpSetQta(${idx},this.value)" />
         </td>
         <td>
-          <input type="number" class="cfp-num-input" value="${r.prezzo_unitario ?? ''}"
+          <input type="number" class="cfp-num-input" value="${r.prezzo_unitario ?? ""}"
             min="0.01" step="0.01" onchange="cfpSetPrezzo(${idx},this.value)" />
         </td>
         <td>
@@ -5536,194 +5576,254 @@ Risposta (SOLO JSON):
           </button>
         </td>
       </tr>
-    `).join('');
+    `,
+      )
+      .join("");
   }
 
   // ---- funzioni globali tabella ----
-  window.cfpToggle = function(idx, v) { _cfpRighe[idx].includi = v; };
+  window.cfpToggle = function (idx, v) {
+    _cfpRighe[idx].includi = v;
+  };
 
-  window.cfpSetProdotto = function(idx, val) {
-    const p = _cfpProdotti.find(x => x.id == val);
-    _cfpRighe[idx].prodotto_id   = p ? p.id   : null;
-    _cfpRighe[idx].prodotto_nome = p ? p.nome  : null;
+  window.cfpSetProdotto = function (idx, val) {
+    const p = _cfpProdotti.find((x) => x.id == val);
+    _cfpRighe[idx].prodotto_id = p ? p.id : null;
+    _cfpRighe[idx].prodotto_nome = p ? p.nome : null;
     if (p) {
       _cfpRighe[idx].includi = true;
-      const cb = document.querySelector('#cfp-tr-' + idx + ' input[type=checkbox]');
+      const cb = document.querySelector(
+        "#cfp-tr-" + idx + " input[type=checkbox]",
+      );
       if (cb) cb.checked = true;
     }
-    const badge = document.getElementById('cfp-badge-' + idx);
+    const badge = document.getElementById("cfp-badge-" + idx);
     if (badge) {
-      badge.className   = p ? 'cfp-badge-ok' : 'cfp-badge-warn';
-      badge.textContent = p ? '✓ Trovato'    : '⚠ Non trovato';
+      badge.className = p ? "cfp-badge-ok" : "cfp-badge-warn";
+      badge.textContent = p ? "✓ Trovato" : "⚠ Non trovato";
     }
   };
-  window.cfpSetQta    = function(idx, v) { _cfpRighe[idx].quantita        = parseFloat(v) || null; };
-  window.cfpSetPrezzo = function(idx, v) { _cfpRighe[idx].prezzo_unitario = parseFloat(v) || null; };
+  window.cfpSetQta = function (idx, v) {
+    _cfpRighe[idx].quantita = parseFloat(v) || null;
+  };
+  window.cfpSetPrezzo = function (idx, v) {
+    _cfpRighe[idx].prezzo_unitario = parseFloat(v) || null;
+  };
 
-  // ---- clicca CARICA su una riga → pre-compila form Nuovo Movimento ----
-  window.cfpUsaRiga = async function(idx) {
+  // ---- clicca CARICA su una riga → salva il movimento DIRETTAMENTE via API ----
+  window.cfpUsaRiga = async function (idx) {
     const r = _cfpRighe[idx];
     const errs = [];
-    if (!r.prodotto_id)                               errs.push('Seleziona un prodotto dal DB per questa riga.');
-    if (!r.quantita        || r.quantita <= 0)        errs.push('Inserisci una quantità valida.');
-    if (!r.prezzo_unitario || r.prezzo_unitario <= 0) errs.push('Inserisci un prezzo unitario valido.');
-    if (errs.length) { _showErr(errs.join('<br>')); return; }
+    if (!r.prodotto_id)
+      errs.push("Seleziona un prodotto dal DB per questa riga.");
+    if (!r.quantita || r.quantita <= 0)
+      errs.push("Inserisci una quantità valida.");
+    if (!r.prezzo_unitario || r.prezzo_unitario <= 0)
+      errs.push("Inserisci un prezzo unitario valido.");
+    if (errs.length) {
+      _showErr(errs.join("<br>"));
+      return;
+    }
     _hideErr();
 
-    const numDoc    = (document.getElementById('cfp-numero-doc')?.value || '').trim();
-    const fornitore = (document.getElementById('cfp-fornitore')?.value  || '').trim();
-    const data      = document.getElementById('cfp-data')?.value || '';
+    const numDoc = (
+      document.getElementById("cfp-numero-doc")?.value || ""
+    ).trim();
+    const fornitore = (
+      document.getElementById("cfp-fornitore")?.value || ""
+    ).trim();
+    const data =
+      (document.getElementById("cfp-data")?.value || "").trim() ||
+      new Date().toISOString().split("T")[0];
 
-    // Chiudi modal PDF e apri form Nuovo Movimento
-    closeCaricoFatturaPDFModal();
-    await openMovimentoModal(null);
+    if (!numDoc) {
+      _showErr("⚠ Inserisci il numero documento prima di caricare.");
+      return;
+    }
+    if (!fornitore) {
+      _showErr("⚠ Inserisci il fornitore prima di caricare.");
+      return;
+    }
 
-    setTimeout(() => {
-      // Prodotto
-      const prodotto = _cfpProdotti.find(p => p.id === r.prodotto_id);
-      if (prodotto) {
-        const hiddenInput = document.getElementById('movimentoProdotto');
-        const searchInput = document.getElementById('movimentoProdottoSearch');
-        const resultsBox  = document.getElementById('prodottoSearchResults');
-        if (hiddenInput) hiddenInput.value = prodotto.id;
-        if (searchInput) {
-          const marca = prodotto.marca_nome || '';
-          searchInput.value = marca ? prodotto.nome + ' - ' + marca.toUpperCase() : prodotto.nome;
-          searchInput.classList.add('has-selection');
-        }
-        if (resultsBox) resultsBox.classList.remove('show');
-        if (typeof showGiacenzaInfo === 'function') showGiacenzaInfo(prodotto.id);
+    // Disabilita il bottone durante il salvataggio
+    const btn = document.querySelector(`#cfp-tr-${idx} .cfp-btn-usa`);
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "⏳";
+    }
+
+    try {
+      const res = await fetch(`${API_URL}/dati`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prodotto_id: r.prodotto_id,
+          tipo: "carico",
+          quantita: parseFloat(r.quantita.toFixed(2)),
+          prezzo: parseFloat(r.prezzo_unitario.toFixed(2)),
+          data_movimento: data,
+          fattura_doc: numDoc || null,
+          fornitore: fornitore || null,
+        }),
+      });
+
+      if (!res.ok) {
+        const e = await res.json().catch(() => ({}));
+        throw new Error(
+          e.error || e.message || "Errore salvataggio (" + res.status + ")",
+        );
       }
-      // Tipo = carico
-      const tipoSel = document.getElementById('movimentoTipo');
-      if (tipoSel) { tipoSel.value = 'carico'; if (typeof togglePrezzoField === 'function') togglePrezzoField(); }
-      // Quantità
-      const qInput = document.getElementById('movimentoQuantita');
-      if (qInput) qInput.value = r.quantita.toFixed(2).replace('.', ',');
-      // Prezzo
-      const pInput = document.getElementById('movimentoPrezzo');
-      if (pInput) pInput.value = r.prezzo_unitario.toFixed(2).replace('.', ',');
-      // Data
-      const dInput = document.getElementById('movimentoData');
-      if (dInput && data) dInput.value = data;
-      // Documento (senza .pdf)
-      const fInput = document.getElementById('movimentoFattura');
-      if (fInput && numDoc) fInput.value = numDoc;
-      // Fornitore
-      const fornInput = document.getElementById('movimentoFornitore');
-      if (fornInput && fornitore) fornInput.value = fornitore;
-    }, 300);
+
+      // Riga salvata: mostra spunta verde e disabilita definitivamente
+      const tr = document.getElementById("cfp-tr-" + idx);
+      if (tr) tr.style.opacity = "0.55";
+      if (btn) {
+        btn.textContent = "✓ Caricato";
+        btn.style.background = "linear-gradient(135deg,#10b981,#059669)";
+        btn.disabled = true;
+      }
+
+      // Aggiorna i dati in background (movimenti, prodotti)
+      if (typeof ignoreNextSocketUpdate === "function")
+        ignoreNextSocketUpdate();
+      if (typeof loadMovimenti === "function") loadMovimenti().catch(() => {});
+      if (typeof loadProdotti === "function") loadProdotti().catch(() => {});
+      if (typeof loadRiepilogo === "function") loadRiepilogo().catch(() => {});
+    } catch (err) {
+      _showErr("❌ " + err.message);
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML =
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Carica';
+      }
+    }
   };
 
   // ---- open/close modal ----
-  window.openCaricoFatturaPDFModal = function() {
-    _cfpFile  = null;
+  window.openCaricoFatturaPDFModal = function () {
+    _cfpFile = null;
     _cfpRighe = [];
-    const modal = document.getElementById('modalCaricoFatturaPDF');
+    const modal = document.getElementById("modalCaricoFatturaPDF");
     if (!modal) return;
-    const fi = document.getElementById('cfp-file-input');
-    if (fi) fi.value = '';
-    const fl = document.getElementById('cfp-file-label');
-    if (fl) fl.textContent = 'Trascina il PDF qui o clicca per sfogliare';
-    const ba = document.getElementById('cfp-btn-analizza');
+    const fi = document.getElementById("cfp-file-input");
+    if (fi) fi.value = "";
+    const fl = document.getElementById("cfp-file-label");
+    if (fl) fl.textContent = "Trascina il PDF qui o clicca per sfogliare";
+    const ba = document.getElementById("cfp-btn-analizza");
     if (ba) ba.disabled = true;
-    const tb = document.getElementById('cfp-tbody');
-    if (tb) tb.innerHTML = '';
+    const tb = document.getElementById("cfp-tbody");
+    if (tb) tb.innerHTML = "";
     _hideErr();
-    _setStep('upload');
+    _setStep("upload");
     _loadProdotti().catch(console.error);
-    modal.classList.add('active');
+    modal.classList.add("active");
   };
 
-  window.closeCaricoFatturaPDFModal = function() {
-    document.getElementById('modalCaricoFatturaPDF')?.classList.remove('active');
+  window.closeCaricoFatturaPDFModal = function () {
+    document
+      .getElementById("modalCaricoFatturaPDF")
+      ?.classList.remove("active");
   };
 
   // ---- selezione file ----
-  window.cfpOnFileSelected = function(input) {
+  window.cfpOnFileSelected = function (input) {
     const file = input.files[0];
     if (!file) return;
-    if (file.type !== 'application/pdf') { _showErr('⚠ Seleziona un file PDF valido.'); return; }
+    if (file.type !== "application/pdf") {
+      _showErr("⚠ Seleziona un file PDF valido.");
+      return;
+    }
     _cfpFile = file;
-    const lbl = document.getElementById('cfp-file-label');
-    if (lbl) lbl.textContent = '📄 ' + file.name;
-    const btn = document.getElementById('cfp-btn-analizza');
+    const lbl = document.getElementById("cfp-file-label");
+    if (lbl) lbl.textContent = "📄 " + file.name;
+    const btn = document.getElementById("cfp-btn-analizza");
     if (btn) btn.disabled = false;
     _hideErr();
   };
 
   // ---- analizza PDF ----
-  window.cfpAnalizzaPDF = async function() {
+  window.cfpAnalizzaPDF = async function () {
     if (!_cfpFile) return;
-    const btn = document.getElementById('cfp-btn-analizza');
+    const btn = document.getElementById("cfp-btn-analizza");
     if (btn) btn.disabled = true;
     try {
-      _setStep('loading'); _setMsg('📖 Lettura PDF...');
+      _setStep("loading");
+      _setMsg("📖 Lettura PDF...");
       const testo = await _estraiTesto(_cfpFile);
-      if (!testo.trim()) throw new Error('Il PDF non contiene testo leggibile (potrebbe essere scansionato).');
+      if (!testo.trim())
+        throw new Error(
+          "Il PDF non contiene testo leggibile (potrebbe essere scansionato).",
+        );
 
-      _setMsg('🤖 Analisi AI in corso...');
+      _setMsg("🤖 Analisi AI in corso...");
       const dati = await _analizzaConAI(testo);
 
-      _setMsg('🔍 Ricerca prodotti nel database...');
+      _setMsg("🔍 Ricerca prodotti nel database...");
       await _loadProdotti();
 
       // Numero documento: togli ".pdf" e prefissi tipo "scaricato da"
-      const numDocPulito = (dati.numero_documento || '')
-        .replace(/\.pdf$/i, '')
-        .replace(/^scaricato da /i, '')
+      const numDocPulito = (dati.numero_documento || "")
+        .replace(/\.pdf$/i, "")
+        .replace(/^scaricato da /i, "")
         .trim();
 
-      const ndEl = document.getElementById('cfp-numero-doc');
-      const frEl = document.getElementById('cfp-fornitore');
-      const dtEl = document.getElementById('cfp-data');
+      const ndEl = document.getElementById("cfp-numero-doc");
+      const frEl = document.getElementById("cfp-fornitore");
+      const dtEl = document.getElementById("cfp-data");
       if (ndEl) ndEl.value = numDocPulito;
       if (frEl && dati.fornitore) frEl.value = dati.fornitore;
-      if (dtEl) dtEl.value = dati.data_documento || new Date().toISOString().split('T')[0];
+      if (dtEl)
+        dtEl.value =
+          dati.data_documento || new Date().toISOString().split("T")[0];
 
       _cfpRighe = (dati.righe || []).map((r, idx) => {
         const trovato = _matchProdotto(r.nome_prodotto);
         return {
           idx,
-          nome_pdf:        r.nome_prodotto,
-          quantita:        r.quantita,
+          nome_pdf: r.nome_prodotto,
+          quantita: r.quantita,
           prezzo_unitario: r.prezzo_unitario,
-          prodotto_id:     trovato ? trovato.id   : null,
-          prodotto_nome:   trovato ? trovato.nome : null,
-          includi:         trovato !== null
+          prodotto_id: trovato ? trovato.id : null,
+          prodotto_nome: trovato ? trovato.nome : null,
+          includi: trovato !== null,
         };
       });
 
       _renderRighe();
-      _setStep('risultati');
+      _setStep("risultati");
     } catch (err) {
-      console.error('Errore analisi PDF:', err);
-      _setStep('upload');
-      _showErr('❌ ' + err.message);
+      console.error("Errore analisi PDF:", err);
+      _setStep("upload");
+      _showErr("❌ " + err.message);
     } finally {
       if (btn) btn.disabled = false;
     }
   };
 
   // ---- drag & drop ----
-  document.addEventListener('DOMContentLoaded', () => {
-    const dz = document.getElementById('cfp-dropzone');
+  document.addEventListener("DOMContentLoaded", () => {
+    const dz = document.getElementById("cfp-dropzone");
     if (!dz) return;
-    dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('cfp-drag-over'); });
-    dz.addEventListener('dragleave', ()  => dz.classList.remove('cfp-drag-over'));
-    dz.addEventListener('drop', e => {
+    dz.addEventListener("dragover", (e) => {
       e.preventDefault();
-      dz.classList.remove('cfp-drag-over');
+      dz.classList.add("cfp-drag-over");
+    });
+    dz.addEventListener("dragleave", () =>
+      dz.classList.remove("cfp-drag-over"),
+    );
+    dz.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dz.classList.remove("cfp-drag-over");
       const f = e.dataTransfer.files[0];
-      if (f && f.type === 'application/pdf') {
+      if (f && f.type === "application/pdf") {
         _cfpFile = f;
-        const lbl = document.getElementById('cfp-file-label');
-        if (lbl) lbl.textContent = '📄 ' + f.name;
-        const btn = document.getElementById('cfp-btn-analizza');
+        const lbl = document.getElementById("cfp-file-label");
+        if (lbl) lbl.textContent = "📄 " + f.name;
+        const btn = document.getElementById("cfp-btn-analizza");
         if (btn) btn.disabled = false;
         _hideErr();
       } else {
-        _showErr('⚠ Seleziona un file PDF valido.');
+        _showErr("⚠ Seleziona un file PDF valido.");
       }
     });
   });
@@ -5732,47 +5832,62 @@ Risposta (SOLO JSON):
   // 🧹 PULIZIA: elimina movimenti con fattura_doc = nome file .pdf
   // ================================================================
 
-  window.pulisciMovimentiPDF = async function() {
+  window.pulisciMovimentiPDF = async function () {
     // Trova tutti i movimenti che hanno fattura_doc finente con .pdf
     // oppure che inizia con "scaricato da"
-    const sospetti = (allMovimenti || []).filter(m => {
-      const f = (m.fattura_doc || '').trim();
+    const sospetti = (allMovimenti || []).filter((m) => {
+      const f = (m.fattura_doc || "").trim();
       return /\.pdf$/i.test(f) || /^scaricato da /i.test(f);
     });
 
     if (sospetti.length === 0) {
-      showAlertModal('Nessun movimento con nome file .pdf trovato. ✅', 'Pulizia completata', 'success');
+      showAlertModal(
+        "Nessun movimento con nome file .pdf trovato. ✅",
+        "Pulizia completata",
+        "success",
+      );
       return;
     }
 
-    const lista = sospetti.map(m =>
-      `• ${m.prodotto_nome || '?'} — ${m.tipo.toUpperCase()} — fattura: "${m.fattura_doc}"`
-    ).join('\n');
+    const lista = sospetti
+      .map(
+        (m) =>
+          `• ${m.prodotto_nome || "?"} — ${m.tipo.toUpperCase()} — fattura: "${m.fattura_doc}"`,
+      )
+      .join("\n");
 
     const msg = `Trovati <strong>${sospetti.length}</strong> movimento/i con documento = nome file PDF:<br><br>
       <div style="background:#f8fafc;border-radius:8px;padding:12px;font-family:monospace;font-size:12px;max-height:200px;overflow-y:auto;text-align:left;white-space:pre-wrap;">${escapeHtml(lista)}</div>
       <br>Vuoi eliminarli tutti?`;
 
-    const confermato = await showConfirmModal(msg, '🧹 Elimina movimenti con nome file PDF');
+    const confermato = await showConfirmModal(
+      msg,
+      "🧹 Elimina movimenti con nome file PDF",
+    );
     if (!confermato) return;
 
-    let ok = 0, ko = 0;
+    let ok = 0,
+      ko = 0;
     for (const m of sospetti) {
       try {
-        const res = await fetch(`${API_URL}/dati/${m.id}`, { method: 'DELETE' });
-        if (res.ok) ok++; else ko++;
-      } catch { ko++; }
+        const res = await fetch(`${API_URL}/dati/${m.id}`, {
+          method: "DELETE",
+        });
+        if (res.ok) ok++;
+        else ko++;
+      } catch {
+        ko++;
+      }
     }
 
-    if (typeof ignoreNextSocketUpdate === 'function') ignoreNextSocketUpdate();
+    if (typeof ignoreNextSocketUpdate === "function") ignoreNextSocketUpdate();
     showAlertModal(
-      `Eliminati: ${ok} ✅${ko > 0 ? ' — Errori: ' + ko + ' ❌' : ''}`,
-      'Pulizia completata',
-      ok > 0 ? 'success' : 'error'
+      `Eliminati: ${ok} ✅${ko > 0 ? " — Errori: " + ko + " ❌" : ""}`,
+      "Pulizia completata",
+      ok > 0 ? "success" : "error",
     );
 
     await loadMovimenti();
     await loadProdotti();
   };
-
 })();

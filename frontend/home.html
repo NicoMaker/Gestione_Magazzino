@@ -173,8 +173,8 @@
             </svg>
             <span>Esci</span>
           </button>
-          <br>
-          <br>
+          <br />
+          <br />
         </div>
 
         <!-- ✅ IMPORTANTE: Aggiungi questo script PRIMA di script.js -->
@@ -321,7 +321,9 @@
                   stroke="currentColor"
                   stroke-width="2"
                 >
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <path
+                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                  />
                   <polyline points="14 2 14 8 20 8" />
                   <line x1="16" y1="13" x2="8" y2="13" />
                   <line x1="16" y1="17" x2="8" y2="17" />
@@ -329,12 +331,23 @@
                 </svg>
                 <span>Scarica da PDF</span>
               </button>
-              <button class="btn btn-primary" onclick="openCaricoFatturaPDFModal()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                  <polyline points="14 2 14 8 20 8"/>
-                  <line x1="12" y1="18" x2="12" y2="12"/>
-                  <line x1="9" y1="15" x2="15" y2="15"/>
+              <button
+                class="btn btn-primary"
+                onclick="openCaricoFatturaPDFModal()"
+                style="background: linear-gradient(135deg, #6366f1, #8b5cf6)"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"
+                  />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="12" y1="18" x2="12" y2="12" />
+                  <line x1="9" y1="15" x2="15" y2="15" />
                 </svg>
                 <span>Carica da Fattura PDF</span>
               </button>
@@ -395,83 +408,154 @@
             </div>
             <form id="formImportPDF">
               <div class="modal-body">
-
                 <!-- Istruzioni -->
-                <div style="
-                  background: #eff6ff;
-                  border: 1px solid #bfdbfe;
-                  border-radius: 10px;
-                  padding: 14px 16px;
-                  margin-bottom: 18px;
-                ">
-                  <p style="font-weight: 700; color: #1d4ed8; margin-bottom: 6px; font-size: 13px;">
+                <div
+                  style="
+                    background: #eff6ff;
+                    border: 1px solid #bfdbfe;
+                    border-radius: 10px;
+                    padding: 14px 16px;
+                    margin-bottom: 18px;
+                  "
+                >
+                  <p
+                    style="
+                      font-weight: 700;
+                      color: #1d4ed8;
+                      margin-bottom: 6px;
+                      font-size: 13px;
+                    "
+                  >
                     ℹ️ Come funziona
                   </p>
-                  <p style="color: #1e40af; font-size: 13px; line-height: 1.5; margin: 0;">
-                    Carica il PDF del documento di lavoro. Il sistema leggerà automaticamente
-                    la sezione <strong>RICAMBI</strong> ed eseguirà uno <strong>scarico di magazzino</strong>
-                    per ogni prodotto trovato con il rispettivo codice e quantità.
+                  <p
+                    style="
+                      color: #1e40af;
+                      font-size: 13px;
+                      line-height: 1.5;
+                      margin: 0;
+                    "
+                  >
+                    Carica il PDF del documento di lavoro. Il sistema leggerà
+                    automaticamente la sezione <strong>RICAMBI</strong> ed
+                    eseguirà uno <strong>scarico di magazzino</strong>
+                    per ogni prodotto trovato con il rispettivo codice e
+                    quantità.
                   </p>
                 </div>
 
                 <!-- Area upload -->
                 <div class="file-upload-container">
-                  <label for="importPDFFile" class="file-upload-label" style="cursor: pointer;">
+                  <label
+                    for="importPDFFile"
+                    class="file-upload-label"
+                    style="cursor: pointer"
+                  >
                     <input
                       type="file"
                       id="importPDFFile"
                       accept=".pdf"
                       hidden
                     />
-                    <div class="file-upload-design" style="
-                      display: flex;
-                      flex-direction: column;
-                      align-items: center;
-                      justify-content: center;
-                      padding: 28px 20px;
-                      gap: 8px;
-                    ">
+                    <div
+                      class="file-upload-design"
+                      style="
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 28px 20px;
+                        gap: 8px;
+                      "
+                    >
                       <svg
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="#6366f1"
                         stroke-width="2"
-                        style="width: 44px; height: 44px;"
+                        style="width: 44px; height: 44px"
                       >
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                         <polyline points="17 8 12 3 7 8" />
                         <line x1="12" y1="3" x2="12" y2="15" />
                       </svg>
-                      <p style="font-weight: 700; font-size: 15px; color: #374151; margin: 0;">
+                      <p
+                        style="
+                          font-weight: 700;
+                          font-size: 15px;
+                          color: #374151;
+                          margin: 0;
+                        "
+                      >
                         Clicca per selezionare il PDF
                       </p>
-                      <p style="font-size: 13px; color: #6b7280; margin: 0;">
+                      <p style="font-size: 13px; color: #6b7280; margin: 0">
                         oppure trascinalo qui dentro
                       </p>
-                      <span id="filePreview" style="
-                        margin-top: 6px;
-                        font-size: 13px;
-                        font-weight: 600;
-                        color: #6366f1;
-                        display: none;
-                      "></span>
+                      <span
+                        id="filePreview"
+                        style="
+                          margin-top: 6px;
+                          font-size: 13px;
+                          font-weight: 600;
+                          color: #6366f1;
+                          display: none;
+                        "
+                      ></span>
                     </div>
                   </label>
                 </div>
 
                 <!-- Formato atteso -->
-                <div style="margin-top: 14px; padding: 12px 14px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
-                  <p style="font-size: 12px; font-weight: 700; color: #6b7280; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">
+                <div
+                  style="
+                    margin-top: 14px;
+                    padding: 12px 14px;
+                    background: #f9fafb;
+                    border-radius: 8px;
+                    border: 1px solid #e5e7eb;
+                  "
+                >
+                  <p
+                    style="
+                      font-size: 12px;
+                      font-weight: 700;
+                      color: #6b7280;
+                      margin-bottom: 6px;
+                      text-transform: uppercase;
+                      letter-spacing: 0.5px;
+                    "
+                  >
                     ✅ Requisiti del PDF
                   </p>
-                  <ul style="margin: 0; padding-left: 16px; font-size: 12px; color: #6b7280; line-height: 1.8;">
-                    <li>Deve contenere la sezione <strong style="color:#374151;">RICAMBI</strong></li>
-                    <li>Ogni riga: <strong style="color:#374151;">CODICE PRODOTTO</strong> + <strong style="color:#374151;">QUANTITÀ</strong></li>
-                    <li>Data del documento (se presente verrà usata automaticamente)</li>
-                    <li>Dimensione massima: <strong style="color:#374151;">10 MB</strong></li>
+                  <ul
+                    style="
+                      margin: 0;
+                      padding-left: 16px;
+                      font-size: 12px;
+                      color: #6b7280;
+                      line-height: 1.8;
+                    "
+                  >
+                    <li>
+                      Deve contenere la sezione
+                      <strong style="color: #374151">RICAMBI</strong>
+                    </li>
+                    <li>
+                      Ogni riga:
+                      <strong style="color: #374151">CODICE PRODOTTO</strong> +
+                      <strong style="color: #374151">QUANTITÀ</strong>
+                    </li>
+                    <li>
+                      Data del documento (se presente verrà usata
+                      automaticamente)
+                    </li>
+                    <li>
+                      Dimensione massima:
+                      <strong style="color: #374151">10 MB</strong>
+                    </li>
                   </ul>
                 </div>
-
               </div>
               <div class="modal-footer">
                 <button
@@ -482,11 +566,19 @@
                   Annulla
                 </button>
                 <button type="submit" class="btn btn-primary">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14 2 14 8 20 8"/>
-                    <line x1="16" y1="13" x2="8" y2="13"/>
-                    <line x1="16" y1="17" x2="8" y2="17"/>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    style="width: 16px; height: 16px"
+                  >
+                    <path
+                      d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                    />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
                   </svg>
                   Elabora Documento
                 </button>
@@ -1055,58 +1147,151 @@
       </div>
     </div>
 
-    
     <!-- == MODAL CARICO DA FATTURA PDF == -->
     <div id="modalCaricoFatturaPDF" class="modal">
       <div class="modal-content cfp-modal-content">
         <div class="modal-header">
           <div>
             <h2>📄 Carica da Fattura PDF</h2>
-            <p style="font-size:13px;color:#64748b;margin:4px 0 0;">L'AI legge la fattura — clicca <strong>Carica</strong> su ogni riga per aprire il form già compilato</p>
+            <p style="font-size: 13px; color: #64748b; margin: 4px 0 0">
+              L'AI legge la fattura — clicca <strong>Carica</strong> su ogni
+              riga per salvare il movimento direttamente
+            </p>
           </div>
-          <button class="modal-close" onclick="closeCaricoFatturaPDFModal()">&times;</button>
+          <button class="modal-close" onclick="closeCaricoFatturaPDFModal()">
+            &times;
+          </button>
         </div>
         <div class="modal-body">
-
           <div id="cfp-step-upload">
-            <div id="cfp-dropzone" class="cfp-dropzone" onclick="document.getElementById('cfp-file-input').click()">
-              <svg style="width:48px;height:48px;color:#94a3b8;display:block;margin:0 auto 14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9"/>
-                <polyline points="9 15 12 12 15 15"/><line x1="12" y1="12" x2="12" y2="21"/>
+            <div
+              id="cfp-dropzone"
+              class="cfp-dropzone"
+              onclick="document.getElementById('cfp-file-input').click()"
+            >
+              <svg
+                style="
+                  width: 48px;
+                  height: 48px;
+                  color: #94a3b8;
+                  display: block;
+                  margin: 0 auto 14px;
+                "
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <path
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9"
+                />
+                <polyline points="9 15 12 12 15 15" />
+                <line x1="12" y1="12" x2="12" y2="21" />
               </svg>
-              <p id="cfp-file-label" style="font-size:15px;font-weight:600;color:#475569;margin:0 0 6px;">Trascina il PDF qui o clicca per sfogliare</p>
-              <p style="font-size:12px;color:#94a3b8;margin:0;">Fatture, DDT, bolle, ordini</p>
-              <input type="file" id="cfp-file-input" accept="application/pdf" style="display:none" onchange="cfpOnFileSelected(this)" />
+              <p
+                id="cfp-file-label"
+                style="
+                  font-size: 15px;
+                  font-weight: 600;
+                  color: #475569;
+                  margin: 0 0 6px;
+                "
+              >
+                Trascina il PDF qui o clicca per sfogliare
+              </p>
+              <p style="font-size: 12px; color: #94a3b8; margin: 0">
+                Fatture, DDT, bolle, ordini
+              </p>
+              <input
+                type="file"
+                id="cfp-file-input"
+                accept="application/pdf"
+                style="display: none"
+                onchange="cfpOnFileSelected(this)"
+              />
             </div>
             <div class="cfp-ai-info">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;flex-shrink:0;color:#3b82f6"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <span>L'AI estrarrà <strong>numero documento, fornitore, data, prodotti, quantità e prezzi</strong>. Clicca <strong>Carica</strong> su ogni riga per aprire il form di Nuovo Movimento già pre-compilato.</span>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                style="
+                  width: 18px;
+                  height: 18px;
+                  flex-shrink: 0;
+                  color: #3b82f6;
+                "
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <span
+                >L'AI estrarrà
+                <strong
+                  >numero documento, fornitore, data, prodotti, quantità e
+                  prezzi</strong
+                >. Clicca <strong>Carica</strong> su ogni riga per salvare il
+                movimento direttamente nel database, senza aprire alcun
+                form.</span
+              >
             </div>
-            <div style="text-align:center;margin-top:24px;">
-              <button id="cfp-btn-analizza" class="btn btn-primary cfp-btn-main" onclick="cfpAnalizzaPDF()" disabled>
+            <div style="text-align: center; margin-top: 24px">
+              <button
+                id="cfp-btn-analizza"
+                class="btn btn-primary cfp-btn-main"
+                onclick="cfpAnalizzaPDF()"
+                disabled
+              >
                 🔍 Analizza PDF con AI
               </button>
             </div>
           </div>
 
-          <div id="cfp-step-loading" style="display:none;text-align:center;padding:48px 24px;">
+          <div
+            id="cfp-step-loading"
+            style="display: none; text-align: center; padding: 48px 24px"
+          >
             <div class="cfp-spinner"></div>
-            <p id="cfp-loading-msg" style="font-size:15px;font-weight:600;color:#475569;margin-top:20px;">Analisi in corso...</p>
+            <p
+              id="cfp-loading-msg"
+              style="
+                font-size: 15px;
+                font-weight: 600;
+                color: #475569;
+                margin-top: 20px;
+              "
+            >
+              Analisi in corso...
+            </p>
           </div>
 
-          <div id="cfp-step-risultati" style="display:none;">
+          <div id="cfp-step-risultati" style="display: none">
             <div class="cfp-section-title">
               <span class="cfp-step-num">1</span> Dati del documento
-              <small style="font-weight:400;color:#64748b;">(verifica e correggi)</small>
+              <small style="font-weight: 400; color: #64748b"
+                >(verifica e correggi)</small
+              >
             </div>
             <div class="cfp-form-grid">
               <div class="form-group">
                 <label>Numero Documento / Fattura *</label>
-                <input type="text" id="cfp-numero-doc" class="cfp-input" placeholder="es. FT/2024/001" />
+                <input
+                  type="text"
+                  id="cfp-numero-doc"
+                  class="cfp-input"
+                  placeholder="es. FT/2024/001"
+                />
               </div>
               <div class="form-group">
                 <label>Fornitore *</label>
-                <input type="text" id="cfp-fornitore" class="cfp-input" placeholder="Nome fornitore" />
+                <input
+                  type="text"
+                  id="cfp-fornitore"
+                  class="cfp-input"
+                  placeholder="Nome fornitore"
+                />
               </div>
               <div class="form-group">
                 <label>Data Documento</label>
@@ -1114,34 +1299,50 @@
               </div>
             </div>
 
-            <div class="cfp-section-title" style="margin-top:20px;">
+            <div class="cfp-section-title" style="margin-top: 20px">
               <span class="cfp-step-num">2</span> Prodotti estratti
-              <span id="cfp-counter" style="margin-left:auto;font-size:13px;font-weight:600;color:#64748b;"></span>
+              <span
+                id="cfp-counter"
+                style="
+                  margin-left: auto;
+                  font-size: 13px;
+                  font-weight: 600;
+                  color: #64748b;
+                "
+              ></span>
             </div>
             <div class="cfp-table-wrap">
               <table class="cfp-table">
                 <thead>
                   <tr>
-                    <th style="width:44px;text-align:center;">✓</th>
+                    <th style="width: 44px; text-align: center">✓</th>
                     <th>Nome nel PDF</th>
                     <th>Prodotto nel DB</th>
-                    <th style="width:95px;">Quantità</th>
-                    <th style="width:115px;">Prezzo Unit. €</th>
-                    <th style="width:90px;text-align:center;">Azione</th>
+                    <th style="width: 95px">Quantità</th>
+                    <th style="width: 115px">Prezzo Unit. €</th>
+                    <th style="width: 90px; text-align: center">Azione</th>
                   </tr>
                 </thead>
                 <tbody id="cfp-tbody"></tbody>
               </table>
             </div>
             <p class="cfp-note">
-              💡 Prodotti non riconosciuti: selezionali dal menu. Prodotti mancanti: creali prima in <strong>Prodotti</strong>. Documento e fornitore vengono copiati in ogni form di carico.
+              💡 Prodotti non riconosciuti: selezionali dal menu. Prodotti
+              mancanti: creali prima in <strong>Prodotti</strong>. Documento e
+              fornitore in cima vengono usati per tutti i carichi. Ogni riga
+              viene salvata <strong>immediatamente</strong> cliccando Carica.
             </p>
           </div>
 
-          <div id="cfp-error" class="cfp-error" style="display:none;"></div>
+          <div id="cfp-error" class="cfp-error" style="display: none"></div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" onclick="closeCaricoFatturaPDFModal()">Chiudi</button>
+          <button
+            class="btn btn-secondary"
+            onclick="closeCaricoFatturaPDFModal()"
+          >
+            Chiudi
+          </button>
         </div>
       </div>
     </div>
