@@ -570,7 +570,8 @@ tbody tr:hover {
   gap: 8px;
 }
 
-.filter-controls .btn svg {
+.filter-controls .btn svg,
+.date-filter .btn svg {
   width: 18px;
   height: 18px;
 }
