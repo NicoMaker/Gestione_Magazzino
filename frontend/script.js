@@ -3308,7 +3308,7 @@ function renderMarche() {
         <!-- 🎯 BADGE CONTEGGIO PRODOTTI -->
         <td class="text-center-badge">
           <span class="prodotti-badge ${badgeClass}"">
-            ${prodottiCount} Prodott${prodottiCount === 1 ? "o" : "i"}
+            ${prodottiCount}
           </span>
         </td>
         
