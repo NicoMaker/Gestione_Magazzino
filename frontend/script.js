@@ -759,7 +759,7 @@ function selectProduct(id, nome, marca, giacenza) {
 
 // script.js (Intorno a riga 1120, o dove si trova la tua funzione searchProducts)
 
-function searchProducts() {
+async function searchProducts() {
   const searchInput = document.getElementById("movimentoProdottoSearch");
   const resultsContainer = document.getElementById("prodottoSearchResults");
 
@@ -773,19 +773,31 @@ function searchProducts() {
   console.log("searchProducts chiamata - searchTerm:", searchTerm);
   console.log("allProdotti disponibili:", allProdotti ? allProdotti.length : 0);
 
-  // Verifica che allProdotti sia definito e non vuoto
+  // 🔥 Se allProdotti è vuoto (sezione prodotti non ancora visitata), carica dall'API
   if (!allProdotti || allProdotti.length === 0) {
     resultsContainer.innerHTML = `
       <div class="search-no-results">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 32px; height: 32px; margin: 0 auto 8px; opacity: 0.5;">
-          <circle cx="11" cy="11" r="8"/>
-          <path d="M21 21l-4.35-4.35"/>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 32px; height: 32px; margin: 0 auto 8px; opacity: 0.5; animation: spin 1s linear infinite;">
+          <circle cx="11" cy="11" r="8" stroke-dasharray="25 10"/>
         </svg>
-        Nessun prodotto disponibile nel sistema
+        Caricamento prodotti...
       </div>
     `;
     resultsContainer.classList.add("show");
-    return;
+    try {
+      const res = await fetch(`${API_URL}/prodotti`);
+      allProdotti = await res.json();
+      prodotti = allProdotti;
+      console.log("✅ Prodotti caricati per ricerca:", allProdotti.length);
+    } catch (error) {
+      console.error("Errore caricamento prodotti per ricerca:", error);
+      resultsContainer.innerHTML = `
+        <div class="search-no-results">
+          Errore nel caricamento dei prodotti. Riprova.
+        </div>
+      `;
+      return;
+    }
   }
 
   // 🎯 Filtra i prodotti: se vuoto mostra TUTTI, altrimenti filtra
@@ -5286,6 +5298,17 @@ async function openMovimentoModal(movimento = null) {
   const hiddenProdotto = document.getElementById("movimentoProdotto");
   const searchInput = document.getElementById("movimentoProdottoSearch");
   const resultsBox = document.getElementById("prodottoSearchResults");
+
+  // 🔥 Carica SEMPRE tutti i prodotti freschi dall'API al momento dell'apertura
+  // In questo modo la ricerca nel form non è mai influenzata dal filtro attivo nella sezione prodotti
+  try {
+    const res = await fetch(`${API_URL}/prodotti`);
+    allProdotti = await res.json();
+    prodotti = allProdotti;
+    console.log("✅ Prodotti ricaricati per il modal movimento:", allProdotti.length);
+  } catch (error) {
+    console.warn("⚠️ Impossibile ricaricare prodotti, uso cache:", error);
+  }
 
   form.reset();
   document.getElementById("movimentoId").value = "";
