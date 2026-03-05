@@ -3539,7 +3539,7 @@ function renderProdotti() {
           </span>
         </td>
         <td>
-          <span class="badge-giacenza">
+          <span class="${(p.giacenza ?? 0) == 0 ? 'badge-giacenza-zero' : 'badge-giacenza'}">
             ${formatQuantity(p.giacenza ?? 0)} pz
           </span>
         </td>
@@ -3734,7 +3734,7 @@ function renderRiepilogo() {
           }
         </td>
         <td>
-          <span class="badge-giacenza">${formatQuantity(r.giacenza)} pz</span>
+          <span class="${(r.giacenza ?? 0) == 0 ? 'badge-giacenza-zero' : 'badge-giacenza'}">${formatQuantity(r.giacenza)} pz</span>
         </td>
         <td>
           <strong>${formatCurrency(r.valore_totale)}</strong>
@@ -3906,7 +3906,7 @@ function renderStorico(storico) {
           }
         </td>
         <td>
-          <span class="badge-giacenza">${formatQuantity(s.giacenza)} pz</span>
+          <span class="${(s.giacenza ?? 0) == 0 ? 'badge-giacenza-zero' : 'badge-giacenza'}">${formatQuantity(s.giacenza)} pz</span>
         </td>
         <td>
           <strong>${formatCurrency(s.valore_totale)}</strong>
