@@ -515,6 +515,15 @@
                 </svg>
                 <span>Stampa</span>
               </button>
+              <button class="btn btn-primary" onclick="openCaricoFatturaPDFModal()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="12" y1="18" x2="12" y2="12"/>
+                  <line x1="9" y1="15" x2="15" y2="15"/>
+                </svg>
+                <span>Carica da Fattura PDF</span>
+              </button>
             </div>
           </div>
 
@@ -1042,6 +1051,107 @@
           <button class="btn btn-primary" id="alertModalOkBtn">
             <span>OK</span>
           </button>
+        </div>
+      </div>
+    </div>
+
+    
+    <!-- == MODAL CARICO DA FATTURA PDF == -->
+    <div id="modalCaricoFatturaPDF" class="modal">
+      <div class="modal-content cfp-modal-content">
+        <div class="modal-header">
+          <div>
+            <h2>📄 Carica da Fattura PDF</h2>
+            <p style="font-size:13px;color:#64748b;margin:4px 0 0;">L'AI legge la fattura ed estrae i dati — poi li carichi uno alla volta nel form standard</p>
+          </div>
+          <button class="modal-close" onclick="closeCaricoFatturaPDFModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+
+          <!-- STEP UPLOAD -->
+          <div id="cfp-step-upload">
+            <div id="cfp-dropzone" class="cfp-dropzone" onclick="document.getElementById('cfp-file-input').click()">
+              <svg style="width:48px;height:48px;color:#94a3b8;display:block;margin:0 auto 14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9"/>
+                <polyline points="9 15 12 12 15 15"/><line x1="12" y1="12" x2="12" y2="21"/>
+              </svg>
+              <p id="cfp-file-label" style="font-size:15px;font-weight:600;color:#475569;margin:0 0 6px;">Trascina il PDF qui o clicca per sfogliare</p>
+              <p style="font-size:12px;color:#94a3b8;margin:0;">Fatture, DDT, bolle di consegna, ordini</p>
+              <input type="file" id="cfp-file-input" accept="application/pdf" style="display:none" onchange="cfpOnFileSelected(this)" />
+            </div>
+            <div class="cfp-ai-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;flex-shrink:0;color:#3b82f6"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span>L'AI estrarrà automaticamente <strong>numero documento, fornitore, data, prodotti, quantità e prezzi</strong>. Per ogni riga clicca <strong>Carica</strong> per aprire il form di carico già pre-compilato.</span>
+            </div>
+            <div style="text-align:center;margin-top:24px;">
+              <button id="cfp-btn-analizza" class="btn btn-primary cfp-btn-main" onclick="cfpAnalizzaPDF()" disabled>
+                🔍 Analizza PDF con AI
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP LOADING -->
+          <div id="cfp-step-loading" style="display:none;text-align:center;padding:48px 24px;">
+            <div class="cfp-spinner"></div>
+            <p id="cfp-loading-msg" style="font-size:15px;font-weight:600;color:#475569;margin-top:20px;">Analisi in corso...</p>
+          </div>
+
+          <!-- STEP RISULTATI -->
+          <div id="cfp-step-risultati" style="display:none;">
+
+            <!-- Dati documento: fornitore, numero, data (editabili) -->
+            <div class="cfp-section-title">
+              <span class="cfp-step-num">1</span> Dati del documento <small style="font-weight:400;color:#64748b;">(verifica e correggi se necessario)</small>
+            </div>
+            <div class="cfp-form-grid">
+              <div class="form-group">
+                <label>Numero Documento / Fattura</label>
+                <input type="text" id="cfp-numero-doc" class="cfp-input" placeholder="es. FT/2024/001" />
+              </div>
+              <div class="form-group">
+                <label>Fornitore</label>
+                <input type="text" id="cfp-fornitore" class="cfp-input" placeholder="Nome fornitore" />
+              </div>
+              <div class="form-group">
+                <label>Data Documento</label>
+                <input type="date" id="cfp-data" class="cfp-input" />
+              </div>
+            </div>
+
+            <!-- Tabella prodotti estratti -->
+            <div class="cfp-section-title" style="margin-top:20px;">
+              <span class="cfp-step-num">2</span>
+              Prodotti estratti — clicca <strong style="color:#6366f1;">Carica</strong> su ogni riga per aprire il form pre-compilato
+              <span id="cfp-counter" style="margin-left:auto;font-size:13px;font-weight:600;color:#64748b;"></span>
+            </div>
+
+            <div class="cfp-table-wrap">
+              <table class="cfp-table">
+                <thead>
+                  <tr>
+                    <th style="width:44px;text-align:center;">✓</th>
+                    <th>Nome nel PDF</th>
+                    <th>Prodotto nel DB</th>
+                    <th style="width:95px;">Quantità</th>
+                    <th style="width:115px;">Prezzo Unit. €</th>
+                    <th style="width:90px;text-align:center;">Azione</th>
+                  </tr>
+                </thead>
+                <tbody id="cfp-tbody"></tbody>
+              </table>
+            </div>
+
+            <p class="cfp-note">
+              💡 Se un prodotto non è stato riconosciuto selezionalo dal menu. I prodotti non presenti vanno prima creati nella sezione <strong>Prodotti</strong>. I dati documento sopra vengono copiati in ogni form di carico.
+            </p>
+          </div>
+
+          <!-- ERRORE -->
+          <div id="cfp-error" class="cfp-error" style="display:none;"></div>
+
+        </div><!-- /modal-body -->
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeCaricoFatturaPDFModal()">Chiudi</button>
         </div>
       </div>
     </div>

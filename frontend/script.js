@@ -5319,7 +5319,7 @@ async function openMovimentoModal(movimento = null) {
           movimento.fattura_doc || movimento.fatturadoc || "";
       if (document.getElementById("movimentoFornitore"))
         document.getElementById("movimentoFornitore").value =
-          movimento.fornitore || "";
+          movimento.fornitore || movimento.fornitore_cliente_id || "";
     }
 
     // mostra giacenza prodotto selezionato
@@ -5339,3 +5339,445 @@ async function openMovimentoModal(movimento = null) {
     if (typeof setupProductSearch === "function") setupProductSearch();
   }, 150);
 }
+
+// ================================================================
+// 📄 CARICO DA FATTURA PDF → PRE-COMPILA FORM MOVIMENTO (v2)
+// Flusso: PDF → AI estrae righe → tabella scelta → 
+//         click su riga → apre form "Nuovo Movimento" pre-compilato
+// Nessuna API key esposta: usa anthropic-dangerous-direct-browser-access
+// ================================================================
+
+(function () {
+  'use strict';
+
+  // ---- STATO ----
+  let _cfpFile     = null;
+  let _cfpRighe    = [];
+  let _cfpProdotti = [];
+
+  // ================================================================
+  // UTILS
+  // ================================================================
+
+  function _loadPDFjs() {
+    return new Promise((resolve, reject) => {
+      if (window.pdfjsLib) return resolve();
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      s.onload = () => {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        resolve();
+      };
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+
+  async function _estraiTesto(file) {
+    await _loadPDFjs();
+    const buf = await file.arrayBuffer();
+    const pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
+    let testo = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page    = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      testo += '\n--- PAG ' + i + ' ---\n' + content.items.map(it => it.str).join(' ');
+    }
+    return testo;
+  }
+
+  async function _analizzaConAI(testo) {
+    const prompt = `Sei un esperto di fatture commerciali italiane.
+Analizza questo testo estratto da una fattura e restituisci SOLO JSON valido (no markdown, no testo extra).
+
+TESTO:
+${testo}
+
+Estrai:
+- numero_documento: numero fattura/DDT (stringa o null)
+- fornitore: ragione sociale emittente (stringa o null)  
+- data_documento: data YYYY-MM-DD (stringa o null)
+- righe: array prodotti con:
+    nome_prodotto: nome/codice esatto nel documento
+    quantita: numero
+    prezzo_unitario: prezzo UNITARIO euro come numero (se vedi solo totale riga dividilo per quantita, altrimenti null)
+
+Ignora IVA, sconti, spese trasporto, subtotali generali.
+Risposta (SOLO JSON):
+{"numero_documento":null,"fornitore":null,"data_documento":null,"righe":[{"nome_prodotto":"","quantita":1,"prezzo_unitario":null}]}`;
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!resp.ok) {
+      const e = await resp.json().catch(() => ({}));
+      throw new Error(e.error?.message || 'Errore AI (' + resp.status + ')');
+    }
+    const data = await resp.json();
+    const raw  = (data.content?.[0]?.text || '')
+      .replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    return JSON.parse(raw);
+  }
+
+  async function _loadProdotti() {
+    if (_cfpProdotti.length > 0) return _cfpProdotti;
+    const r = await fetch(API_URL + '/prodotti');
+    _cfpProdotti = await r.json();
+    return _cfpProdotti;
+  }
+
+  function _matchProdotto(nomePDF, prodotti) {
+    if (!nomePDF) return null;
+    const q = nomePDF.toLowerCase().trim();
+    let m = prodotti.find(p => p.nome.toLowerCase() === q);
+    if (m) return m;
+    m = prodotti.find(p => q.includes(p.nome.toLowerCase()) || p.nome.toLowerCase().includes(q));
+    if (m) return m;
+    const pw = q.split(/\s+/).filter(w => w.length > 2);
+    let best = 0, bestM = null;
+    prodotti.forEach(p => {
+      const pp = p.nome.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+      const n  = pw.filter(w => pp.includes(w)).length;
+      if (n >= 2 && n > best) { best = n; bestM = p; }
+    });
+    return bestM;
+  }
+
+  // ================================================================
+  // UI HELPERS
+  // ================================================================
+
+  function _showErr(msg) {
+    const el = document.getElementById('cfp-error');
+    if (el) { el.innerHTML = msg; el.style.display = 'block'; }
+  }
+  function _hideErr() {
+    const el = document.getElementById('cfp-error');
+    if (el) el.style.display = 'none';
+  }
+
+  function _setStep(step) {
+    ['cfp-step-upload','cfp-step-loading','cfp-step-risultati'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    const target = document.getElementById('cfp-step-' + step);
+    if (target) target.style.display = 'block';
+    const btnCarica = document.getElementById('cfp-btn-carica');
+    if (btnCarica) btnCarica.style.display = 'none';
+  }
+
+  function _setLoadingMsg(msg) {
+    const el = document.getElementById('cfp-loading-msg');
+    if (el) el.textContent = msg;
+  }
+
+  // ================================================================
+  // RENDER TABELLA RIGHE ESTRATTE
+  // ================================================================
+
+  function _renderRighe(prodotti) {
+    const tbody   = document.getElementById('cfp-tbody');
+    const counter = document.getElementById('cfp-counter');
+    if (!tbody) return;
+
+    const trovati = _cfpRighe.filter(r => r.prodotto_id).length;
+    if (counter) {
+      counter.textContent = trovati + ' di ' + _cfpRighe.length + ' prodotti trovati nel DB';
+      counter.style.color = trovati === _cfpRighe.length ? '#10b981' : '#f59e0b';
+    }
+
+    tbody.innerHTML = _cfpRighe.map((r, idx) => `
+      <tr class="${r.prodotto_id ? 'cfp-row-ok' : 'cfp-row-warn'}" id="cfp-tr-${idx}">
+        <td style="text-align:center;">
+          <input type="checkbox" ${r.includi ? 'checked' : ''}
+            onchange="cfpToggle(${idx},this.checked)"
+            style="width:16px;height:16px;cursor:pointer;" />
+        </td>
+        <td>
+          <div class="cfp-pdf-nome" title="${escapeHtml(r.nome_pdf||'')}">${escapeHtml(r.nome_pdf||'—')}</div>
+        </td>
+        <td>
+          <select class="cfp-select" onchange="cfpSetProdotto(${idx},this.value)">
+            <option value="">— Non associare —</option>
+            ${prodotti.map(p =>
+              `<option value="${p.id}" ${p.id === r.prodotto_id ? 'selected' : ''}>
+                ${escapeHtml(p.nome)}${p.marca_nome ? ' — ' + escapeHtml(p.marca_nome) : ''}
+              </option>`
+            ).join('')}
+          </select>
+          <span id="cfp-badge-${idx}" class="${r.prodotto_id ? 'cfp-badge-ok' : 'cfp-badge-warn'}">
+            ${r.prodotto_id ? '✓ Trovato' : '⚠ Non trovato'}
+          </span>
+        </td>
+        <td>
+          <input type="number" class="cfp-num-input"
+            value="${r.quantita ?? ''}" min="0.01" step="0.01"
+            onchange="cfpSetQta(${idx},this.value)" />
+        </td>
+        <td>
+          <input type="number" class="cfp-num-input"
+            value="${r.prezzo_unitario ?? ''}" min="0.01" step="0.01"
+            onchange="cfpSetPrezzo(${idx},this.value)" />
+        </td>
+        <td>
+          <button class="btn btn-primary cfp-btn-usa"
+            onclick="cfpUsaRiga(${idx})"
+            title="Apri il form Nuovo Movimento con questi dati pre-compilati">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Carica
+          </button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // ================================================================
+  // FUNZIONI GLOBALI (HTML inline)
+  // ================================================================
+
+  window.cfpToggle = function(idx, v) { _cfpRighe[idx].includi = v; };
+
+  window.cfpSetProdotto = function(idx, val) {
+    const p = _cfpProdotti.find(x => x.id == val);
+    _cfpRighe[idx].prodotto_id   = p ? p.id   : null;
+    _cfpRighe[idx].prodotto_nome = p ? p.nome  : null;
+    if (p) {
+      _cfpRighe[idx].includi = true;
+      const cb = document.querySelector('#cfp-tr-' + idx + ' input[type=checkbox]');
+      if (cb) cb.checked = true;
+    }
+    const badge = document.getElementById('cfp-badge-' + idx);
+    if (badge) {
+      badge.className   = p ? 'cfp-badge-ok' : 'cfp-badge-warn';
+      badge.textContent = p ? '✓ Trovato' : '⚠ Non trovato';
+    }
+  };
+
+  window.cfpSetQta    = function(idx, v) { _cfpRighe[idx].quantita        = parseFloat(v) || null; };
+  window.cfpSetPrezzo = function(idx, v) { _cfpRighe[idx].prezzo_unitario = parseFloat(v) || null; };
+
+  // ---- CLICCA "CARICA" SU UNA RIGA → apre form Nuovo Movimento pre-compilato ----
+  window.cfpUsaRiga = async function(idx) {
+    const r = _cfpRighe[idx];
+
+    // Validazioni riga
+    const errs = [];
+    if (!r.prodotto_id)                          errs.push('Seleziona un prodotto dal DB per questa riga.');
+    if (!r.quantita        || r.quantita <= 0)   errs.push('Inserisci una quantità valida.');
+    if (!r.prezzo_unitario || r.prezzo_unitario <= 0) errs.push('Inserisci un prezzo unitario valido.');
+
+    if (errs.length) { _showErr(errs.join('<br>')); return; }
+    _hideErr();
+
+    // Leggi i campi documento dalla sezione "dati documento"
+    const numDoc    = (document.getElementById('cfp-numero-doc')?.value || '').trim();
+    const fornitore = (document.getElementById('cfp-fornitore')?.value  || '').trim();
+    const data      = document.getElementById('cfp-data')?.value || '';
+
+    // Chiudi il modal PDF
+    closeCaricoFatturaPDFModal();
+
+    // Apri il modal standard Nuovo Movimento
+    await openMovimentoModal(null);
+
+    // Dopo breve timeout (aspetta che il modal si apra e setupDecimalInputs giri)
+    setTimeout(() => {
+      // Prodotto: trova nell'array globale e pre-seleziona
+      const prodotto = _cfpProdotti.find(p => p.id === r.prodotto_id);
+      if (prodotto) {
+        const hiddenInput  = document.getElementById('movimentoProdotto');
+        const searchInput  = document.getElementById('movimentoProdottoSearch');
+        const resultsBox   = document.getElementById('prodottoSearchResults');
+        if (hiddenInput)  hiddenInput.value  = prodotto.id;
+        if (searchInput) {
+          const marca   = prodotto.marca_nome || '';
+          searchInput.value = marca
+            ? prodotto.nome + ' - ' + marca.toUpperCase()
+            : prodotto.nome;
+          searchInput.classList.add('has-selection');
+        }
+        if (resultsBox) resultsBox.classList.remove('show');
+        // mostra giacenza
+        if (typeof showGiacenzaInfo === 'function') showGiacenzaInfo(prodotto.id);
+      }
+
+      // Tipo sempre CARICO
+      const tipoSel = document.getElementById('movimentoTipo');
+      if (tipoSel) {
+        tipoSel.value = 'carico';
+        if (typeof togglePrezzoField === 'function') togglePrezzoField();
+      }
+
+      // Quantità
+      const qInput = document.getElementById('movimentoQuantita');
+      if (qInput) {
+        qInput.value = r.quantita.toFixed(2).replace('.', ',');
+      }
+
+      // Prezzo unitario
+      const pInput = document.getElementById('movimentoPrezzo');
+      if (pInput) {
+        pInput.value = r.prezzo_unitario.toFixed(2).replace('.', ',');
+      }
+
+      // Data
+      const dInput = document.getElementById('movimentoData');
+      if (dInput && data) dInput.value = data;
+
+      // Documento/Fattura
+      const fInput = document.getElementById('movimentoFattura');
+      if (fInput && numDoc) fInput.value = numDoc;
+
+      // Fornitore
+      const fornInput = document.getElementById('movimentoFornitore');
+      if (fornInput && fornitore) fornInput.value = fornitore;
+
+    }, 300);
+  };
+
+  // ================================================================
+  // OPEN / CLOSE MODAL PDF
+  // ================================================================
+
+  window.openCaricoFatturaPDFModal = function() {
+    _cfpFile  = null;
+    _cfpRighe = [];
+
+    const modal = document.getElementById('modalCaricoFatturaPDF');
+    if (!modal) return;
+
+    // Reset UI
+    const fileInput = document.getElementById('cfp-file-input');
+    if (fileInput) fileInput.value = '';
+    const fileLabel = document.getElementById('cfp-file-label');
+    if (fileLabel) fileLabel.textContent = 'Trascina il PDF qui o clicca per sfogliare';
+    const btnAnal = document.getElementById('cfp-btn-analizza');
+    if (btnAnal) btnAnal.disabled = true;
+    const tbody = document.getElementById('cfp-tbody');
+    if (tbody) tbody.innerHTML = '';
+    _hideErr();
+    _setStep('upload');
+
+    // precarica prodotti in background
+    _loadProdotti().catch(console.error);
+
+    modal.classList.add('active');
+  };
+
+  window.closeCaricoFatturaPDFModal = function() {
+    document.getElementById('modalCaricoFatturaPDF')?.classList.remove('active');
+  };
+
+  // ================================================================
+  // SELEZIONE FILE
+  // ================================================================
+
+  window.cfpOnFileSelected = function(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.type !== 'application/pdf') { _showErr('⚠ Seleziona un file PDF valido.'); return; }
+    _cfpFile = file;
+    const lbl = document.getElementById('cfp-file-label');
+    if (lbl) lbl.textContent = '📄 ' + file.name;
+    const btn = document.getElementById('cfp-btn-analizza');
+    if (btn) btn.disabled = false;
+    _hideErr();
+  };
+
+  // ================================================================
+  // ANALIZZA PDF CON AI
+  // ================================================================
+
+  window.cfpAnalizzaPDF = async function() {
+    if (!_cfpFile) return;
+    const btn = document.getElementById('cfp-btn-analizza');
+    if (btn) btn.disabled = true;
+
+    try {
+      _setStep('loading');
+      _setLoadingMsg('📖 Lettura PDF...');
+      const testo = await _estraiTesto(_cfpFile);
+      if (!testo.trim()) throw new Error('Il PDF non contiene testo leggibile (potrebbe essere scansionato).');
+
+      _setLoadingMsg('🤖 Analisi AI in corso...');
+      const dati = await _analizzaConAI(testo);
+
+      _setLoadingMsg('🔍 Ricerca prodotti nel database...');
+      const prodotti = await _loadProdotti();
+
+      // Popola campi documento
+      const ndEl = document.getElementById('cfp-numero-doc');
+      const frEl = document.getElementById('cfp-fornitore');
+      const dtEl = document.getElementById('cfp-data');
+      if (ndEl && dati.numero_documento) ndEl.value = dati.numero_documento;
+      if (frEl && dati.fornitore)        frEl.value = dati.fornitore;
+      if (dtEl) dtEl.value = dati.data_documento || new Date().toISOString().split('T')[0];
+
+      // Costruisci righe con match automatico
+      _cfpRighe = (dati.righe || []).map((r, idx) => {
+        const trovato = _matchProdotto(r.nome_prodotto, prodotti);
+        return {
+          idx,
+          nome_pdf:        r.nome_prodotto,
+          quantita:        r.quantita,
+          prezzo_unitario: r.prezzo_unitario,
+          prodotto_id:     trovato ? trovato.id   : null,
+          prodotto_nome:   trovato ? trovato.nome : null,
+          includi:         trovato !== null
+        };
+      });
+
+      _renderRighe(prodotti);
+      _setStep('risultati');
+
+    } catch (err) {
+      console.error('Errore analisi PDF:', err);
+      _setStep('upload');
+      _showErr('❌ ' + err.message);
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  };
+
+  // ================================================================
+  // DRAG & DROP
+  // ================================================================
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const dz = document.getElementById('cfp-dropzone');
+    if (!dz) return;
+    dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('cfp-drag-over'); });
+    dz.addEventListener('dragleave', ()  => dz.classList.remove('cfp-drag-over'));
+    dz.addEventListener('drop', e => {
+      e.preventDefault();
+      dz.classList.remove('cfp-drag-over');
+      const f = e.dataTransfer.files[0];
+      if (f && f.type === 'application/pdf') {
+        _cfpFile = f;
+        const lbl = document.getElementById('cfp-file-label');
+        if (lbl) lbl.textContent = '📄 ' + f.name;
+        const btn = document.getElementById('cfp-btn-analizza');
+        if (btn) btn.disabled = false;
+        _hideErr();
+      } else {
+        _showErr('⚠ Seleziona un file PDF valido.');
+      }
+    });
+  });
+
+})();
