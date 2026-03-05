@@ -5212,12 +5212,8 @@ function renderMovimenti() {
           <td class="${colorClass}">${formatQuantity(m.quantita)} pz</td>
           <td class="${colorClass}">${prezzoUnitarioHtml}</td>
           <td class="${colorClass}"><strong>${prezzoTotaleHtml}</strong></td>
-          <td>${(() => {
+          <td>${m.tipo === 'scarico' ? '' : (() => {
             const doc = m.fattura_doc || '';
-            // Per gli scarichi, non mostrare il nome del PDF
-            if (m.tipo === 'scarico') {
-              return '<span style="color:#999;">-</span>';
-            }
             if (/\.pdf$/i.test(doc.trim())) {
               const nome = doc.trim();
               return `<span style="display:inline-flex;align-items:center;gap:5px;">
@@ -5231,11 +5227,9 @@ function renderMovimenti() {
                 <span style="font-size:12px;color:#64748b;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(nome)}">${escapeHtml(nome.replace(/\.pdf$/i, ''))}</span>
               </span>`;
             }
-            return doc ? escapeHtml(doc) : '<span style="color:#999;">-</span>';
+            return doc ? escapeHtml(doc) : '';
           })()}</td>
-          <td>${
-            m.fornitore_cliente_id || '<span style="color:#999;">-</span>'
-          }</td>
+          <td>${m.tipo === 'scarico' ? '' : (m.fornitore_cliente_id || '')}</td>
           <td class="text-right">
             <!-- PENNA MODIFICA -->
             <button class="btn-icon"
