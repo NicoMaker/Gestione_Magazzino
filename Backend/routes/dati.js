@@ -514,8 +514,8 @@ router.post("/bulk-scarico", (req, res) => {
                   prodotto_id, tipo, quantita, prezzo,
                   prezzo_totale_movimento, data_movimento,
                   data_registrazione, fattura_doc, fornitore_cliente_id
-                ) VALUES (?, 'scarico', ?, NULL, ?, ?, ?, ?, NULL)`,
-                [prodotto_id, qta, costoTotale, data_movimento, now, nomeDoc],
+                ) VALUES (?, 'scarico', ?, NULL, ?, ?, ?, NULL, NULL)`,
+                [prodotto_id, qta, costoTotale, data_movimento, now],
                 function (errInsert) {
                   if (errInsert) {
                     db.run("ROLLBACK;");
