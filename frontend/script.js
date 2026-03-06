@@ -2271,7 +2271,7 @@ function printRiepilogo() {
               <tr>
                 <th>Data Carico</th>
                 <th>Quantità (pz)</th>
-                <th>Prezzo Unit.</th>
+                <th>Prezzo Unitario</th>
                 <th>Valore</th>
                 <th>Documento/Fattura</th>
                 <th>Fornitore</th>
@@ -2472,7 +2472,7 @@ function printStorico() {
               <tr>
                 <th>Data Carico</th>
                 <th>Quantità (pz)</th>
-                <th>Prezzo Unit.</th>
+                <th>Prezzo Unitario</th>
                 <th>Valore</th>
                 <th>Documento/Fattura</th>
                 <th>Fornitore</th>
@@ -3753,7 +3753,7 @@ function renderRiepilogo() {
                   <tr>
                     <th>Data Carico</th>
                     <th>Quantità (pz)</th>
-                    <th>Prezzo Unit.</th>
+                    <th>Prezzo Unitario</th>
                     <th>Valore</th>
                     <th>Documento/Fattura</th>
                     <th>Fornitore</th>
@@ -3925,7 +3925,7 @@ function renderStorico(storico) {
                   <tr>
                     <th>Data Carico</th>
                     <th>Quantità (pz)</th>
-                    <th>Prezzo Unit.</th>
+                    <th>Prezzo Unitario</th>
                     <th>Valore</th>
                     <th>Documento/Fattura</th>
                     <th>Fornitore</th>
