@@ -5444,7 +5444,10 @@ async function openMovimentoModal(movimento = null) {
   async function _analizzaConAI(testo) {
     console.log("🔍 Parsing ibrido PDF (nessuna API esterna)...");
 
-    const righe = testo.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+    const righe = testo
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
 
     // ── 1. NUMERO DOCUMENTO ──────────────────────────────────────
     let numero_documento = null;
@@ -5462,7 +5465,10 @@ async function openMovimentoModal(movimento = null) {
     for (const riga of righe) {
       for (const pat of patternDoc) {
         const m = riga.match(pat);
-        if (m && m[1] && m[1].length >= 2) { numero_documento = m[1].trim(); break; }
+        if (m && m[1] && m[1].length >= 2) {
+          numero_documento = m[1].trim();
+          break;
+        }
       }
       if (numero_documento) break;
     }
@@ -5479,41 +5485,116 @@ async function openMovimentoModal(movimento = null) {
         const m = riga.match(pat);
         if (m && m[1]) {
           const norm = _normData(m[1]);
-          if (norm) { data_documento = norm; break; }
+          if (norm) {
+            data_documento = norm;
+            break;
+          }
         }
       }
       if (data_documento) break;
     }
-    if (!data_documento) data_documento = new Date().toISOString().split("T")[0];
+    if (!data_documento)
+      data_documento = new Date().toISOString().split("T")[0];
 
     // ── 3. FORNITORE (prime righe) ───────────────────────────────
     let fornitore = null;
-    const stopW = ["fattura","ddt","bolla","ordine","data","numero","via","viale",
-      "corso","piazza","tel","fax","email","pec","p.iva","partita","cod","cf","rea",
-      "cap","comune","prov","intestat","spett","cliente","destinatar","pagament",
-      "scadenz","totale","imponibil","iva","importo","descrizione","quantit","prezzo",
-      "articolo","codice","riferimento","note","condizioni","banca","iban","swift"];
+    const stopW = [
+      "fattura",
+      "ddt",
+      "bolla",
+      "ordine",
+      "data",
+      "numero",
+      "via",
+      "viale",
+      "corso",
+      "piazza",
+      "tel",
+      "fax",
+      "email",
+      "pec",
+      "p.iva",
+      "partita",
+      "cod",
+      "cf",
+      "rea",
+      "cap",
+      "comune",
+      "prov",
+      "intestat",
+      "spett",
+      "cliente",
+      "destinatar",
+      "pagament",
+      "scadenz",
+      "totale",
+      "imponibil",
+      "iva",
+      "importo",
+      "descrizione",
+      "quantit",
+      "prezzo",
+      "articolo",
+      "codice",
+      "riferimento",
+      "note",
+      "condizioni",
+      "banca",
+      "iban",
+      "swift",
+    ];
     for (let i = 0; i < Math.min(15, righe.length); i++) {
       const r = righe[i];
       if (r.length < 3 || r.length > 80) continue;
       const rl = r.toLowerCase();
-      if (stopW.some(w => rl.startsWith(w))) continue;
+      if (stopW.some((w) => rl.startsWith(w))) continue;
       if (/^\d/.test(r) || /^[^a-zA-Z]/.test(r)) continue;
-      if (/[a-zA-Z]{3,}/.test(r)) { fornitore = r; break; }
+      if (/[a-zA-Z]{3,}/.test(r)) {
+        fornitore = r;
+        break;
+      }
     }
 
     // ── 4. RIGHE PRODOTTO ────────────────────────────────────────
     const righeOutput = [];
-    const reQta    = /\b(\d{1,6}(?:[,\.]\d{1,3})?)\s*(?:pz|pcs|nr|n\.?|pezzi?)?\b/gi;
+    // Cattura quantità con unità opzionale; gruppo 2 = unità (per rilevare liquidi)
+    const reQta =
+      /\b(\d{1,6}(?:[,\.]\d{1,3})?)\s*(l(?:t|itri?)?|pz|pcs|nr|n\.?|pezzi?)?\b/gi;
     const rePrezzo = /€?\s*(\d{1,8}[,\.]\d{2})\b/g;
-    const skipL = ["totale","subtotale","imponibile","iva","sconto","trasporto",
-      "spese","acconto","saldo","netto","lordo","descrizione","quantita","quantità",
-      "prezzo","importo","articolo","codice","um","u.m.","nr","note"];
+    const skipL = [
+      "totale",
+      "subtotale",
+      "imponibile",
+      "iva",
+      "sconto",
+      "trasporto",
+      "spese",
+      "acconto",
+      "saldo",
+      "netto",
+      "lordo",
+      "descrizione",
+      "quantita",
+      "quantità",
+      "prezzo",
+      "importo",
+      "articolo",
+      "codice",
+      "um",
+      "u.m.",
+      "nr",
+      "note",
+    ];
 
     for (const r of righe) {
       if (r.length < 3) continue;
       const rl = r.toLowerCase().trim();
-      if (skipL.some(w => rl === w || rl.startsWith(w+" ") || rl.startsWith(w+":"))) continue;
+      if (
+        skipL.some(
+          (w) => rl === w || rl.startsWith(w + " ") || rl.startsWith(w + ":"),
+        )
+      )
+        continue;
       if (/^[-=*_#]+$/.test(r)) continue;
 
       reQta.lastIndex = 0;
@@ -5526,22 +5607,30 @@ async function openMovimentoModal(movimento = null) {
       let quantita = null;
       for (const m of qtaMatches) {
         const v = parseFloat(m[1].replace(",", "."));
-        if (v > 0 && v <= 9999) { quantita = v; break; }
+        if (v > 0 && v <= 9999) {
+          // Regola liquidi: 1 L = 1 pz → la quantità in litri vale direttamente come pezzi
+          // (nessuna conversione necessaria, il valore numerico rimane invariato)
+          quantita = v;
+          break;
+        }
       }
       if (!quantita) continue;
 
       let prezzo_unitario = null;
       if (prezzoMatches.length) {
         const prezzi = prezzoMatches
-          .map(m => parseFloat(m[1].replace(",", ".")))
-          .filter(v => v > 0)
+          .map((m) => parseFloat(m[1].replace(",", ".")))
+          .filter((v) => v > 0)
           .sort((a, b) => a - b);
         if (prezzi.length) prezzo_unitario = prezzi[0];
       }
 
       let nome = r
         .replace(/€?\s*\d{1,8}[,\.]\d{2}/g, "")
-        .replace(/\b\d{1,6}(?:[,\.]\d{1,3})?\s*(?:pz|pcs|nr|n\.?)?\b/gi, "")
+        .replace(
+          /\b\d{1,6}(?:[,\.]\d{1,3})?\s*(?:l(?:t|itri?)?|pz|pcs|nr|n\.?)?\b/gi,
+          "",
+        )
         .replace(/\s{2,}/g, " ")
         .trim();
 
@@ -5562,9 +5651,10 @@ async function openMovimentoModal(movimento = null) {
     const sep = str.includes("/") ? "/" : str.includes("-") ? "-" : ".";
     const p = str.split(sep);
     if (p.length !== 3) return null;
-    if (p[0].length === 4) return `${p[0]}-${p[1].padStart(2,"0")}-${p[2].padStart(2,"0")}`;
-    const y = p[2].length === 2 ? "20"+p[2] : p[2];
-    return `${y}-${p[1].padStart(2,"0")}-${p[0].padStart(2,"0")}`;
+    if (p[0].length === 4)
+      return `${p[0]}-${p[1].padStart(2, "0")}-${p[2].padStart(2, "0")}`;
+    const y = p[2].length === 2 ? "20" + p[2] : p[2];
+    return `${y}-${p[1].padStart(2, "0")}-${p[0].padStart(2, "0")}`;
   }
 
   async function _loadProdotti() {
