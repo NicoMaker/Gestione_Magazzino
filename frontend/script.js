@@ -5442,48 +5442,129 @@ async function openMovimentoModal(movimento = null) {
   }
 
   async function _analizzaConAI(testo) {
-    const prompt = `Sei un esperto di fatture commerciali italiane.
-Analizza questo testo estratto da una fattura e restituisci SOLO JSON valido (no markdown, no testo extra).
+    console.log("🔍 Parsing ibrido PDF (nessuna API esterna)...");
 
-TESTO:
-${testo}
+    const righe = testo.split("\n").map(l => l.trim()).filter(l => l.length > 0);
 
-Estrai:
-- numero_documento: numero fattura/DDT (stringa o null)
-- fornitore: ragione sociale emittente (stringa o null)
-- data_documento: data YYYY-MM-DD (stringa o null)
-- righe: array prodotti con:
-    nome_prodotto: nome/codice esatto nel documento
-    quantita: numero
-    prezzo_unitario: prezzo UNITARIO euro come numero (se vedi solo totale riga dividilo per quantita, null se non trovato)
-
-Ignora IVA, sconti, spese trasporto, subtotali.
-Risposta (SOLO JSON):
-{"numero_documento":null,"fornitore":null,"data_documento":null,"righe":[{"nome_prodotto":"","quantita":1,"prezzo_unitario":null}]}`;
-
-    const resp = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "anthropic-version": "2023-06-01",
-        "anthropic-dangerous-direct-browser-access": "true",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 2000,
-        messages: [{ role: "user", content: prompt }],
-      }),
-    });
-    if (!resp.ok) {
-      const e = await resp.json().catch(() => ({}));
-      throw new Error(e.error?.message || "Errore AI (" + resp.status + ")");
+    // ── 1. NUMERO DOCUMENTO ──────────────────────────────────────
+    let numero_documento = null;
+    const patternDoc = [
+      /fattura\s+n[°.]?\s*([A-Z0-9\-\/]+)/i,
+      /n[°.]?\s*fattura\s*:?\s*([A-Z0-9\-\/]+)/i,
+      /ddt\s+n[°.]?\s*([A-Z0-9\-\/]+)/i,
+      /documento\s+n[°.]?\s*([A-Z0-9\-\/]+)/i,
+      /ordine\s+n[°.]?\s*([A-Z0-9\-\/]+)/i,
+      /bolla\s+n[°.]?\s*([A-Z0-9\-\/]+)/i,
+      /num(?:ero)?\s*[:\.]?\s*([A-Z0-9]{2,}[\/\-][A-Z0-9]+)/i,
+      /^([A-Z]{2,}[\/\-]\d{4}[\/\-]\d+)$/i,
+      /^(\d{4}[\/\-]\d+)$/,
+    ];
+    for (const riga of righe) {
+      for (const pat of patternDoc) {
+        const m = riga.match(pat);
+        if (m && m[1] && m[1].length >= 2) { numero_documento = m[1].trim(); break; }
+      }
+      if (numero_documento) break;
     }
-    const data = await resp.json();
-    const raw = (data.content?.[0]?.text || "")
-      .replace(/```json\n?/g, "")
-      .replace(/```\n?/g, "")
-      .trim();
-    return JSON.parse(raw);
+
+    // ── 2. DATA DOCUMENTO ────────────────────────────────────────
+    let data_documento = null;
+    const patternData = [
+      /data\s*[:\-]?\s*(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/i,
+      /del\s+(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/i,
+      /(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{4})/,
+    ];
+    for (const riga of righe) {
+      for (const pat of patternData) {
+        const m = riga.match(pat);
+        if (m && m[1]) {
+          const norm = _normData(m[1]);
+          if (norm) { data_documento = norm; break; }
+        }
+      }
+      if (data_documento) break;
+    }
+    if (!data_documento) data_documento = new Date().toISOString().split("T")[0];
+
+    // ── 3. FORNITORE (prime righe) ───────────────────────────────
+    let fornitore = null;
+    const stopW = ["fattura","ddt","bolla","ordine","data","numero","via","viale",
+      "corso","piazza","tel","fax","email","pec","p.iva","partita","cod","cf","rea",
+      "cap","comune","prov","intestat","spett","cliente","destinatar","pagament",
+      "scadenz","totale","imponibil","iva","importo","descrizione","quantit","prezzo",
+      "articolo","codice","riferimento","note","condizioni","banca","iban","swift"];
+    for (let i = 0; i < Math.min(15, righe.length); i++) {
+      const r = righe[i];
+      if (r.length < 3 || r.length > 80) continue;
+      const rl = r.toLowerCase();
+      if (stopW.some(w => rl.startsWith(w))) continue;
+      if (/^\d/.test(r) || /^[^a-zA-Z]/.test(r)) continue;
+      if (/[a-zA-Z]{3,}/.test(r)) { fornitore = r; break; }
+    }
+
+    // ── 4. RIGHE PRODOTTO ────────────────────────────────────────
+    const righeOutput = [];
+    const reQta    = /\b(\d{1,6}(?:[,\.]\d{1,3})?)\s*(?:pz|pcs|nr|n\.?|pezzi?)?\b/gi;
+    const rePrezzo = /€?\s*(\d{1,8}[,\.]\d{2})\b/g;
+    const skipL = ["totale","subtotale","imponibile","iva","sconto","trasporto",
+      "spese","acconto","saldo","netto","lordo","descrizione","quantita","quantità",
+      "prezzo","importo","articolo","codice","um","u.m.","nr","note"];
+
+    for (const r of righe) {
+      if (r.length < 3) continue;
+      const rl = r.toLowerCase().trim();
+      if (skipL.some(w => rl === w || rl.startsWith(w+" ") || rl.startsWith(w+":"))) continue;
+      if (/^[-=*_#]+$/.test(r)) continue;
+
+      reQta.lastIndex = 0;
+      const qtaMatches = [...r.matchAll(reQta)];
+      if (!qtaMatches.length) continue;
+
+      rePrezzo.lastIndex = 0;
+      const prezzoMatches = [...r.matchAll(rePrezzo)];
+
+      let quantita = null;
+      for (const m of qtaMatches) {
+        const v = parseFloat(m[1].replace(",", "."));
+        if (v > 0 && v <= 9999) { quantita = v; break; }
+      }
+      if (!quantita) continue;
+
+      let prezzo_unitario = null;
+      if (prezzoMatches.length) {
+        const prezzi = prezzoMatches
+          .map(m => parseFloat(m[1].replace(",", ".")))
+          .filter(v => v > 0)
+          .sort((a, b) => a - b);
+        if (prezzi.length) prezzo_unitario = prezzi[0];
+      }
+
+      let nome = r
+        .replace(/€?\s*\d{1,8}[,\.]\d{2}/g, "")
+        .replace(/\b\d{1,6}(?:[,\.]\d{1,3})?\s*(?:pz|pcs|nr|n\.?)?\b/gi, "")
+        .replace(/\s{2,}/g, " ")
+        .trim();
+
+      if (nome.length < 2) continue;
+      if (/^[\d\s\.\,\-\/\*]+$/.test(nome)) continue;
+
+      righeOutput.push({ nome_prodotto: nome, quantita, prezzo_unitario });
+    }
+
+    console.log(`✅ Parsing completato: ${righeOutput.length} righe trovate`);
+    return { numero_documento, fornitore, data_documento, righe: righeOutput };
+  }
+
+  // helper data locale (evita conflitto con normalizeDate globale)
+  function _normData(str) {
+    if (!str) return null;
+    str = str.trim();
+    const sep = str.includes("/") ? "/" : str.includes("-") ? "-" : ".";
+    const p = str.split(sep);
+    if (p.length !== 3) return null;
+    if (p[0].length === 4) return `${p[0]}-${p[1].padStart(2,"0")}-${p[2].padStart(2,"0")}`;
+    const y = p[2].length === 2 ? "20"+p[2] : p[2];
+    return `${y}-${p[1].padStart(2,"0")}-${p[0].padStart(2,"0")}`;
   }
 
   async function _loadProdotti() {
