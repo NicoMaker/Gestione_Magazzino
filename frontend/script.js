@@ -2270,7 +2270,7 @@ function printRiepilogo() {
             <thead>
               <tr>
                 <th>Data Carico</th>
-                <th>Quantità</th>
+                <th>Quantità (pz)</th>
                 <th>Prezzo Unit.</th>
                 <th>Valore</th>
                 <th>Documento/Fattura</th>
@@ -2286,7 +2286,7 @@ function printRiepilogo() {
               <td>${new Date(lotto.data_carico).toLocaleDateString(
                 "it-IT",
               )}</td>
-              <td>${formatQuantity(lotto.quantita_rimanente)} pz</td>
+              <td>${formatQuantity(lotto.quantita_rimanente)}</td>
               <td>${formatCurrency(lotto.prezzo)}</td>
               <td><strong>${formatCurrency(
                 lotto.quantita_rimanente * lotto.prezzo,
@@ -2471,7 +2471,7 @@ function printStorico() {
             <thead>
               <tr>
                 <th>Data Carico</th>
-                <th>Quantità</th>
+                <th>Quantità (pz)</th>
                 <th>Prezzo Unit.</th>
                 <th>Valore</th>
                 <th>Documento/Fattura</th>
@@ -2487,7 +2487,7 @@ function printStorico() {
               <td>${new Date(lotto.data_carico).toLocaleDateString(
                 "it-IT",
               )}</td>
-              <td>${formatQuantity(lotto.quantita_rimanente)} pz</td>
+              <td>${formatQuantity(lotto.quantita_rimanente)}</td>
               <td>${formatCurrency(lotto.prezzo)}</td>
               <td><strong>${formatCurrency(
                 lotto.quantita_rimanente * lotto.prezzo,
@@ -3539,8 +3539,8 @@ function renderProdotti() {
           </span>
         </td>
         <td>
-          <span class="${(p.giacenza ?? 0) == 0 ? 'badge-giacenza-zero' : 'badge-giacenza'}">
-            ${formatQuantity(p.giacenza ?? 0)} pz
+          <span class="${(p.giacenza ?? 0) == 0 ? "badge-giacenza-zero" : "badge-giacenza"}">
+            ${formatQuantity(p.giacenza ?? 0)}
           </span>
         </td>
         <td>${p.descrizione ? escapeHtml(p.descrizione) : "-"}</td>
@@ -3734,7 +3734,7 @@ function renderRiepilogo() {
           }
         </td>
         <td>
-          <span class="${(r.giacenza ?? 0) == 0 ? 'badge-giacenza-zero' : 'badge-giacenza'}">${formatQuantity(r.giacenza)} pz</span>
+          <span class="${(r.giacenza ?? 0) == 0 ? "badge-giacenza-zero" : "badge-giacenza"}">${formatQuantity(r.giacenza)}</span>
         </td>
         <td>
           <strong>${formatCurrency(r.valore_totale)}</strong>
@@ -3752,7 +3752,7 @@ function renderRiepilogo() {
                 <thead>
                   <tr>
                     <th>Data Carico</th>
-                    <th>Quantità</th>
+                    <th>Quantità (pz)</th>
                     <th>Prezzo Unit.</th>
                     <th>Valore</th>
                     <th>Documento/Fattura</th>
@@ -3766,7 +3766,7 @@ function renderRiepilogo() {
         html += `
           <tr>
             <td>${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
-            <td><strong>${formatQuantity(lotto.quantita_rimanente)} pz</strong></td>
+            <td><strong>${formatQuantity(lotto.quantita_rimanente)}</strong></td>
             <td>${formatCurrency(lotto.prezzo)}</td>
             <td><strong>${formatCurrency(lotto.quantita_rimanente * lotto.prezzo)}</strong></td>
             <td>${lotto.fattura_doc || '<span style="color: #999;">-</span>'}</td>
@@ -3906,7 +3906,7 @@ function renderStorico(storico) {
           }
         </td>
         <td>
-          <span class="${(s.giacenza ?? 0) == 0 ? 'badge-giacenza-zero' : 'badge-giacenza'}">${formatQuantity(s.giacenza)} pz</span>
+          <span class="${(s.giacenza ?? 0) == 0 ? "badge-giacenza-zero" : "badge-giacenza"}">${formatQuantity(s.giacenza)}</span>
         </td>
         <td>
           <strong>${formatCurrency(s.valore_totale)}</strong>
@@ -3924,7 +3924,7 @@ function renderStorico(storico) {
                 <thead>
                   <tr>
                     <th>Data Carico</th>
-                    <th>Quantità</th>
+                    <th>Quantità (pz)</th>
                     <th>Prezzo Unit.</th>
                     <th>Valore</th>
                     <th>Documento/Fattura</th>
@@ -3938,7 +3938,7 @@ function renderStorico(storico) {
         html += `
           <tr>
             <td>${new Date(lotto.data_carico).toLocaleDateString("it-IT")}</td>
-            <td><strong>${formatQuantity(lotto.quantita_rimanente)} pz</strong></td>
+            <td><strong>${formatQuantity(lotto.quantita_rimanente)}</strong></td>
             <td>${formatCurrency(lotto.prezzo)}</td>
             <td><strong>${formatCurrency(lotto.quantita_rimanente * lotto.prezzo)}</strong></td>
             <td>${lotto.fattura_doc || '<span style="color: #999;">-</span>'}</td>
@@ -5230,7 +5230,7 @@ function renderMovimenti() {
               m.tipo === "carico" ? "badge-success" : "badge-danger"
             }">${m.tipo.toUpperCase()}</span>
           </td>
-          <td class="${colorClass}">${formatQuantity(m.quantita)} pz</td>
+          <td class="${colorClass}">${formatQuantity(m.quantita)}</td>
           <td class="${colorClass}">${prezzoUnitarioHtml}</td>
           <td class="${colorClass}"><strong>${prezzoTotaleHtml}</strong></td>
           <td>${
@@ -5305,7 +5305,10 @@ async function openMovimentoModal(movimento = null) {
     const res = await fetch(`${API_URL}/prodotti`);
     allProdotti = await res.json();
     prodotti = allProdotti;
-    console.log("✅ Prodotti ricaricati per il modal movimento:", allProdotti.length);
+    console.log(
+      "✅ Prodotti ricaricati per il modal movimento:",
+      allProdotti.length,
+    );
   } catch (error) {
     console.warn("⚠️ Impossibile ricaricare prodotti, uso cache:", error);
   }
