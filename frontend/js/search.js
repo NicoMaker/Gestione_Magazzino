@@ -23,22 +23,35 @@ function getSearchTerm(key) {
 function reapplyFilter(inputId) {
   const input = document.getElementById(inputId);
   if (input && input.value.trim()) {
-    input.dispatchEvent(new Event("input", { bubbles: true }));
+    const filterMap = {
+      filterMarche:    filterMarche,
+      filterProdotti:  filterProdotti,
+      filterMovimenti: filterMovimenti,
+      filterRiepilogo: filterRiepilogo,
+      filterStorico:   filterStorico,
+      filterUtenti:    filterUtenti,
+    };
+    const fn = filterMap[inputId];
+    if (fn) fn(input.value.trim());
   }
 }
 
 // Collega input di ricerca a localStorage e rilancia il filtro
-function setupSearchPersistence(inputId, storageKey) {
+function setupSearchPersistence(inputId, storageKey, filterFn) {
   const input = document.getElementById(inputId);
   if (!input) return;
 
   const saved = getSearchTerm(storageKey);
   if (saved) {
     input.value = saved;
-    setTimeout(() => input.dispatchEvent(new Event("input")), 0);
+    setTimeout(() => filterFn(saved), 0);
   }
 
-  input.addEventListener("input", (e) => saveSearchTerm(storageKey, e.target.value));
+  input.addEventListener("input", (e) => {
+    const val = e.target.value;
+    saveSearchTerm(storageKey, val);
+    filterFn(val);
+  });
 }
 
 // ── Funzioni di filtro per ogni sezione ─────────────────────
@@ -111,10 +124,10 @@ function filterUtenti(searchTerm) {
 // ── Inizializzazione sistema di ricerca ──────────────────────
 
 function initSearchSystem() {
-  setupSearchPersistence("filterMarche",    SEARCHKEYS.marche);
-  setupSearchPersistence("filterProdotti",  SEARCHKEYS.prodotti);
-  setupSearchPersistence("filterMovimenti", SEARCHKEYS.movimenti);
-  setupSearchPersistence("filterRiepilogo", SEARCHKEYS.riepilogo);
-  setupSearchPersistence("filterStorico",   SEARCHKEYS.storico);
-  setupSearchPersistence("filterUtenti",    SEARCHKEYS.utenti);
+  setupSearchPersistence("filterMarche",    SEARCHKEYS.marche,    filterMarche);
+  setupSearchPersistence("filterProdotti",  SEARCHKEYS.prodotti,  filterProdotti);
+  setupSearchPersistence("filterMovimenti", SEARCHKEYS.movimenti, filterMovimenti);
+  setupSearchPersistence("filterRiepilogo", SEARCHKEYS.riepilogo, filterRiepilogo);
+  setupSearchPersistence("filterStorico",   SEARCHKEYS.storico,   filterStorico);
+  setupSearchPersistence("filterUtenti",    SEARCHKEYS.utenti,    filterUtenti);
 }
