@@ -3620,3 +3620,23 @@ tbody tr:hover {
     display: none;
   }
 }
+
+/* ===== MOBILE: filter-controls full width ===== */
+@media (max-width: 768px) {
+  .filter-controls {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .filter-controls .filter-input,
+  .filter-controls .search-wrapper,
+  .filter-controls .btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .filter-controls .search-wrapper input {
+    width: 100%;
+  }
+}
