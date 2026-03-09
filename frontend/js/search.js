@@ -131,3 +131,27 @@ function initSearchSystem() {
   setupSearchPersistence("filterStorico",   SEARCHKEYS.storico,   filterStorico);
   setupSearchPersistence("filterUtenti",    SEARCHKEYS.utenti,    filterUtenti);
 }
+
+// ── Ripristina il termine di ricerca salvato quando si cambia sezione ─
+function restoreSearchOnSectionChange(section) {
+  const map = {
+    marche:    { inputId: "filterMarche",    fn: filterMarche    },
+    prodotti:  { inputId: "filterProdotti",  fn: filterProdotti  },
+    movimenti: { inputId: "filterMovimenti", fn: filterMovimenti },
+    riepilogo: { inputId: "filterRiepilogo", fn: filterRiepilogo },
+    storico:   { inputId: "filterStorico",   fn: filterStorico   },
+    utenti:    { inputId: "filterUtenti",    fn: filterUtenti    },
+  };
+
+  const entry = map[section];
+  if (!entry) return;
+
+  const input = document.getElementById(entry.inputId);
+  if (!input) return;
+
+  const saved = getSearchTerm(SEARCHKEYS[section]);
+  if (saved) {
+    input.value = saved;
+    setTimeout(() => entry.fn(saved), 0);
+  }
+}
