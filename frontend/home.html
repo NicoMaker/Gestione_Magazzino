@@ -178,8 +178,6 @@
         </div>
 
         <!-- ✅ IMPORTANTE: Aggiungi questo script PRIMA di script.js -->
-        <!-- Inseriscilo subito prima di <script src="script.js"></script> -->
-        <script src="company-loader.js"></script>
       </aside>
 
       <!-- Sistema Notifiche -->
@@ -1347,9 +1345,36 @@
       </div>
     </div>
 
-    <!-- Socket.IO Client -->
+    <!--
+      ORDINE DI CARICAMENTO SCRIPT HOME:
+      1. Socket.IO       → real-time
+      2. realtime.js     → connessione socket + modali alert/confirm
+      3. config.js       → costanti e variabili globali (API_URL, array dati)
+      4. utils.js        → formatCurrency, formatQuantity, escapeHtml, decimal inputs, forceLogout
+      5. search.js       → sistema ricerca con memoria localStorage
+      6. company-loader.js → dati aziendali (sidebar, stampe)
+      7. marche.js       → CRUD marche
+      8. prodotti.js     → CRUD prodotti + ricerca marca
+      9. movimenti.js    → CRUD movimenti + ricerca prodotto + toggle carico/scarico
+      10. riepilogo.js   → giacenze FIFO + storico + stampe
+      11. utenti.js      → CRUD utenti + password toggle
+      12. pdf-scarico.js → import PDF scarichi
+      13. pdf-fattura.js → carico da fattura PDF (IIFE)
+      14. navigation.js  → bootstrap app: navigazione, hamburger, logout (unico DOMContentLoaded)
+    -->
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-    <script src="realtime.js"></script>
-    <script src="script.js"></script>
+    <script src="js/realtime.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/company-loader.js"></script>
+    <script src="js/marche.js"></script>
+    <script src="js/prodotti.js"></script>
+    <script src="js/movimenti.js"></script>
+    <script src="js/riepilogo.js"></script>
+    <script src="js/utenti.js"></script>
+    <script src="js/pdf-scarico.js"></script>
+    <script src="js/pdf-fattura.js"></script>
+    <script src="js/navigation.js"></script>
   </body>
 </html>
