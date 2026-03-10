@@ -106,6 +106,8 @@ function _printMagazzino(tipo) {
       ? new Date(dataEl + "T00:00:00").toLocaleDateString("it-IT")
       : "Non selezionata";
     extraInfo = `<p><strong>Data Selezionata:</strong> ${dataIt}</p>`;
+  } else {
+    extraInfo = `<p><strong>Data Odierna:</strong> ${new Date().toLocaleDateString("it-IT")}</p>`;
   }
 
   const content = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${pageTitle}</title><style>${_printCSS}</style></head><body>
