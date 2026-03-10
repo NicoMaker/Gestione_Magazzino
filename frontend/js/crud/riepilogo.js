@@ -63,7 +63,7 @@ function renderRiepilogo() {
     if (r.giacenza > 0 && r.lotti && r.lotti.length > 0) {
       html += `<tr class="lotti-row"><td colspan="4" class="lotti-container"><div class="lotti-table-wrapper">
         <table class="lotti-table"><thead><tr>
-          <th>Data Carico</th><th>Quantità (pz)</th><th>Prezzo Unitario</th>
+          <th>Data Carico</th><th>Quantità (pz/l)</th><th>Prezzo Unitario</th>
           <th>Valore</th><th>Documento/Fattura</th><th>Fornitore</th>
         </tr></thead><tbody>`;
       r.lotti.forEach((l) => {
@@ -167,7 +167,7 @@ function renderStorico(storicoData) {
     if (s.giacenza > 0 && s.lotti && s.lotti.length > 0) {
       html += `<tr class="lotti-row"><td colspan="4" class="lotti-container"><div class="lotti-table-wrapper">
         <table class="lotti-table"><thead><tr>
-          <th>Data Carico</th><th>Quantità (pz)</th><th>Prezzo Unitario</th>
+          <th>Data Carico</th><th>Quantità (pz/l)</th><th>Prezzo Unitario</th>
           <th>Valore</th><th>Documento/Fattura</th><th>Fornitore</th>
         </tr></thead><tbody>`;
       s.lotti.forEach((l) => {

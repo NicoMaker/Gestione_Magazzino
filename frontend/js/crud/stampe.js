@@ -62,12 +62,12 @@ function _buildProductBlocks(lista) {
     out += `
       <div class="prodotto-block">
         <div class="prodotto-header">
-          <div class="prodotto-info"><span><strong>Prodotto:</strong> ${prodotto.nome}</span><span><strong>Giacenza:</strong> ${formatQuantity(prodotto.giacenza)} pz</span></div>
+          <div class="prodotto-info"><span><strong>Prodotto:</strong> ${prodotto.nome}</span><span><strong>Giacenza:</strong> ${formatQuantity(prodotto.giacenza)} pz/l</span></div>
           <div class="prodotto-info"><span><strong>Marca:</strong> ${prodotto.marca_nome || "-"}</span><span><strong>Valore:</strong> ${formatCurrency(prodotto.valore_totale)}</span></div>
           ${prodotto.descrizione ? `<div class="prodotto-info"><span><strong>Descrizione:</strong> ${prodotto.descrizione}</span></div>` : ""}
         </div>`;
     if (prodotto.lotti && prodotto.lotti.length > 0) {
-      out += `<table><thead><tr><th>Data Carico</th><th>Quantità (pz)</th><th>Prezzo Unitario</th><th>Valore</th><th>Documento/Fattura</th><th>Fornitore</th></tr></thead><tbody>`;
+      out += `<table><thead><tr><th>Data Carico</th><th>Quantità (pz/l)</th><th>Prezzo Unitario</th><th>Valore</th><th>Documento/Fattura</th><th>Fornitore</th></tr></thead><tbody>`;
       prodotto.lotti.forEach((l) => {
         out += `<tr class="lotto-row"><td>${new Date(l.data_carico).toLocaleDateString("it-IT")}</td><td>${formatQuantity(l.quantita_rimanente)}</td><td>${formatCurrency(l.prezzo)}</td><td><strong>${formatCurrency(l.quantita_rimanente * l.prezzo)}</strong></td><td>${l.fattura_doc || "-"}</td><td>${l.fornitore || "-"}</td></tr>`;
       });
