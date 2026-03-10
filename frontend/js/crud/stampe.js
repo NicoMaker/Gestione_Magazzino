@@ -62,12 +62,12 @@ function _buildProductBlocks(lista) {
     out += `
       <div class="prodotto-block">
         <div class="prodotto-header">
-          <div class="prodotto-info"><span><strong>Prodotto:</strong> ${prodotto.nome}</span><span><strong>Giacenza:</strong> ${formatQuantity(prodotto.giacenza)} pz/l</span></div>
+          <div class="prodotto-info"><span><strong>Prodotto:</strong> ${prodotto.nome}</span><span><strong>Giacenza:</strong> ${formatQuantity(prodotto.giacenza)} PZ/L</span></div>
           <div class="prodotto-info"><span><strong>Marca:</strong> ${prodotto.marca_nome || "-"}</span><span><strong>Valore:</strong> ${formatCurrency(prodotto.valore_totale)}</span></div>
           ${prodotto.descrizione ? `<div class="prodotto-info"><span><strong>Descrizione:</strong> ${prodotto.descrizione}</span></div>` : ""}
         </div>`;
     if (prodotto.lotti && prodotto.lotti.length > 0) {
-      out += `<table><thead><tr><th>Data Carico</th><th>Quantità (pz/l)</th><th>Prezzo Unitario</th><th>Valore</th><th>Documento/Fattura</th><th>Fornitore</th></tr></thead><tbody>`;
+      out += `<table><thead><tr><th>Data Carico</th><th>Quantità (PZ/L)</th><th>Prezzo Unitario</th><th>Valore</th><th>Documento/Fattura</th><th>Fornitore</th></tr></thead><tbody>`;
       prodotto.lotti.forEach((l) => {
         out += `<tr class="lotto-row"><td>${new Date(l.data_carico).toLocaleDateString("it-IT")}</td><td>${formatQuantity(l.quantita_rimanente)}</td><td>${formatCurrency(l.prezzo)}</td><td><strong>${formatCurrency(l.quantita_rimanente * l.prezzo)}</strong></td><td>${l.fattura_doc || "-"}</td><td>${l.fornitore || "-"}</td></tr>`;
       });
@@ -78,49 +78,49 @@ function _buildProductBlocks(lista) {
   return out;
 }
 
-function printRiepilogo() {
-  if (!riepilogo || riepilogo.length === 0) {
+function _printMagazzino(tipo) {
+  // tipo: "riepilogo" | "storico"
+  const isStorico = tipo === "storico";
+  const lista = isStorico ? storico : riepilogo;
+
+  if (!lista || lista.length === 0) {
     alert("Nessun prodotto da stampare");
     return;
   }
-  const tot = riepilogo.reduce(
+
+  const tot = lista.reduce(
     (s, r) => s + Number.parseFloat(r.valore_totale || 0),
     0,
   );
-  const content = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Riepilogo Magazzino</title><style>${_printCSS}</style></head><body>
+
+  const titolo = isStorico
+    ? "Storico Giacenze Magazzino"
+    : "Riepilogo Giacenze Magazzino";
+  const pageTitle = isStorico ? "Storico Giacenze" : "Riepilogo Magazzino";
+  const dataNow = `${new Date().toLocaleDateString("it-IT")} ${new Date().toLocaleTimeString("it-IT")}`;
+
+  let extraInfo = "";
+  if (isStorico) {
+    const dataEl = document.getElementById("storicoDate").value;
+    const dataIt = dataEl
+      ? new Date(dataEl + "T00:00:00").toLocaleDateString("it-IT")
+      : "Non selezionata";
+    extraInfo = `<p><strong>Data Selezionata:</strong> ${dataIt}</p>`;
+  }
+
+  const content = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${pageTitle}</title><style>${_printCSS}</style></head><body>
     ${_printHeader}
-    <h1>Riepilogo Giacenze Magazzino</h1>
+    <h1>${titolo}</h1>
     <div class="info">
+      ${extraInfo}
       <p><strong>Valore Totale:</strong> ${formatCurrency(tot)}</p>
-      <p><strong>Data Stampa:</strong> ${new Date().toLocaleDateString("it-IT")} ${new Date().toLocaleTimeString("it-IT")}</p>
+      <p><strong>Data Stampa:</strong> ${dataNow}</p>
     </div>
-    ${_buildProductBlocks(riepilogo)}
+    ${_buildProductBlocks(lista)}
   </body></html>`;
+
   _buildPrintFrame(content);
 }
 
-function printStorico() {
-  if (!storico || storico.length === 0) {
-    alert("Nessun prodotto da stampare");
-    return;
-  }
-  const tot = storico.reduce(
-    (s, x) => s + Number.parseFloat(x.valore_totale || 0),
-    0,
-  );
-  const dataEl = document.getElementById("storicoDate").value;
-  const dataIt = dataEl
-    ? new Date(dataEl + "T00:00:00").toLocaleDateString("it-IT")
-    : "Non selezionata";
-  const content = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Storico Giacenze</title><style>${_printCSS}</style></head><body>
-    ${_printHeader}
-    <h1>Storico Giacenze Magazzino</h1>
-    <div class="info">
-      <p><strong>Data Selezionata:</strong> ${dataIt}</p>
-      <p><strong>Valore Totale:</strong> ${formatCurrency(tot)}</p>
-      <p><strong>Data Stampa:</strong> ${new Date().toLocaleDateString("it-IT")} ${new Date().toLocaleTimeString("it-IT")}</p>
-    </div>
-    ${_buildProductBlocks(storico)}
-  </body></html>`;
-  _buildPrintFrame(content);
-}
+const printRiepilogo = () => _printMagazzino("riepilogo");
+const printStorico = () => _printMagazzino("storico");
