@@ -68,54 +68,7 @@ function renderProdotti() {
     </tr>`).join("");
 }
 
-// ── Apertura modal ───────────────────────────────────────────
-async function openProdottoModal(prodotto = null) {
-  if (!allMarche || allMarche.length === 0) {
-    try {
-      const res = await fetch(`${API_URL}/marche`);
-      allMarche = await res.json();
-    } catch { alert("Errore nel caricamento delle marche"); return; }
-  }
 
-  const modal = document.getElementById("modalProdotto");
-  document.getElementById("formProdotto").reset();
-
-  const searchInput   = document.getElementById("prodottoMarcaSearch");
-  const hiddenInput   = document.getElementById("prodottoMarca");
-  const resultsCont   = document.getElementById("marcaSearchResults");
-
-  if (searchInput)  { searchInput.value = ""; searchInput.classList.remove("has-selection"); }
-  if (hiddenInput)  hiddenInput.value = "";
-  if (resultsCont)  resultsCont.classList.remove("show");
-  selectedMarcaId = null;
-
-  if (prodotto) {
-    document.getElementById("modalProdottoTitle").textContent = "Modifica Prodotto";
-    document.getElementById("prodottoId").value        = prodotto.id;
-    document.getElementById("prodottoNome").value      = prodotto.nome;
-    document.getElementById("prodottoDescrizione").value = prodotto.descrizione || "";
-    if (prodotto.marca_id) {
-      const marca = allMarche.find((m) => m.id == prodotto.marca_id);
-      if (marca) {
-        selectedMarcaId   = prodotto.marca_id;
-        hiddenInput.value = prodotto.marca_id;
-        searchInput.value = marca.nome.toUpperCase();
-        searchInput.classList.add("has-selection");
-      }
-    }
-  } else {
-    document.getElementById("modalProdottoTitle").textContent = "Nuovo Prodotto";
-    document.getElementById("prodottoId").value = "";
-  }
-
-  modal.classList.add("active");
-  setTimeout(() => setupMarcaSearch(), 150);
-}
-
-function closeProdottoModal() {
-  document.getElementById("modalProdotto").classList.remove("active");
-  selectedMarcaId = null;
-}
 
 function editProdotto(id) {
   const prodotto = prodotti.find((p) => p.id === id);

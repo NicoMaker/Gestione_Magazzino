@@ -62,23 +62,7 @@ function renderMarche() {
   }).join("");
 }
 
-function openMarcaModal(marca = null) {
-  const modal = document.getElementById("modalMarca");
-  document.getElementById("formMarca").reset();
-  if (marca) {
-    document.getElementById("modalMarcaTitle").textContent = "Modifica Marca";
-    document.getElementById("marcaId").value = marca.id;
-    document.getElementById("marcaNome").value = marca.nome;
-  } else {
-    document.getElementById("modalMarcaTitle").textContent = "Nuova Marca";
-    document.getElementById("marcaId").value = "";
-  }
-  modal.classList.add("active");
-}
 
-function closeMarcaModal() {
-  document.getElementById("modalMarca").classList.remove("active");
-}
 
 function editMarca(id) {
   const marca = marche.find((m) => m.id === id);

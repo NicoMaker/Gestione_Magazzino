@@ -289,19 +289,7 @@ function showImportResults(results) {
   }
 }
 
-function openImportPDFModal() {
-  const modal = document.getElementById("modalImportPDF");
-  const form  = document.getElementById("formImportPDF");
-  if (!modal || !form) return;
-  form.reset();
-  const filePreview = document.getElementById("filePreview") || document.getElementById("filePreviewBox");
-  if (filePreview) { filePreview.style.display = "none"; filePreview.textContent = "Trascina il PDF qui o clicca per sfogliare"; }
-  modal.classList.add("active");
-}
 
-function closeImportPDFModal() {
-  document.getElementById("modalImportPDF")?.classList.remove("active");
-}
 
 async function importaOrdineDaPdf(righePdf, dataOrdine, nomeFilePdf) {
   const aggregati = {};
