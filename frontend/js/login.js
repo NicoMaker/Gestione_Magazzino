@@ -9,10 +9,10 @@ const API_URL = "api";
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const username     = document.getElementById("username").value.trim();
-  const password     = document.getElementById("password").value;
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value;
   const errorMessage = document.getElementById("errorMessage");
-  const btnLogin     = document.querySelector(".btn-login");
+  const btnLogin = document.querySelector(".btn-login");
 
   errorMessage.classList.remove("show");
   btnLogin.classList.add("loading");
@@ -29,16 +29,20 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     if (response.ok) {
       localStorage.setItem("username", username);
 
-      btnLogin.style.background = "linear-gradient(135deg, #10b981 0%, #059669 100%)";
+      btnLogin.style.background =
+        "linear-gradient(135deg, #10b981 0%, #059669 100%)";
       btnLogin.querySelector(".btn-text").textContent = "✓ Accesso effettuato!";
       btnLogin.classList.remove("loading");
 
-      setTimeout(() => { window.location.href = "home.html"; }, 800);
+      setTimeout(() => {
+        window.location.href = "home.html";
+      }, 800);
     } else {
       errorMessage.textContent = data.error || "Errore durante il login";
       errorMessage.classList.add("show");
 
-      btnLogin.style.background = "linear-gradient(135deg, #f87171 0%, #ef4444 100%)";
+      btnLogin.style.background =
+        "linear-gradient(135deg, #f87171 0%, #ef4444 100%)";
       btnLogin.querySelector(".btn-text").textContent = "Accesso fallito";
       btnLogin.classList.remove("loading");
 
@@ -49,10 +53,12 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     }
   } catch (error) {
     console.error("Login Error:", error);
-    errorMessage.textContent = "Impossibile connettersi al server. Riprova più tardi.";
+    errorMessage.textContent =
+      "Impossibile connettersi al server. Riprova più tardi.";
     errorMessage.classList.add("show");
 
-    btnLogin.style.background = "linear-gradient(135deg, #f87171 0%, #ef4444 100%)";
+    btnLogin.style.background =
+      "linear-gradient(135deg, #f87171 0%, #ef4444 100%)";
     btnLogin.querySelector(".btn-text").textContent = "Errore di rete";
     btnLogin.classList.remove("loading");
 
@@ -66,12 +72,13 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 // ==================== LOGIN - TOGGLE PASSWORD ====================
 // File: login-toggle.js
 
-const passwordInput  = document.getElementById("password");
+const passwordInput = document.getElementById("password");
 const togglePassword = document.getElementById("togglePassword");
 
 if (togglePassword && passwordInput) {
   togglePassword.addEventListener("click", function () {
-    const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+    const type =
+      passwordInput.getAttribute("type") === "password" ? "text" : "password";
     passwordInput.setAttribute("type", type);
 
     if (type === "text") {

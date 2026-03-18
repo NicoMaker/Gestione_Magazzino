@@ -3,7 +3,6 @@
 // Unico punto di bootstrap dell'applicazione
 
 document.addEventListener("DOMContentLoaded", () => {
-
   // ── Username corrente ────────────────────────────────────────
   const username = localStorage.getItem("username");
   if (username) {
@@ -13,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ── Hamburger / Sidebar mobile ───────────────────────────────
   const mobileMenuToggle = document.getElementById("mobileMenuToggle");
-  const sidebar          = document.getElementById("sidebar");
+  const sidebar = document.getElementById("sidebar");
 
   if (mobileMenuToggle && sidebar) {
     mobileMenuToggle.addEventListener("click", (e) => {
@@ -24,7 +23,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.addEventListener("click", (e) => {
       if (window.innerWidth <= 1024) {
-        if (!sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
+        if (
+          !sidebar.contains(e.target) &&
+          !mobileMenuToggle.contains(e.target)
+        ) {
           sidebar.classList.remove("mobile-open");
           mobileMenuToggle.classList.remove("active");
         }
@@ -42,11 +44,15 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!section) return;
 
       // Attiva voce menu
-      document.querySelectorAll(".nav-item").forEach((i) => i.classList.remove("active"));
+      document
+        .querySelectorAll(".nav-item")
+        .forEach((i) => i.classList.remove("active"));
       item.classList.add("active");
 
       // Attiva sezione contenuto
-      document.querySelectorAll(".content-section").forEach((s) => s.classList.remove("active"));
+      document
+        .querySelectorAll(".content-section")
+        .forEach((s) => s.classList.remove("active"));
       const sectionEl = document.getElementById(`section-${section}`);
       if (sectionEl) sectionEl.classList.add("active");
 
@@ -60,12 +66,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Carica dati sezione
-      if (section === "marche")    await loadMarche();
-      if (section === "prodotti")  await loadProdotti();
+      if (section === "marche") await loadMarche();
+      if (section === "prodotti") await loadProdotti();
       if (section === "movimenti") await loadMovimenti();
       if (section === "riepilogo") await loadRiepilogo();
-      if (section === "storico")   await loadStorico();
-      if (section === "utenti")    await loadUtenti();
+      if (section === "storico") await loadStorico();
+      if (section === "utenti") await loadUtenti();
 
       // Ripristina filtro salvato per la sezione
       restoreSearchOnSectionChange(section);
@@ -73,7 +79,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ── Sezione iniziale ─────────────────────────────────────────
-  const initialItem = document.querySelector(`.nav-item[data-section="${savedSection}"]`);
+  const initialItem = document.querySelector(
+    `.nav-item[data-section="${savedSection}"]`,
+  );
   if (initialItem) initialItem.click();
 
   // ── Logout ───────────────────────────────────────────────────
@@ -90,7 +98,9 @@ document.addEventListener("DOMContentLoaded", () => {
   initSearchSystem();
 
   // ── Storico: listener cambio data ────────────────────────────
-  document.getElementById("storicoDate")?.addEventListener("change", loadStorico);
+  document
+    .getElementById("storicoDate")
+    ?.addEventListener("change", loadStorico);
 
   // ── Toggle carico/scarico ────────────────────────────────────
   const movimentoTipoSelect = document.getElementById("movimentoTipo");

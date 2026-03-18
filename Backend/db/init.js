@@ -105,17 +105,17 @@ async function initDatabase() {
                     console.error("Errore creazione utente Admin:", err3);
                   } else {
                     console.log(
-                      "✅ Utente Admin creato (username: Admin, password: Admin123!)"
+                      "✅ Utente Admin creato (username: Admin, password: Admin123!)",
                     );
                   }
-                }
+                },
               );
             } catch (error) {
               console.error("Errore hashing password:", error);
             }
           }
         });
-      }
+      },
     );
 
     // Le marche vengono create manualmente dall'utente

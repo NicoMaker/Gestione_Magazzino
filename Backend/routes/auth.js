@@ -43,7 +43,7 @@ router.post("/login", async (req, res) => {
           .status(500)
           .json({ error: "Errore durante la verifica della password" });
       }
-    }
+    },
   );
 });
 

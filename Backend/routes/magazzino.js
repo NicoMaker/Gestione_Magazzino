@@ -91,7 +91,7 @@ router.get("/riepilogo", (req, res) => {
 
       const valoreTotale = riepilogo.reduce(
         (sum, r) => sum + formatDecimal(r.valore_totale),
-        0
+        0,
       );
 
       res.json({
@@ -201,7 +201,7 @@ router.get("/storico-giacenza/:date", (req, res) => {
           (err, movimenti) => {
             if (err) {
               console.error(
-                `Errore storico prodotto ${prodotto.id}: ${err.message}`
+                `Errore storico prodotto ${prodotto.id}: ${err.message}`,
               );
               productsProcessed++;
               if (productsProcessed === prodotti.length) {
@@ -241,11 +241,11 @@ router.get("/storico-giacenza/:date", (req, res) => {
 
                   const qtaPrelevata = Math.min(
                     qtaDaScaricare,
-                    lotto.qty_rimanente
+                    lotto.qty_rimanente,
                   );
 
                   lotto.qty_rimanente = formatDecimal(
-                    lotto.qty_rimanente - qtaPrelevata
+                    lotto.qty_rimanente - qtaPrelevata,
                   );
                   qtaDaScaricare = formatDecimal(qtaDaScaricare - qtaPrelevata);
                 }
@@ -253,13 +253,13 @@ router.get("/storico-giacenza/:date", (req, res) => {
             });
 
             const lottiRimanenti = lottiAttivi.filter(
-              (l) => l.qty_rimanente > 0
+              (l) => l.qty_rimanente > 0,
             );
 
             lottiRimanenti.forEach((l) => {
               totaleGiacenza = formatDecimal(totaleGiacenza + l.qty_rimanente);
               totaleValore = formatDecimal(
-                totaleValore + l.qty_rimanente * l.prezzo
+                totaleValore + l.qty_rimanente * l.prezzo,
               );
             });
 
@@ -286,7 +286,9 @@ router.get("/storico-giacenza/:date", (req, res) => {
             if (productsProcessed === prodotti.length) {
               // ORDINA I RISULTATI: prima case-insensitive, poi maiuscole prima
               results.sort((a, b) => {
-                const caseInsensitive = a.nome.localeCompare(b.nome, 'it', { sensitivity: 'base' });
+                const caseInsensitive = a.nome.localeCompare(b.nome, "it", {
+                  sensitivity: "base",
+                });
                 if (caseInsensitive !== 0) return caseInsensitive;
                 return a.nome.localeCompare(b.nome); // maiuscole prima
               });
@@ -295,10 +297,10 @@ router.get("/storico-giacenza/:date", (req, res) => {
                 valore_totale: formatDecimal(totalValue),
               });
             }
-          }
+          },
         );
       });
-    }
+    },
   );
 });
 

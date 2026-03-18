@@ -27,7 +27,7 @@ router.get("/", (req, res) => {
         return res.status(500).json({ error: "Errore nel recupero utenti" });
       }
       res.json(rows);
-    }
+    },
   );
 });
 
@@ -76,7 +76,7 @@ router.post("/", async (req, res) => {
           io.emit("utenti_aggiornati");
         }
         res.json({ id: this.lastID, username: username.trim() });
-      }
+      },
     );
   } catch (error) {
     console.error("Errore hashing password:", error);
@@ -170,7 +170,11 @@ router.put("/:id", async (req, res) => {
               // Emetti evento Socket.IO per aggiornamento real-time
               const io = req.app.get("io");
               if (io) {
-                io.emit("utente_modificato", { id, oldUsername: user.username, newUsername });
+                io.emit("utente_modificato", {
+                  id,
+                  oldUsername: user.username,
+                  newUsername,
+                });
                 io.emit("utenti_aggiornati");
               }
               // 🎯 RISPOSTA CON FLAG username_modificato
@@ -179,9 +183,9 @@ router.put("/:id", async (req, res) => {
                 username: newUsername,
                 username_modificato: isCurrentUser, // 🆕 Flag per il frontend
               });
-            }
+            },
           );
-        }
+        },
       );
     } else {
       // Aggiornamento solo password
@@ -199,7 +203,11 @@ router.put("/:id", async (req, res) => {
           // Emetti evento Socket.IO per aggiornamento real-time
           const io = req.app.get("io");
           if (io) {
-            io.emit("utente_modificato", { id, oldUsername: user.username, newUsername: user.username });
+            io.emit("utente_modificato", {
+              id,
+              oldUsername: user.username,
+              newUsername: user.username,
+            });
             io.emit("utenti_aggiornati");
           }
           // 🎯 RISPOSTA CON FLAG password_modificata
@@ -208,7 +216,7 @@ router.put("/:id", async (req, res) => {
             username: newUsername,
             password_modificata: isCurrentUser && password ? true : false, // 🆕
           });
-        }
+        },
       );
     }
   });

@@ -5,16 +5,16 @@
 const API_URL = "api";
 
 // ==================== STATO GLOBALE ====================
-let marche     = [];
-let prodotti   = [];
-let movimenti  = [];
-let utenti     = [];
+let marche = [];
+let prodotti = [];
+let movimenti = [];
+let utenti = [];
 
-let allMarche    = [];
-let allProdotti  = [];
+let allMarche = [];
+let allProdotti = [];
 let allMovimenti = [];
 let allRiepilogo = [];
-let riepilogo    = [];
-let allStorico   = [];
-let storico      = [];
-let allUtenti    = [];
+let riepilogo = [];
+let allStorico = [];
+let storico = [];
+let allUtenti = [];

@@ -80,9 +80,9 @@ router.post("/", (req, res) => {
             io.emit("prodotti_aggiornati");
           }
           res.json({ ...row, giacenza: formatDecimal(0) }); // 🎯 Giacenza 0.00
-        }
+        },
       );
-    }
+    },
   );
 });
 
@@ -119,7 +119,7 @@ router.put("/:id", (req, res) => {
       }
 
       res.json({ success: true });
-    }
+    },
   );
 });
 
@@ -175,51 +175,49 @@ router.delete("/:id", (req, res) => {
             }
 
             // 3️⃣ Elimina eventuali lotti vuoti
-            db.run(
-              "DELETE FROM lotti WHERE prodotto_id = ?",
-              [id],
-              (err3) => {
-                if (err3) {
-                  db.run("ROLLBACK");
-                  return res.status(500).json({ error: err3.message });
-                }
-
-                // 4️⃣ Elimina il prodotto
-                db.run(
-                  "DELETE FROM prodotti WHERE id = ?",
-                  [id],
-                  function (err4) {
-                    if (err4) {
-                      db.run("ROLLBACK");
-                      return res.status(500).json({ error: err4.message });
-                    }
-
-                    if (this.changes === 0) {
-                      db.run("ROLLBACK");
-                      return res.status(404).json({ error: "Prodotto non trovato" });
-                    }
-
-                    // ✅ Commit della transazione
-                    db.run("COMMIT");
-
-                    // Emetti evento Socket.IO per aggiornamento real-time
-                    const io = req.app.get("io");
-                    if (io) {
-                      io.emit("prodotto_eliminato", { id });
-                      io.emit("prodotti_aggiornati");
-                    }
-
-                    res.json({
-                      success: true,
-                      message: "Prodotto eliminato con successo",
-                    });
-                  }
-                );
+            db.run("DELETE FROM lotti WHERE prodotto_id = ?", [id], (err3) => {
+              if (err3) {
+                db.run("ROLLBACK");
+                return res.status(500).json({ error: err3.message });
               }
-            );
-          }
+
+              // 4️⃣ Elimina il prodotto
+              db.run(
+                "DELETE FROM prodotti WHERE id = ?",
+                [id],
+                function (err4) {
+                  if (err4) {
+                    db.run("ROLLBACK");
+                    return res.status(500).json({ error: err4.message });
+                  }
+
+                  if (this.changes === 0) {
+                    db.run("ROLLBACK");
+                    return res
+                      .status(404)
+                      .json({ error: "Prodotto non trovato" });
+                  }
+
+                  // ✅ Commit della transazione
+                  db.run("COMMIT");
+
+                  // Emetti evento Socket.IO per aggiornamento real-time
+                  const io = req.app.get("io");
+                  if (io) {
+                    io.emit("prodotto_eliminato", { id });
+                    io.emit("prodotti_aggiornati");
+                  }
+
+                  res.json({
+                    success: true,
+                    message: "Prodotto eliminato con successo",
+                  });
+                },
+              );
+            });
+          },
         );
-      }
+      },
     );
   });
 });

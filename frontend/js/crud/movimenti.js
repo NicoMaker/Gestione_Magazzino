@@ -117,8 +117,6 @@ function renderMovimenti() {
 
 // ── Toggle visibilità campi carico/scarico ───────────────────
 
-
-
 function editMovimento(id) {
   const movimento = movimenti.find((m) => m.id === id);
   if (movimento) openMovimentoModal(movimento);

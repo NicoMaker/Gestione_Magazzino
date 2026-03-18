@@ -6,8 +6,8 @@
     "province": "RO",
     "country": "Italia",
     "piva": "1234567890",
-    "email":"prova@prova.com",
-    "phone":"+39 1234567890"
+    "email": "prova@prova.com",
+    "phone": "+39 1234567890"
   },
   "settings": {
     "currency": "EUR",

@@ -41,7 +41,9 @@ function renderUtenti() {
     return;
   }
 
-  tbody.innerHTML = utenti.map((u) => `
+  tbody.innerHTML = utenti
+    .map(
+      (u) => `
     <tr>
       <td><strong>${escapeHtml(u.username)}</strong></td>
       <td class="text-right">
@@ -63,10 +65,10 @@ function renderUtenti() {
         </button>
       </td>
     </tr>
-  `).join("");
+  `,
+    )
+    .join("");
 }
-
-
 
 function editUser(id) {
   const user = utenti.find((u) => u.id === id);
@@ -80,15 +82,18 @@ async function deleteUser(id) {
     const currentUser = localStorage.getItem("username") || "";
     const res = await fetch(
       `${API_URL}/utenti/${id}?current_user=${encodeURIComponent(currentUser)}`,
-      { method: "DELETE" }
+      { method: "DELETE" },
     );
     const data = await res.json();
 
     if (res.ok) {
       if (data.utente_eliminato) {
-        forceLogout("Hai eliminato il tuo account. Verrai disconnesso e dovrai effettuare di nuovo il login.");
+        forceLogout(
+          "Hai eliminato il tuo account. Verrai disconnesso e dovrai effettuare di nuovo il login.",
+        );
       } else {
-        if (typeof ignoreNextSocketUpdate === "function") ignoreNextSocketUpdate();
+        if (typeof ignoreNextSocketUpdate === "function")
+          ignoreNextSocketUpdate();
         alert("Utente eliminato con successo!");
         loadUtenti();
       }
@@ -100,22 +105,21 @@ async function deleteUser(id) {
   }
 }
 
-
 document.getElementById("formUser")?.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const id       = document.getElementById("userId").value;
+  const id = document.getElementById("userId").value;
   const username = document.getElementById("userUsername").value.trim();
   const password = document.getElementById("userPassword").value;
 
   const method = id ? "PUT" : "POST";
-  const url    = id ? `${API_URL}/utenti/${id}` : `${API_URL}/utenti`;
-  const body   = { username };
+  const url = id ? `${API_URL}/utenti/${id}` : `${API_URL}/utenti`;
+  const body = { username };
   if (password) body.password = password;
   if (id) body.current_user = localStorage.getItem("username") || null;
 
   try {
-    const res  = await fetch(url, {
+    const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -123,12 +127,16 @@ document.getElementById("formUser")?.addEventListener("submit", async (e) => {
     const data = await res.json();
 
     if (res.ok) {
-      const mustLogout = data.username_modificato || data.password_modificata || false;
-      if (typeof ignoreNextSocketUpdate === "function") ignoreNextSocketUpdate();
+      const mustLogout =
+        data.username_modificato || data.password_modificata || false;
+      if (typeof ignoreNextSocketUpdate === "function")
+        ignoreNextSocketUpdate();
       alert(id ? "Utente aggiornato!" : "Utente creato!");
       closeUserModal();
       if (mustLogout) {
-        forceLogout("Le tue credenziali sono cambiate. Effettua di nuovo l'accesso.");
+        forceLogout(
+          "Le tue credenziali sono cambiate. Effettua di nuovo l'accesso.",
+        );
       } else {
         loadUtenti();
       }

@@ -56,7 +56,7 @@ async function batchInsert(query, dataArray, batchSize = 500) {
           else {
             completed += batch.length;
             process.stdout.write(
-              `\r  Progress: ${completed}/${dataArray.length}`
+              `\r  Progress: ${completed}/${dataArray.length}`,
             );
             resolve();
           }
@@ -193,13 +193,13 @@ function generateMarcaName(index, baseMarche) {
     "Mega",
   ];
   return `${randomElement(prefissi)} ${randomElement(suffissi)} ${Math.floor(
-    index / 100
+    index / 100,
   )}`;
 }
 
 async function seedDatabase() {
   console.log(
-    "🌱 Inizio popolamento database con dati casuali su larga scala...\n"
+    "🌱 Inizio popolamento database con dati casuali su larga scala...\n",
   );
   const startTime = Date.now();
 
@@ -245,37 +245,38 @@ async function seedDatabase() {
     const numUtenti = Math.min(
       10000,
       parseInt(
-        (await askQuestion("Numero di utenti da creare (1-10000): ")) || "10"
-      )
+        (await askQuestion("Numero di utenti da creare (1-10000): ")) || "10",
+      ),
     );
     const numMarche = Math.min(
       10000,
       parseInt(
-        (await askQuestion("Numero di marche da creare (1-10000): ")) || "50"
-      )
+        (await askQuestion("Numero di marche da creare (1-10000): ")) || "50",
+      ),
     );
     const numProdotti = Math.min(
       10000,
       parseInt(
-        (await askQuestion("Numero di prodotti da creare (1-10000): ")) || "100"
-      )
+        (await askQuestion("Numero di prodotti da creare (1-10000): ")) ||
+          "100",
+      ),
     );
     const numCarichi = Math.min(
       10000,
       parseInt(
         (await askQuestion("Numero di movimenti di carico (1-10000): ")) ||
-          "200"
-      )
+          "200",
+      ),
     );
     const numScarichi = Math.min(
       10000,
       parseInt(
         (await askQuestion("Numero di movimenti di scarico (1-10000): ")) ||
-          "150"
-      )
+          "150",
+      ),
     );
     const giorniStorico = parseInt(
-      (await askQuestion("Giorni di storico (default 180): ")) || "180"
+      (await askQuestion("Giorni di storico (default 180): ")) || "180",
     );
 
     console.log("\n⚙️ Configurazione:");
@@ -312,7 +313,7 @@ async function seedDatabase() {
 
     await batchInsert(
       "INSERT OR IGNORE INTO users (username, password, createdat) VALUES (?, ?, ?)",
-      usersToInsert
+      usersToInsert,
     );
     console.log(`✅ ${numUtenti} utenti creati!\n`);
 
@@ -329,7 +330,7 @@ async function seedDatabase() {
 
     await batchInsert(
       "INSERT OR IGNORE INTO marche (nome, data_creazione) VALUES (?, ?)",
-      marcheToInsert
+      marcheToInsert,
     );
 
     // Recupera gli ID delle marche create
@@ -355,7 +356,7 @@ async function seedDatabase() {
       const nome = `${prefisso} ${specifica} ${dimensione} #${i}`;
       const descrizione = `${categoria.categoria} - ${marcaNome} ${randomInt(
         2020,
-        2024
+        2024,
       )}`;
       const dataCreazione = new Date().toISOString();
 
@@ -376,7 +377,7 @@ async function seedDatabase() {
 
     await batchInsert(
       "INSERT OR IGNORE INTO prodotti (nome, marca_id, descrizione, data_creazione) VALUES (?, ?, ?, ?)",
-      prodottiToInsert
+      prodottiToInsert,
     );
 
     // Recupera gli ID dei prodotti creati
@@ -395,7 +396,7 @@ async function seedDatabase() {
 
     for (let i = 0; i < numCarichi; i++) {
       const prodotto = randomElement(prodottiInfo);
-      
+
       // MODIFICA: Quantità con virgola (60%) o intera (40%)
       const quantitaString = randomQuantity(10, 200);
       const quantitaFloat = parseFloat(quantitaString);
@@ -403,7 +404,7 @@ async function seedDatabase() {
       // Utilizza la stringa formattata con 2 decimali per il prezzo
       const prezzoString = randomFloat(prodotto.prezzoMin, prodotto.prezzoMax);
       const prezzoFloat = parseFloat(prezzoString);
-      
+
       // Calcola il totale
       const prezzoTotale = (quantitaFloat * prezzoFloat).toFixed(2);
 
@@ -443,14 +444,14 @@ async function seedDatabase() {
       `INSERT INTO dati (prodotto_id, tipo, quantita, prezzo, prezzo_totale_movimento, 
         data_movimento, data_registrazione, fattura_doc, fornitore_cliente_id) 
         VALUES (?, 'carico', ?, ?, ?, ?, ?, ?, ?)`,
-      carichiMovimenti
+      carichiMovimenti,
     );
 
     await batchInsert(
       `INSERT INTO lotti (prodotto_id, quantita_iniziale, quantita_rimanente, 
         prezzo, data_carico, data_registrazione, fattura_doc, fornitore, dati_id) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      carichiLotti
+      carichiLotti,
     );
     console.log(`✅ ${numCarichi} carichi creati!\n`);
 
@@ -466,7 +467,7 @@ async function seedDatabase() {
       // Verifica disponibilità
       const disponibilita = await getQuery(
         `SELECT SUM(quantita_rimanente) as totale FROM lotti WHERE prodotto_id = ?`,
-        [prodottoId]
+        [prodottoId],
       );
 
       if (!disponibilita || disponibilita.totale <= 0) {
@@ -479,16 +480,17 @@ async function seedDatabase() {
       const quantitaMaxFloat = parseFloat(quantitaMaxString);
       const quantitaFloat = Math.min(quantitaMaxFloat, disponibilita.totale);
       const quantitaString = quantitaFloat.toFixed(2);
-      
+
       // Prendi prezzo FIFO
       const lotto = await getQuery(
         `SELECT prezzo, data_carico FROM lotti 
           WHERE prodotto_id = ? AND quantita_rimanente > 0 
           ORDER BY data_carico ASC LIMIT 1`,
-        [prodottoId]
+        [prodottoId],
       );
 
-      if (!lotto) { // Ulteriore controllo di sicurezza
+      if (!lotto) {
+        // Ulteriore controllo di sicurezza
         scarichiSaltati++;
         continue;
       }
@@ -513,7 +515,7 @@ async function seedDatabase() {
           prezzoTotale,
           dataMovimento,
           dataRegistrazione,
-        ]
+        ],
       );
 
       const movimentoScaricoId = result.lastID;
@@ -524,28 +526,29 @@ async function seedDatabase() {
         db.serialize(async () => {
           try {
             db.run("BEGIN TRANSACTION");
-            while (quantitaDaScaricare > 0.001) { // Tolleranza per errori di arrotondamento
+            while (quantitaDaScaricare > 0.001) {
+              // Tolleranza per errori di arrotondamento
               const lottoFifo = await getQuery(
                 `SELECT id, quantita_rimanente FROM lotti 
                   WHERE prodotto_id = ? AND quantita_rimanente > 0 
                   ORDER BY data_carico ASC LIMIT 1`,
-                [prodottoId]
+                [prodottoId],
               );
 
               if (!lottoFifo) break;
 
               const quantitaDaPrelevare = Math.min(
                 quantitaDaScaricare,
-                parseFloat(lottoFifo.quantita_rimanente)
+                parseFloat(lottoFifo.quantita_rimanente),
               );
               const nuovaQuantita = (
                 parseFloat(lottoFifo.quantita_rimanente) - quantitaDaPrelevare
               ).toFixed(2);
 
-              await runQuery("UPDATE lotti SET quantita_rimanente = ? WHERE id = ?", [
-                nuovaQuantita,
-                lottoFifo.id,
-              ]);
+              await runQuery(
+                "UPDATE lotti SET quantita_rimanente = ? WHERE id = ?",
+                [nuovaQuantita, lottoFifo.id],
+              );
 
               quantitaDaScaricare -= quantitaDaPrelevare;
             }
@@ -562,7 +565,7 @@ async function seedDatabase() {
       }
     }
     console.log(
-      `\n✅ ${scarichiCreati} scarichi creati (${scarichiSaltati} saltati per mancanza giacenza)!\n`
+      `\n✅ ${scarichiCreati} scarichi creati (${scarichiSaltati} saltati per mancanza giacenza)!\n`,
     );
 
     const endTime = Date.now();

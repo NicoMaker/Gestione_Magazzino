@@ -36,10 +36,11 @@ function renderMarche() {
     return;
   }
 
-  tbody.innerHTML = marche.map((m) => {
-    const prodottiCount = parseInt(m.prodotti_count) || 0;
-    const badgeClass = prodottiCount > 0 ? "has-products" : "empty";
-    return `
+  tbody.innerHTML = marche
+    .map((m) => {
+      const prodottiCount = parseInt(m.prodotti_count) || 0;
+      const badgeClass = prodottiCount > 0 ? "has-products" : "empty";
+      return `
       <tr>
         <td><strong style="font-size:15px;">${escapeHtml(m.nome)}</strong></td>
         <td class="text-center-badge">
@@ -59,10 +60,9 @@ function renderMarche() {
           </button>
         </td>
       </tr>`;
-  }).join("");
+    })
+    .join("");
 }
-
-
 
 function editMarca(id) {
   const marca = marche.find((m) => m.id === id);
@@ -86,7 +86,11 @@ async function deleteMarca(id, nome) {
     const res = await fetch(`${API_URL}/marche/${id}`, { method: "DELETE" });
     const data = await res.json();
     if (res.ok) {
-      showAlertModal(`Marca "${nome}" eliminata.`, "Operazione Completata", "success");
+      showAlertModal(
+        `Marca "${nome}" eliminata.`,
+        "Operazione Completata",
+        "success",
+      );
       await loadMarche();
       if (prodottiCount > 0) await loadProdotti();
     } else {
@@ -100,21 +104,28 @@ async function deleteMarca(id, nome) {
 // ── Submit form marca ────────────────────────────────────────
 document.getElementById("formMarca").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const id   = document.getElementById("marcaId").value;
+  const id = document.getElementById("marcaId").value;
   const nome = document.getElementById("marcaNome").value.trim();
-  const method = id ? "PUT"  : "POST";
-  const url    = id ? `${API_URL}/marche/${id}` : `${API_URL}/marche`;
+  const method = id ? "PUT" : "POST";
+  const url = id ? `${API_URL}/marche/${id}` : `${API_URL}/marche`;
 
   try {
-    const res  = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nome }) });
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome }),
+    });
     const data = await res.json();
     if (res.ok) {
-      if (typeof ignoreNextSocketUpdate === "function") ignoreNextSocketUpdate();
+      if (typeof ignoreNextSocketUpdate === "function")
+        ignoreNextSocketUpdate();
       alert(id ? "Marca aggiornata!" : "Marca creata!");
       closeMarcaModal();
       loadMarche();
     } else {
       alert(data.error || "Errore durante il salvataggio");
     }
-  } catch { alert("Errore di connessione"); }
+  } catch {
+    alert("Errore di connessione");
+  }
 });

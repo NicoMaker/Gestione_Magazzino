@@ -42,7 +42,9 @@ function renderProdotti() {
     return;
   }
 
-  tbody.innerHTML = prodotti.map((p) => `
+  tbody.innerHTML = prodotti
+    .map(
+      (p) => `
     <tr>
       <td><strong>${escapeHtml(p.nome)}</strong></td>
       <td><span class="badge badge-marca">${p.marca_nome ? escapeHtml(p.marca_nome).toUpperCase() : "N/A"}</span></td>
@@ -65,10 +67,10 @@ function renderProdotti() {
           </svg>
         </button>
       </td>
-    </tr>`).join("");
+    </tr>`,
+    )
+    .join("");
 }
-
-
 
 function editProdotto(id) {
   const prodotto = prodotti.find((p) => p.id === id);
@@ -77,7 +79,9 @@ function editProdotto(id) {
 
 // ── Eliminazione prodotto ────────────────────────────────────
 async function deleteProdotto(id, nome) {
-  const movimentiCollegati = allMovimenti.filter((m) => m.prodotto_id === id).length;
+  const movimentiCollegati = allMovimenti.filter(
+    (m) => m.prodotto_id === id,
+  ).length;
   let messaggio = `Sei sicuro di voler eliminare il prodotto "<strong>${escapeHtml(nome)}</strong>"?`;
   if (movimentiCollegati > 0) {
     messaggio += `
@@ -90,11 +94,16 @@ async function deleteProdotto(id, nome) {
   if (!confermato) return;
 
   try {
-    const res  = await fetch(`${API_URL}/prodotti/${id}`, { method: "DELETE" });
+    const res = await fetch(`${API_URL}/prodotti/${id}`, { method: "DELETE" });
     const data = await res.json();
     if (res.ok) {
-      if (typeof ignoreNextSocketUpdate === "function") ignoreNextSocketUpdate();
-      showAlertModal(`Prodotto "${nome}" eliminato!`, "Operazione Completata", "success");
+      if (typeof ignoreNextSocketUpdate === "function")
+        ignoreNextSocketUpdate();
+      showAlertModal(
+        `Prodotto "${nome}" eliminato!`,
+        "Operazione Completata",
+        "success",
+      );
       await loadProdotti();
       if (movimentiCollegati > 0) await loadMovimenti();
     } else {
@@ -106,32 +115,48 @@ async function deleteProdotto(id, nome) {
 }
 
 // ── Submit form prodotto ─────────────────────────────────────
-document.getElementById("formProdotto")?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const id          = document.getElementById("prodottoId").value;
-  const nome        = document.getElementById("prodottoNome").value.trim();
-  const marca_id    = document.getElementById("prodottoMarca").value;
-  const descrizione = document.getElementById("prodottoDescrizione").value.trim() || null;
+document
+  .getElementById("formProdotto")
+  ?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const id = document.getElementById("prodottoId").value;
+    const nome = document.getElementById("prodottoNome").value.trim();
+    const marca_id = document.getElementById("prodottoMarca").value;
+    const descrizione =
+      document.getElementById("prodottoDescrizione").value.trim() || null;
 
-  if (!nome)     { alert("⚠️ Il nome del prodotto è obbligatorio!"); return; }
-  if (!marca_id) { alert("⚠️ Seleziona una marca dalla lista!");     return; }
-
-  const method = id ? "PUT"  : "POST";
-  const url    = id ? `${API_URL}/prodotti/${id}` : `${API_URL}/prodotti`;
-
-  try {
-    const res  = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nome, marca_id, descrizione }) });
-    const data = await res.json();
-    if (res.ok) {
-      if (typeof ignoreNextSocketUpdate === "function") ignoreNextSocketUpdate();
-      alert(id ? "✅ Prodotto aggiornato!" : "✅ Prodotto creato!");
-      closeProdottoModal();
-      loadProdotti();
-    } else {
-      alert(data.error || "❌ Errore durante il salvataggio");
+    if (!nome) {
+      alert("⚠️ Il nome del prodotto è obbligatorio!");
+      return;
     }
-  } catch { alert("❌ Errore di connessione al server"); }
-});
+    if (!marca_id) {
+      alert("⚠️ Seleziona una marca dalla lista!");
+      return;
+    }
+
+    const method = id ? "PUT" : "POST";
+    const url = id ? `${API_URL}/prodotti/${id}` : `${API_URL}/prodotti`;
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome, marca_id, descrizione }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        if (typeof ignoreNextSocketUpdate === "function")
+          ignoreNextSocketUpdate();
+        alert(id ? "✅ Prodotto aggiornato!" : "✅ Prodotto creato!");
+        closeProdottoModal();
+        loadProdotti();
+      } else {
+        alert(data.error || "❌ Errore durante il salvataggio");
+      }
+    } catch {
+      alert("❌ Errore di connessione al server");
+    }
+  });
 
 // ── Ricerca marche nel modal prodotto ────────────────────────
 
@@ -165,7 +190,10 @@ function searchMarche() {
   const searchTerm = searchInput.value.toLowerCase().trim();
 
   // Reset se si sta modificando dopo una selezione
-  if (selectedMarcaId !== null && searchInput.classList.contains("has-selection")) {
+  if (
+    selectedMarcaId !== null &&
+    searchInput.classList.contains("has-selection")
+  ) {
     const cur = allMarche.find((m) => m.id == selectedMarcaId);
     if (cur && searchInput.value !== cur.nome.toUpperCase()) {
       selectedMarcaId = null;
@@ -180,8 +208,8 @@ function searchMarche() {
     return;
   }
 
-  const filteredMarche = allMarche.filter((m) =>
-    !searchTerm || m.nome.toLowerCase().includes(searchTerm)
+  const filteredMarche = allMarche.filter(
+    (m) => !searchTerm || m.nome.toLowerCase().includes(searchTerm),
   );
 
   if (filteredMarche.length === 0 && searchTerm) {
@@ -190,10 +218,14 @@ function searchMarche() {
     return;
   }
 
-  resultsCont.innerHTML = filteredMarche.map((m) => `
+  resultsCont.innerHTML = filteredMarche
+    .map(
+      (m) => `
     <div class="search-result-item marca-result-item" data-id="${m.id}" data-nome="${m.nome}">
       <div class="search-result-name">${highlightMatch(m.nome, searchTerm)}</div>
-    </div>`).join("");
+    </div>`,
+    )
+    .join("");
 
   resultsCont.querySelectorAll(".marca-result-item").forEach((item) => {
     item.addEventListener("click", function () {
@@ -209,7 +241,7 @@ function selectMarca(id, nome) {
   const hiddenInput = document.getElementById("prodottoMarca");
   const resultsCont = document.getElementById("marcaSearchResults");
 
-  selectedMarcaId   = id;
+  selectedMarcaId = id;
   hiddenInput.value = id;
   searchInput.value = nome.toUpperCase();
   searchInput.classList.add("has-selection");

@@ -4,7 +4,9 @@
 
 // ── Separatore decimale locale ──────────────────────────────
 function getDecimalSeparator() {
-  const formatted = (1.1).toLocaleString(undefined, { minimumFractionDigits: 1 });
+  const formatted = (1.1).toLocaleString(undefined, {
+    minimumFractionDigits: 1,
+  });
   return formatted.includes(",") ? "," : ".";
 }
 
@@ -44,7 +46,13 @@ function formatQuantity(num) {
 // ── Escape HTML (prevenzione XSS) ───────────────────────────
 function escapeHtml(text) {
   if (!text) return "";
-  const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
+  const map = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;",
+  };
   return String(text).replace(/[&<>"']/g, (m) => map[m]);
 }
 
@@ -54,7 +62,7 @@ function highlightMatch(text, searchTerm) {
   const regex = new RegExp(`(${searchTerm})`, "gi");
   return text.replace(
     regex,
-    '<mark style="background:#fef08a;padding:2px 4px;border-radius:3px;font-weight:700;">$1</mark>'
+    '<mark style="background:#fef08a;padding:2px 4px;border-radius:3px;font-weight:700;">$1</mark>',
   );
 }
 
@@ -77,33 +85,67 @@ function limitToTwoDecimals(inputElement) {
 
   const handleBlur = function () {
     const value = this.value;
-    if (!value || value === separator) { this.value = `0${separator}00`; return; }
+    if (!value || value === separator) {
+      this.value = `0${separator}00`;
+      return;
+    }
     const num = parseDecimalInput(value);
-    this.value = !isNaN(num) ? num.toFixed(2).replace(".", separator) : `0${separator}00`;
+    this.value = !isNaN(num)
+      ? num.toFixed(2).replace(".", separator)
+      : `0${separator}00`;
   };
 
   const handlePaste = function (e) {
     e.preventDefault();
     const pasted = (e.clipboardData || window.clipboardData).getData("text");
-    const num = Number.parseFloat(pasted.replace(/[^\d.,]/g, "").replace(",", "."));
-    if (!isNaN(num) && num >= 0) this.value = num.toFixed(2).replace(".", separator);
+    const num = Number.parseFloat(
+      pasted.replace(/[^\d.,]/g, "").replace(",", "."),
+    );
+    if (!isNaN(num) && num >= 0)
+      this.value = num.toFixed(2).replace(".", separator);
   };
 
   const handleKeydown = function (e) {
     const sep = getDecimalSeparator();
-    const ctrl = ["Backspace","Delete","Tab","Escape","Enter","ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Home","End"];
-    if (ctrl.includes(e.key) || e.ctrlKey || e.metaKey || e.key === "a" || e.key === "A") return;
-    if (e.key === "-" || e.key === "_") { e.preventDefault(); return; }
+    const ctrl = [
+      "Backspace",
+      "Delete",
+      "Tab",
+      "Escape",
+      "Enter",
+      "ArrowLeft",
+      "ArrowRight",
+      "ArrowUp",
+      "ArrowDown",
+      "Home",
+      "End",
+    ];
+    if (
+      ctrl.includes(e.key) ||
+      e.ctrlKey ||
+      e.metaKey ||
+      e.key === "a" ||
+      e.key === "A"
+    )
+      return;
+    if (e.key === "-" || e.key === "_") {
+      e.preventDefault();
+      return;
+    }
     if (/^\d$/.test(e.key)) return;
-    if ((e.key === sep || e.key === "." || e.key === ",") && !this.value.includes(sep)) return;
+    if (
+      (e.key === sep || e.key === "." || e.key === ",") &&
+      !this.value.includes(sep)
+    )
+      return;
     e.preventDefault();
   };
 
   const newInput = inputElement.cloneNode(true);
   inputElement.parentNode.replaceChild(newInput, inputElement);
-  newInput.addEventListener("input",   handleInput);
-  newInput.addEventListener("blur",    handleBlur);
-  newInput.addEventListener("paste",   handlePaste);
+  newInput.addEventListener("input", handleInput);
+  newInput.addEventListener("blur", handleBlur);
+  newInput.addEventListener("paste", handlePaste);
   newInput.addEventListener("keydown", handleKeydown);
   return newInput;
 }

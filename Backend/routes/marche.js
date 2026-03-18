@@ -20,7 +20,7 @@ router.get("/", (req, res) => {
 
   db.all(query, (err, rows) => {
     if (err) {
-      console.error('❌ Errore caricamento marche:', err);
+      console.error("❌ Errore caricamento marche:", err);
       return res.status(500).json({ error: err.message });
     }
 
@@ -47,7 +47,7 @@ router.post("/", (req, res) => {
         if (err.message.includes("UNIQUE")) {
           return res.status(400).json({ error: "Marca già esistente" });
         }
-        console.error('❌ Errore creazione marca:', err);
+        console.error("❌ Errore creazione marca:", err);
         return res.status(500).json({ error: err.message });
       }
 
@@ -63,9 +63,9 @@ router.post("/", (req, res) => {
         id: this.lastID,
         nome: nome.trim(),
         data_creazione,
-        prodotti_count: 0
+        prodotti_count: 0,
       });
-    }
+    },
   );
 });
 
@@ -86,7 +86,7 @@ router.put("/:id", (req, res) => {
         if (err.message.includes("UNIQUE")) {
           return res.status(400).json({ error: "Marca già esistente" });
         }
-        console.error('❌ Errore aggiornamento marca:', err);
+        console.error("❌ Errore aggiornamento marca:", err);
         return res.status(500).json({ error: err.message });
       }
 
@@ -103,7 +103,7 @@ router.put("/:id", (req, res) => {
 
       console.log(`✅ Marca aggiornata: ID ${id} -> "${nome.trim()}"`);
       res.json({ success: true, nome: nome.trim() });
-    }
+    },
   );
 });
 
@@ -118,7 +118,7 @@ router.delete("/:id", (req, res) => {
     [id],
     (err, row) => {
       if (err) {
-        console.error('❌ Errore verifica prodotti:', err);
+        console.error("❌ Errore verifica prodotti:", err);
         return res.status(500).json({ error: err.message });
       }
 
@@ -126,20 +126,23 @@ router.delete("/:id", (req, res) => {
 
       // 🚫 BLOCCA L'ELIMINAZIONE SE CI SONO PRODOTTI
       if (prodottiCount > 0) {
-        console.log(`⚠️ Tentativo di eliminare marca ID ${id} con ${prodottiCount} prodotti - BLOCCATO`);
-        
+        console.log(
+          `⚠️ Tentativo di eliminare marca ID ${id} con ${prodottiCount} prodotti - BLOCCATO`,
+        );
+
         return res.status(400).json({
-          error: prodottiCount === 1
-            ? "Impossibile eliminare: c'è 1 prodotto collegato a questa marca."
-            : `Impossibile eliminare: ci sono ${prodottiCount} prodotti collegati a questa marca.`,
-          prodotti_count: prodottiCount
+          error:
+            prodottiCount === 1
+              ? "Impossibile eliminare: c'è 1 prodotto collegato a questa marca."
+              : `Impossibile eliminare: ci sono ${prodottiCount} prodotti collegati a questa marca.`,
+          prodotti_count: prodottiCount,
         });
       }
 
       // ✅ Nessun prodotto collegato, procedi con l'eliminazione
       db.run("DELETE FROM marche WHERE id = ?", [id], function (err2) {
         if (err2) {
-          console.error('❌ Errore eliminazione marca:', err2);
+          console.error("❌ Errore eliminazione marca:", err2);
           return res.status(500).json({ error: err2.message });
         }
 
@@ -158,10 +161,10 @@ router.delete("/:id", (req, res) => {
 
         res.json({
           success: true,
-          message: "Marca eliminata con successo"
+          message: "Marca eliminata con successo",
         });
       });
-    }
+    },
   );
 });
 

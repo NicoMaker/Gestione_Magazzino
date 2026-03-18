@@ -168,8 +168,8 @@
         "Olio 2T",
         "Olio Competizione"
       ],
-      "prezzoMin": 8.50,
-      "prezzoMax": 45.00
+      "prezzoMin": 8.5,
+      "prezzoMax": 45.0
     },
     {
       "categoria": "Filtri",
@@ -181,8 +181,8 @@
         "Filtro Olio Performance",
         "Kit Filtri"
       ],
-      "prezzoMin": 5.00,
-      "prezzoMax": 85.00
+      "prezzoMin": 5.0,
+      "prezzoMax": 85.0
     },
     {
       "categoria": "Trasmissione",
@@ -195,8 +195,8 @@
         "Catena X-Ring",
         "Catena Racing"
       ],
-      "prezzoMin": 15.00,
-      "prezzoMax": 350.00
+      "prezzoMin": 15.0,
+      "prezzoMax": 350.0
     },
     {
       "categoria": "Freni",
@@ -210,8 +210,8 @@
         "Pastiglie Organiche",
         "Kit Freni"
       ],
-      "prezzoMin": 20.00,
-      "prezzoMax": 800.00
+      "prezzoMin": 20.0,
+      "prezzoMax": 800.0
     },
     {
       "categoria": "Sospensioni",
@@ -223,8 +223,8 @@
         "Forcella Regolabile",
         "Ammortizzatore Racing"
       ],
-      "prezzoMin": 150.00,
-      "prezzoMax": 2500.00
+      "prezzoMin": 150.0,
+      "prezzoMax": 2500.0
     },
     {
       "categoria": "Scarichi",
@@ -237,8 +237,8 @@
         "Scarico Carbonio",
         "Silenziatore"
       ],
-      "prezzoMin": 120.00,
-      "prezzoMax": 1800.00
+      "prezzoMin": 120.0,
+      "prezzoMax": 1800.0
     },
     {
       "categoria": "Pneumatici",
@@ -253,8 +253,8 @@
         "Pneumatico Off-Road",
         "Pneumatico Enduro"
       ],
-      "prezzoMin": 45.00,
-      "prezzoMax": 350.00
+      "prezzoMin": 45.0,
+      "prezzoMax": 350.0
     },
     {
       "categoria": "Caschi",
@@ -267,8 +267,8 @@
         "Casco Racing",
         "Casco Touring"
       ],
-      "prezzoMin": 80.00,
-      "prezzoMax": 1200.00
+      "prezzoMin": 80.0,
+      "prezzoMax": 1200.0
     },
     {
       "categoria": "Abbigliamento",
@@ -288,8 +288,8 @@
         "Sottotuta",
         "Intimo Tecnico"
       ],
-      "prezzoMin": 25.00,
-      "prezzoMax": 1500.00
+      "prezzoMin": 25.0,
+      "prezzoMax": 1500.0
     },
     {
       "categoria": "Accessori Moto",
@@ -313,8 +313,8 @@
         "Catena Antifurto",
         "Allarme Moto"
       ],
-      "prezzoMin": 15.00,
-      "prezzoMax": 800.00
+      "prezzoMin": 15.0,
+      "prezzoMax": 800.0
     },
     {
       "categoria": "Ricambi Motore",
@@ -333,8 +333,8 @@
         "Pompa Acqua",
         "Radiatore"
       ],
-      "prezzoMin": 8.00,
-      "prezzoMax": 1200.00
+      "prezzoMin": 8.0,
+      "prezzoMax": 1200.0
     },
     {
       "categoria": "Elettronica",
@@ -352,8 +352,8 @@
         "Faro LED",
         "Kit LED"
       ],
-      "prezzoMin": 12.00,
-      "prezzoMax": 900.00
+      "prezzoMin": 12.0,
+      "prezzoMax": 900.0
     }
   ],
   "fornitori": [
