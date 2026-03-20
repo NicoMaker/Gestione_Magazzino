@@ -1,8 +1,10 @@
 // realtime.js - Gestione Socket.IO e notifiche real-time
 
+// Flag globale per ignorare aggiornamenti
+window.ignoreNextSocketUpdate = false;
+
 // Connessione Socket.IO
 let socket = null;
-let ignoreNextUpdate = false; // Flag per ignorare aggiornamenti dopo operazioni locali
 
 // Inizializza Socket.IO
 function initSocket() {
@@ -34,89 +36,102 @@ function initSocket() {
 
   // Marche - Aggiorna solo se l'operazione viene da altri dispositivi
   socket.on("marca_aggiunta", () => {
-    if (!ignoreNextUpdate && typeof loadMarche === "function") {
+    if (!window.ignoreNextSocketUpdate && typeof loadMarche === "function") {
       loadMarche();
     }
+    window.ignoreNextSocketUpdate = false;
   });
 
   socket.on("marca_modificata", () => {
-    if (!ignoreNextUpdate) {
+    if (!window.ignoreNextSocketUpdate) {
       if (typeof loadMarche === "function") loadMarche();
       if (typeof loadProdotti === "function") loadProdotti();
     }
+    window.ignoreNextSocketUpdate = false;
   });
 
   socket.on("marca_eliminata", () => {
-    if (!ignoreNextUpdate) {
+    if (!window.ignoreNextSocketUpdate) {
       if (typeof loadMarche === "function") loadMarche();
       if (typeof loadProdotti === "function") loadProdotti();
     }
+    window.ignoreNextSocketUpdate = false;
   });
 
   socket.on("marche_aggiornate", () => {
-    if (!ignoreNextUpdate && typeof loadMarche === "function") {
+    if (!window.ignoreNextSocketUpdate && typeof loadMarche === "function") {
       loadMarche();
     }
+    window.ignoreNextSocketUpdate = false;
   });
 
   // Prodotti - Aggiorna solo se l'operazione viene da altri dispositivi
   socket.on("prodotto_aggiunto", () => {
-    if (!ignoreNextUpdate && typeof loadProdotti === "function") {
+    if (!window.ignoreNextSocketUpdate && typeof loadProdotti === "function") {
       loadProdotti();
     }
+    window.ignoreNextSocketUpdate = false;
   });
 
   socket.on("prodotto_modificato", () => {
-    if (!ignoreNextUpdate && typeof loadProdotti === "function") {
+    if (!window.ignoreNextSocketUpdate && typeof loadProdotti === "function") {
       loadProdotti();
     }
+    window.ignoreNextSocketUpdate = false;
   });
 
   socket.on("prodotto_eliminato", () => {
-    if (!ignoreNextUpdate && typeof loadProdotti === "function") {
+    if (!window.ignoreNextSocketUpdate && typeof loadProdotti === "function") {
       loadProdotti();
     }
+    window.ignoreNextSocketUpdate = false;
   });
 
   socket.on("prodotti_aggiornati", () => {
-    if (!ignoreNextUpdate && typeof loadProdotti === "function") {
+    if (!window.ignoreNextSocketUpdate && typeof loadProdotti === "function") {
       loadProdotti();
     }
+    window.ignoreNextSocketUpdate = false;
   });
 
   // Movimenti - Aggiorna solo se l'operazione viene da altri dispositivi
   socket.on("movimento_aggiunto", () => {
-    if (!ignoreNextUpdate && typeof loadMovimenti === "function") {
+    if (!window.ignoreNextSocketUpdate && typeof loadMovimenti === "function") {
       loadMovimenti();
     }
+    window.ignoreNextSocketUpdate = false;
   });
 
   socket.on("movimento_eliminato", () => {
-    if (!ignoreNextUpdate && typeof loadMovimenti === "function") {
+    if (!window.ignoreNextSocketUpdate && typeof loadMovimenti === "function") {
       loadMovimenti();
     }
+    window.ignoreNextSocketUpdate = false;
   });
 
   socket.on("dati_aggiornati", () => {
-    if (!ignoreNextUpdate && typeof loadMovimenti === "function") {
+    if (!window.ignoreNextSocketUpdate && typeof loadMovimenti === "function") {
       loadMovimenti();
     }
+    window.ignoreNextSocketUpdate = false;
   });
 
   // Magazzino - Aggiorna solo se l'operazione viene da altri dispositivi
   socket.on("magazzino_aggiornato", () => {
-    if (!ignoreNextUpdate) {
+    if (!window.ignoreNextSocketUpdate) {
       if (typeof loadRiepilogo === "function") loadRiepilogo();
       if (typeof loadMovimenti === "function") loadMovimenti();
       if (typeof loadProdotti === "function") loadProdotti();
     }
+    window.ignoreNextSocketUpdate = false;
   });
 
   // Utenti - Aggiorna solo se l'operazione viene da altri dispositivi
   socket.on("utente_aggiunto", () => {
-    if (!ignoreNextUpdate && typeof loadUtenti === "function") {
+    if (!window.ignoreNextSocketUpdate && typeof loadUtenti === "function") {
       loadUtenti();
     }
+    window.ignoreNextSocketUpdate = false;
   });
 
   socket.on("utente_modificato", (data) => {
@@ -137,9 +152,10 @@ function initSocket() {
       return;
     }
 
-    if (!ignoreNextUpdate && typeof loadUtenti === "function") {
+    if (!window.ignoreNextSocketUpdate && typeof loadUtenti === "function") {
       loadUtenti();
     }
+    window.ignoreNextSocketUpdate = false;
   });
 
   socket.on("utente_eliminato", (data) => {
@@ -158,17 +174,24 @@ function initSocket() {
       return;
     }
 
-    if (!ignoreNextUpdate && typeof loadUtenti === "function") {
+    if (!window.ignoreNextSocketUpdate && typeof loadUtenti === "function") {
       loadUtenti();
     }
+    window.ignoreNextSocketUpdate = false;
   });
 
   socket.on("utenti_aggiornati", () => {
-    if (!ignoreNextUpdate && typeof loadUtenti === "function") {
+    if (!window.ignoreNextSocketUpdate && typeof loadUtenti === "function") {
       loadUtenti();
     }
+    window.ignoreNextSocketUpdate = false;
   });
 }
 
-// Esporta per uso globale
-window.ignoreNextSocketUpdate = ignoreNextSocketUpdate;
+// Funzione per ignorare il prossimo aggiornamento
+function skipNextSocketUpdate() {
+  window.ignoreNextSocketUpdate = true;
+}
+
+// Export per uso globale
+window.skipNextSocketUpdate = skipNextSocketUpdate;

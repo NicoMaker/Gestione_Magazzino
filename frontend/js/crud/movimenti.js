@@ -1,7 +1,8 @@
 // ==================== GESTIONE MOVIMENTI ====================
-// File: movimenti.js
+// File: movimenti.js (VERSIONE AGGIORNATA CON RIORDINO)
 // Scopo: Caricamento, rendering, creazione, modifica ed eliminazione movimenti
 //        + ricerca prodotti nel modal + gestione campi carico/scarico
+//        + NUOVO: Bottone Riordina per carichi
 
 let selectedProdottoId = null;
 
@@ -85,6 +86,39 @@ function renderMovimenti() {
               return doc ? escapeHtml(doc) : "";
             })();
 
+      // 🆕 BOTTONI DI AZIONE - STILE UNIFORME
+      let buttoniHTML = ``;
+
+      // Bottone Riordina SOLO per CARICHI (PRIMO) - STESSO STILE
+      if (m.tipo === "carico") {
+        buttoniHTML += `
+        <button class="btn-icon btn-riordina" onclick="handleRiordino(${m.id})" title="Riordina questo carico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="21" r="1"/>
+            <circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            <path d="M6 6h14"/>
+          </svg>
+        </button>`;
+      }
+
+      // Bottone Modifica (SECONDO) - STESSO STILE
+      buttoniHTML += `
+        <button class="btn-icon btn-modifica" onclick="editMovimento(${m.id})" title="Modifica">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </button>`;
+
+      // Bottone Elimina (TERZO) - STESSO STILE
+      buttoniHTML += `
+        <button class="btn-icon btn-elimina" onclick="deleteMovimento(${m.id},'${escapeHtml(m.prodotto_nome)}','${m.tipo}')" title="Elimina">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+        </button>`;
+
       return `
       <tr>
         <td>${new Date(m.data_movimento).toLocaleDateString("it-IT")}</td>
@@ -98,17 +132,7 @@ function renderMovimenti() {
         <td>${docCell}</td>
         <td>${m.tipo === "scarico" ? "" : m.fornitore_cliente_id || ""}</td>
         <td class="text-right">
-          <button class="btn-icon" onclick="editMovimento(${m.id})" title="Modifica">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-            </svg>
-          </button>
-          <button class="btn-icon" onclick="deleteMovimento(${m.id},'${escapeHtml(m.prodotto_nome)}','${m.tipo}')" title="Elimina">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-            </svg>
-          </button>
+          ${buttoniHTML}
         </td>
       </tr>`;
     })
@@ -232,8 +256,8 @@ document
       });
       const data = await res.json();
       if (res.ok) {
-        if (typeof ignoreNextSocketUpdate === "function")
-          ignoreNextSocketUpdate();
+        if (typeof skipNextSocketUpdate === "function")
+          skipNextSocketUpdate();
         alert(id ? "Movimento aggiornato!" : "Movimento registrato!");
         closeMovimentoModal();
         loadMovimenti();
