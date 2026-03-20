@@ -454,8 +454,24 @@ async function openMovimentoModal(movimento = null) {
       searchInput.classList.remove("has-selection");
     }
     if (resultsBox) resultsBox.classList.remove("show");
+    
     const gi = document.getElementById("giacenzaInfo");
-    if (gi) gi.style.display = "none";
+    if (gi) {
+      // Rimuovi TUTTI i flag gialli che si trovano PRIMA di giacenzaInfo
+      let prev = gi.previousElementSibling;
+      while (prev) {
+        if (prev.textContent && prev.textContent.includes("RIORDINO")) {
+          const toRemove = prev;
+          prev = prev.previousElementSibling;
+          toRemove.remove();
+        } else {
+          prev = prev.previousElementSibling;
+        }
+      }
+      
+      // Pulisci la giacenza
+      gi.style.display = "none";
+    }
     if (tipoSelect) tipoSelect.value = "carico";
   } else {
     document.getElementById("modalMovimentoTitle").textContent =
