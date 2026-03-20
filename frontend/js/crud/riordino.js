@@ -37,16 +37,22 @@ function precompileRiordino(movimento) {
   tipoSelect.value = "carico";
   togglePrezzoField(); // Mostra i campi di prezzo
 
-  // Mostra info di riordino
+  // Mostra info di riordino SOPRA la giacenza (non la sostituisce)
   const giacenzaInfo = document.getElementById("giacenzaInfo");
   if (giacenzaInfo) {
-    giacenzaInfo.innerHTML = `
-      <div style="background:#fef3c7;border-left:4px solid #f59e0b;padding:12px;border-radius:6px;margin-bottom:16px;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
-        <strong style="color:#92400e;">📋 RIORDINO BASATO SU CARICO PRECEDENTE</strong>
-        <p style="font-size:13px;color:#b45309;margin-top:4px;">
-          Tutti i dati sono precompilati. Modifica ciò che serve!
-        </p>
-      </div>`;
+    // Crea il flag giallo come elemento separato
+    const flagRiordino = document.createElement("div");
+    flagRiordino.style.cssText = "background:#fef3c7;border-left:4px solid #f59e0b;padding:12px;border-radius:6px;margin-bottom:8px;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.1);";
+    flagRiordino.innerHTML = `
+      <strong style="color:#92400e;">📋 RIORDINO BASATO SU CARICO PRECEDENTE</strong>
+      <p style="font-size:13px;color:#b45309;margin-top:4px;">
+        Tutti i dati sono precompilati. Modifica ciò che serve!
+      </p>`;
+    
+    // Inserisci il flag PRIMA della giacenza
+    giacenzaInfo.parentNode.insertBefore(flagRiordino, giacenzaInfo);
+    
+    // Assicurati che la giacenza sia visibile
     giacenzaInfo.style.display = "block";
   }
 
