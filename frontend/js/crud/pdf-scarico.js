@@ -164,12 +164,8 @@ function parseRicamboLine(line) {
   return null;
 }
 
-function isValidCode(code) {
-  return /^[A-Z0-9\-_\/]{1,50}$/i.test(code);
-}
-function isValidQuantity(qty) {
-  return !isNaN(qty) && qty > 0 && qty <= 9999;
-}
+const isValidCode = (code) => /^[A-Z0-9\-_\/]{1,50}$/i.test(code);
+const isValidQuantity = (qty) => !isNaN(qty) && qty > 0 && qty <= 9999;
 
 function normalizeDate(dateStr) {
   dateStr = dateStr.trim();
