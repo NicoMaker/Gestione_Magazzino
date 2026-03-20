@@ -3642,3 +3642,99 @@ tbody tr:hover {
 }
 
 
+/* ==================== BOTTONI DI AZIONE - STILE IMAGE ESATTO ==================== */
+
+/* Base per tutti i bottoni */
+.btn-icon {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border-radius: 14px;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  font-size: 0;
+}
+
+.btn-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke-width: 2.2;
+}
+
+/* ========== BOTTONE RIORDINA - VERDE ========== */
+.btn-riordina {
+  border: 2.5px solid #10b981;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.btn-riordina:hover {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #059669;
+  color: #059669;
+}
+
+.btn-riordina:active {
+  transform: scale(0.92);
+}
+
+/* ========== BOTTONE MODIFICA - BLU ========== */
+.btn-modifica {
+  border: 2.5px solid #3b82f6;
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.12);
+}
+
+.btn-modifica:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+.btn-modifica:active {
+  transform: scale(0.92);
+}
+
+/* ========== BOTTONE ELIMINA - ROSSO ========== */
+.btn-elimina {
+  border: 2.5px solid #ef4444;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.btn-elimina:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+.btn-elimina:active {
+  transform: scale(0.92);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .btn-icon,
+  .btn-riordina,
+  .btn-modifica,
+  .btn-elimina {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+  }
+
+  .btn-icon svg,
+  .btn-riordina svg,
+  .btn-modifica svg,
+  .btn-elimina svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+/* ==================== FINE BOTTONI DI AZIONE ==================== */
