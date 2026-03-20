@@ -68,15 +68,15 @@ function precompileRiordino(movimento) {
     // Prodotto è stato eliminato - Mostra un avviso ma permetti comunque il riordino
     selectedProdottoId = null;
     hiddenInput.value = "";
-    searchInput.value = `[PRODOTTO ELIMINATO - ID: ${movimento.prodotto_id}]`;
-    searchInput.classList.add("has-selection");
+    searchInput.value = "";
+    searchInput.classList.remove("has-selection");
     
     // Mostra avviso
     const avviso = document.createElement("div");
     avviso.style.cssText = "background:#fee2e2;border-left:4px solid #ef4444;padding:12px;border-radius:6px;margin-bottom:16px;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.1);";
     avviso.innerHTML = `
       <strong style="color:#991b1b;">⚠️ PRODOTTO ELIMINATO</strong>
-      <p style="font-size:13px;color:#b45309;margin-top:4px;">
+      <p style="font-size:13px;color:#991b1b;margin-top:4px;">
         Il prodotto di questo carico è stato eliminato dal sistema.
         Seleziona un nuovo prodotto prima di salvare.
       </p>`;
