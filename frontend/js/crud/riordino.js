@@ -19,7 +19,8 @@ function openRiordinoModal(movimento) {
   // Attendi che il modal sia aperto (un frame)
   setTimeout(() => {
     // Prepopola i dati dal movimento precedente
-    precompileRiordino(movimento);
+    // Passa true per indicare che è un riordino vero (non una modifica)
+    precompileRiordino(movimento, true);
   }, 100);
 }
 
@@ -40,7 +41,7 @@ function precompileRiordino(movimento) {
   const giacenzaInfo = document.getElementById("giacenzaInfo");
   if (giacenzaInfo) {
     giacenzaInfo.innerHTML = `
-      <div style="background:#fef3c7;border-left:4px solid #f59e0b;padding:12px;border-radius:6px;margin-bottom:16px;">
+      <div style="background:#fef3c7;border-left:4px solid #f59e0b;padding:12px;border-radius:6px;margin-bottom:16px;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
         <strong style="color:#92400e;">📋 RIORDINO BASATO SU CARICO PRECEDENTE</strong>
         <p style="font-size:13px;color:#b45309;margin-top:4px;">
           Tutti i dati sono precompilati. Modifica ciò che serve!
@@ -72,7 +73,7 @@ function precompileRiordino(movimento) {
     
     // Mostra avviso
     const avviso = document.createElement("div");
-    avviso.style.cssText = "background:#fee2e2;border-left:4px solid #ef4444;padding:12px;border-radius:6px;margin-bottom:16px;";
+    avviso.style.cssText = "background:#fee2e2;border-left:4px solid #ef4444;padding:12px;border-radius:6px;margin-bottom:16px;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.1);";
     avviso.innerHTML = `
       <strong style="color:#991b1b;">⚠️ PRODOTTO ELIMINATO</strong>
       <p style="font-size:13px;color:#b45309;margin-top:4px;">
@@ -90,11 +91,13 @@ function precompileRiordino(movimento) {
   const dataMovimento = movimento.data_movimento.split("T")[0]; // Se contiene datetime
   dataInput.value = dataMovimento;
 
-  // Quantità: stessa del carico precedente
-  document.getElementById("movimentoQuantita").value = formatQuantity(movimento.quantita);
+  // Quantità: stessa del carico precedente (sempre con 2 decimali)
+  const quantitaValue = parseFloat(movimento.quantita || 0).toFixed(2);
+  document.getElementById("movimentoQuantita").value = quantitaValue;
 
-  // Prezzo: stessa del carico precedente
-  document.getElementById("movimentoPrezzo").value = formatQuantity(movimento.prezzo || 0);
+  // Prezzo: stessa del carico precedente (sempre con 2 decimali)
+  const prezzoValue = parseFloat(movimento.prezzo || 0).toFixed(2);
+  document.getElementById("movimentoPrezzo").value = prezzoValue;
 
   // Fattura: stessa del carico precedente (opzionale, può essere modificata)
   document.getElementById("movimentoFattura").value = movimento.fattura_doc || "";
