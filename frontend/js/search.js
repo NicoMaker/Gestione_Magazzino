@@ -9,6 +9,7 @@ const SEARCHKEYS = {
   riepilogo: "search_riepilogo",
   storico: "search_storico",
   utenti: "search_utenti",
+  riordino: "search_riordino",
 };
 
 function saveSearchTerm(key, value) {
@@ -153,6 +154,7 @@ function initSearchSystem() {
   );
   setupSearchPersistence("filterStorico", SEARCHKEYS.storico, filterStorico);
   setupSearchPersistence("filterUtenti", SEARCHKEYS.utenti, filterUtenti);
+  setupSearchPersistence("filterRiordino", SEARCHKEYS.riordino, filterRiordinoList);
 }
 
 // ── Ripristina il termine di ricerca salvato quando si cambia sezione ─
@@ -164,6 +166,7 @@ function restoreSearchOnSectionChange(section) {
     riepilogo: { inputId: "filterRiepilogo", fn: filterRiepilogo },
     storico: { inputId: "filterStorico", fn: filterStorico },
     utenti: { inputId: "filterUtenti", fn: filterUtenti },
+    riordino: { inputId: "filterRiordino", fn: filterRiordinoList },
   };
 
   const entry = map[section];

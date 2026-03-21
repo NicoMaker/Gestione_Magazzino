@@ -71,6 +71,14 @@
             </svg>
             <span>Movimenti</span>
           </a>
+          <a href="#" class="nav-item" data-section="riordino">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="9" cy="21" r="1"/>
+              <circle cx="20" cy="21" r="1"/>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+            <span>Riordino</span>
+          </a>
           <a href="#" class="nav-item" data-section="riepilogo">
             <svg
               viewBox="0 0 24 24"
@@ -584,6 +592,53 @@
             </form>
           </div>
         </div>
+
+        <!-- Sezione RIORDINO -->
+        <section id="section-riordino" class="content-section">
+          <div class="section-header">
+            <div>
+              <h1>Riordino Prodotti</h1>
+              <p>Prodotti con giacenza esaurita — crea subito un nuovo carico</p>
+            </div>
+            <div class="filter-controls">
+              <input
+                type="text"
+                id="filterRiordino"
+                class="filter-input"
+                placeholder="Cerca prodotto per nome, marca, descrizione..."
+              />
+            </div>
+          </div>
+
+          <!-- Banner alert -->
+          <div class="riordino-alert-banner" id="riordinoBanner" style="display:none;">
+            <div class="riordino-banner-left">
+              <div class="riordino-banner-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+              </div>
+              <div>
+                <strong class="riordino-banner-title">Prodotti Esauriti — Riordino Necessario</strong>
+                <p class="riordino-banner-sub">
+                  I seguenti prodotti hanno giacenza a <strong>zero</strong>.
+                  Clicca <span class="riordino-badge-inline">🛒 Riordina</span> per creare subito un nuovo carico.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Griglia prodotti a zero -->
+          <div class="riordino-grid" id="riordinoGrid">
+            <div style="padding:40px 20px;text-align:center;color:var(--text-secondary);">
+              <span>Caricamento...</span>
+            </div>
+          </div>
+
+          <br /><br />
+        </section>
 
         <!-- Sezione RIEPILOGO -->
         <section id="section-riepilogo" class="content-section">

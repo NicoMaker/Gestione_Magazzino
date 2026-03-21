@@ -14,12 +14,14 @@ async function loadMovimenti() {
       movimenti = [];
       allMovimenti = [];
       renderMovimenti();
+      renderAlertRiordino();
       return;
     }
     const data = await res.json();
     allMovimenti = Array.isArray(data) ? data : [];
     movimenti = allMovimenti;
     renderMovimenti();
+    renderAlertRiordino();
     reapplyFilter("filterMovimenti");
   } catch (error) {
     console.error("Errore caricamento movimenti", error);
@@ -391,3 +393,68 @@ function selectProduct(id, nome, marca, giacenza) {
   resultsCont.classList.remove("show");
   showGiacenzaInfo(id);
 }
+// ==================== ALERT RIORDINO: Prodotti a Giacenza Zero ====================
+
+/**
+ * Renderizza il pannello "Alert Riordino" sotto la tabella movimenti.
+ * Mostra tutti i prodotti con giacenza = 0 che hanno avuto almeno un carico passato,
+ * così l'utente può riordinare con un click.
+ */
+function renderAlertRiordino() {
+  const container = document.getElementById("alertRiordino");
+  const grid = document.getElementById("alertRiordinoGrid");
+  const countEl = document.getElementById("alertRiordinoCount");
+  if (!container || !grid || !countEl) return;
+
+  // Prodotti con giacenza zero (usa allProdotti che è sempre la lista completa)
+  const prodottiZero = (allProdotti || []).filter(
+    (p) => (parseFloat(p.giacenza) || 0) === 0
+  );
+
+  if (prodottiZero.length === 0) {
+    container.style.display = "none";
+    return;
+  }
+
+  countEl.textContent = prodottiZero.length;
+  container.style.display = "block";
+
+  grid.innerHTML = prodottiZero
+    .map((p) => {
+      const nome = escapeHtml(p.nome);
+      const marca = p.marca_nome ? escapeHtml(p.marca_nome) : null;
+      const descr = p.descrizione
+        ? escapeHtml(p.descrizione.substring(0, 45)) +
+          (p.descrizione.length > 45 ? "…" : "")
+        : null;
+
+      return `
+        <div class="alert-riordino-card">
+          <div class="alert-riordino-card-info">
+            <div class="alert-riordino-card-nome" title="${nome}">${nome}</div>
+            <div class="alert-riordino-card-meta">
+              ${marca ? `<span class="alert-riordino-card-marca">${marca}</span>` : ""}
+              <span class="alert-riordino-card-zero">Giacenza: 0</span>
+            </div>
+            ${descr ? `<div class="alert-riordino-card-descr">${descr}</div>` : ""}
+          </div>
+          <button
+            class="btn-riordina-alert"
+            onclick="handleRiordinoDaProdotto(${p.id})"
+            title="Riordina ${nome}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="21" r="1"/>
+              <circle cx="20" cy="21" r="1"/>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+            Riordina
+          </button>
+        </div>`;
+    })
+    .join("");
+}
+
+// Esporta globalmente
+window.renderAlertRiordino = renderAlertRiordino;
