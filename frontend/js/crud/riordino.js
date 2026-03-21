@@ -18,9 +18,13 @@ function openRiordinoModal(movimento) {
 
   // Attendi che il modal sia aperto (un frame)
   setTimeout(() => {
+    // Cambia il titolo DOPO l'apertura del modal
+    const modalTitle = document.getElementById("modalMovimentoTitle");
+    if (modalTitle) {
+      modalTitle.textContent = "Nuovo Movimento (Riordino)";
+    }
     // Prepopola i dati dal movimento precedente
-    // Passa true per indicare che è un riordino vero (non una modifica)
-    precompileRiordino(movimento, true);
+    precompileRiordino(movimento);
   }, 100);
 }
 
@@ -42,7 +46,7 @@ function precompileRiordino(movimento) {
   if (giacenzaInfo) {
     // Crea il flag giallo come elemento separato
     const flagRiordino = document.createElement("div");
-    flagRiordino.style.cssText = "background:#fef3c7;border-left:4px solid #f59e0b;padding:12px;border-radius:6px;margin-bottom:8px;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.1);";
+    flagRiordino.style.cssText = "background:#fef3c7;border-left:4px solid #f59e0b;padding:12px;border-radius:6px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);";
     flagRiordino.innerHTML = `
       <strong style="color:#92400e;">📋 RIORDINO BASATO SU CARICO PRECEDENTE</strong>
       <p style="font-size:13px;color:#b45309;margin-top:4px;">
@@ -79,7 +83,7 @@ function precompileRiordino(movimento) {
     
     // Mostra avviso
     const avviso = document.createElement("div");
-    avviso.style.cssText = "background:#fee2e2;border-left:4px solid #ef4444;padding:12px;border-radius:6px;margin-bottom:16px;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.1);";
+    avviso.style.cssText = "background:#fee2e2;border-left:4px solid #ef4444;padding:12px;border-radius:6px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.1);";
     avviso.innerHTML = `
       <strong style="color:#991b1b;">⚠️ PRODOTTO ELIMINATO</strong>
       <p style="font-size:13px;color:#991b1b;margin-top:4px;">

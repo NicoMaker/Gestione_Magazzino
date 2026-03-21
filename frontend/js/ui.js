@@ -446,8 +446,8 @@ async function openMovimentoModal(movimento = null) {
   document.getElementById("movimentoId").value = "";
 
   if (!movimento) {
-    document.getElementById("modalMovimentoTitle").textContent =
-      "Nuovo Movimento";
+    // Reset SEMPRE del titolo a "Nuovo Movimento" quando si apre un nuovo movimento
+    document.getElementById("modalMovimentoTitle").textContent = "Nuovo Movimento";
     if (hiddenProd) hiddenProd.value = "";
     if (searchInput) {
       searchInput.value = "";
