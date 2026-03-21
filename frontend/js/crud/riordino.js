@@ -41,31 +41,21 @@ function precompileRiordino(movimento) {
   tipoSelect.value = "carico";
   togglePrezzoField(); // Mostra i campi di prezzo
 
-  // Mostra info di riordino SOPRA la giacenza (non la sostituisce)
+  // ========== PULIZIA FLAGS PRECEDENTI ==========
   const giacenzaInfo = document.getElementById("giacenzaInfo");
-  if (giacenzaInfo) {
-    // Crea il flag giallo come elemento separato
-    const flagRiordino = document.createElement("div");
-    flagRiordino.style.cssText = "background:#fef3c7;border-left:4px solid #f59e0b;padding:12px;border-radius:6px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);";
-    flagRiordino.innerHTML = `
-      <strong style="color:#92400e;">📋 RIORDINO BASATO SU CARICO PRECEDENTE</strong>
-      <p style="font-size:13px;color:#b45309;margin-top:4px;">
-        Tutti i dati sono precompilati. Modifica ciò che serve!
-      </p>`;
-    
-    // Inserisci il flag PRIMA della giacenza
-    giacenzaInfo.parentNode.insertBefore(flagRiordino, giacenzaInfo);
-    
-    // Assicurati che la giacenza sia visibile
-    giacenzaInfo.style.display = "block";
+  if (giacenzaInfo && giacenzaInfo.parentNode) {
+    const oldFlags = giacenzaInfo.parentNode.querySelectorAll('[data-riordino-flag="true"]');
+    oldFlags.forEach((el) => el.remove());
   }
 
-  // Ricerca e selezione prodotto
+  // ========== RICERCA PRODOTTO ==========
   const searchInput = document.getElementById("movimentoProdottoSearch");
   const hiddenInput = document.getElementById("movimentoProdotto");
-  const prodotto = prodotti.find((p) => p.id === movimento.prodotto_id);
+  // Usa allProdotti (lista COMPLETA)
+  const prodotto = allProdotti.find((p) => p.id === movimento.prodotto_id);
 
   if (prodotto) {
+    // ✅ PRODOTTO ESISTE: Seleziona il prodotto e mostra flag + giacenza
     selectedProdottoId = prodotto.id;
     hiddenInput.value = prodotto.id;
     const marcaLabel = prodotto.marca_nome ? ` (${prodotto.marca_nome.toUpperCase()})` : "";
@@ -74,59 +64,64 @@ function precompileRiordino(movimento) {
 
     // Mostra info giacenza
     showGiacenzaInfo(prodotto.id);
+
+    // Mostra FLAG GIALLO di riordino
+    if (giacenzaInfo && giacenzaInfo.parentNode) {
+      const flagRiordino = document.createElement("div");
+      flagRiordino.setAttribute("data-riordino-flag", "true");
+      flagRiordino.style.cssText = "background:#fef3c7;border-left:4px solid #f59e0b;padding:12px;border-radius:6px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);";
+      flagRiordino.innerHTML = `
+        <strong style="color:#92400e;">📋 RIORDINO BASATO SU CARICO PRECEDENTE</strong>
+        <p style="font-size:13px;color:#b45309;margin-top:4px;">
+          I dati sono precompilati. Modifica ciò che serve!
+        </p>`;
+      giacenzaInfo.parentNode.insertBefore(flagRiordino, giacenzaInfo);
+      giacenzaInfo.style.display = "block";
+    }
+
+    // Focus sulla quantità (il dato da modificare di solito)
+    document.getElementById("movimentoQuantita").focus();
+
   } else {
-    // Prodotto è stato eliminato - Mostra un avviso ma permetti comunque il riordino
+    // ❌ PRODOTTO ELIMINATO: Nessun avviso, semplicemente precompila i dati
     selectedProdottoId = null;
     hiddenInput.value = "";
     searchInput.value = "";
     searchInput.classList.remove("has-selection");
     
-    // Mostra avviso
-    const avviso = document.createElement("div");
-    avviso.style.cssText = "background:#fee2e2;border-left:4px solid #ef4444;padding:12px;border-radius:6px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.1);";
-    avviso.innerHTML = `
-      <strong style="color:#991b1b;">⚠️ PRODOTTO ELIMINATO</strong>
-      <p style="font-size:13px;color:#991b1b;margin-top:4px;">
-        Il prodotto di questo carico è stato eliminato dal sistema.
-        Seleziona un nuovo prodotto prima di salvare.
-      </p>`;
-    
-    const giacenzaParent = giacenzaInfo.parentNode;
-    giacenzaParent.insertBefore(avviso, giacenzaInfo);
+    // Non mostrare nessun avviso - semplicemente procedi con i dati del movimento
+    if (giacenzaInfo) {
+      giacenzaInfo.style.display = "none";
+    }
+
+    // Focus sulla ricerca prodotto per permettere di cercarne uno nuovo
+    document.getElementById("movimentoProdottoSearch").focus();
   }
 
+  // ========== PRECOMPILA CAMPI NUMERICI E DATI ==========
   // Imposta la data dal movimento precedente
   const dataInput = document.getElementById("movimentoData");
-  // Prendi la data dal movimento precedente (es: "2024-03-20")
-  const dataMovimento = movimento.data_movimento.split("T")[0]; // Se contiene datetime
+  const dataMovimento = movimento.data_movimento.split("T")[0];
   dataInput.value = dataMovimento;
 
-  // Quantità: stessa del carico precedente (sempre con 2 decimali)
+  // Quantità: stessa del carico precedente
   const quantitaValue = parseFloat(movimento.quantita || 0).toFixed(2);
   document.getElementById("movimentoQuantita").value = quantitaValue;
 
-  // Prezzo: stessa del carico precedente (sempre con 2 decimali)
+  // Prezzo: stessa del carico precedente
   const prezzoValue = parseFloat(movimento.prezzo || 0).toFixed(2);
   document.getElementById("movimentoPrezzo").value = prezzoValue;
 
-  // Fattura: stessa del carico precedente (opzionale, può essere modificata)
+  // Fattura: stessa del carico precedente
   document.getElementById("movimentoFattura").value = movimento.fattura_doc || "";
 
   // Fornitore: stesso del carico precedente
   document.getElementById("movimentoFornitore").value = movimento.fornitore_cliente_id || "";
 
-  // Focus sul primo campo modificabile
-  // Se il prodotto non esiste, permetti di cercarne uno nuovo
-  if (prodotto) {
-    document.getElementById("movimentoQuantita").focus();
-  } else {
-    document.getElementById("movimentoProdottoSearch").focus();
-  }
-
-  // Mostra un messaggio di conferma
+  // ========== LOG DI DEBUG ==========
   console.log("✅ Form riordino precompilato");
-  console.log("📋 Dettagli riordino:", {
-    prodotto: prodotto?.nome || `[ELIMINATO - ID: ${movimento.prodotto_id}]`,
+  console.log("📋 Dettagli:", {
+    prodotto: prodotto?.nome || `[Prodotto ID: ${movimento.prodotto_id}]`,
     quantita: movimento.quantita,
     prezzo: movimento.prezzo,
     fornitore: movimento.fornitore_cliente_id,
