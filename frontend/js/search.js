@@ -6,6 +6,8 @@ const SEARCHKEYS = {
   marche: "search_marche",
   prodotti: "search_prodotti",
   movimenti: "search_movimenti",
+  movimentiStart: "search_movimenti_start",
+  movimentiEnd: "search_movimenti_end",
   riepilogo: "search_riepilogo",
   storico: "search_storico",
   utenti: "search_utenti",
@@ -63,6 +65,25 @@ function setupSearchPersistence(inputId, storageKey, filterFn) {
   });
 }
 
+// Collega input data a localStorage e rilancia il filtro
+function setupDatePersistence(inputId, storageKey, filterFn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+
+  const saved = getSearchTerm(storageKey);
+  if (saved) {
+    input.value = saved;
+  }
+
+  input.addEventListener("change", (e) => {
+    const val = e.target.value;
+    saveSearchTerm(storageKey, val);
+    // Rilancia il filtro principale (che leggerà anche le date)
+    const searchInput = document.getElementById("filterMovimenti");
+    filterFn(searchInput ? searchInput.value : "");
+  });
+}
+
 // ── Funzioni di filtro per ogni sezione ─────────────────────
 
 function filterMarche(searchTerm) {
@@ -77,27 +98,39 @@ function filterProdotti(searchTerm) {
   const t = searchTerm.toLowerCase();
   prodotti = t
     ? allProdotti.filter(
-        (p) =>
-          p.nome.toLowerCase().includes(t) ||
-          (p.marca_nome && p.marca_nome.toLowerCase().includes(t)) ||
-          (p.descrizione && p.descrizione.toLowerCase().includes(t)),
-      )
+      (p) =>
+        p.nome.toLowerCase().includes(t) ||
+        (p.marca_nome && p.marca_nome.toLowerCase().includes(t)) ||
+        (p.descrizione && p.descrizione.toLowerCase().includes(t)),
+    )
     : [...allProdotti];
   renderProdotti();
 }
 
 function filterMovimenti(searchTerm) {
   const t = searchTerm.toLowerCase();
-  movimenti = t
-    ? allMovimenti.filter(
-        (m) =>
-          m.prodotto_nome.toLowerCase().includes(t) ||
-          (m.marca_nome && m.marca_nome.toLowerCase().includes(t)) ||
-          m.tipo.toLowerCase().includes(t) ||
-          (m.prodotto_descrizione &&
-            m.prodotto_descrizione.toLowerCase().includes(t)),
-      )
-    : [...allMovimenti];
+  const startStr = document.getElementById("filterMovimentiStart")?.value;
+  const endStr = document.getElementById("filterMovimentiEnd")?.value;
+
+  movimenti = allMovimenti.filter((m) => {
+    // Filtro testuale
+    const matchesText =
+      !t ||
+      m.prodotto_nome.toLowerCase().includes(t) ||
+      (m.marca_nome && m.marca_nome.toLowerCase().includes(t)) ||
+      m.tipo.toLowerCase().includes(t) ||
+      (m.prodotto_descrizione &&
+        m.prodotto_descrizione.toLowerCase().includes(t));
+
+    if (!matchesText) return false;
+
+    // Filtro per data
+    if (startStr && m.data_movimento < startStr) return false;
+    if (endStr && m.data_movimento > endStr) return false;
+
+    return true;
+  });
+
   renderMovimenti();
 }
 
@@ -105,11 +138,11 @@ function filterRiepilogo(searchTerm) {
   const t = searchTerm.toLowerCase();
   riepilogo = t
     ? allRiepilogo.filter(
-        (r) =>
-          r.nome.toLowerCase().includes(t) ||
-          (r.marca_nome && r.marca_nome.toLowerCase().includes(t)) ||
-          (r.descrizione && r.descrizione.toLowerCase().includes(t)),
-      )
+      (r) =>
+        r.nome.toLowerCase().includes(t) ||
+        (r.marca_nome && r.marca_nome.toLowerCase().includes(t)) ||
+        (r.descrizione && r.descrizione.toLowerCase().includes(t)),
+    )
     : [...allRiepilogo];
   updateRiepilogoTotal();
   renderRiepilogo();
@@ -119,11 +152,11 @@ function filterStorico(searchTerm) {
   const t = searchTerm.toLowerCase();
   storico = t
     ? allStorico.filter(
-        (s) =>
-          s.nome.toLowerCase().includes(t) ||
-          (s.marca_nome && s.marca_nome.toLowerCase().includes(t)) ||
-          (s.descrizione && s.descrizione.toLowerCase().includes(t)),
-      )
+      (s) =>
+        s.nome.toLowerCase().includes(t) ||
+        (s.marca_nome && s.marca_nome.toLowerCase().includes(t)) ||
+        (s.descrizione && s.descrizione.toLowerCase().includes(t)),
+    )
     : [...allStorico];
   updateStoricoTotal();
   renderStorico(storico);
@@ -155,6 +188,10 @@ function initSearchSystem() {
   setupSearchPersistence("filterStorico", SEARCHKEYS.storico, filterStorico);
   setupSearchPersistence("filterUtenti", SEARCHKEYS.utenti, filterUtenti);
   setupSearchPersistence("filterRiordino", SEARCHKEYS.riordino, filterRiordinoList);
+
+  // Setup persistenza date movimenti (se esistono nel DOM)
+  setupDatePersistence("filterMovimentiStart", SEARCHKEYS.movimentiStart, filterMovimenti);
+  setupDatePersistence("filterMovimentiEnd", SEARCHKEYS.movimentiEnd, filterMovimenti);
 }
 
 // ── Ripristina il termine di ricerca salvato quando si cambia sezione ─

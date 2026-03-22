@@ -22,6 +22,7 @@ async function loadMovimenti() {
     movimenti = allMovimenti;
     renderMovimenti();
     renderAlertRiordino();
+    injectDateFilters(); // Inietta i filtri data
     reapplyFilter("filterMovimenti");
   } catch (error) {
     console.error("Errore caricamento movimenti", error);
@@ -74,22 +75,22 @@ function renderMovimenti() {
         m.tipo === "scarico"
           ? ""
           : (() => {
-              const doc = m.fattura_doc || "";
-              if (/\.pdf$/i.test(doc.trim())) {
-                const nome = doc.trim();
-                return `<span style="display:inline-flex;align-items:center;gap:5px;">
+            const doc = m.fattura_doc || "";
+            if (/\.pdf$/i.test(doc.trim())) {
+              const nome = doc.trim();
+              return `<span style="display:inline-flex;align-items:center;gap:5px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" style="width:16px;height:16px;">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
             <polyline points="14 2 14 8 20 8"/>
           </svg>
           <span style="font-size:12px;color:#64748b;">${escapeHtml(nome.replace(/\.pdf$/i, ""))}</span>
         </span>`;
-              }
-              return doc ? escapeHtml(doc) : "";
-            })();
+            }
+            return doc ? escapeHtml(doc) : "";
+          })();
 
       // 🆕 BOTTONI DI AZIONE - STILE UNIFORME
-      let buttoniHTML = ``;
+      let buttoniHTML = `<div class="action-buttons">`;
 
       // Bottone Riordina SOLO per CARICHI (PRIMO) - STESSO STILE
       if (m.tipo === "carico") {
@@ -119,6 +120,8 @@ function renderMovimenti() {
             <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
           </svg>
         </button>`;
+
+      buttoniHTML += `</div>`;
 
       return `
       <tr>
@@ -425,7 +428,7 @@ function renderAlertRiordino() {
       const marca = p.marca_nome ? escapeHtml(p.marca_nome) : null;
       const descr = p.descrizione
         ? escapeHtml(p.descrizione.substring(0, 45)) +
-          (p.descrizione.length > 45 ? "…" : "")
+        (p.descrizione.length > 45 ? "…" : "")
         : null;
 
       return `
@@ -454,6 +457,83 @@ function renderAlertRiordino() {
         </div>`;
     })
     .join("");
+}
+
+/**
+ * Inietta i campi filtro data (Inizio/Fine) accanto alla barra di ricerca
+ */
+function injectDateFilters() {
+  const searchInput = document.getElementById("filterMovimenti");
+  if (!searchInput) return;
+
+  // Trova il contenitore dei filtri
+  const container = searchInput.closest(".filter-controls") || searchInput.parentNode;
+  if (!container) return;
+
+  // Evita duplicati
+  if (document.getElementById("filterMovimentiStart")) return;
+
+  // Wrapper per le date
+  const dateWrapper = document.createElement("div");
+  dateWrapper.className = "date-filter";
+  dateWrapper.style.display = "flex";
+  dateWrapper.style.gap = "12px";
+  dateWrapper.style.alignItems = "flex-end"; // Allinea label e input in basso
+
+  // HTML per Data Inizio
+  const startGroup = document.createElement("div");
+  startGroup.style.display = "flex";
+  startGroup.style.flexDirection = "column";
+  startGroup.style.gap = "4px";
+  startGroup.innerHTML = `
+    <label for="filterMovimentiStart" style="font-size:11px; font-weight:700; color:var(--text-secondary); text-transform:uppercase;">Data Inizio</label>
+    <input type="date" id="filterMovimentiStart" class="input-date" style="padding: 8px 12px; height: 42px;">
+  `;
+
+  // HTML per Data Fine
+  const endGroup = document.createElement("div");
+  endGroup.style.display = "flex";
+  endGroup.style.flexDirection = "column";
+  endGroup.style.gap = "4px";
+  endGroup.innerHTML = `
+    <label for="filterMovimentiEnd" style="font-size:11px; font-weight:700; color:var(--text-secondary); text-transform:uppercase;">Data Fine</label>
+    <input type="date" id="filterMovimentiEnd" class="input-date" style="padding: 8px 12px; height: 42px;">
+  `;
+
+  dateWrapper.appendChild(startGroup);
+  dateWrapper.appendChild(endGroup);
+
+  // Inserisci dopo il campo di ricerca
+  if (searchInput.nextSibling) {
+    container.insertBefore(dateWrapper, searchInput.nextSibling);
+  } else {
+    container.appendChild(dateWrapper);
+  }
+
+  // Inizializza persistenza (funzioni in search.js)
+  if (typeof setupDatePersistence === "function") {
+    setupDatePersistence("filterMovimentiStart", "search_movimenti_start", filterMovimenti);
+    setupDatePersistence("filterMovimentiEnd", "search_movimenti_end", filterMovimenti);
+  }
+
+  // Aggiungi validazione (Data Fine >= Data Inizio)
+  const startIn = document.getElementById("filterMovimentiStart");
+  const endIn = document.getElementById("filterMovimentiEnd");
+
+  startIn.addEventListener("change", () => {
+    if (startIn.value) endIn.min = startIn.value;
+    if (endIn.value && startIn.value && endIn.value < startIn.value) {
+      endIn.value = startIn.value;
+      endIn.dispatchEvent(new Event("change")); // Triggera il salvataggio/filtro
+    }
+  });
+
+  endIn.addEventListener("change", () => {
+    if (endIn.value && startIn.value && startIn.value > endIn.value) {
+      startIn.value = endIn.value;
+      startIn.dispatchEvent(new Event("change"));
+    }
+  });
 }
 
 // Esporta globalmente
