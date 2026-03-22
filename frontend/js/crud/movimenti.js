@@ -467,7 +467,7 @@ function injectDateFilters() {
   if (!searchInput) return;
 
   // Trova il contenitore dei filtri
-  const container = searchInput.closest(".filter-controls") || searchInput.parentNode;
+  const container = searchInput.parentNode;
   if (!container) return;
 
   // Evita duplicati
@@ -476,9 +476,7 @@ function injectDateFilters() {
   // Wrapper per le date
   const dateWrapper = document.createElement("div");
   dateWrapper.className = "date-filter";
-  dateWrapper.style.display = "flex";
-  dateWrapper.style.gap = "12px";
-  dateWrapper.style.alignItems = "flex-end"; // Allinea label e input in basso
+  // Rimosso stile inline per permettere al CSS (.date-filter) di gestire il responsive su mobile
 
   // HTML per Data Inizio
   const startGroup = document.createElement("div");
