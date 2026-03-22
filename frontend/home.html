@@ -257,6 +257,19 @@
             </div>
             <!-- Riga 2: bottoni -->
             <div class="movimenti-btn-row">
+              <button class="btn btn-reset-filtri" onclick="
+                document.getElementById('filterMovimentiStart').value='';
+                document.getElementById('filterMovimentiEnd').value='';
+                localStorage.removeItem('search_movimenti_start');
+                localStorage.removeItem('search_movimenti_end');
+                filterMovimenti(document.getElementById('filterMovimenti').value);
+              " title="Cancella date">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="1 4 1 10 7 10"/>
+                  <path d="M3.51 15a9 9 0 1 0 .49-4.5"/>
+                </svg>
+                <span>Reset Date</span>
+              </button>
               <button class="btn btn-secondary" onclick="openImportPDFModal()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
