@@ -4124,3 +4124,114 @@ input {
   margin: 0;
   line-height: 1.6;
 }
+
+
+/* ==================== MOVIMENTI: date fields + layout ==================== */
+
+/* Il section-header dei movimenti si comporta come colonna
+   perché ha più controlli da gestire */
+.movimenti-section-header {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.movimenti-filter-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+/* Riga superiore: ricerca + date affiancate */
+.movimenti-top-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  flex-wrap: nowrap;
+}
+
+.movimenti-search {
+  flex: 1 1 0;
+  min-width: 180px;
+}
+
+.movimenti-date-wrap {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.movimenti-date-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.movimenti-date-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-secondary);
+  padding-left: 2px;
+  white-space: nowrap;
+}
+
+.movimenti-date-input {
+  width: 160px;
+  cursor: pointer;
+}
+
+/* Riga inferiore: bottoni */
+.movimenti-btn-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* ── MOBILE ── */
+@media (max-width: 768px) {
+  .movimenti-section-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .movimenti-filter-controls {
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .movimenti-top-row {
+    flex-direction: column;
+  }
+
+  .movimenti-search {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .movimenti-date-wrap {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .movimenti-date-field {
+    width: 100%;
+  }
+
+  .movimenti-date-input {
+    width: 100%;
+  }
+
+  .movimenti-btn-row {
+    flex-direction: column;
+    justify-content: stretch;
+  }
+
+  .movimenti-btn-row .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

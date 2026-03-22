@@ -234,45 +234,57 @@
       <!-- Sezione MOVIMENTI -->
       <!-- Sezione MOVIMENTI -->
       <section id="section-movimenti" class="content-section">
-        <div class="section-header">
+        <div class="section-header movimenti-section-header">
           <div>
             <h1>Movimenti di Magazzino</h1>
             <p>Registra carichi e scarichi</p>
           </div>
-          <div class="filter-controls" style="flex-wrap: wrap;">
-            <div
-              style="flex-basis: 100%; display: flex; gap: 8px; margin-bottom: 8px; align-items: flex-end; flex-wrap: wrap;">
-              <input type="text" id="filterMovimenti" class="filter-input"
-                placeholder="Cerca per prodotto, marca, descrizione..." style="flex-grow: 1;" />
+          <div class="filter-controls movimenti-filter-controls">
+            <!-- Riga 1: ricerca + date -->
+            <div class="movimenti-top-row">
+              <input type="text" id="filterMovimenti" class="filter-input movimenti-search"
+                placeholder="Cerca per prodotto, marca, descrizione..." />
+              <div class="movimenti-date-wrap">
+                <div class="movimenti-date-field">
+                  <label class="movimenti-date-label">Data Inizio</label>
+                  <input type="date" id="filterMovimentiStart" class="filter-input movimenti-date-input" />
+                </div>
+                <div class="movimenti-date-field">
+                  <label class="movimenti-date-label">Data Fine</label>
+                  <input type="date" id="filterMovimentiEnd" class="filter-input movimenti-date-input" />
+                </div>
+              </div>
             </div>
-
-            <button class="btn btn-secondary" onclick="openImportPDFModal()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-                <line x1="16" y1="13" x2="8" y2="13" />
-                <line x1="16" y1="17" x2="8" y2="17" />
-                <polyline points="10 9 9 9 8 9" />
-              </svg>
-              <span>Scarica da PDF</span>
-            </button>
-            <button class="btn btn-primary" onclick="openCaricoFatturaPDFModal()"
-              style="background: linear-gradient(135deg, #6366f1, #8b5cf6)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-                <line x1="12" y1="18" x2="12" y2="12" />
-                <line x1="9" y1="15" x2="15" y2="15" />
-              </svg>
-              <span>Carica da Fattura PDF</span>
-            </button>
-            <button class="btn btn-primary" onclick="openMovimentoModal()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              <span>Nuovo Movimento</span>
-            </button>
+            <!-- Riga 2: bottoni -->
+            <div class="movimenti-btn-row">
+              <button class="btn btn-secondary" onclick="openImportPDFModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                  <polyline points="10 9 9 9 8 9" />
+                </svg>
+                <span>Scarica da PDF</span>
+              </button>
+              <button class="btn btn-primary" onclick="openCaricoFatturaPDFModal()"
+                style="background: linear-gradient(135deg, #6366f1, #8b5cf6)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="12" y1="18" x2="12" y2="12" />
+                  <line x1="9" y1="15" x2="15" y2="15" />
+                </svg>
+                <span>Carica da Fattura PDF</span>
+              </button>
+              <button class="btn btn-primary" onclick="openMovimentoModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span>Nuovo Movimento</span>
+              </button>
+            </div>
           </div>
         </div>
 
