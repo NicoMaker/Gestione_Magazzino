@@ -314,84 +314,210 @@
         <!-- Sezione MOVIMENTI -->
         <!-- Sezione MOVIMENTI -->
         <section id="section-movimenti" class="content-section">
-          <div class="section-header">
+          <div class="section-header movimenti-section-header">
             <div>
               <h1>Movimenti di Magazzino</h1>
               <p>Registra carichi e scarichi</p>
             </div>
-          </div>
+            <div class="filter-controls movimenti-filter-controls">
+              <!-- Riga 1: ricerca + date -->
+              <div class="movimenti-top-row">
+                <input
+                  type="text"
+                  id="filterMovimenti"
+                  class="filter-input movimenti-search"
+                  placeholder="Cerca per prodotto, marca, descrizione..."
+                />
+                <div class="movimenti-date-wrap">
+                  <div class="movimenti-date-field">
+                    <label class="movimenti-date-label">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        style="
+                          width: 14px;
+                          height: 14px;
+                          display: inline-block;
+                          vertical-align: middle;
+                          margin-right: 5px;
+                          color: #94a3b8;
+                        "
+                      >
+                        <rect
+                          x="3"
+                          y="4"
+                          width="18"
+                          height="18"
+                          rx="2"
+                          ry="2"
+                        />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                        <path
+                          d="M8 14h.01M12 14h.01M8 18h.01"
+                          stroke-linecap="round"
+                        />
+                      </svg>
+                      Data Inizio
+                    </label>
+                    <input
+                      type="date"
+                      id="filterMovimentiStart"
+                      class="filter-input movimenti-date-input"
+                    />
+                  </div>
+                  <div class="movimenti-date-arrow">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                      <polyline points="13 6 19 12 13 18" />
+                    </svg>
+                  </div>
+                  <div class="movimenti-date-field">
+                    <label class="movimenti-date-label">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        style="
+                          width: 14px;
+                          height: 14px;
+                          display: inline-block;
+                          vertical-align: middle;
+                          margin-right: 5px;
+                          color: #94a3b8;
+                        "
+                      >
+                        <rect
+                          x="3"
+                          y="4"
+                          width="18"
+                          height="18"
+                          rx="2"
+                          ry="2"
+                        />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                        <path
+                          d="M12 14h.01M16 14h.01M12 18h.01M16 18h.01"
+                          stroke-linecap="round"
+                        />
+                      </svg>
+                      Data Fine
+                    </label>
+                    <input
+                      type="date"
+                      id="filterMovimentiEnd"
+                      class="filter-input movimenti-date-input"
+                    />
+                  </div>
+                </div>
+              </div>
+              <!-- Riga 2: bottoni -->
+              <div class="movimenti-btn-row">
+                <button
+                  class="btn btn-reset-filtri"
+                  onclick="
+                    document.getElementById('filterMovimentiStart').value = '';
+                    document.getElementById('filterMovimentiEnd').value = '';
+                    localStorage.removeItem('search_movimenti_start');
+                    localStorage.removeItem('search_movimenti_end');
+                    filterMovimenti(
+                      document.getElementById('filterMovimenti').value,
+                    );
+                  "
+                  title="Cancella date"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <polyline points="1 4 1 10 7 10" />
+                    <path d="M3.51 15a9 9 0 1 0 .49-4.5" />
+                  </svg>
+                  <span>Reset Date</span>
+                </button>
+                <button
+                  class="btn btn-secondary"
+                  onclick="openImportPDFModal()"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                    />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <polyline points="10 9 9 9 8 9" />
+                  </svg>
+                  <span>Scarica da PDF</span>
+                </button>
+                <button
+                  class="btn btn-primary"
+                  onclick="openCaricoFatturaPDFModal()"
+                  style="background: linear-gradient(135deg, #6366f1, #8b5cf6)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"
+                    />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="12" y1="18" x2="12" y2="12" />
+                    <line x1="9" y1="15" x2="15" y2="15" />
+                  </svg>
+                  <span>Carica da Fattura PDF</span>
+                </button>
+                <button class="btn btn-primary" onclick="openMovimentoModal()">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  <span>Nuovo Movimento</span>
+                </button>
+              </div>
 
-          <!-- Filtri movimenti: riga 1 -->
-          <div class="mov-filters">
-            <!-- Search -->
-            <div class="mov-search-wrap">
-              <svg class="mov-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-              </svg>
-              <input type="text" id="filterMovimenti" class="mov-search-input" placeholder="Cerca prodotto, marca, descrizione…"/>
+              <div class="movimenti-tipo-filter">
+                <label class="movimenti-tipo-filter-label"
+                  >Filtra per Tipo:</label
+                >
+                <br />
+                <select
+                  id="movimentiTipoFilter"
+                  class="filter-input"
+                  onchange="filterMovimentiByTipo(this.value)"
+                >
+                  <option value="tutti">Tutti</option>
+                  <option value="carico">Carico</option>
+                  <option value="scarico">Scarico</option>
+                </select>
+              </div>
             </div>
-
-            <!-- Data inizio -->
-            <div class="mov-date-field">
-              <label class="mov-date-label">Data inizio</label>
-              <input type="date" id="filterMovimentiStart" class="mov-date-input"/>
-            </div>
-
-            <!-- Freccia -->
-            <div class="mov-date-arrow">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>
-              </svg>
-            </div>
-
-            <!-- Data fine -->
-            <div class="mov-date-field">
-              <label class="mov-date-label">Data fine</label>
-              <input type="date" id="filterMovimentiEnd" class="mov-date-input"/>
-            </div>
-
-            <!-- Tipo -->
-            <div class="mov-date-field">
-              <label class="mov-date-label">Tipo</label>
-              <select id="movimentiTipoFilter" class="mov-tipo-select" onchange="filterMovimentiByTipo(this.value)">
-                <option value="tutti">Tutti</option>
-                <option value="carico">Carico</option>
-                <option value="scarico">Scarico</option>
-              </select>
-            </div>
-
-            <!-- Reset -->
-            <button class="mov-reset-btn" title="Reset date"
-              onclick="document.getElementById('filterMovimentiStart').value='';document.getElementById('filterMovimentiEnd').value='';localStorage.removeItem('search_movimenti_start');localStorage.removeItem('search_movimenti_end');filterMovimenti(document.getElementById('filterMovimenti').value);">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/>
-              </svg>
-              Reset Date
-            </button>
-
-            <!-- Bottoni azione -->
-            <button class="btn btn-secondary" onclick="openImportPDFModal()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-              </svg>
-              <span>Scarica da PDF</span>
-            </button>
-            <button class="btn btn-primary" onclick="openCaricoFatturaPDFModal()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>
-              </svg>
-              <span>Carica da Fattura PDF</span>
-            </button>
-            <button class="btn btn-primary" onclick="openMovimentoModal()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-              </svg>
-              <span>Nuovo Movimento</span>
-            </button>
           </div>
 
           <div class="card">
