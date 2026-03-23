@@ -1,1151 +1,1598 @@
 <!doctype html>
 <html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestione Magazzino Moto</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" type="image/png" href="img/Logo.png" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gestione Magazzino Moto</title>
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="icon" type="image/png" href="img/Logo.png" />
-</head>
+  <body>
+    <div class="app-container">
+      <!-- Added mobile menu toggle button with X animation -->
+      <button
+        class="mobile-menu-toggle"
+        id="mobileMenuToggle"
+        aria-label="Toggle menu"
+      >
+        <div class="hamburger">
+          <span class="line"></span>
+          <span class="line"></span>
+          <span class="line"></span>
+        </div>
+      </button>
 
-<body>
-  <div class="app-container">
-    <!-- Added mobile menu toggle button with X animation -->
-    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
-      <div class="hamburger">
-        <span class="line"></span>
-        <span class="line"></span>
-        <span class="line"></span>
-      </div>
-    </button>
-
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <img src="img/Logo2.png" alt="Logo Magazzino Moto" class="logo" />
-        <h2>Magazzino Moto</h2>
-      </div>
-
-      <nav class="sidebar-nav">
-        <a href="#" class="nav-item active" data-section="marche">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M20 7h-9M14 17H5M3 7h2M21 17h-4M15 12h6M9 12H3M15 6v12M9 6v12" />
-          </svg>
-          <span>Marche</span>
-        </a>
-        <a href="#" class="nav-item" data-section="prodotti">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path
-              d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
-            <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-            <line x1="12" y1="22.08" x2="12" y2="12" />
-          </svg>
-          <span>Prodotti</span>
-        </a>
-        <a href="#" class="nav-item" data-section="movimenti">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-            <polyline points="17 6 23 6 23 12" />
-          </svg>
-          <span>Movimenti</span>
-        </a>
-        <a href="#" class="nav-item" data-section="riordino">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="9" cy="21" r="1" />
-            <circle cx="20" cy="21" r="1" />
-            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-          </svg>
-          <span>Riordino</span>
-        </a>
-        <a href="#" class="nav-item" data-section="riepilogo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path
-              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            <path d="M9 12h6m-6 4h6" />
-          </svg>
-          <span>Riepilogo</span>
-        </a>
-        <a href="#" class="nav-item" data-section="storico">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 6v6l4 2" />
-          </svg>
-          <span>Storico</span>
-        </a>
-        <a href="#" class="nav-item" data-section="utenti">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
-          </svg>
-          <span>Utenti</span>
-        </a>
-      </nav>
-
-      <!-- ✅ SOSTITUISCI SOLO QUESTA SEZIONE NEL TUO home.html -->
-      <!-- Cerca .sidebar-footer e sostituiscila con questo codice -->
-
-      <div class="sidebar-footer">
-        <div class="user-info">
-          <div class="user-avatar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-          </div>
-          <div class="user-details">
-            <span class="user-name" id="currentUser">Admin</span>
-            <span class="user-role">Amministratore</span>
-          </div>
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <img src="img/Logo2.png" alt="Logo Magazzino Moto" class="logo" />
+          <h2>Magazzino Moto</h2>
         </div>
 
-        <!-- ✅ INFORMAZIONI AZIENDALI - DATI CARICATI DA JSON -->
-        <div class="company-info-sidebar">
-          <!-- 📍 INDIRIZZO -->
-          <p class="company-address-sidebar">Caricamento...</p>
-          <br />
-
-          <!-- 💳 PARTITA IVA -->
-          <div class="piva-info">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-              <line x1="3" y1="9" x2="21" y2="9" />
-              <line x1="9" y1="21" x2="9" y2="9" />
+        <nav class="sidebar-nav">
+          <a href="#" class="nav-item active" data-section="marche">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M20 7h-9M14 17H5M3 7h2M21 17h-4M15 12h6M9 12H3M15 6v12M9 6v12"
+              />
             </svg>
-            <div class="piva-details">
-              <span class="piva-label-sidebar">Partita IVA</span>
-              <span class="piva-number">Caricamento...</span>
+            <span>Marche</span>
+          </a>
+          <a href="#" class="nav-item" data-section="prodotti">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"
+              />
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+              <line x1="12" y1="22.08" x2="12" y2="12" />
+            </svg>
+            <span>Prodotti</span>
+          </a>
+          <a href="#" class="nav-item" data-section="movimenti">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+              <polyline points="17 6 23 6 23 12" />
+            </svg>
+            <span>Movimenti</span>
+          </a>
+          <a href="#" class="nav-item" data-section="riordino">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="9" cy="21" r="1" />
+              <circle cx="20" cy="21" r="1" />
+              <path
+                d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"
+              />
+            </svg>
+            <span>Riordino</span>
+          </a>
+          <a href="#" class="nav-item" data-section="riepilogo">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+              />
+              <path d="M9 12h6m-6 4h6" />
+            </svg>
+            <span>Riepilogo</span>
+          </a>
+          <a href="#" class="nav-item" data-section="storico">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 6v6l4 2" />
+            </svg>
+            <span>Storico</span>
+          </a>
+          <a href="#" class="nav-item" data-section="utenti">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+            </svg>
+            <span>Utenti</span>
+          </a>
+        </nav>
+
+        <!-- ✅ SOSTITUISCI SOLO QUESTA SEZIONE NEL TUO home.html -->
+        <!-- Cerca .sidebar-footer e sostituiscila con questo codice -->
+
+        <div class="sidebar-footer">
+          <div class="user-info">
+            <div class="user-avatar">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </div>
+            <div class="user-details">
+              <span class="user-name" id="currentUser">Admin</span>
+              <span class="user-role">Amministratore</span>
             </div>
           </div>
-        </div>
 
-        <!-- 🚪 LOGOUT -->
-        <button id="logoutBtn" class="btn-logout">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
-          </svg>
-          <span>Esci</span>
-        </button>
-        <br />
-        <br />
-      </div>
+          <!-- ✅ INFORMAZIONI AZIENDALI - DATI CARICATI DA JSON -->
+          <div class="company-info-sidebar">
+            <!-- 📍 INDIRIZZO -->
+            <p class="company-address-sidebar">Caricamento...</p>
+            <br />
 
-      <!-- ✅ IMPORTANTE: Aggiungi questo script PRIMA di script.js -->
-    </aside>
-
-    <!-- Sistema Notifiche -->
-    <div id="notificationContainer" class="notification-container"></div>
-
-    <!-- Main Content -->
-    <main class="main-content">
-      <!-- Sezione MARCHE -->
-      <section id="section-marche" class="content-section active">
-        <div class="section-header">
-          <div>
-            <h1>Gestione Marche</h1>
-            <p>Crea e gestisci le marche dei prodotti</p>
-          </div>
-          <div class="filter-controls">
-            <div class="search-wrapper">
-              <input type="text" id="filterMarche" class="filter-input" placeholder="Cerca marca..." />
-            </div>
-            <button class="btn btn-primary" onclick="openMarcaModal()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
+            <!-- 💳 PARTITA IVA -->
+            <div class="piva-info">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <line x1="3" y1="9" x2="21" y2="9" />
+                <line x1="9" y1="21" x2="9" y2="9" />
               </svg>
-              <span>Nuova Marca</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Nome Marca</th>
-                  <!-- 🎯 NUOVA COLONNA -->
-                  <th style="text-align: center">Prodotti Relazionati</th>
-                  <th class="text-right">Azioni</th>
-                </tr>
-              </thead>
-              <tbody id="marcheTableBody">
-                <tr>
-                  <td colspan="3" class="text-center">
-                    <span>Caricamento...</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <br />
-        <br />
-      </section>
-
-      <!-- Sezione PRODOTTI -->
-      <section id="section-prodotti" class="content-section">
-        <div class="section-header">
-          <div>
-            <h1>Gestione Prodotti</h1>
-            <p>Visualizza e gestisci i prodotti del magazzino</p>
-          </div>
-          <div class="filter-controls">
-            <input type="text" id="filterProdotti" class="filter-input"
-              placeholder="Cerca prodotto per codice,descrizione,marca..." />
-            <button class="btn btn-primary" onclick="openProdottoModal()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              <span>Nuovo Prodotto</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Codice/Telaio Prodotto</th>
-                  <th>Marca</th>
-                  <th>Giacenza (pz/l)</th>
-                  <th>Descrizione</th>
-                  <th class="text-right">Azioni</th>
-                </tr>
-              </thead>
-              <tbody id="prodottiTableBody">
-                <tr>
-                  <td colspan="5" class="text-center">
-                    <span>Caricamento...</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <br />
-        <br />
-      </section>
-
-      <!-- Sezione MOVIMENTI -->
-      <!-- Sezione MOVIMENTI -->
-      <section id="section-movimenti" class="content-section">
-        <div class="section-header movimenti-section-header">
-          <div>
-            <h1>Movimenti di Magazzino</h1>
-            <p>Registra carichi e scarichi</p>
-          </div>
-          <div class="filter-controls movimenti-filter-controls">
-            <!-- Riga 1: ricerca + date -->
-            <div class="movimenti-top-row">
-              <input type="text" id="filterMovimenti" class="filter-input movimenti-search"
-                placeholder="Cerca per prodotto, marca, descrizione..." />
-              <div class="movimenti-date-wrap">
-                <div class="movimenti-date-field">
-                  <label class="movimenti-date-label">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:5px;color:#94a3b8;">
-                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                      <line x1="16" y1="2" x2="16" y2="6"/>
-                      <line x1="8" y1="2" x2="8" y2="6"/>
-                      <line x1="3" y1="10" x2="21" y2="10"/>
-                      <path d="M8 14h.01M12 14h.01M8 18h.01" stroke-linecap="round"/>
-                    </svg>
-                    Data Inizio
-                  </label>
-                  <input type="date" id="filterMovimentiStart" class="filter-input movimenti-date-input" />
-                </div>
-                <div class="movimenti-date-arrow">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="5" y1="12" x2="19" y2="12"/>
-                    <polyline points="13 6 19 12 13 18"/>
-                  </svg>
-                </div>
-                <div class="movimenti-date-field">
-                  <label class="movimenti-date-label">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:5px;color:#94a3b8;">
-                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                      <line x1="16" y1="2" x2="16" y2="6"/>
-                      <line x1="8" y1="2" x2="8" y2="6"/>
-                      <line x1="3" y1="10" x2="21" y2="10"/>
-                      <path d="M12 14h.01M16 14h.01M12 18h.01M16 18h.01" stroke-linecap="round"/>
-                    </svg>
-                    Data Fine
-                  </label>
-                  <input type="date" id="filterMovimentiEnd" class="filter-input movimenti-date-input" />
-                </div>
+              <div class="piva-details">
+                <span class="piva-label-sidebar">Partita IVA</span>
+                <span class="piva-number">Caricamento...</span>
               </div>
             </div>
-            <!-- Riga 2: bottoni -->
-            <div class="movimenti-btn-row">
-              <button class="btn btn-reset-filtri" onclick="
-                document.getElementById('filterMovimentiStart').value='';
-                document.getElementById('filterMovimentiEnd').value='';
-                localStorage.removeItem('search_movimenti_start');
-                localStorage.removeItem('search_movimenti_end');
-                filterMovimenti(document.getElementById('filterMovimenti').value);
-              " title="Cancella date">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="1 4 1 10 7 10"/>
-                  <path d="M3.51 15a9 9 0 1 0 .49-4.5"/>
+          </div>
+
+          <!-- 🚪 LOGOUT -->
+          <button id="logoutBtn" class="btn-logout">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"
+              />
+            </svg>
+            <span>Esci</span>
+          </button>
+          <br />
+          <br />
+        </div>
+
+        <!-- ✅ IMPORTANTE: Aggiungi questo script PRIMA di script.js -->
+      </aside>
+
+      <!-- Sistema Notifiche -->
+      <div id="notificationContainer" class="notification-container"></div>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Sezione MARCHE -->
+        <section id="section-marche" class="content-section active">
+          <div class="section-header">
+            <div>
+              <h1>Gestione Marche</h1>
+              <p>Crea e gestisci le marche dei prodotti</p>
+            </div>
+            <div class="filter-controls">
+              <div class="search-wrapper">
+                <input
+                  type="text"
+                  id="filterMarche"
+                  class="filter-input"
+                  placeholder="Cerca marca..."
+                />
+              </div>
+              <button class="btn btn-primary" onclick="openMarcaModal()">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
-                <span>Reset Date</span>
+                <span>Nuova Marca</span>
               </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nome Marca</th>
+                    <!-- 🎯 NUOVA COLONNA -->
+                    <th style="text-align: center">Prodotti Relazionati</th>
+                    <th class="text-right">Azioni</th>
+                  </tr>
+                </thead>
+                <tbody id="marcheTableBody">
+                  <tr>
+                    <td colspan="3" class="text-center">
+                      <span>Caricamento...</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <br />
+          <br />
+        </section>
+
+        <!-- Sezione PRODOTTI -->
+        <section id="section-prodotti" class="content-section">
+          <div class="section-header">
+            <div>
+              <h1>Gestione Prodotti</h1>
+              <p>Visualizza e gestisci i prodotti del magazzino</p>
+            </div>
+            <div class="filter-controls">
+              <input
+                type="text"
+                id="filterProdotti"
+                class="filter-input"
+                placeholder="Cerca prodotto per codice,descrizione,marca..."
+              />
+              <button class="btn btn-primary" onclick="openProdottoModal()">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span>Nuovo Prodotto</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Codice/Telaio Prodotto</th>
+                    <th>Marca</th>
+                    <th>Giacenza (pz/l)</th>
+                    <th>Descrizione</th>
+                    <th class="text-right">Azioni</th>
+                  </tr>
+                </thead>
+                <tbody id="prodottiTableBody">
+                  <tr>
+                    <td colspan="5" class="text-center">
+                      <span>Caricamento...</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <br />
+          <br />
+        </section>
+
+        <!-- Sezione MOVIMENTI -->
+        <!-- Sezione MOVIMENTI -->
+        <section id="section-movimenti" class="content-section">
+          <div class="section-header movimenti-section-header">
+            <div>
+              <h1>Movimenti di Magazzino</h1>
+              <p>Registra carichi e scarichi</p>
+            </div>
+            <div class="filter-controls movimenti-filter-controls">
+              <!-- Riga 1: ricerca + date -->
+              <div class="movimenti-top-row">
+                <input
+                  type="text"
+                  id="filterMovimenti"
+                  class="filter-input movimenti-search"
+                  placeholder="Cerca per prodotto, marca, descrizione..."
+                />
+                <div class="movimenti-date-wrap">
+                  <div class="movimenti-date-field">
+                    <label class="movimenti-date-label">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        style="
+                          width: 14px;
+                          height: 14px;
+                          display: inline-block;
+                          vertical-align: middle;
+                          margin-right: 5px;
+                          color: #94a3b8;
+                        "
+                      >
+                        <rect
+                          x="3"
+                          y="4"
+                          width="18"
+                          height="18"
+                          rx="2"
+                          ry="2"
+                        />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                        <path
+                          d="M8 14h.01M12 14h.01M8 18h.01"
+                          stroke-linecap="round"
+                        />
+                      </svg>
+                      Data Inizio
+                    </label>
+                    <input
+                      type="date"
+                      id="filterMovimentiStart"
+                      class="filter-input movimenti-date-input"
+                    />
+                  </div>
+                  <div class="movimenti-date-arrow">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                      <polyline points="13 6 19 12 13 18" />
+                    </svg>
+                  </div>
+                  <div class="movimenti-date-field">
+                    <label class="movimenti-date-label">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        style="
+                          width: 14px;
+                          height: 14px;
+                          display: inline-block;
+                          vertical-align: middle;
+                          margin-right: 5px;
+                          color: #94a3b8;
+                        "
+                      >
+                        <rect
+                          x="3"
+                          y="4"
+                          width="18"
+                          height="18"
+                          rx="2"
+                          ry="2"
+                        />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                        <path
+                          d="M12 14h.01M16 14h.01M12 18h.01M16 18h.01"
+                          stroke-linecap="round"
+                        />
+                      </svg>
+                      Data Fine
+                    </label>
+                    <input
+                      type="date"
+                      id="filterMovimentiEnd"
+                      class="filter-input movimenti-date-input"
+                    />
+                  </div>
+                </div>
+              </div>
+              <!-- Riga 2: bottoni -->
+              <div class="movimenti-btn-row">
+                <button
+                  class="btn btn-reset-filtri"
+                  onclick="
+                    document.getElementById('filterMovimentiStart').value = '';
+                    document.getElementById('filterMovimentiEnd').value = '';
+                    localStorage.removeItem('search_movimenti_start');
+                    localStorage.removeItem('search_movimenti_end');
+                    filterMovimenti(
+                      document.getElementById('filterMovimenti').value,
+                    );
+                  "
+                  title="Cancella date"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <polyline points="1 4 1 10 7 10" />
+                    <path d="M3.51 15a9 9 0 1 0 .49-4.5" />
+                  </svg>
+                  <span>Reset Date</span>
+                </button>
+                <button
+                  class="btn btn-secondary"
+                  onclick="openImportPDFModal()"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                    />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <polyline points="10 9 9 9 8 9" />
+                  </svg>
+                  <span>Scarica da PDF</span>
+                </button>
+                <button
+                  class="btn btn-primary"
+                  onclick="openCaricoFatturaPDFModal()"
+                  style="background: linear-gradient(135deg, #6366f1, #8b5cf6)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"
+                    />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="12" y1="18" x2="12" y2="12" />
+                    <line x1="9" y1="15" x2="15" y2="15" />
+                  </svg>
+                  <span>Carica da Fattura PDF</span>
+                </button>
+                <button class="btn btn-primary" onclick="openMovimentoModal()">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  <span>Nuovo Movimento</span>
+                </button>
+              </div>
+
+              <label class="movimenti-tipo-filter-label">Filtra per Tipo:</label>
               <div class="movimenti-tipo-filter">
-                <select id="movimentiTipoFilter" class="filter-input" onchange="filterMovimentiByTipo(this.value)">
+                <select
+                  id="movimentiTipoFilter"
+                  class="filter-input"
+                  onchange="filterMovimentiByTipo(this.value)"
+                >
                   <option value="tutti">Tutti</option>
                   <option value="carico">Carico</option>
                   <option value="scarico">Scarico</option>
                 </select>
               </div>
-              <button class="btn btn-secondary" onclick="openImportPDFModal()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                  <line x1="16" y1="13" x2="8" y2="13" />
-                  <line x1="16" y1="17" x2="8" y2="17" />
-                  <polyline points="10 9 9 9 8 9" />
-                </svg>
-                <span>Scarica da PDF</span>
-              </button>
-              <button class="btn btn-primary" onclick="openCaricoFatturaPDFModal()"
-                style="background: linear-gradient(135deg, #6366f1, #8b5cf6)">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                  <line x1="12" y1="18" x2="12" y2="12" />
-                  <line x1="9" y1="15" x2="15" y2="15" />
-                </svg>
-                <span>Carica da Fattura PDF</span>
-              </button>
-              <button class="btn btn-primary" onclick="openMovimentoModal()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                <span>Nuovo Movimento</span>
-              </button>
             </div>
           </div>
-        </div>
 
-        <div class="card">
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Data carico/scarico</th>
-                  <th>Codice/Telaio Prodotto</th>
-                  <th>Marca</th>
-                  <th>Descrizione</th>
-                  <th>Tipo</th>
-                  <th>Quantità (pz/l)</th>
-                  <th>Prezzo Unitario</th>
-                  <th>Totale</th>
-                  <th>Documento/Fattura</th>
-                  <th>Fornitore</th>
-                  <th class="text-right">Azioni</th>
-                </tr>
-              </thead>
-              <tbody id="movimentiTableBody">
-                <tr>
-                  <td colspan="11" class="text-center">
-                    <span>Caricamento...</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="card">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Data carico/scarico</th>
+                    <th>Codice/Telaio Prodotto</th>
+                    <th>Marca</th>
+                    <th>Descrizione</th>
+                    <th>Tipo</th>
+                    <th>Quantità (pz/l)</th>
+                    <th>Prezzo Unitario</th>
+                    <th>Totale</th>
+                    <th>Documento/Fattura</th>
+                    <th>Fornitore</th>
+                    <th class="text-right">Azioni</th>
+                  </tr>
+                </thead>
+                <tbody id="movimentiTableBody">
+                  <tr>
+                    <td colspan="11" class="text-center">
+                      <span>Caricamento...</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-        <br />
-        <br />
-      </section>
+          <br />
+          <br />
+        </section>
 
-      <div id="modalImportPDF" class="modal">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h2>📄 Scarica da PDF</h2>
-            <button class="modal-close" onclick="closeImportPDFModal()">
-              &times;
-            </button>
-          </div>
-          <form id="formImportPDF">
-            <div class="modal-body">
-              <!-- Istruzioni -->
-              <div style="
+        <div id="modalImportPDF" class="modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2>📄 Scarica da PDF</h2>
+              <button class="modal-close" onclick="closeImportPDFModal()">
+                &times;
+              </button>
+            </div>
+            <form id="formImportPDF">
+              <div class="modal-body">
+                <!-- Istruzioni -->
+                <div
+                  style="
                     background: #eff6ff;
                     border: 1px solid #bfdbfe;
                     border-radius: 10px;
                     padding: 14px 16px;
                     margin-bottom: 18px;
-                  ">
-                <p style="
+                  "
+                >
+                  <p
+                    style="
                       font-weight: 700;
                       color: #1d4ed8;
                       margin-bottom: 6px;
                       font-size: 13px;
-                    ">
-                  ℹ️ Come funziona
-                </p>
-                <p style="
+                    "
+                  >
+                    ℹ️ Come funziona
+                  </p>
+                  <p
+                    style="
                       color: #1e40af;
                       font-size: 13px;
                       line-height: 1.5;
                       margin: 0;
-                    ">
-                  Carica il PDF del documento di lavoro. Il sistema leggerà
-                  automaticamente la sezione <strong>RICAMBI</strong> ed
-                  eseguirà uno <strong>scarico di magazzino</strong>
-                  per ogni prodotto trovato con il rispettivo codice e
-                  quantità.
-                </p>
-              </div>
+                    "
+                  >
+                    Carica il PDF del documento di lavoro. Il sistema leggerà
+                    automaticamente la sezione <strong>RICAMBI</strong> ed
+                    eseguirà uno <strong>scarico di magazzino</strong>
+                    per ogni prodotto trovato con il rispettivo codice e
+                    quantità.
+                  </p>
+                </div>
 
-              <!-- Area upload -->
-              <div class="file-upload-container">
-                <label for="importPDFFile" class="file-upload-label" style="cursor: pointer">
-                  <input type="file" id="importPDFFile" accept=".pdf" hidden />
-                  <div class="file-upload-design" style="
+                <!-- Area upload -->
+                <div class="file-upload-container">
+                  <label
+                    for="importPDFFile"
+                    class="file-upload-label"
+                    style="cursor: pointer"
+                  >
+                    <input
+                      type="file"
+                      id="importPDFFile"
+                      accept=".pdf"
+                      hidden
+                    />
+                    <div
+                      class="file-upload-design"
+                      style="
                         display: flex;
                         flex-direction: column;
                         align-items: center;
                         justify-content: center;
                         padding: 28px 20px;
                         gap: 8px;
-                      ">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"
-                      style="width: 44px; height: 44px">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                      <polyline points="17 8 12 3 7 8" />
-                      <line x1="12" y1="3" x2="12" y2="15" />
-                    </svg>
-                    <p style="
+                      "
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#6366f1"
+                        stroke-width="2"
+                        style="width: 44px; height: 44px"
+                      >
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                      </svg>
+                      <p
+                        style="
                           font-weight: 700;
                           font-size: 15px;
                           color: #374151;
                           margin: 0;
-                        ">
-                      Clicca per selezionare il PDF
-                    </p>
-                    <p style="font-size: 13px; color: #6b7280; margin: 0">
-                      oppure trascinalo qui dentro
-                    </p>
-                    <span id="filePreview" style="
+                        "
+                      >
+                        Clicca per selezionare il PDF
+                      </p>
+                      <p style="font-size: 13px; color: #6b7280; margin: 0">
+                        oppure trascinalo qui dentro
+                      </p>
+                      <span
+                        id="filePreview"
+                        style="
                           margin-top: 6px;
                           font-size: 13px;
                           font-weight: 600;
                           color: #6366f1;
                           display: none;
-                        "></span>
-                  </div>
-                </label>
-              </div>
+                        "
+                      ></span>
+                    </div>
+                  </label>
+                </div>
 
-              <!-- Formato atteso -->
-              <div style="
+                <!-- Formato atteso -->
+                <div
+                  style="
                     margin-top: 14px;
                     padding: 12px 14px;
                     background: #f9fafb;
                     border-radius: 8px;
                     border: 1px solid #e5e7eb;
-                  ">
-                <p style="
+                  "
+                >
+                  <p
+                    style="
                       font-size: 12px;
                       font-weight: 700;
                       color: #6b7280;
                       margin-bottom: 6px;
                       text-transform: uppercase;
                       letter-spacing: 0.5px;
-                    ">
-                  ✅ Requisiti del PDF
-                </p>
-                <ul style="
+                    "
+                  >
+                    ✅ Requisiti del PDF
+                  </p>
+                  <ul
+                    style="
                       margin: 0;
                       padding-left: 16px;
                       font-size: 12px;
                       color: #6b7280;
                       line-height: 1.8;
-                    ">
-                  <li>
-                    Deve contenere la sezione
-                    <strong style="color: #374151">RICAMBI</strong>
-                  </li>
-                  <li>
-                    Ogni riga:
-                    <strong style="color: #374151">CODICE PRODOTTO</strong> +
-                    <strong style="color: #374151">QUANTITÀ</strong>
-                  </li>
-                  <li>
-                    Data del documento (se presente verrà usata
-                    automaticamente)
-                  </li>
-                  <li>
-                    Dimensione massima:
-                    <strong style="color: #374151">10 MB</strong>
-                  </li>
-                </ul>
+                    "
+                  >
+                    <li>
+                      Deve contenere la sezione
+                      <strong style="color: #374151">RICAMBI</strong>
+                    </li>
+                    <li>
+                      Ogni riga:
+                      <strong style="color: #374151">CODICE PRODOTTO</strong> +
+                      <strong style="color: #374151">QUANTITÀ</strong>
+                    </li>
+                    <li>
+                      Data del documento (se presente verrà usata
+                      automaticamente)
+                    </li>
+                    <li>
+                      Dimensione massima:
+                      <strong style="color: #374151">10 MB</strong>
+                    </li>
+                  </ul>
+                </div>
               </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" onclick="closeImportPDFModal()">
-                Annulla
-              </button>
-              <button type="submit" class="btn btn-primary">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                  style="width: 16px; height: 16px">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                  <line x1="16" y1="13" x2="8" y2="13" />
-                  <line x1="16" y1="17" x2="8" y2="17" />
-                </svg>
-                Elabora Documento
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- Sezione RIORDINO -->
-      <section id="section-riordino" class="content-section">
-        <div class="section-header">
-          <div>
-            <h1>Riordino Prodotti</h1>
-            <p>
-              Prodotti con giacenza esaurita — crea subito un nuovo carico
-            </p>
-          </div>
-          <div class="filter-controls">
-            <input type="text" id="filterRiordino" class="filter-input"
-              placeholder="Cerca prodotto per nome, marca, descrizione..." />
+              <div class="modal-footer">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  onclick="closeImportPDFModal()"
+                >
+                  Annulla
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    style="width: 16px; height: 16px"
+                  >
+                    <path
+                      d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                    />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                  </svg>
+                  Elabora Documento
+                </button>
+              </div>
+            </form>
           </div>
         </div>
 
-        <!-- Banner alert -->
-        <div class="riordino-alert-banner" id="riordinoBanner" style="display: none">
-          <div class="riordino-banner-left">
-            <div class="riordino-banner-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                <line x1="12" y1="9" x2="12" y2="13" />
-                <line x1="12" y1="17" x2="12.01" y2="17" />
-              </svg>
-            </div>
+        <!-- Sezione RIORDINO -->
+        <section id="section-riordino" class="content-section">
+          <div class="section-header">
             <div>
-              <strong class="riordino-banner-title">Prodotti Esauriti — Riordino Necessario</strong>
-              <p class="riordino-banner-sub">
-                I seguenti prodotti hanno giacenza a <strong>zero</strong>.
-                Clicca
-                <span class="riordino-badge-inline">🛒 Riordina</span> per
-                creare subito un nuovo carico.
+              <h1>Riordino Prodotti</h1>
+              <p>
+                Prodotti con giacenza esaurita — crea subito un nuovo carico
               </p>
             </div>
+            <div class="filter-controls">
+              <input
+                type="text"
+                id="filterRiordino"
+                class="filter-input"
+                placeholder="Cerca prodotto per nome, marca, descrizione..."
+              />
+            </div>
           </div>
-        </div>
 
-        <!-- Griglia prodotti a zero -->
-        <div class="riordino-grid" id="riordinoGrid">
-          <div style="
+          <!-- Banner alert -->
+          <div
+            class="riordino-alert-banner"
+            id="riordinoBanner"
+            style="display: none"
+          >
+            <div class="riordino-banner-left">
+              <div class="riordino-banner-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                  />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+              </div>
+              <div>
+                <strong class="riordino-banner-title"
+                  >Prodotti Esauriti — Riordino Necessario</strong
+                >
+                <p class="riordino-banner-sub">
+                  I seguenti prodotti hanno giacenza a <strong>zero</strong>.
+                  Clicca
+                  <span class="riordino-badge-inline">🛒 Riordina</span> per
+                  creare subito un nuovo carico.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Griglia prodotti a zero -->
+          <div class="riordino-grid" id="riordinoGrid">
+            <div
+              style="
                 padding: 40px 20px;
                 text-align: center;
                 color: var(--text-secondary);
-              ">
-            <span>Caricamento...</span>
+              "
+            >
+              <span>Caricamento...</span>
+            </div>
           </div>
-        </div>
 
-        <br /><br />
-        <br />
-        <br />
-      </section>
+          <br /><br />
+          <br />
+          <br />
+        </section>
 
-      <!-- Sezione RIEPILOGO -->
-      <section id="section-riepilogo" class="content-section">
-        <div class="section-header">
-          <div>
-            <h1>Riepilogo Magazzino</h1>
-            <p>Giacenze e valorizzazione FIFO</p>
-          </div>
-          <div class="filter-controls">
-            <input type="text" id="filterRiepilogo" class="filter-input"
-              placeholder="Cerca prodotto per nome,marca,descrizione..." />
-            <button class="btn btn-secondary" onclick="printRiepilogo()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="6 9 6 2 18 2 18 9" />
-                <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
-                <rect x="6" y="14" width="12" height="8" />
-              </svg>
-              <span>Stampa</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="stats-grid">
-          <div class="stat-card">
+        <!-- Sezione RIEPILOGO -->
+        <section id="section-riepilogo" class="content-section">
+          <div class="section-header">
             <div>
-              <p class="stat-label">Valore Totale Magazzino</p>
-              <p class="stat-value" id="valoreTotale">€ 0.00</p>
+              <h1>Riepilogo Magazzino</h1>
+              <p>Giacenze e valorizzazione FIFO</p>
             </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Prodotto / Marca</th>
-                  <th>Descrizione</th>
-                  <th>Giacenza (pz/l)</th>
-                  <th>Valore Totale</th>
-                </tr>
-              </thead>
-              <tbody id="riepilogoTableBody">
-                <tr>
-                  <td colspan="4" class="text-center">
-                    <span>Caricamento...</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <br />
-        <br />
-      </section>
-
-      <!-- Sezione STORICO -->
-      <section id="section-storico" class="content-section">
-        <div class="section-header">
-          <div>
-            <h1>Storico Magazzino</h1>
-            <p>Visualizza giacenze a una data specifica</p>
-          </div>
-          <div class="date-filter">
-            <input type="date" id="storicoDate" class="input-date" />
-            <div class="search-wrapper">
-              <input type="text" id="filterStorico" class="filter-input"
-                placeholder="Cerca prodotto per nome,marca,descrizione..." />
-            </div>
-            <button class="btn btn-reset-filtri" onclick="
-                document.getElementById('storicoDate').value = '';
-                allStorico = [];
-                storico = [];
-                updateStoricoTotal();
-                renderStorico([]);
-              " title="Cancella data">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="1 4 1 10 7 10"/>
-                <path d="M3.51 15a9 9 0 1 0 .49-4.5"/>
-              </svg>
-              <span>Reset Data</span>
-            </button>
-            <button class="btn btn-secondary" onclick="printStorico()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="6 9 6 2 18 2 18 9" />
-                <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
-                <rect x="6" y="14" width="12" height="8" />
-              </svg>
-              <span>Stampa</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div>
-              <p class="stat-label">Valore Storico</p>
-              <p class="stat-value" id="valoreStorico">€ 0.00</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Prodotto / Marca</th>
-                  <th>Descrizione</th>
-                  <th>Giacenza (pz/l)</th>
-                  <th>Valore Totale</th>
-                </tr>
-              </thead>
-              <tbody id="storicoTableBody">
-                <tr>
-                  <td colspan="4" class="text-center">
-                    Seleziona una data per visualizzare lo storico
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <br />
-        <br />
-      </section>
-
-      <!-- Sezione UTENTI -->
-      <section id="section-utenti" class="content-section">
-        <div class="section-header">
-          <div>
-            <h1>Gestione Utenti</h1>
-            <p>Crea e gestisci gli utenti del sistema</p>
-          </div>
-          <div class="filter-controls">
-            <div class="search-wrapper">
-              <input type="text" id="filterUtenti" class="filter-input" placeholder="Cerca utente..." />
-            </div>
-            <button class="btn btn-primary" onclick="openUserModal()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              <span>Nuovo Utente</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Username</th>
-                  <th class="text-right">Azioni</th>
-                </tr>
-              </thead>
-              <tbody id="utentiTableBody">
-                <tr>
-                  <td colspan="2" class="text-center">
-                    <span>Caricamento...</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <br />
-        <br />
-      </section>
-    </main>
-  </div>
-
-  <!-- Modal Marca -->
-  <div id="modalMarca" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 id="modalMarcaTitle">Nuova Marca</h2>
-        <button class="modal-close" onclick="closeMarcaModal()" aria-label="Chiudi">
-          &times;
-        </button>
-      </div>
-      <form id="formMarca">
-        <input type="hidden" id="marcaId" />
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="marcaNome">Nome Marca *</label>
-            <input type="text" id="marcaNome" required placeholder="es. Ducati, Honda, Yamaha..." />
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeMarcaModal()">
-            <span>Annulla</span>
-          </button>
-          <button type="submit" class="btn btn-primary">
-            <span>Salva</span>
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modal Prodotto -->
-  <div id="modalProdotto" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 id="modalProdottoTitle">Nuovo Prodotto</h2>
-        <button class="modal-close" onclick="closeProdottoModal()" aria-label="Chiudi">
-          &times;
-        </button>
-      </div>
-      <form id="formProdotto">
-        <input type="hidden" id="prodottoId" />
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="prodottoNome">Codice Telaio/Prodotto *</label>
-            <input type="text" id="prodottoNome" required placeholder="es. Olio motore, Filtro aria, Candele..." />
-          </div>
-
-          <div class="form-group">
-            <label for="prodottoMarcaSearch">Marca *</label>
-            <div class="search-select-wrapper">
-              <input type="text" id="prodottoMarcaSearch" class="form-input" placeholder="Cerca Marca (Nome)"
-                oninput="searchMarche()" onfocus="searchMarche()" autocomplete="off" />
-              <input type="hidden" id="prodottoMarca" required />
-              <div id="marcaSearchResults" class="search-results"></div>
+            <div class="filter-controls">
+              <input
+                type="text"
+                id="filterRiepilogo"
+                class="filter-input"
+                placeholder="Cerca prodotto per nome,marca,descrizione..."
+              />
+              <button class="btn btn-secondary" onclick="printRiepilogo()">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <polyline points="6 9 6 2 18 2 18 9" />
+                  <path
+                    d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"
+                  />
+                  <rect x="6" y="14" width="12" height="8" />
+                </svg>
+                <span>Stampa</span>
+              </button>
             </div>
           </div>
 
-          <div class="form-group">
-            <label for="prodottoDescrizione">Descrizione</label>
-            <textarea id="prodottoDescrizione" rows="3"
-              placeholder="Inserisci una descrizione dettagliata del prodotto..."></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeProdottoModal()">
-            <span>Annulla</span>
-          </button>
-          <button type="submit" class="btn btn-primary">
-            <span>Salva</span>
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modal Movimento -->
-  <div id="modalMovimento" class="modal">
-    <div class="modal-content modal-large">
-      <div class="modal-header">
-        <h2 id="modalMovimentoTitle">Nuovo Movimento</h2>
-        <button class="modal-close" onclick="closeMovimentoModal()" aria-label="Chiudi">
-          &times;
-        </button>
-      </div>
-      <form id="formMovimento">
-        <input type="hidden" id="movimentoId" />
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="movimentoProdotto">Codice Telaio/Prodotto *</label>
-            <div class="search-select-wrapper">
-              <input type="text" id="movimentoProdottoSearch" class="form-input"
-                placeholder="Cerca Prodotto (Nome, Marca, Descrizione)" oninput="searchProducts()"
-                onfocus="searchProducts()" autocomplete="off" />
-              <input type="hidden" id="movimentoProdotto" required />
-              <div id="prodottoSearchResults" class="search-results"></div>
-            </div>
-            <div class="form-group">
-              <label for="movimentoTipo">Tipo Movimento</label>
-              <select id="movimentoTipo" class="form-input" required>
-                <option value="carico">Carico</option>
-                <option value="scarico">Scarico</option>
-              </select>
-            </div>
-          </div>
-
-          <div id="giacenzaInfo" class="stock-info">
-            <strong>Giacenza attuale:</strong>
-            <span id="giacenzaValue">-</span>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="movimentoQuantita">Quantità *</label>
-              <input type="text" id="movimentoQuantita" inputmode="decimal" required placeholder="es. 10" />
-            </div>
-            <div class="form-group" id="prezzoGroup" style="display: none">
-              <label for="movimentoPrezzo">Prezzo Unitario *</label>
-              <div class="input-with-currency">
-                <input type="text" id="movimentoPrezzo" inputmode="decimal" placeholder="es. 25,50" />
-                <span class="currency-symbol">€</span>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div>
+                <p class="stat-label">Valore Totale Magazzino</p>
+                <p class="stat-value" id="valoreTotale">€ 0.00</p>
               </div>
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="movimentoData">Data Movimento *</label>
-              <input type="date" id="movimentoData" required />
+          <div class="card">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Prodotto / Marca</th>
+                    <th>Descrizione</th>
+                    <th>Giacenza (pz/l)</th>
+                    <th>Valore Totale</th>
+                  </tr>
+                </thead>
+                <tbody id="riepilogoTableBody">
+                  <tr>
+                    <td colspan="4" class="text-center">
+                      <span>Caricamento...</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            <div class="form-group">
-              <label for="movimentoFattura">Documento/Fattura <span id="docOptional">*</span></label>
-              <input type="text" id="movimentoFattura" placeholder="es. FT/2024/001" />
+          </div>
+          <br />
+          <br />
+        </section>
+
+        <!-- Sezione STORICO -->
+        <section id="section-storico" class="content-section">
+          <div class="section-header">
+            <div>
+              <h1>Storico Magazzino</h1>
+              <p>Visualizza giacenze a una data specifica</p>
+            </div>
+            <div class="date-filter">
+              <input type="date" id="storicoDate" class="input-date" />
+              <div class="search-wrapper">
+                <input
+                  type="text"
+                  id="filterStorico"
+                  class="filter-input"
+                  placeholder="Cerca prodotto per nome,marca,descrizione..."
+                />
+              </div>
+              <button
+                class="btn btn-reset-filtri"
+                onclick="
+                  document.getElementById('storicoDate').value = '';
+                  allStorico = [];
+                  storico = [];
+                  updateStoricoTotal();
+                  renderStorico([]);
+                "
+                title="Cancella data"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <polyline points="1 4 1 10 7 10" />
+                  <path d="M3.51 15a9 9 0 1 0 .49-4.5" />
+                </svg>
+                <span>Reset Data</span>
+              </button>
+              <button class="btn btn-secondary" onclick="printStorico()">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <polyline points="6 9 6 2 18 2 18 9" />
+                  <path
+                    d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"
+                  />
+                  <rect x="6" y="14" width="12" height="8" />
+                </svg>
+                <span>Stampa</span>
+              </button>
             </div>
           </div>
 
-          <div class="form-group" id="fornitoreGroup" style="display: none">
-            <label for="movimentoFornitore">Fornitore <span id="fornitoreOptional">*</span></label>
-            <input type="text" id="movimentoFornitore" placeholder="es. Fornitore SRL" />
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div>
+                <p class="stat-label">Valore Storico</p>
+                <p class="stat-value" id="valoreStorico">€ 0.00</p>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeMovimentoModal()">
-            <span>Annulla</span>
-          </button>
-          <button type="submit" class="btn btn-primary">
-            <span>Salva</span>
-          </button>
-        </div>
-      </form>
+
+          <div class="card">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Prodotto / Marca</th>
+                    <th>Descrizione</th>
+                    <th>Giacenza (pz/l)</th>
+                    <th>Valore Totale</th>
+                  </tr>
+                </thead>
+                <tbody id="storicoTableBody">
+                  <tr>
+                    <td colspan="4" class="text-center">
+                      Seleziona una data per visualizzare lo storico
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <br />
+          <br />
+        </section>
+
+        <!-- Sezione UTENTI -->
+        <section id="section-utenti" class="content-section">
+          <div class="section-header">
+            <div>
+              <h1>Gestione Utenti</h1>
+              <p>Crea e gestisci gli utenti del sistema</p>
+            </div>
+            <div class="filter-controls">
+              <div class="search-wrapper">
+                <input
+                  type="text"
+                  id="filterUtenti"
+                  class="filter-input"
+                  placeholder="Cerca utente..."
+                />
+              </div>
+              <button class="btn btn-primary" onclick="openUserModal()">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span>Nuovo Utente</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Username</th>
+                    <th class="text-right">Azioni</th>
+                  </tr>
+                </thead>
+                <tbody id="utentiTableBody">
+                  <tr>
+                    <td colspan="2" class="text-center">
+                      <span>Caricamento...</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <br />
+          <br />
+        </section>
+      </main>
     </div>
-  </div>
 
-  <!-- Modal Utente -->
-  <div id="modalUser" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 id="modalUserTitle">Nuovo Utente</h2>
-        <button class="modal-close" onclick="closeUserModal()" aria-label="Chiudi">
-          &times;
-        </button>
+    <!-- Modal Marca -->
+    <div id="modalMarca" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modalMarcaTitle">Nuova Marca</h2>
+          <button
+            class="modal-close"
+            onclick="closeMarcaModal()"
+            aria-label="Chiudi"
+          >
+            &times;
+          </button>
+        </div>
+        <form id="formMarca">
+          <input type="hidden" id="marcaId" />
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="marcaNome">Nome Marca *</label>
+              <input
+                type="text"
+                id="marcaNome"
+                required
+                placeholder="es. Ducati, Honda, Yamaha..."
+              />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeMarcaModal()"
+            >
+              <span>Annulla</span>
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <span>Salva</span>
+            </button>
+          </div>
+        </form>
       </div>
-      <form id="formUser">
-        <input type="hidden" id="userId" />
+    </div>
+
+    <!-- Modal Prodotto -->
+    <div id="modalProdotto" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modalProdottoTitle">Nuovo Prodotto</h2>
+          <button
+            class="modal-close"
+            onclick="closeProdottoModal()"
+            aria-label="Chiudi"
+          >
+            &times;
+          </button>
+        </div>
+        <form id="formProdotto">
+          <input type="hidden" id="prodottoId" />
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="prodottoNome">Codice Telaio/Prodotto *</label>
+              <input
+                type="text"
+                id="prodottoNome"
+                required
+                placeholder="es. Olio motore, Filtro aria, Candele..."
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="prodottoMarcaSearch">Marca *</label>
+              <div class="search-select-wrapper">
+                <input
+                  type="text"
+                  id="prodottoMarcaSearch"
+                  class="form-input"
+                  placeholder="Cerca Marca (Nome)"
+                  oninput="searchMarche()"
+                  onfocus="searchMarche()"
+                  autocomplete="off"
+                />
+                <input type="hidden" id="prodottoMarca" required />
+                <div id="marcaSearchResults" class="search-results"></div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="prodottoDescrizione">Descrizione</label>
+              <textarea
+                id="prodottoDescrizione"
+                rows="3"
+                placeholder="Inserisci una descrizione dettagliata del prodotto..."
+              ></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeProdottoModal()"
+            >
+              <span>Annulla</span>
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <span>Salva</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal Movimento -->
+    <div id="modalMovimento" class="modal">
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h2 id="modalMovimentoTitle">Nuovo Movimento</h2>
+          <button
+            class="modal-close"
+            onclick="closeMovimentoModal()"
+            aria-label="Chiudi"
+          >
+            &times;
+          </button>
+        </div>
+        <form id="formMovimento">
+          <input type="hidden" id="movimentoId" />
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="movimentoProdotto">Codice Telaio/Prodotto *</label>
+              <div class="search-select-wrapper">
+                <input
+                  type="text"
+                  id="movimentoProdottoSearch"
+                  class="form-input"
+                  placeholder="Cerca Prodotto (Nome, Marca, Descrizione)"
+                  oninput="searchProducts()"
+                  onfocus="searchProducts()"
+                  autocomplete="off"
+                />
+                <input type="hidden" id="movimentoProdotto" required />
+                <div id="prodottoSearchResults" class="search-results"></div>
+              </div>
+              <div class="form-group">
+                <label for="movimentoTipo">Tipo Movimento</label>
+                <select id="movimentoTipo" class="form-input" required>
+                  <option value="carico">Carico</option>
+                  <option value="scarico">Scarico</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="giacenzaInfo" class="stock-info">
+              <strong>Giacenza attuale:</strong>
+              <span id="giacenzaValue">-</span>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="movimentoQuantita">Quantità *</label>
+                <input
+                  type="text"
+                  id="movimentoQuantita"
+                  inputmode="decimal"
+                  required
+                  placeholder="es. 10"
+                />
+              </div>
+              <div class="form-group" id="prezzoGroup" style="display: none">
+                <label for="movimentoPrezzo">Prezzo Unitario *</label>
+                <div class="input-with-currency">
+                  <input
+                    type="text"
+                    id="movimentoPrezzo"
+                    inputmode="decimal"
+                    placeholder="es. 25,50"
+                  />
+                  <span class="currency-symbol">€</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="movimentoData">Data Movimento *</label>
+                <input type="date" id="movimentoData" required />
+              </div>
+              <div class="form-group">
+                <label for="movimentoFattura"
+                  >Documento/Fattura <span id="docOptional">*</span></label
+                >
+                <input
+                  type="text"
+                  id="movimentoFattura"
+                  placeholder="es. FT/2024/001"
+                />
+              </div>
+            </div>
+
+            <div class="form-group" id="fornitoreGroup" style="display: none">
+              <label for="movimentoFornitore"
+                >Fornitore <span id="fornitoreOptional">*</span></label
+              >
+              <input
+                type="text"
+                id="movimentoFornitore"
+                placeholder="es. Fornitore SRL"
+              />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeMovimentoModal()"
+            >
+              <span>Annulla</span>
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <span>Salva</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal Utente -->
+    <div id="modalUser" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modalUserTitle">Nuovo Utente</h2>
+          <button
+            class="modal-close"
+            onclick="closeUserModal()"
+            aria-label="Chiudi"
+          >
+            &times;
+          </button>
+        </div>
+        <form id="formUser">
+          <input type="hidden" id="userId" />
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="userUsername">Username *</label>
+              <input
+                type="text"
+                id="userUsername"
+                required
+                placeholder="es. admin, utente1..."
+              />
+            </div>
+            <div class="form-group">
+              <label for="userPassword"
+                >Password <span id="passwordOptional"></span
+              ></label>
+              <div class="input-container">
+                <input
+                  type="password"
+                  id="userPassword"
+                  placeholder="Lascia vuoto per non modificare"
+                  autocomplete="new-password"
+                />
+                <svg
+                  class="toggle-password"
+                  id="toggleUserPassword"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeUserModal()"
+            >
+              <span>Annulla</span>
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <span>Salva</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal Dettagli Lotti -->
+    <div id="modalDettagli" class="modal">
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h2 id="modalDettagliTitle">Dettagli Lotti</h2>
+          <button class="modal-close" onclick="closeDettagliModal()">
+            &times;
+          </button>
+        </div>
         <div class="modal-body">
-          <div class="form-group">
-            <label for="userUsername">Username *</label>
-            <input type="text" id="userUsername" required placeholder="es. admin, utente1..." />
-          </div>
-          <div class="form-group">
-            <label for="userPassword">Password <span id="passwordOptional"></span></label>
-            <div class="input-container">
-              <input type="password" id="userPassword" placeholder="Lascia vuoto per non modificare"
-                autocomplete="new-password" />
-              <svg class="toggle-password" id="toggleUserPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-            </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Quantità (pz/l)</th>
+                  <th>Prezzo</th>
+                  <th>Valore</th>
+                  <th>Data Carico</th>
+                  <th>Documento</th>
+                  <th>Fornitore</th>
+                </tr>
+              </thead>
+              <tbody id="dettagliTableBody"></tbody>
+            </table>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeUserModal()">
+          <button class="btn btn-secondary" onclick="closeDettagliModal()">
+            Chiudi
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modale Conferma Moderno -->
+    <div id="confirmModal" class="modal">
+      <div class="modal-content modal-small">
+        <div class="modal-header">
+          <h2 id="confirmModalTitle">Conferma</h2>
+          <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="confirm-content">
+            <div class="confirm-icon" id="confirmIcon"></div>
+            <p id="confirmMessage"></p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary">
             <span>Annulla</span>
           </button>
-          <button type="submit" class="btn btn-primary">
-            <span>Salva</span>
+          <button class="btn btn-primary" id="confirmButton">
+            <span>Conferma</span>
           </button>
         </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modal Dettagli Lotti -->
-  <div id="modalDettagli" class="modal">
-    <div class="modal-content modal-large">
-      <div class="modal-header">
-        <h2 id="modalDettagliTitle">Dettagli Lotti</h2>
-        <button class="modal-close" onclick="closeDettagliModal()">
-          &times;
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Quantità (pz/l)</th>
-                <th>Prezzo</th>
-                <th>Valore</th>
-                <th>Data Carico</th>
-                <th>Documento</th>
-                <th>Fornitore</th>
-              </tr>
-            </thead>
-            <tbody id="dettagliTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeDettagliModal()">
-          Chiudi
-        </button>
       </div>
     </div>
-  </div>
 
-  <!-- Modale Conferma Moderno -->
-  <div id="confirmModal" class="modal">
-    <div class="modal-content modal-small">
-      <div class="modal-header">
-        <h2 id="confirmModalTitle">Conferma</h2>
-        <button class="modal-close">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="confirm-content">
-          <div class="confirm-icon" id="confirmIcon"></div>
-          <p id="confirmMessage"></p>
+    <!-- Modale Messaggio/Alert Moderno -->
+    <div id="alertModal" class="modal">
+      <div class="modal-content modal-medium">
+        <div class="modal-header">
+          <h2 id="alertModalTitle">Informazione</h2>
+          <button class="modal-close">&times;</button>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary">
-          <span>Annulla</span>
-        </button>
-        <button class="btn btn-primary" id="confirmButton">
-          <span>Conferma</span>
-        </button>
+        <div class="modal-body">
+          <div class="alert-content" id="alertContent">
+            <div class="alert-icon" id="alertIcon"></div>
+            <div class="alert-message-text" id="alertMessage"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" id="alertModalOkBtn">
+            <span>OK</span>
+          </button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Modale Messaggio/Alert Moderno -->
-  <div id="alertModal" class="modal">
-    <div class="modal-content modal-medium">
-      <div class="modal-header">
-        <h2 id="alertModalTitle">Informazione</h2>
-        <button class="modal-close">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="alert-content" id="alertContent">
-          <div class="alert-icon" id="alertIcon"></div>
-          <div class="alert-message-text" id="alertMessage"></div>
+    <!-- == MODAL CARICO DA FATTURA PDF == -->
+    <div id="modalCaricoFatturaPDF" class="modal">
+      <div class="modal-content cfp-modal-content">
+        <div class="modal-header">
+          <div>
+            <h2>📄 Carica da Fattura PDF</h2>
+            <p style="font-size: 13px; color: #64748b; margin: 4px 0 0">
+              L'AI legge la fattura — clicca <strong>Carica</strong> su ogni
+              riga per salvare il movimento direttamente
+            </p>
+          </div>
+          <button class="modal-close" onclick="closeCaricoFatturaPDFModal()">
+            &times;
+          </button>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-primary" id="alertModalOkBtn">
-          <span>OK</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- == MODAL CARICO DA FATTURA PDF == -->
-  <div id="modalCaricoFatturaPDF" class="modal">
-    <div class="modal-content cfp-modal-content">
-      <div class="modal-header">
-        <div>
-          <h2>📄 Carica da Fattura PDF</h2>
-          <p style="font-size: 13px; color: #64748b; margin: 4px 0 0">
-            L'AI legge la fattura — clicca <strong>Carica</strong> su ogni
-            riga per salvare il movimento direttamente
-          </p>
-        </div>
-        <button class="modal-close" onclick="closeCaricoFatturaPDFModal()">
-          &times;
-        </button>
-      </div>
-      <div class="modal-body">
-        <div id="cfp-step-upload">
-          <div id="cfp-dropzone" class="cfp-dropzone" onclick="document.getElementById('cfp-file-input').click()">
-            <svg style="
+        <div class="modal-body">
+          <div id="cfp-step-upload">
+            <div
+              id="cfp-dropzone"
+              class="cfp-dropzone"
+              onclick="document.getElementById('cfp-file-input').click()"
+            >
+              <svg
+                style="
                   width: 48px;
                   height: 48px;
                   color: #94a3b8;
                   display: block;
                   margin: 0 auto 14px;
-                " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9" />
-              <polyline points="9 15 12 12 15 15" />
-              <line x1="12" y1="12" x2="12" y2="21" />
-            </svg>
-            <p id="cfp-file-label" style="
+                "
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <path
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9"
+                />
+                <polyline points="9 15 12 12 15 15" />
+                <line x1="12" y1="12" x2="12" y2="21" />
+              </svg>
+              <p
+                id="cfp-file-label"
+                style="
                   font-size: 15px;
                   font-weight: 600;
                   color: #475569;
                   margin: 0 0 6px;
-                ">
-              Trascina il PDF qui o clicca per sfogliare
-            </p>
-            <p style="font-size: 12px; color: #94a3b8; margin: 0">
-              Fatture, DDT, bolle, ordini
-            </p>
-            <input type="file" id="cfp-file-input" accept="application/pdf" style="display: none"
-              onchange="cfpOnFileSelected(this)" />
-          </div>
-          <div class="cfp-ai-info">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="
+                "
+              >
+                Trascina il PDF qui o clicca per sfogliare
+              </p>
+              <p style="font-size: 12px; color: #94a3b8; margin: 0">
+                Fatture, DDT, bolle, ordini
+              </p>
+              <input
+                type="file"
+                id="cfp-file-input"
+                accept="application/pdf"
+                style="display: none"
+                onchange="cfpOnFileSelected(this)"
+              />
+            </div>
+            <div class="cfp-ai-info">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                style="
                   width: 18px;
                   height: 18px;
                   flex-shrink: 0;
                   color: #3b82f6;
-                ">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
-            <span>L'AI estrarrà
-              <strong>numero documento, fornitore, data, prodotti, quantità e
-                prezzi</strong>. Clicca <strong>Carica</strong> su ogni riga per salvare il
-              movimento direttamente nel database, senza aprire alcun
-              form.</span>
+                "
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <span
+                >L'AI estrarrà
+                <strong
+                  >numero documento, fornitore, data, prodotti, quantità e
+                  prezzi</strong
+                >. Clicca <strong>Carica</strong> su ogni riga per salvare il
+                movimento direttamente nel database, senza aprire alcun
+                form.</span
+              >
+            </div>
+            <div style="text-align: center; margin-top: 24px">
+              <button
+                id="cfp-btn-analizza"
+                class="btn btn-primary cfp-btn-main"
+                onclick="cfpAnalizzaPDF()"
+                disabled
+              >
+                🔍 Analizza PDF con AI
+              </button>
+            </div>
           </div>
-          <div style="text-align: center; margin-top: 24px">
-            <button id="cfp-btn-analizza" class="btn btn-primary cfp-btn-main" onclick="cfpAnalizzaPDF()" disabled>
-              🔍 Analizza PDF con AI
-            </button>
-          </div>
-        </div>
 
-        <div id="cfp-step-loading" style="display: none; text-align: center; padding: 48px 24px">
-          <div class="cfp-spinner"></div>
-          <p id="cfp-loading-msg" style="
+          <div
+            id="cfp-step-loading"
+            style="display: none; text-align: center; padding: 48px 24px"
+          >
+            <div class="cfp-spinner"></div>
+            <p
+              id="cfp-loading-msg"
+              style="
                 font-size: 15px;
                 font-weight: 600;
                 color: #475569;
                 margin-top: 20px;
-              ">
-            Analisi in corso...
-          </p>
-        </div>
-
-        <div id="cfp-step-risultati" style="display: none">
-          <div class="cfp-section-title">
-            <span class="cfp-step-num">1</span> Dati del documento
-            <small style="font-weight: 400; color: #64748b">(verifica e correggi)</small>
-          </div>
-          <div class="cfp-form-grid">
-            <div class="form-group">
-              <label>Numero Documento / Fattura *</label>
-              <input type="text" id="cfp-numero-doc" class="cfp-input" placeholder="es. FT/2024/001" />
-            </div>
-            <div class="form-group">
-              <label>Fornitore *</label>
-              <input type="text" id="cfp-fornitore" class="cfp-input" placeholder="Nome fornitore" />
-            </div>
-            <div class="form-group">
-              <label>Data Documento</label>
-              <input type="date" id="cfp-data" class="cfp-input" />
-            </div>
+              "
+            >
+              Analisi in corso...
+            </p>
           </div>
 
-          <div class="cfp-section-title" style="margin-top: 20px">
-            <span class="cfp-step-num">2</span> Prodotti estratti
-            <span id="cfp-counter" style="
+          <div id="cfp-step-risultati" style="display: none">
+            <div class="cfp-section-title">
+              <span class="cfp-step-num">1</span> Dati del documento
+              <small style="font-weight: 400; color: #64748b"
+                >(verifica e correggi)</small
+              >
+            </div>
+            <div class="cfp-form-grid">
+              <div class="form-group">
+                <label>Numero Documento / Fattura *</label>
+                <input
+                  type="text"
+                  id="cfp-numero-doc"
+                  class="cfp-input"
+                  placeholder="es. FT/2024/001"
+                />
+              </div>
+              <div class="form-group">
+                <label>Fornitore *</label>
+                <input
+                  type="text"
+                  id="cfp-fornitore"
+                  class="cfp-input"
+                  placeholder="Nome fornitore"
+                />
+              </div>
+              <div class="form-group">
+                <label>Data Documento</label>
+                <input type="date" id="cfp-data" class="cfp-input" />
+              </div>
+            </div>
+
+            <div class="cfp-section-title" style="margin-top: 20px">
+              <span class="cfp-step-num">2</span> Prodotti estratti
+              <span
+                id="cfp-counter"
+                style="
                   margin-left: auto;
                   font-size: 13px;
                   font-weight: 600;
                   color: #64748b;
-                "></span>
+                "
+              ></span>
+            </div>
+            <div class="cfp-table-wrap">
+              <table class="cfp-table">
+                <thead>
+                  <tr>
+                    <th style="width: 44px; text-align: center">✓</th>
+                    <th>Nome nel PDF</th>
+                    <th>Prodotto nel DB</th>
+                    <th style="width: 95px">Quantità</th>
+                    <th style="width: 115px">Prezzo Unitario €</th>
+                    <th style="width: 90px; text-align: center">Azione</th>
+                  </tr>
+                </thead>
+                <tbody id="cfp-tbody"></tbody>
+              </table>
+            </div>
+            <p class="cfp-note">
+              💡 Prodotti non riconosciuti: selezionali dal menu. Prodotti
+              mancanti: creali prima in <strong>Prodotti</strong>. Documento e
+              fornitore in cima vengono usati per tutti i carichi. Ogni riga
+              viene salvata <strong>immediatamente</strong> cliccando Carica.
+            </p>
           </div>
-          <div class="cfp-table-wrap">
-            <table class="cfp-table">
-              <thead>
-                <tr>
-                  <th style="width: 44px; text-align: center">✓</th>
-                  <th>Nome nel PDF</th>
-                  <th>Prodotto nel DB</th>
-                  <th style="width: 95px">Quantità</th>
-                  <th style="width: 115px">Prezzo Unitario €</th>
-                  <th style="width: 90px; text-align: center">Azione</th>
-                </tr>
-              </thead>
-              <tbody id="cfp-tbody"></tbody>
-            </table>
-          </div>
-          <p class="cfp-note">
-            💡 Prodotti non riconosciuti: selezionali dal menu. Prodotti
-            mancanti: creali prima in <strong>Prodotti</strong>. Documento e
-            fornitore in cima vengono usati per tutti i carichi. Ogni riga
-            viene salvata <strong>immediatamente</strong> cliccando Carica.
-          </p>
-        </div>
 
-        <div id="cfp-error" class="cfp-error" style="display: none"></div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeCaricoFatturaPDFModal()">
-          Chiudi
-        </button>
+          <div id="cfp-error" class="cfp-error" style="display: none"></div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn btn-secondary"
+            onclick="closeCaricoFatturaPDFModal()"
+          >
+            Chiudi
+          </button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!--
+    <!--
       ORDINE DI CARICAMENTO SCRIPT HOME:
       1. Socket.IO       → real-time
       2. realtime.js     → connessione socket + modali alert/confirm
@@ -1163,23 +1610,22 @@
       13. pdf-fattura.js → carico da fattura PDF (IIFE)
       14. navigation.js  → bootstrap app: navigazione, hamburger, logout (unico DOMContentLoaded)
     -->
-  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-  <script src="js/realtime.js"></script>
-  <script src="js/config.js"></script>
-  <script src="js/utils.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/search.js"></script>
-  <script src="js/company-loader.js"></script>
-  <script src="js/crud/marche.js"></script>
-  <script src="js/crud/prodotti.js"></script>
-  <script src="js/crud/movimenti.js"></script>
-  <script src="js/crud/riordino.js"></script>
-  <script src="js/crud/riepilogo.js"></script>
-  <script src="js/crud/utenti.js"></script>
-  <script src="js/crud/pdf-scarico.js"></script>
-  <script src="js/crud/pdf-fattura.js"></script>
-  <script src="js/navigation.js"></script>
-  <script src="js/crud/stampe.js"></script>
-</body>
-
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="js/realtime.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/company-loader.js"></script>
+    <script src="js/crud/marche.js"></script>
+    <script src="js/crud/prodotti.js"></script>
+    <script src="js/crud/movimenti.js"></script>
+    <script src="js/crud/riordino.js"></script>
+    <script src="js/crud/riepilogo.js"></script>
+    <script src="js/crud/utenti.js"></script>
+    <script src="js/crud/pdf-scarico.js"></script>
+    <script src="js/crud/pdf-fattura.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/crud/stampe.js"></script>
+  </body>
 </html>
