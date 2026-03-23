@@ -4297,3 +4297,196 @@ input {
     justify-content: center;
   }
 }
+/* --- OTTIMIZZAZIONE FILTRO TIPO DESKTOP --- */
+
+@media (min-width: 769px) {
+  /* Contenitore generale dei filtri: niente bordi, tutto allineato */
+  .movimenti-filter-controls {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end; /* Allinea i campi e i bottoni sulla base */
+    justify-content: flex-start; /* Elementi uno dopo l'altro */
+    gap: 25px;
+    background: transparent;
+    padding: 10px 0;
+    margin-bottom: 20px;
+    border: none;
+  }
+
+  /* Contenitore specifico per il Filtro Tipo */
+  .movimenti-search-wrap {
+    display: flex;
+    flex-direction: column; /* Mette la scritta SOPRA */
+    gap: 8px;
+    flex: 0 1 auto; /* Non occupa tutto lo spazio, solo il necessario */
+  }
+
+  /* La scritta "Filtra per Tipo" */
+  .movimenti-search-wrap label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    margin-left: 2px;
+  }
+
+  /* La tendina (Select) stilizzata bene */
+  #filterTipo {
+    min-width: 180px;
+    height: 42px;
+    background-color: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0 35px 0 12px;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    /* Freccetta personalizzata */
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  #filterTipo:hover {
+    border-color: var(--primary-light);
+    background-color: #fcfcfc;
+  }
+
+  #filterTipo:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  }
+
+  /* Anche i campi data con etichetta sopra */
+  .movimenti-date-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .movimenti-date-field label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
+  .movimenti-date-input {
+    height: 42px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    padding: 0 10px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Il bottone reset allineato ai campi */
+  .btn-reset-filtri {
+    height: 42px;
+    margin-bottom: 0; /* Rimuove eventuali margini che lo sfasano */
+    padding: 0 15px;
+    border-radius: 8px;
+    background: white;
+    border: 1px solid var(--border);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+/* --- FIX FILTRO TIPO E ALLINEAMENTI --- */
+
+@media (min-width: 769px) {
+  .movimenti-filter-controls {
+    display: flex;
+    align-items: flex-end; /* Allinea la base dei filtri con i bottoni */
+    gap: 30px;
+    padding: 10px 0;
+    background: transparent;
+  }
+
+  /* Contenitore Filtro per Tipo */
+  .movimenti-search-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* Scritta sopra */
+  .movimenti-search-wrap label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    letter-spacing: 0.05em;
+  }
+
+  /* Styling della Select (se decidi di tenerla) per centrare la freccia */
+  #filterTipo {
+    height: 42px;
+    min-width: 180px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0 35px 0 12px;
+    background-color: white;
+    appearance: none;
+    -webkit-appearance: none;
+    /* Freccia centrata perfettamente */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 14px;
+    cursor: pointer;
+    line-height: 40px; /* Centra il testo verticalmente */
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Sezione Date: allineamento scritte */
+  .movimenti-date-wrap {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+  }
+
+  .movimenti-date-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .movimenti-date-field label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
+  .movimenti-date-input {
+    height: 42px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0 10px;
+    background: white;
+  }
+
+  /* Bottone Reset allineato */
+  .btn-reset-filtri {
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px;
+    margin: 0; 
+    border-radius: 8px;
+    background: white;
+    font-weight: 600;
+    border: 1px solid var(--border);
+  }
+}
