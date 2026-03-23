@@ -77,7 +77,46 @@ function setupDatePersistence(inputId, storageKey, filterFn) {
 
   input.addEventListener("change", (e) => {
     const val = e.target.value;
-    saveSearchTerm(storageKey, val);
+
+    // ── Validazione range date ───────────────────────────────
+    const startInput = document.getElementById("filterMovimentiStart");
+    const endInput   = document.getElementById("filterMovimentiEnd");
+
+    if (startInput && endInput && startInput.value && endInput.value) {
+      if (startInput.value > endInput.value) {
+        // La data di inizio è successiva alla data di fine: correggi automaticamente
+        if (inputId === "filterMovimentiStart") {
+          // L'utente ha appena cambiato la data di inizio: riportala pari alla data di fine
+          startInput.value = endInput.value;
+          saveSearchTerm(storageKey, endInput.value);
+        } else {
+          // L'utente ha appena cambiato la data di fine: riportala pari alla data di inizio
+          endInput.value = startInput.value;
+          saveSearchTerm(storageKey, startInput.value);
+        }
+        // Effetto visivo lampeggiante per avvisare l'utente
+        const errInput = inputId === "filterMovimentiStart" ? startInput : endInput;
+        errInput.style.borderColor = "#ef4444";
+        errInput.style.boxShadow = "0 0 0 3px rgba(239,68,68,0.2)";
+        setTimeout(() => {
+          errInput.style.borderColor = "";
+          errInput.style.boxShadow = "";
+        }, 1500);
+      } else {
+        saveSearchTerm(storageKey, val);
+      }
+    } else {
+      saveSearchTerm(storageKey, val);
+    }
+
+    // Imposta min/max sui due campi per guidare il browser
+    if (startInput && endInput) {
+      if (startInput.value) endInput.min = startInput.value;
+      else endInput.removeAttribute("min");
+      if (endInput.value) startInput.max = endInput.value;
+      else startInput.removeAttribute("max");
+    }
+
     // Rilancia il filtro principale (che leggerà anche le date)
     const searchInput = document.getElementById("filterMovimenti");
     filterFn(searchInput ? searchInput.value : "");
