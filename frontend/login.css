@@ -607,3 +607,12 @@ body::before {
     padding: 50px 40px;
   }
 }
+
+
+input {
+  border: 2px solid #1e293b !important; /* nero di default */
+}
+
+input:focus {
+  border: 2px solid #6366f1 !important; /* blu al click */
+}
