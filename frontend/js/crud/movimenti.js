@@ -24,10 +24,69 @@ async function loadMovimenti() {
     renderAlertRiordino();
     injectDateFilters(); // Inietta i filtri data
     reapplyFilter("filterMovimenti");
+    
+    // Applica il filtro per tipo salvato in localStorage
+    const savedTipo = localStorage.getItem('movimenti_tipo_filter');
+    if (savedTipo) {
+      const tipoFilterElement = document.getElementById('movimentiTipoFilter');
+      if (tipoFilterElement) {
+        tipoFilterElement.value = savedTipo;
+        // La funzione filterMovimenti verrà chiamata da reapplyFilter o da un'altra logica di inizializzazione
+      }
+    }
+    filterMovimenti(); // Chiamata iniziale per applicare tutti i filtri
+    
   } catch (error) {
     console.error("Errore caricamento movimenti", error);
   }
 }
+
+// Funzione per filtrare i movimenti per tipo (carico, scarico, tutti)
+function filterMovimentiByTipo(tipo) {
+  // Salva la selezione nel localStorage
+  localStorage.setItem("movimenti_tipo_filter", tipo);
+
+  // Applica tutti i filtri correnti
+  filterMovimenti();
+}
+
+// Modifica la funzione filterMovimenti per includere il filtro per tipo
+function filterMovimenti() {
+  const searchTerm = document.getElementById("filterMovimenti") ? document.getElementById("filterMovimenti").value.toLowerCase() : "";
+  const startDate = document.getElementById("filterMovimentiStart") ? document.getElementById("filterMovimentiStart").value : null;
+  const endDate = document.getElementById("filterMovimentiEnd") ? document.getElementById("filterMovimentiEnd").value : null;
+  const tipo = document.getElementById("movimentiTipoFilter") ? document.getElementById("movimentiTipoFilter").value : "tutti";
+
+  let filtered = allMovimenti;
+
+  // Filtro per tipo
+  if (tipo === "carico") {
+    filtered = filtered.filter(m => m.tipo === "carico");
+  } else if (tipo === "scarico") {
+    filtered = filtered.filter(m => m.tipo === "scarico");
+  }
+
+  // Filtro per testo
+  if (searchTerm) {
+    filtered = filtered.filter(m =>
+      (m.prodotto_nome && m.prodotto_nome.toLowerCase().includes(searchTerm)) ||
+      (m.marca_nome && m.marca_nome.toLowerCase().includes(searchTerm)) ||
+      (m.prodotto_descrizione && m.prodotto_descrizione.toLowerCase().includes(searchTerm))
+    );
+  }
+
+  // Filtro per data
+  if (startDate) {
+    filtered = filtered.filter(m => m.data_movimento >= startDate);
+  }
+  if (endDate) {
+    filtered = filtered.filter(m => m.data_movimento <= endDate);
+  }
+
+  movimenti = filtered;
+  renderMovimenti();
+}
+
 
 // ── Rendering tabella ────────────────────────────────────────
 function renderMovimenti() {
@@ -524,6 +583,7 @@ function injectDateFilters() {
       endIn.value = startIn.value;
       endIn.dispatchEvent(new Event("change")); // Triggera il salvataggio/filtro
     }
+    filterMovimenti();
   });
 
   endIn.addEventListener("change", () => {
@@ -531,6 +591,7 @@ function injectDateFilters() {
       startIn.value = endIn.value;
       startIn.dispatchEvent(new Event("change"));
     }
+    filterMovimenti();
   });
 }
 
