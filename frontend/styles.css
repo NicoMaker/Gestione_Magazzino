@@ -4490,3 +4490,169 @@ input {
     border: 1px solid var(--border);
   }
 }
+
+/* --- FIX FILTRO TIPO DESKTOP --- */
+@media (min-width: 769px) {
+    
+    /* Contenitore principale: allinea tutto sulla base dei componenti */
+    .movimenti-filter-controls {
+        display: flex;
+        align-items: flex-end; /* Fondamentale per allineare Select e Bottoni */
+        gap: 20px;
+        padding: 15px 0;
+        background: transparent;
+    }
+
+    /* Box del Filtro Tipo */
+    .movimenti-search-wrap {
+        display: flex;
+        flex-direction: column; /* Mette la LABEL sopra il CAMPO */
+        gap: 8px;
+        min-width: 200px;
+    }
+
+    /* La scritta "Filtra per tipo" */
+    .movimenti-search-wrap label {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin: 0; /* Reset margini */
+    }
+
+    /* La Select (il rettangolo di scelta) */
+    #filterTipo {
+        height: 42px; /* Altezza fissa uguale ai bottoni */
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background-color: white;
+        padding: 0 35px 0 12px;
+        font-size: 0.95rem;
+        cursor: pointer;
+        
+        /* Reset freccia originale per centrarla bene */
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center; /* Freccia centrata perfettamente */
+        background-size: 16px;
+        
+        box-shadow: var(--shadow-sm);
+        transition: all 0.2s ease;
+    }
+
+    #filterTipo:hover {
+        border-color: var(--primary-light);
+    }
+
+    /* Allineamento campi data (se vuoi la scritta sopra anche lì) */
+    .movimenti-date-field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .movimenti-date-field label {
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+    }
+
+    .movimenti-date-input {
+        height: 42px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        padding: 0 10px;
+    }
+
+    /* Bottone Reset: deve essere alto come la select */
+    .btn-reset-filtri {
+        height: 42px;
+        padding: 0 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 0; /* Importante per l'allineamento */
+        border-radius: 8px;
+        font-weight: 600;
+    }
+}
+
+/* --- FIX FINALE FILTRO TIPO DESKTOP --- */
+@media (min-width: 769px) {
+
+    /* Allinea i contenitori sulla base, così i bottoni e la select toccano terra insieme */
+    .movimenti-filter-controls {
+        display: flex;
+        align-items: flex-end; 
+        gap: 20px;
+        background: transparent;
+        padding: 10px 0;
+    }
+
+    /* FORZA LA SCRITTA SOPRA */
+    .movimenti-search-wrap {
+        display: flex;
+        flex-direction: column !important; /* Forza la disposizione verticale */
+        align-items: flex-start !important;
+        gap: 8px; /* Spazio tra scritta e select */
+    }
+
+    /* La scritta "Filtra per tipo" */
+    .movimenti-search-wrap label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        margin: 0;
+        padding: 0;
+    }
+
+    /* La Select stilizzata con freccia centrata */
+    #filterTipo {
+        height: 42px;
+        min-width: 180px;
+        background-color: white;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0 35px 0 12px;
+        font-size: 0.95rem;
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        /* Freccia centrata verticalmente (center) */
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center; 
+        background-size: 14px;
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* Allinea anche le date allo stesso modo */
+    .movimenti-date-field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .movimenti-date-input {
+        height: 42px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0 10px;
+    }
+
+    /* Il tasto Reset senza etichetta sopra rimarrà allineato alla base della select */
+    .btn-reset-filtri {
+        height: 42px;
+        margin: 0;
+        display: flex;
+        align-items: center;
+    }
+}
+
