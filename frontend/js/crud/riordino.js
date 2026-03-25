@@ -216,9 +216,6 @@ function _apriModalRiordino(prodottoId) {
     if (giacenzaInfo && giacenzaInfo.parentNode) {
       const flag = document.createElement("div");
       flag.setAttribute("data-riordino-flag", "true");
-      flag.style.cssText = "background:#fef3c7;border-left:4px solid #f59e0b;padding:12px 14px;border-radius:8px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.07);";
-      flag.innerHTML = `<strong style="color:#92400e;font-size:13px;">🛒 RIORDINO — Prodotto Esaurito</strong>
-        <p style="font-size:12px;color:#b45309;margin:4px 0 0;"><strong>${escapeHtml(prodotto.nome)}</strong> ha giacenza <strong>0</strong>. Inserisci quantità, prezzo, documento e fornitore.</p>`;
       giacenzaInfo.parentNode.insertBefore(flag, giacenzaInfo);
     }
     document.getElementById("movimentoData").value = new Date().toISOString().split("T")[0];
@@ -268,9 +265,6 @@ function precompileRiordino(movimento) {
     if (giacenzaInfo && giacenzaInfo.parentNode) {
       const flag = document.createElement("div");
       flag.setAttribute("data-riordino-flag", "true");
-      flag.style.cssText = "background:#fef3c7;border-left:4px solid #f59e0b;padding:12px 14px;border-radius:8px;margin-bottom:10px;";
-      flag.innerHTML = `<strong style="color:#92400e;font-size:13px;">📋 RIORDINO BASATO SU CARICO PRECEDENTE</strong>
-        <p style="font-size:12px;color:#b45309;margin:4px 0 0;">I dati sono precompilati. Modifica ciò che serve!</p>`;
       giacenzaInfo.parentNode.insertBefore(flag, giacenzaInfo);
       giacenzaInfo.style.display = "block";
     }
