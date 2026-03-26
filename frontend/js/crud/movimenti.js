@@ -113,74 +113,71 @@ function renderMovimenti() {
 
   tbody.innerHTML = movimenti
     .map((m) => {
-      const prefix = m.tipo === "scarico" ? "-" : "";
-      let prezzoUnitHtml = "-";
-      if (m.tipo === "carico") prezzoUnitHtml = formatCurrency(m.prezzo);
-      else if (m.tipo === "scarico" && m.prezzo_unitario_scarico != null)
-        prezzoUnitHtml = formatCurrency(m.prezzo_unitario_scarico).replace(
-          "€",
-          `${prefix}€`,
-        );
+      const isScarico = m.tipo === "scarico";
+      const prefix = isScarico ? "-" : "";
+      const colorClass = isScarico ? "text-red" : "text-green";
 
-      const prezzoTotHtml = formatCurrency(
-        m.prezzo_totale_movimento || 0,
-      ).replace("€", `${prefix}€`);
-      const colorClass = m.tipo === "carico" ? "text-green" : "text-red";
+      // 1. Quantità con segno (senza grassetto)
+      const quantitaHtml = `${prefix}${formatQuantity(m.quantita)}`;
+
+      // 2. Prezzo Unitario
+      let prezzoUnitHtml = "-";
+      if (m.tipo === "carico") {
+        prezzoUnitHtml = formatCurrency(m.prezzo);
+      } else if (isScarico && m.prezzo_unitario_scarico != null) {
+        prezzoUnitHtml = formatCurrency(m.prezzo_unitario_scarico).replace("€", `${prefix}€`);
+      }
+
+      // 3. Prezzo Totale (mantiene il grassetto come da tua richiesta originale)
+      const prezzoTotHtml = formatCurrency(m.prezzo_totale_movimento || 0)
+        .replace("€", `${prefix}€`);
+
       const descr = m.prodotto_descrizione
         ? `<small>${escapeHtml(m.prodotto_descrizione.substring(0, 30))}${m.prodotto_descrizione.length > 30 ? "…" : ""}</small>`
         : '<span style="color:#999;">-</span>';
 
       const docCell =
-        m.tipo === "scarico"
+        isScarico
           ? ""
           : (() => {
             const doc = m.fattura_doc || "";
             if (/\.pdf$/i.test(doc.trim())) {
               const nome = doc.trim();
               return `<span style="display:inline-flex;align-items:center;gap:5px;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" style="width:16px;height:16px;">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-          </svg>
-          <span style="font-size:12px;color:#64748b;">${escapeHtml(nome.replace(/\.pdf$/i, ""))}</span>
-        </span>`;
+                <svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" style="width:16px;height:16px;">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+                <span style="font-size:12px;color:#64748b;">${escapeHtml(nome.replace(/\.pdf$/i, ""))}</span>
+              </span>`;
             }
             return doc ? escapeHtml(doc) : "";
           })();
 
-      // 🆕 BOTTONI DI AZIONE - STILE UNIFORME
+      // Bottoni Azione
       let buttoniHTML = `<div class="action-buttons">`;
-
-      // Bottone Riordina SOLO per CARICHI (PRIMO) - STESSO STILE
       if (m.tipo === "carico") {
         buttoniHTML += `
         <button class="btn-icon btn-riordina" onclick="handleRiordino(${m.id})" title="Riordina questo carico">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="9" cy="21" r="1"/>
-            <circle cx="20" cy="21" r="1"/>
+            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
             <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
           </svg>
         </button>`;
       }
-
-      // Bottone Modifica (SECONDO) - STESSO STILE
       buttoniHTML += `
         <button class="btn-icon btn-modifica" onclick="editMovimento(${m.id})" title="Modifica">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
           </svg>
-        </button>`;
-
-      // Bottone Elimina (TERZO) - STESSO STILE
-      buttoniHTML += `
+        </button>
         <button class="btn-icon btn-elimina" onclick="deleteMovimento(${m.id},'${escapeHtml(m.prodotto_nome)}','${m.tipo}')" title="Elimina">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
           </svg>
-        </button>`;
-
-      buttoniHTML += `</div>`;
+        </button>
+      </div>`;
 
       return `
       <tr>
@@ -188,12 +185,12 @@ function renderMovimenti() {
         <td><strong>${escapeHtml(m.prodotto_nome)}</strong></td>
         <td>${m.marca_nome ? escapeHtml(m.marca_nome) : '<span style="color:#999;">-</span>'}</td>
         <td>${descr}</td>
-        <td><span class="badge ${m.tipo === "carico" ? "badge-success" : "badge-danger"}">${m.tipo.toUpperCase()}</span></td>
-        <td class="${colorClass}">${formatQuantity(m.quantita)}</td>
+        <td><span class="badge ${isScarico ? "badge-danger" : "badge-success"}">${m.tipo.toUpperCase()}</span></td>
+        <td class="${colorClass}">${quantitaHtml}</td>
         <td class="${colorClass}">${prezzoUnitHtml}</td>
         <td class="${colorClass}"><strong>${prezzoTotHtml}</strong></td>
         <td>${docCell}</td>
-        <td>${m.tipo === "scarico" ? "" : m.fornitore_cliente_id || ""}</td>
+        <td>${isScarico ? "" : m.fornitore_cliente_id || ""}</td>
         <td class="text-right">
           ${buttoniHTML}
         </td>
