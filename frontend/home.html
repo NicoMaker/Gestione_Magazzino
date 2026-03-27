@@ -125,10 +125,27 @@
             </svg>
             <span>Utenti</span>
           </a>
-        </nav>
 
-        <!-- ✅ SOSTITUISCI SOLO QUESTA SEZIONE NEL TUO home.html -->
-        <!-- Cerca .sidebar-footer e sostituiscila con questo codice -->
+          <!-- ✅ NUOVO: Scarica DB -->
+          <a
+            href="#"
+            class="nav-item"
+            id="navDownloadDb"
+            onclick="downloadDatabase(event)"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            <span>Scarica DB</span>
+          </a>
+        </nav>
 
         <div class="sidebar-footer">
           <div class="user-info">
@@ -191,8 +208,6 @@
           <br />
           <br />
         </div>
-
-        <!-- ✅ IMPORTANTE: Aggiungi questo script PRIMA di script.js -->
       </aside>
 
       <!-- Sistema Notifiche -->
@@ -237,7 +252,6 @@
                 <thead>
                   <tr>
                     <th>Nome Marca</th>
-                    <!-- 🎯 NUOVA COLONNA -->
                     <th style="text-align: center">Prodotti Relazionati</th>
                     <th class="text-right">Azioni</th>
                   </tr>
@@ -311,7 +325,6 @@
           <br />
         </section>
 
-        <!-- Sezione MOVIMENTI -->
         <!-- Sezione MOVIMENTI -->
         <section id="section-movimenti" class="content-section">
           <div class="section-header movimenti-section-header">
@@ -562,7 +575,6 @@
             </div>
             <form id="formImportPDF">
               <div class="modal-body">
-                <!-- Istruzioni -->
                 <div
                   style="
                     background: #eff6ff;
@@ -598,7 +610,6 @@
                   </p>
                 </div>
 
-                <!-- Area upload -->
                 <div class="file-upload-container">
                   <label
                     for="importPDFFile"
@@ -660,7 +671,6 @@
                   </label>
                 </div>
 
-                <!-- Formato atteso -->
                 <div
                   style="
                     margin-top: 14px;
@@ -760,7 +770,6 @@
             </div>
           </div>
 
-          <!-- Banner alert -->
           <div
             class="riordino-alert-banner"
             id="riordinoBanner"
@@ -795,7 +804,6 @@
             </div>
           </div>
 
-          <!-- Griglia prodotti a zero -->
           <div class="riordino-grid" id="riordinoGrid">
             <div
               style="
@@ -1630,5 +1638,6 @@
     <script src="js/crud/pdf-fattura.js"></script>
     <script src="js/navigation.js"></script>
     <script src="js/crud/stampe.js"></script>
+
   </body>
 </html>
