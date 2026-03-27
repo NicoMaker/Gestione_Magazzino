@@ -566,7 +566,7 @@ tbody tr:hover {
   gap: 10px;
   padding: 12px 24px;
   border: none;
-  border-radius: 14px;
+  border-radius: 12px;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -576,11 +576,9 @@ tbody tr:hover {
 }
 
 .filter-controls .btn {
-  height: 48px;
-  padding: 0 20px;
+  padding: 11px 20px;
   font-size: 14px;
   gap: 8px;
-  box-sizing: border-box;
 }
 
 .filter-controls .btn svg,
@@ -682,7 +680,7 @@ tbody tr:hover {
 .input-date {
   padding: 12px 18px;
   border: 2px solid var(--border);
-  border-radius: 14px;
+  border-radius: 12px;
   font-size: 15px;
   transition: all 0.25s ease;
   font-family: inherit;
@@ -961,21 +959,19 @@ tbody tr:hover {
 .filter-controls {
   display: flex;
   gap: 8px;
-  align-items: center;
+  align-items: flex-end; /* Allinea in basso per pareggiare input con e senza label */
   flex-wrap: wrap;
 }
 
 .filter-input {
-  height: 48px;
-  padding: 0 18px;
+  padding: 12px 18px;
   border: 2px solid var(--border);
-  border-radius: 14px;
+  border-radius: 12px;
   font-size: 15px;
   min-width: 200px;
   transition: all 0.25s ease;
   background: white;
   font-family: inherit;
-  box-sizing: border-box;
 }
 
 .filter-input:focus {
@@ -4271,7 +4267,7 @@ input {
   background: white;
   color: var(--text-secondary);
   border: 2px solid var(--border);
-  border-radius: 14px;
+  border-radius: 12px;
   padding: 10px 16px;
   font-size: 14px;
   font-weight: 600;
