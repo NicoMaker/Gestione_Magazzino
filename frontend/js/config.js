@@ -17,9 +17,7 @@ function downloadDatabase(event) {
   link.click();
   document.body.removeChild(link);
 
-  if (typeof showNotification === "function") {
-    showNotification("📥 Download database avviato...", "info");
-  }
+
 }
 
 // ==================== STATO GLOBALE ====================
