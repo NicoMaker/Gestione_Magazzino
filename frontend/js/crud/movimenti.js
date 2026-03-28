@@ -114,23 +114,21 @@ function renderMovimenti() {
   tbody.innerHTML = movimenti
     .map((m) => {
       const isScarico = m.tipo === "scarico";
-      const prefix = isScarico ? "-" : "";
       const colorClass = isScarico ? "text-red" : "text-green";
 
-      // 1. Quantità con segno (senza grassetto)
-      const quantitaHtml = `${prefix}${formatQuantity(m.quantita)}`;
+      // 1. Quantità (sempre positiva)
+      const quantitaHtml = `${formatQuantity(m.quantita)}`;
 
       // 2. Prezzo Unitario
       let prezzoUnitHtml = "-";
       if (m.tipo === "carico") {
         prezzoUnitHtml = formatCurrency(m.prezzo);
       } else if (isScarico && m.prezzo_unitario_scarico != null) {
-        prezzoUnitHtml = formatCurrency(m.prezzo_unitario_scarico).replace("€", `${prefix}€`);
+        prezzoUnitHtml = formatCurrency(m.prezzo_unitario_scarico);
       }
 
-      // 3. Prezzo Totale (mantiene il grassetto come da tua richiesta originale)
-      const prezzoTotHtml = formatCurrency(m.prezzo_totale_movimento || 0)
-        .replace("€", `${prefix}€`);
+      // 3. Prezzo Totale (sempre positivo)
+      const prezzoTotHtml = formatCurrency(Math.abs(m.prezzo_totale_movimento || 0));
 
       const descr = m.prodotto_descrizione
         ? `<small>${escapeHtml(m.prodotto_descrizione.substring(0, 30))}${m.prodotto_descrizione.length > 30 ? "…" : ""}</small>`
