@@ -6,7 +6,6 @@ const path = require("path");
 const http = require("http");
 const { Server } = require("socket.io");
 const os = require("os");
-const fs = require("fs");
 const { initDatabase } = require("./db/init");
 
 const authRoutes = require("./routes/auth");
@@ -16,6 +15,7 @@ const datiRoutes = require("./routes/dati");
 const magazzinoRoutes = require("./routes/magazzino");
 const utentiRoutes = require("./routes/utenti");
 const downloadRoutes = require("./routes/dowload");
+const avvioHtmlRoutes = require("./routes/avvioHtml");
 
 // ========================================
 // 🌐 CONFIGURAZIONE VPS
@@ -33,7 +33,7 @@ const server = http.createServer(app);
 // ========================================
 const io = new Server(server, {
   cors: {
-    origin: "*", // In produzione considera di limitare agli origin specifici
+    origin: "*",
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -51,7 +51,7 @@ app.set("io", io);
 // ========================================
 app.use(
   cors({
-    origin: "*", // In produzione limita agli origin necessari
+    origin: "*",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
@@ -64,7 +64,7 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 // Serve static files dalla cartella frontend
 app.use(express.static(path.join(__dirname, "../frontend")));
 
-// Log delle richieste (utile per debug)
+// Log delle richieste API (utile per debug)
 app.use((req, res, next) => {
   if (req.path.startsWith("/api")) {
     console.log(
@@ -74,8 +74,6 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/api/admin", downloadRoutes);
-
 // ========================================
 // 💾 INIZIALIZZA DATABASE
 // ========================================
@@ -84,6 +82,7 @@ initDatabase();
 // ========================================
 // 🛣️ API ROUTES
 // ========================================
+app.use("/api/admin", downloadRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/marche", marcheRoutes);
 app.use("/api/prodotti", prodottiRoutes);
@@ -106,7 +105,6 @@ app.get("/api/health", async (req, res) => {
   });
 });
 
-
 // ========================================
 // 🔌 GESTIONE CONNESSIONI SOCKET.IO
 // ========================================
@@ -115,7 +113,6 @@ io.on("connection", (socket) => {
     `✅ Client connesso: ${socket.id} da ${socket.handshake.address}`,
   );
 
-  // Invia conferma di connessione
   socket.emit("connected", {
     message: "Connesso al server",
     timestamp: new Date().toISOString(),
@@ -129,7 +126,6 @@ io.on("connection", (socket) => {
     console.error(`⚠️ Errore Socket.IO (${socket.id}):`, error);
   });
 
-  // Listener custom per test connessione
   socket.on("ping", () => {
     socket.emit("pong", { timestamp: new Date().toISOString() });
   });
@@ -142,7 +138,6 @@ function getLocalIP() {
   const interfaces = os.networkInterfaces();
   for (const name of Object.keys(interfaces)) {
     for (const iface of interfaces[name]) {
-      // Salta IPv6 e localhost
       if (iface.family === "IPv4" && !iface.internal) {
         return iface.address;
       }
@@ -177,17 +172,14 @@ async function getPublicIP() {
 }
 
 // ========================================
-// 🏠 SERVE INDEX.HTML PER TUTTE LE ROUTE NON-API (SPA)
+// 🏠 AVVIO PAGINA INIZIALE (SPA FALLBACK) — deve stare DOPO le API
 // ========================================
-app.get("*", (req, res) => {
-  // Non interferire con le route API
+app.use((req, res, next) => {
   if (req.path.startsWith("/api")) {
     return res.status(404).json({ error: "Endpoint API non trovato" });
   }
-
-  // Serve index.html per tutte le altre route (SPA routing)
-  res.sendFile(path.join(__dirname, "../frontend", "index.html"));
-});
+  next();
+}, avvioHtmlRoutes);
 
 // ========================================
 // ⚠️ GESTIONE ERRORI
