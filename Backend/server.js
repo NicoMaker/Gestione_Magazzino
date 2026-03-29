@@ -15,6 +15,7 @@ const prodottiRoutes = require("./routes/prodotti");
 const datiRoutes = require("./routes/dati");
 const magazzinoRoutes = require("./routes/magazzino");
 const utentiRoutes = require("./routes/utenti");
+const downloadRoutes = require("./routes/dowload");
 
 // ========================================
 // 🌐 CONFIGURAZIONE VPS
@@ -73,6 +74,8 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use("/api/admin", downloadRoutes);
+
 // ========================================
 // 💾 INIZIALIZZA DATABASE
 // ========================================
@@ -103,51 +106,6 @@ app.get("/api/health", async (req, res) => {
   });
 });
 
-// ========================================
-// 💾 DOWNLOAD DATABASE
-// Endpoint: GET /api/admin/download-db
-// Scarica il file magazzino.db in locale
-// ========================================
-app.get("/api/admin/download-db", (req, res) => {
-  // Percorso del file database (backend/db/magazzino.db)
-  const dbPath = path.join(__dirname, "db", "magazzino.db");
-
-  // Verifica che il file esista
-  if (!fs.existsSync(dbPath)) {
-    console.error("❌ File database non trovato:", dbPath);
-    return res.status(404).json({
-      error: "File database non trovato",
-      path: dbPath,
-    });
-  }
-
-  // Nome del file scaricato con data e ora per tracciabilità
-  const now = new Date();
-  const timestamp = now
-    .toISOString()
-    .replace(/[:.]/g, "-")
-    .replace("T", "_")
-    .slice(0, 19);
-  const downloadFilename = `magazzino_backup_${timestamp}.db`;
-
-  console.log(`📥 Download DB richiesto - File: ${downloadFilename}`);
-
-  // Invia il file come download
-  res.setHeader("Content-Type", "application/octet-stream");
-  res.setHeader(
-    "Content-Disposition",
-    `attachment; filename="${downloadFilename}"`,
-  );
-
-  const fileStream = fs.createReadStream(dbPath);
-  fileStream.on("error", (err) => {
-    console.error("❌ Errore lettura DB:", err);
-    if (!res.headersSent) {
-      res.status(500).json({ error: "Errore durante la lettura del database" });
-    }
-  });
-  fileStream.pipe(res);
-});
 
 // ========================================
 // 🔌 GESTIONE CONNESSIONI SOCKET.IO
