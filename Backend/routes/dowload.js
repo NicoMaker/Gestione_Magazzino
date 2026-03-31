@@ -15,12 +15,7 @@ router.get("/download-db", (req, res) => {  // ← tolto /api/admin/ perché è 
     });
   }
 
-  const timestamp = new Date()
-    .toISOString()
-    .replace(/[:.]/g, "-")
-    .replace("T", "_")
-    .slice(0, 19);
-  const downloadFilename = `magazzino_backup_${timestamp}.db`;
+  const downloadFilename = "magazzino.db";
 
   console.log(`📥 Download DB richiesto - File: ${downloadFilename}`);
 
