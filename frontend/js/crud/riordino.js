@@ -20,41 +20,35 @@ async function loadRiordinoSection() {
       <span>Caricamento prodotti...</span>
     </div>`;
 
-  // ── Usa allProdotti già in memoria se disponibile, altrimenti fetcha ──
+  // ── Fetch SEMPRE dal server per avere dati aggiornati ──
   let tuttiProdotti = [];
-
-  if (Array.isArray(allProdotti) && allProdotti.length > 0) {
-    // Dati già in memoria — usa quelli direttamente
-    tuttiProdotti = allProdotti;
-  } else {
-    // Fetch dal server
-    try {
-      const url = (typeof API_URL !== "undefined" ? API_URL : "api") + "/prodotti";
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      tuttiProdotti = await res.json();
-      allProdotti = tuttiProdotti;
-      prodotti = allProdotti;
-    } catch (e) {
-      console.error("Errore riordino fetch:", e);
-      if (grid) grid.innerHTML = `
-        <div class="riordino-empty">
-          <div class="riordino-empty-icon riordino-empty-icon--red">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-          </div>
-          <p class="riordino-empty-title" style="color:#dc2626;">Errore di caricamento</p>
-          <p class="riordino-empty-sub">Impossibile caricare i prodotti.<br>
-            <button onclick="loadRiordinoSection()" style="margin-top:10px;padding:8px 16px;background:#6366f1;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">
-              🔄 Riprova
-            </button>
-          </p>
-        </div>`;
-      return;
-    }
+  try {
+    const url = (typeof API_URL !== "undefined" ? API_URL : "api") + "/prodotti";
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    tuttiProdotti = await res.json();
+    // Aggiorna anche la cache globale usata dal resto dell'app
+    allProdotti = tuttiProdotti;
+    prodotti = allProdotti;
+  } catch (e) {
+    console.error("Errore riordino fetch:", e);
+    if (grid) grid.innerHTML = `
+      <div class="riordino-empty">
+        <div class="riordino-empty-icon riordino-empty-icon--red">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </div>
+        <p class="riordino-empty-title" style="color:#dc2626;">Errore di caricamento</p>
+        <p class="riordino-empty-sub">Impossibile caricare i prodotti.<br>
+          <button onclick="loadRiordinoSection()" style="margin-top:10px;padding:8px 16px;background:#6366f1;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">
+            🔄 Riprova
+          </button>
+        </p>
+      </div>`;
+    return;
   }
 
   // Filtra giacenza zero
@@ -299,10 +293,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const sectionEl = document.getElementById("section-riordino");
   if (!sectionEl) return;
 
+  // Ricarica sempre quando la sezione diventa attiva (non solo la prima volta)
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((m) => {
       if (m.type === "attributes" && m.attributeName === "class") {
-        if (sectionEl.classList.contains("active") && !window._riordinoLoaded) {
+        if (sectionEl.classList.contains("active")) {
           loadRiordinoSection();
         }
       }
@@ -310,4 +305,29 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   observer.observe(sectionEl, { attributes: true, attributeFilter: ["class"] });
+
+  // ── Aggiornamento real-time via Socket.IO ──────────────────
+  // Se la sezione riordino è aperta e arriva un aggiornamento
+  // da un altro client (o dalla stessa tab dopo un movimento),
+  // ricarica automaticamente senza bisogno di refresh.
+  if (typeof io !== "undefined") {
+    const socket = typeof window._socket !== "undefined" ? window._socket : io();
+    window._socket = socket;
+
+    const eventiDaAscoltare = [
+      "magazzino_aggiornato",
+      "prodotti_aggiornati",
+      "prodotto_aggiunto",
+      "prodotto_modificato",
+      "prodotto_eliminato",
+    ];
+
+    eventiDaAscoltare.forEach((evento) => {
+      socket.on(evento, () => {
+        if (sectionEl.classList.contains("active")) {
+          loadRiordinoSection();
+        }
+      });
+    });
+  }
 });
