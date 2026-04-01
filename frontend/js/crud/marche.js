@@ -70,67 +70,6 @@ function editMarca(id) {
 }
 
 async function deleteMarca(id, nome) {
-  const prodottiCount = allProdotti.filter((p) => p.marca_id === id).length;
-  let messaggio = `Sei sicuro di voler eliminare la marca "<strong>${escapeHtml(nome)}</strong>"?`;
-  if (prodottiCount > 0) {
-    messaggio += `
-      <div style="margin-top:15px;padding:12px;background:rgba(239,68,68,0.1);border-radius:8px;">
-        <span style="color:var(--danger);font-weight:700;display:block;">⚠️ ATTENZIONE</span>
-        Ci sono <strong>${prodottiCount}</strong> prodotti collegati. non ti lascia eliminare!
-      </div>`;
-  }
-  const confermato = await showConfirmModal(messaggio, "Elimina Marca");
-  if (!confermato) return;
-
-  try {
-    const res = await fetch(`${API_URL}/marche/${id}`, { method: "DELETE" });
-    const data = await res.json();
-    if (res.ok) {
-      showAlertModal(
-        `Marca "${nome}" eliminata.`,
-        "Operazione Completata",
-        "success",
-      );
-      await loadMarche();
-      if (prodottiCount > 0) await loadProdotti();
-    } else {
-      throw new Error(data.error || "Errore eliminazione");
-    }
-  } catch (error) {
-    showAlertModal(`Errore: ${error.message}`, "Errore", "error");
-  }
-}
-
-// ── Submit form marca ────────────────────────────────────────
-document.getElementById("formMarca").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const id = document.getElementById("marcaId").value;
-  const nome = document.getElementById("marcaNome").value.trim();
-  const method = id ? "PUT" : "POST";
-  const url = id ? `${API_URL}/marche/${id}` : `${API_URL}/marche`;
-
-  try {
-    const res = await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nome }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      if (typeof ignoreNextSocketUpdate === "function")
-        ignoreNextSocketUpdate();
-      alert(id ? "Marca aggiornata!" : "Marca creata!");
-      closeMarcaModal();
-      loadMarche();
-    } else {
-      alert(data.error || "Errore durante il salvataggio");
-    }
-  } catch {
-    alert("Errore di connessione");
-  }
-});
-
-async function deleteMarca(id, nome) {
   // Calcolo prodotti collegati basandosi sui dati in memoria
   const prodottiCount = allProdotti.filter((p) => p.marca_id === id).length;
   
@@ -173,3 +112,32 @@ async function deleteMarca(id, nome) {
     showAlertModal(`Errore: ${error.message}`, "Errore", "error");
   }
 }
+
+// ── Submit form marca ────────────────────────────────────────
+document.getElementById("formMarca").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const id = document.getElementById("marcaId").value;
+  const nome = document.getElementById("marcaNome").value.trim();
+  const method = id ? "PUT" : "POST";
+  const url = id ? `${API_URL}/marche/${id}` : `${API_URL}/marche`;
+
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      if (typeof ignoreNextSocketUpdate === "function")
+        ignoreNextSocketUpdate();
+      alert(id ? "Marca aggiornata!" : "Marca creata!");
+      closeMarcaModal();
+      loadMarche();
+    } else {
+      alert(data.error || "Errore durante il salvataggio");
+    }
+  } catch {
+    alert("Errore di connessione");
+  }
+});
