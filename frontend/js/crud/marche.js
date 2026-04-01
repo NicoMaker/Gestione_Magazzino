@@ -129,3 +129,47 @@ document.getElementById("formMarca").addEventListener("submit", async (e) => {
     alert("Errore di connessione");
   }
 });
+
+async function deleteMarca(id, nome) {
+  // Calcolo prodotti collegati basandosi sui dati in memoria
+  const prodottiCount = allProdotti.filter((p) => p.marca_id === id).length;
+  
+  // Messaggio principale centrato
+  let messaggio = `<div style="text-align:center; margin-bottom:15px;">Sei sicuro di voler eliminare la marca "<strong>${escapeHtml(nome)}</strong>"?</div>`;
+  
+  if (prodottiCount > 0) {
+    // Box rosso di avviso perfettamente centrato e stilizzato
+    messaggio += `
+      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:15px; background:rgba(239,68,68,0.08); border-radius:12px; border:1px solid rgba(239,68,68,0.2); width:100%; box-sizing:border-box;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+          <svg style="width:28px; height:28px; color:#ff4d4d;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <span style="color:#ff4d4d; font-weight:800; font-size:14px; letter-spacing:1px;">ATTENZIONE</span>
+        </div>
+        <p style="margin:0; font-size:15px; color:var(--text-primary); text-align:center; line-height:1.4;">
+          Ci sono <strong>${prodottiCount}</strong> prodotti collegati. Non ti lascia eliminare!
+        </p>
+      </div>`;
+  }
+
+  const confermato = await showConfirmModal(messaggio, "Elimina Marca");
+  if (!confermato) return;
+
+  try {
+    const res = await fetch(`${API_URL}/marche/${id}`, { method: "DELETE" });
+    const data = await res.json();
+    if (res.ok) {
+      if (typeof ignoreNextSocketUpdate === "function") ignoreNextSocketUpdate();
+      showAlertModal(`Marca "${nome}" eliminata.`, "Operazione Completata", "success");
+      await loadMarche();
+      if (prodottiCount > 0 && typeof loadProdotti === "function") await loadProdotti();
+    } else {
+      throw new Error(data.error || "Errore eliminazione");
+    }
+  } catch (error) {
+    showAlertModal(`Errore: ${error.message}`, "Errore", "error");
+  }
+}

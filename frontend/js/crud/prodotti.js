@@ -247,3 +247,103 @@ function selectMarca(id, nome) {
   searchInput.classList.add("has-selection");
   resultsCont.classList.remove("show");
 }
+
+// ── Eliminazione prodotto ────────────────────────────────────
+async function deleteProdotto(id, nome) {
+  // Calcolo movimenti collegati basandosi sui dati in memoria
+  const movimentiCollegati = allMovimenti.filter(
+    (m) => m.prodotto_id === id,
+  ).length;
+
+  let messaggio = `Sei sicuro di voler eliminare il prodotto "<strong>${escapeHtml(nome)}</strong>"?`;
+
+  if (movimentiCollegati > 0) {
+    // Grafica centrata con icona di attenzione (come richiesto)
+    messaggio += `
+      <div style="margin-top:20px; padding:15px; background:rgba(239,68,68,0.08); border-radius:12px; border:1px solid rgba(239,68,68,0.2); text-align:center;">
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px; margin-bottom:10px;">
+          <svg style="width:32px; height:32px; color:#ff4d4d;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <span style="color:#ff4d4d; font-weight:800; font-size:14px; letter-spacing:1px;">ATTENZIONE</span>
+        </div>
+        <p style="margin:0; font-size:15px; color:var(--text-primary); line-height:1.4;">
+          Ci sono <strong>${movimentiCollegati}</strong> movimenti collegati. non ti lascia eliminare!
+        </p>
+      </div>`;
+  }
+
+  const confermato = await showConfirmModal(messaggio, "Elimina Prodotto");
+  if (!confermato) return;
+
+  try {
+    const res = await fetch(`${API_URL}/prodotti/${id}`, { method: "DELETE" });
+    const data = await res.json();
+    if (res.ok) {
+      if (typeof ignoreNextSocketUpdate === "function") ignoreNextSocketUpdate();
+      
+      showAlertModal(
+        `Prodotto "${nome}" eliminato!`,
+        "Operazione Completata",
+        "success",
+      );
+      
+      await loadProdotti();
+      // Ricarica i movimenti per aggiornare la cronologia se necessario
+      if (movimentiCollegati > 0 && typeof loadMovimenti === "function") {
+        await loadMovimenti();
+      }
+    } else {
+      throw new Error(data.error || "Errore eliminazione");
+    }
+  } catch (error) {
+    showAlertModal(`Errore: ${error.message}`, "Errore", "error");
+  }
+}
+
+
+async function deleteProdotto(id, nome) {
+  // Calcolo movimenti collegati basandosi sui dati in memoria
+  const movimentiCollegati = allMovimenti.filter((m) => m.prodotto_id === id).length;
+  
+  // Messaggio principale centrato
+  let messaggio = `<div style="text-align:center; margin-bottom:15px;">Sei sicuro di voler eliminare il prodotto "<strong>${escapeHtml(nome)}</strong>"?</div>`;
+  
+  if (movimentiCollegati > 0) {
+    // Box rosso di avviso perfettamente centrato (Flexbox)
+    messaggio += `
+      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:15px; background:rgba(239,68,68,0.08); border-radius:12px; border:1px solid rgba(239,68,68,0.2); width:100%; box-sizing:border-box;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <svg style="width:24px; height:24px; color:#ff4d4d;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <span style="color:#ff4d4d; font-weight:800; font-size:14px; letter-spacing:1px;">ATTENZIONE</span>
+        </div>
+        <p style="margin:0; font-size:15px; color:var(--text-primary); text-align:center; line-height:1.4;">
+          Ci sono <strong>${movimentiCollegati}</strong> movimenti collegati. non ti lascia eliminare!
+        </p>
+      </div>`;
+  }
+
+  const confermato = await showConfirmModal(messaggio, "Elimina Prodotto");
+  if (!confermato) return;
+
+  try {
+    const res = await fetch(`${API_URL}/prodotti/${id}`, { method: "DELETE" });
+    const data = await res.json();
+    if (res.ok) {
+      if (typeof ignoreNextSocketUpdate === "function") ignoreNextSocketUpdate();
+      showAlertModal(`Prodotto "${nome}" eliminato!`, "Operazione Completata", "success");
+      await loadProdotti();
+      if (movimentiCollegati > 0 && typeof loadMovimenti === "function") await loadMovimenti();
+    } else {
+      throw new Error(data.error || "Errore eliminazione");
+    }
+  } catch (error) {
+    showAlertModal(`Errore: ${error.message}`, "Errore", "error");
+  }
+}
