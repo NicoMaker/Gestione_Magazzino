@@ -87,7 +87,7 @@ async function deleteProdotto(id, nome) {
     messaggio += `
       <div style="margin-top:15px;padding:12px;background:rgba(239,68,68,0.1);border-radius:8px;">
         <span style="color:var(--danger);font-weight:700;display:block;">⚠️ ATTENZIONE</span>
-        Ci sono <strong>${movimentiCollegati}</strong> movimenti collegati. Verranno eliminati anch'essi!
+        Ci sono <strong>${movimentiCollegati}</strong> movimenti collegati. non ti lascia eliminare!
       </div>`;
   }
   const confermato = await showConfirmModal(messaggio, "Elimina Prodotto");
