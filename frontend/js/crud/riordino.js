@@ -14,7 +14,8 @@ async function loadRiordinoSection() {
   const banner = document.getElementById("riordinoBanner");
 
   if (banner) banner.style.display = "none";
-  if (grid) grid.innerHTML = `
+  if (grid)
+    grid.innerHTML = `
     <div class="riordino-loading">
       <div class="riordino-loading-spinner"></div>
       <span>Caricamento prodotti...</span>
@@ -23,7 +24,8 @@ async function loadRiordinoSection() {
   // ── Fetch SEMPRE dal server per avere dati aggiornati ──
   let tuttiProdotti = [];
   try {
-    const url = (typeof API_URL !== "undefined" ? API_URL : "api") + "/prodotti";
+    const url =
+      (typeof API_URL !== "undefined" ? API_URL : "api") + "/prodotti";
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     tuttiProdotti = await res.json();
@@ -32,7 +34,8 @@ async function loadRiordinoSection() {
     prodotti = allProdotti;
   } catch (e) {
     console.error("Errore riordino fetch:", e);
-    if (grid) grid.innerHTML = `
+    if (grid)
+      grid.innerHTML = `
       <div class="riordino-empty">
         <div class="riordino-empty-icon riordino-empty-icon--red">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -75,10 +78,16 @@ async function loadRiordinoSection() {
 
 // ── localStorage ─────────────────────────────────────────────
 function _getRiordinoSearch() {
-  try { return localStorage.getItem("search_riordino") || ""; } catch { return ""; }
+  try {
+    return localStorage.getItem("search_riordino") || "";
+  } catch {
+    return "";
+  }
 }
 function _saveRiordinoSearch(val) {
-  try { localStorage.setItem("search_riordino", val || ""); } catch {}
+  try {
+    localStorage.setItem("search_riordino", val || "");
+  } catch {}
 }
 function _applyRiordinoFilter(term) {
   const t = (term || "").toLowerCase().trim();
@@ -87,7 +96,7 @@ function _applyRiordinoFilter(term) {
     (p) =>
       p.nome.toLowerCase().includes(t) ||
       (p.marca_nome && p.marca_nome.toLowerCase().includes(t)) ||
-      (p.descrizione && p.descrizione.toLowerCase().includes(t))
+      (p.descrizione && p.descrizione.toLowerCase().includes(t)),
   );
 }
 
@@ -141,13 +150,15 @@ function _renderGrid(lista) {
     return;
   }
 
-  grid.innerHTML = lista.map((p) => {
-    const nome = escapeHtml(p.nome);
-    const marca = p.marca_nome ? escapeHtml(p.marca_nome) : null;
-    const descr = p.descrizione
-      ? escapeHtml(p.descrizione.substring(0, 55)) + (p.descrizione.length > 55 ? "…" : "")
-      : null;
-    return `
+  grid.innerHTML = lista
+    .map((p) => {
+      const nome = escapeHtml(p.nome);
+      const marca = p.marca_nome ? escapeHtml(p.marca_nome) : null;
+      const descr = p.descrizione
+        ? escapeHtml(p.descrizione.substring(0, 55)) +
+          (p.descrizione.length > 55 ? "…" : "")
+        : null;
+      return `
       <div class="riordino-card">
         <div class="riordino-card-info">
           <div class="riordino-card-nome" title="${nome}">${nome}</div>
@@ -165,10 +176,14 @@ function _renderGrid(lista) {
           Riordina
         </button>
       </div>`;
-  }).join("");
+    })
+    .join("");
 }
 
-function renderRiordinoSection(lista) { _renderGrid(lista); _renderBanner(); }
+function renderRiordinoSection(lista) {
+  _renderGrid(lista);
+  _renderBanner();
+}
 
 // ══════════════════════════════════════════════════════════════
 // CLICK RIORDINA → naviga Movimenti + apre modal
@@ -195,7 +210,9 @@ function _apriModalRiordino(prodottoId) {
 
     const giacenzaInfo = document.getElementById("giacenzaInfo");
     if (giacenzaInfo && giacenzaInfo.parentNode) {
-      giacenzaInfo.parentNode.querySelectorAll('[data-riordino-flag="true"]').forEach((el) => el.remove());
+      giacenzaInfo.parentNode
+        .querySelectorAll('[data-riordino-flag="true"]')
+        .forEach((el) => el.remove());
     }
     if (!prodotto) return;
 
@@ -203,7 +220,9 @@ function _apriModalRiordino(prodottoId) {
     const hiddenInput = document.getElementById("movimentoProdotto");
     selectedProdottoId = prodotto.id;
     hiddenInput.value = prodotto.id;
-    searchInput.value = prodotto.nome + (prodotto.marca_nome ? ` (${prodotto.marca_nome.toUpperCase()})` : "");
+    searchInput.value =
+      prodotto.nome +
+      (prodotto.marca_nome ? ` (${prodotto.marca_nome.toUpperCase()})` : "");
     searchInput.classList.add("has-selection");
     showGiacenzaInfo(prodotto.id);
 
@@ -212,7 +231,9 @@ function _apriModalRiordino(prodottoId) {
       flag.setAttribute("data-riordino-flag", "true");
       giacenzaInfo.parentNode.insertBefore(flag, giacenzaInfo);
     }
-    document.getElementById("movimentoData").value = new Date().toISOString().split("T")[0];
+    document.getElementById("movimentoData").value = new Date()
+      .toISOString()
+      .split("T")[0];
     document.getElementById("movimentoQuantita").focus();
   }, 150);
 }
@@ -222,8 +243,14 @@ function _apriModalRiordino(prodottoId) {
 // ══════════════════════════════════════════════════════════════
 function handleRiordino(movimentoId) {
   const movimento = allMovimenti.find((m) => m.id === movimentoId);
-  if (!movimento) { alert("❌ Movimento non trovato"); return; }
-  if (movimento.tipo !== "carico") { alert("❌ Puoi riordinare solo i carichi!"); return; }
+  if (!movimento) {
+    alert("❌ Movimento non trovato");
+    return;
+  }
+  if (movimento.tipo !== "carico") {
+    alert("❌ Puoi riordinare solo i carichi!");
+    return;
+  }
   openRiordinoModal(movimento);
 }
 
@@ -243,17 +270,23 @@ function precompileRiordino(movimento) {
 
   const giacenzaInfo = document.getElementById("giacenzaInfo");
   if (giacenzaInfo && giacenzaInfo.parentNode) {
-    giacenzaInfo.parentNode.querySelectorAll('[data-riordino-flag="true"]').forEach((el) => el.remove());
+    giacenzaInfo.parentNode
+      .querySelectorAll('[data-riordino-flag="true"]')
+      .forEach((el) => el.remove());
   }
 
   const searchInput = document.getElementById("movimentoProdottoSearch");
   const hiddenInput = document.getElementById("movimentoProdotto");
-  const prodotto = (allProdotti || []).find((p) => p.id === movimento.prodotto_id);
+  const prodotto = (allProdotti || []).find(
+    (p) => p.id === movimento.prodotto_id,
+  );
 
   if (prodotto) {
     selectedProdottoId = prodotto.id;
     hiddenInput.value = prodotto.id;
-    searchInput.value = prodotto.nome + (prodotto.marca_nome ? ` (${prodotto.marca_nome.toUpperCase()})` : "");
+    searchInput.value =
+      prodotto.nome +
+      (prodotto.marca_nome ? ` (${prodotto.marca_nome.toUpperCase()})` : "");
     searchInput.classList.add("has-selection");
     showGiacenzaInfo(prodotto.id);
     if (giacenzaInfo && giacenzaInfo.parentNode) {
@@ -271,11 +304,18 @@ function precompileRiordino(movimento) {
     if (giacenzaInfo) giacenzaInfo.style.display = "none";
     document.getElementById("movimentoProdottoSearch").focus();
   }
-  document.getElementById("movimentoData").value = movimento.data_movimento.split("T")[0];
-  document.getElementById("movimentoQuantita").value = parseFloat(movimento.quantita || 0).toFixed(2);
-  document.getElementById("movimentoPrezzo").value = parseFloat(movimento.prezzo || 0).toFixed(2);
-  document.getElementById("movimentoFattura").value = movimento.fattura_doc || "";
-  document.getElementById("movimentoFornitore").value = movimento.fornitore_cliente_id || "";
+  document.getElementById("movimentoData").value =
+    movimento.data_movimento.split("T")[0];
+  document.getElementById("movimentoQuantita").value = parseFloat(
+    movimento.quantita || 0,
+  ).toFixed(2);
+  document.getElementById("movimentoPrezzo").value = parseFloat(
+    movimento.prezzo || 0,
+  ).toFixed(2);
+  document.getElementById("movimentoFattura").value =
+    movimento.fattura_doc || "";
+  document.getElementById("movimentoFornitore").value =
+    movimento.fornitore_cliente_id || "";
 }
 
 // ── Export globale ───────────────────────────────────────────
@@ -311,7 +351,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // da un altro client (o dalla stessa tab dopo un movimento),
   // ricarica automaticamente senza bisogno di refresh.
   if (typeof io !== "undefined") {
-    const socket = typeof window._socket !== "undefined" ? window._socket : io();
+    const socket =
+      typeof window._socket !== "undefined" ? window._socket : io();
     window._socket = socket;
 
     const eventiDaAscoltare = [

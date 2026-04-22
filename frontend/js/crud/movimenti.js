@@ -24,18 +24,17 @@ async function loadMovimenti() {
     renderAlertRiordino();
     injectDateFilters(); // Inietta i filtri data
     reapplyFilter("filterMovimenti");
-    
+
     // Applica il filtro per tipo salvato in localStorage
-    const savedTipo = localStorage.getItem('movimenti_tipo_filter');
+    const savedTipo = localStorage.getItem("movimenti_tipo_filter");
     if (savedTipo) {
-      const tipoFilterElement = document.getElementById('movimentiTipoFilter');
+      const tipoFilterElement = document.getElementById("movimentiTipoFilter");
       if (tipoFilterElement) {
         tipoFilterElement.value = savedTipo;
         // La funzione filterMovimenti verrà chiamata da reapplyFilter o da un'altra logica di inizializzazione
       }
     }
     filterMovimenti(); // Chiamata iniziale per applicare tutti i filtri
-    
   } catch (error) {
     console.error("Errore caricamento movimenti", error);
   }
@@ -52,41 +51,51 @@ function filterMovimentiByTipo(tipo) {
 
 // Modifica la funzione filterMovimenti per includere il filtro per tipo
 function filterMovimenti() {
-  const searchTerm = document.getElementById("filterMovimenti") ? document.getElementById("filterMovimenti").value.toLowerCase() : "";
-  const startDate = document.getElementById("filterMovimentiStart") ? document.getElementById("filterMovimentiStart").value : null;
-  const endDate = document.getElementById("filterMovimentiEnd") ? document.getElementById("filterMovimentiEnd").value : null;
-  const tipo = document.getElementById("movimentiTipoFilter") ? document.getElementById("movimentiTipoFilter").value : "tutti";
+  const searchTerm = document.getElementById("filterMovimenti")
+    ? document.getElementById("filterMovimenti").value.toLowerCase()
+    : "";
+  const startDate = document.getElementById("filterMovimentiStart")
+    ? document.getElementById("filterMovimentiStart").value
+    : null;
+  const endDate = document.getElementById("filterMovimentiEnd")
+    ? document.getElementById("filterMovimentiEnd").value
+    : null;
+  const tipo = document.getElementById("movimentiTipoFilter")
+    ? document.getElementById("movimentiTipoFilter").value
+    : "tutti";
 
   let filtered = allMovimenti;
 
   // Filtro per tipo
   if (tipo === "carico") {
-    filtered = filtered.filter(m => m.tipo === "carico");
+    filtered = filtered.filter((m) => m.tipo === "carico");
   } else if (tipo === "scarico") {
-    filtered = filtered.filter(m => m.tipo === "scarico");
+    filtered = filtered.filter((m) => m.tipo === "scarico");
   }
 
   // Filtro per testo
   if (searchTerm) {
-    filtered = filtered.filter(m =>
-      (m.prodotto_nome && m.prodotto_nome.toLowerCase().includes(searchTerm)) ||
-      (m.marca_nome && m.marca_nome.toLowerCase().includes(searchTerm)) ||
-      (m.prodotto_descrizione && m.prodotto_descrizione.toLowerCase().includes(searchTerm))
+    filtered = filtered.filter(
+      (m) =>
+        (m.prodotto_nome &&
+          m.prodotto_nome.toLowerCase().includes(searchTerm)) ||
+        (m.marca_nome && m.marca_nome.toLowerCase().includes(searchTerm)) ||
+        (m.prodotto_descrizione &&
+          m.prodotto_descrizione.toLowerCase().includes(searchTerm)),
     );
   }
 
   // Filtro per data
   if (startDate) {
-    filtered = filtered.filter(m => m.data_movimento >= startDate);
+    filtered = filtered.filter((m) => m.data_movimento >= startDate);
   }
   if (endDate) {
-    filtered = filtered.filter(m => m.data_movimento <= endDate);
+    filtered = filtered.filter((m) => m.data_movimento <= endDate);
   }
 
   movimenti = filtered;
   renderMovimenti();
 }
-
 
 // ── Rendering tabella ────────────────────────────────────────
 function renderMovimenti() {
@@ -128,16 +137,17 @@ function renderMovimenti() {
       }
 
       // 3. Prezzo Totale (sempre positivo)
-      const prezzoTotHtml = formatCurrency(Math.abs(m.prezzo_totale_movimento || 0));
+      const prezzoTotHtml = formatCurrency(
+        Math.abs(m.prezzo_totale_movimento || 0),
+      );
 
       const descr = m.prodotto_descrizione
         ? `<small>${escapeHtml(m.prodotto_descrizione.substring(0, 30))}${m.prodotto_descrizione.length > 30 ? "…" : ""}</small>`
         : '<span style="color:#999;">-</span>';
 
-      const docCell =
-        isScarico
-          ? ""
-          : (() => {
+      const docCell = isScarico
+        ? ""
+        : (() => {
             const doc = m.fattura_doc || "";
             if (/\.pdf$/i.test(doc.trim())) {
               const nome = doc.trim();
@@ -314,8 +324,7 @@ document
       });
       const data = await res.json();
       if (res.ok) {
-        if (typeof skipNextSocketUpdate === "function")
-          skipNextSocketUpdate();
+        if (typeof skipNextSocketUpdate === "function") skipNextSocketUpdate();
         alert(id ? "Movimento aggiornato!" : "Movimento registrato!");
         closeMovimentoModal();
         loadMovimenti();
@@ -465,7 +474,7 @@ function renderAlertRiordino() {
 
   // Prodotti con giacenza zero (usa allProdotti che è sempre la lista completa)
   const prodottiZero = (allProdotti || []).filter(
-    (p) => (parseFloat(p.giacenza) || 0) === 0
+    (p) => (parseFloat(p.giacenza) || 0) === 0,
   );
 
   if (prodottiZero.length === 0) {
@@ -482,7 +491,7 @@ function renderAlertRiordino() {
       const marca = p.marca_nome ? escapeHtml(p.marca_nome) : null;
       const descr = p.descrizione
         ? escapeHtml(p.descrizione.substring(0, 45)) +
-        (p.descrizione.length > 45 ? "…" : "")
+          (p.descrizione.length > 45 ? "…" : "")
         : null;
 
       return `
@@ -564,8 +573,16 @@ function injectDateFilters() {
 
   // Inizializza persistenza (funzioni in search.js)
   if (typeof setupDatePersistence === "function") {
-    setupDatePersistence("filterMovimentiStart", "search_movimenti_start", filterMovimenti);
-    setupDatePersistence("filterMovimentiEnd", "search_movimenti_end", filterMovimenti);
+    setupDatePersistence(
+      "filterMovimentiStart",
+      "search_movimenti_start",
+      filterMovimenti,
+    );
+    setupDatePersistence(
+      "filterMovimentiEnd",
+      "search_movimenti_end",
+      filterMovimenti,
+    );
   }
 
   // Aggiungi validazione (Data Fine >= Data Inizio)

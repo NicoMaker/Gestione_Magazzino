@@ -214,7 +214,9 @@ server.listen(PORT, "0.0.0.0", async () => {
   console.log(`🔌 Socket.IO abilitato per sincronizzazione real-time`);
   console.log(`📂 Frontend servito da: ../frontend/index.html`);
   console.log(`🏥 Health check: http://${publicIP}:${PORT}/api/health`);
-  console.log(`💾 Download DB: http://${publicIP}:${PORT}/api/admin/download-db`);
+  console.log(
+    `💾 Download DB: http://${publicIP}:${PORT}/api/admin/download-db`,
+  );
 });
 
 // ========================================

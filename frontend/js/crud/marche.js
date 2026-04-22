@@ -72,10 +72,10 @@ function editMarca(id) {
 async function deleteMarca(id, nome) {
   // Calcolo prodotti collegati basandosi sui dati in memoria
   const prodottiCount = allProdotti.filter((p) => p.marca_id === id).length;
-  
+
   // Messaggio principale centrato
   let messaggio = `<div style="text-align:center; margin-bottom:15px;">Sei sicuro di voler eliminare la marca "<strong>${escapeHtml(nome)}</strong>"?</div>`;
-  
+
   if (prodottiCount > 0) {
     // Box rosso di avviso perfettamente centrato e stilizzato
     messaggio += `
@@ -101,10 +101,16 @@ async function deleteMarca(id, nome) {
     const res = await fetch(`${API_URL}/marche/${id}`, { method: "DELETE" });
     const data = await res.json();
     if (res.ok) {
-      if (typeof ignoreNextSocketUpdate === "function") ignoreNextSocketUpdate();
-      showAlertModal(`Marca "${nome}" eliminata.`, "Operazione Completata", "success");
+      if (typeof ignoreNextSocketUpdate === "function")
+        ignoreNextSocketUpdate();
+      showAlertModal(
+        `Marca "${nome}" eliminata.`,
+        "Operazione Completata",
+        "success",
+      );
       await loadMarche();
-      if (prodottiCount > 0 && typeof loadProdotti === "function") await loadProdotti();
+      if (prodottiCount > 0 && typeof loadProdotti === "function")
+        await loadProdotti();
     } else {
       throw new Error(data.error || "Errore eliminazione");
     }

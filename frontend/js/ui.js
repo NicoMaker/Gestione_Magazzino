@@ -447,14 +447,15 @@ async function openMovimentoModal(movimento = null) {
 
   if (!movimento) {
     // Reset SEMPRE del titolo a "Nuovo Movimento" quando si apre un nuovo movimento
-    document.getElementById("modalMovimentoTitle").textContent = "Nuovo Movimento";
+    document.getElementById("modalMovimentoTitle").textContent =
+      "Nuovo Movimento";
     if (hiddenProd) hiddenProd.value = "";
     if (searchInput) {
       searchInput.value = "";
       searchInput.classList.remove("has-selection");
     }
     if (resultsBox) resultsBox.classList.remove("show");
-    
+
     const gi = document.getElementById("giacenzaInfo");
     if (gi) {
       // Rimuovi TUTTI i flag gialli che si trovano PRIMA di giacenzaInfo
@@ -468,7 +469,7 @@ async function openMovimentoModal(movimento = null) {
           prev = prev.previousElementSibling;
         }
       }
-      
+
       // Pulisci la giacenza
       gi.style.display = "none";
     }

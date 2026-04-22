@@ -112,7 +112,8 @@ async function deleteProdotto(id, nome) {
     const res = await fetch(`${API_URL}/prodotti/${id}`, { method: "DELETE" });
     const data = await res.json();
     if (res.ok) {
-      if (typeof ignoreNextSocketUpdate === "function") ignoreNextSocketUpdate();
+      if (typeof ignoreNextSocketUpdate === "function")
+        ignoreNextSocketUpdate();
       showAlertModal(
         `Prodotto "${nome}" eliminato!`,
         "Operazione Completata",
