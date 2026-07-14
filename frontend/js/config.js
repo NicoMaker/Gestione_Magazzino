@@ -1,24 +1,16 @@
-// ==================== CONFIGURAZIONE GLOBALE ====================
-// File: config.js
-// Scopo: Costanti di configurazione e variabili di stato globali
+// ==================== CONFIGURAZIONE E STORE GLOBALE ====================
+// File: js/config.js
+// Scopo: costante API + stato applicativo condiviso tra tutti i moduli.
+//        Le variabili restano globali (a livello di script) perché i moduli
+//        sono caricati come script classici e vi accedono per nome.
+//        La funzione di download DB è stata spostata in utils.js.
 
+// Endpoint base delle API
 const API_URL = "api";
 
-// ==================== DOWNLOAD DATABASE ====================
-function downloadDatabase(event) {
-  event.preventDefault();
-
-  const downloadUrl = "/api/admin/download-db";
-
-  const link = document.createElement("a");
-  link.href = downloadUrl;
-  link.style.display = "none";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
-
-// ==================== STATO GLOBALE ====================
+// ── STATO APPLICATIVO ────────────────────────────────────────
+// Liste correnti (filtrate/visualizzate) e liste complete ("all*").
+// Ogni modulo CRUD aggiorna la propria porzione.
 let marche = [];
 let prodotti = [];
 let movimenti = [];

@@ -1609,12 +1609,16 @@
       2. realtime.js     → connessione socket + modali alert/confirm
       3. config.js       → costanti e variabili globali (API_URL, array dati)
       4. utils.js        → formatCurrency, formatQuantity, escapeHtml, decimal inputs, forceLogout
-      5. ui.js           → notifiche, modali (alert/confirm/CRUD), toggle password, open/close modal
+      5. ui/notifications.js → notifiche toast + modali alert/confirm
+         ui/formHelpers.js   → toggle password, toggle campi carico/scarico
+         ui/modals.js        → open/close di tutti i modal CRUD
       6. search.js       → sistema ricerca con memoria localStorage
       6. company-loader.js → dati aziendali (sidebar, stampe)
       7. marche.js       → CRUD marche
       8. prodotti.js     → CRUD prodotti + ricerca marca
-      9. movimenti.js    → CRUD movimenti + ricerca prodotto + toggle carico/scarico
+      9. movimenti/render.js → tabella movimenti, filtri, alert riordino
+         movimenti/search.js → ricerca prodotto nel modal
+         movimenti/data.js   → load/delete/submit movimenti
       10. riepilogo.js   → giacenze FIFO + storico + stampe
       11. utenti.js      → CRUD utenti + password toggle
       12. pdf-scarico.js → import PDF scarichi
@@ -1625,12 +1629,16 @@
     <script src="js/realtime.js"></script>
     <script src="js/config.js"></script>
     <script src="js/utils.js"></script>
-    <script src="js/ui.js"></script>
+    <script src="js/ui/notifications.js"></script>
+    <script src="js/ui/formHelpers.js"></script>
+    <script src="js/ui/modals.js"></script>
     <script src="js/search.js"></script>
     <script src="js/company-loader.js"></script>
     <script src="js/crud/marche.js"></script>
     <script src="js/crud/prodotti.js"></script>
-    <script src="js/crud/movimenti.js"></script>
+    <script src="js/crud/movimenti/render.js"></script>
+    <script src="js/crud/movimenti/search.js"></script>
+    <script src="js/crud/movimenti/data.js"></script>
     <script src="js/crud/riordino.js"></script>
     <script src="js/crud/riepilogo.js"></script>
     <script src="js/crud/utenti.js"></script>

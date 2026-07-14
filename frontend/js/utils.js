@@ -165,3 +165,15 @@ function forceLogout(message) {
   localStorage.removeItem("activeSection");
   window.location.href = "index.html";
 }
+
+// ── Download del database (file .db) ─────────────────────────
+// Spostata qui da config.js: è un'utility di azione, non stato.
+function downloadDatabase(event) {
+  event.preventDefault();
+  const link = document.createElement("a");
+  link.href = "/api/admin/download-db";
+  link.style.display = "none";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
