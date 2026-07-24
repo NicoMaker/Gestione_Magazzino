@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "dati": "node scripts/seed.js",
+    "dati": "node src/scripts/seed.js",
     "start_dati": "npm run dati && npm start",
     "dev_dati": "npm run dati && npm run dev"
   },
