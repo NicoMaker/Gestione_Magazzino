@@ -70,7 +70,8 @@ function bulkUpdateToolbar(entity) {
   const all = document.querySelectorAll(`.bulk-cb[data-entity="${entity}"]`);
   const n = bulkChecked(entity).length;
   if (toolbar) toolbar.style.display = n > 0 ? "flex" : "none";
-  if (countEl) countEl.textContent = n + (n === 1 ? " selezionato" : " selezionati");
+  if (countEl)
+    countEl.textContent = n + (n === 1 ? " selezionato" : " selezionati");
   if (selAll) {
     selAll.checked = n > 0 && n === all.length;
     selAll.indeterminate = n > 0 && n < all.length;

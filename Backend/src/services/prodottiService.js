@@ -9,15 +9,24 @@ const { formatDecimal, formatQtaIT } = require("../utils/decimal");
 const prodottiService = {
   async lista() {
     const rows = await repo.listaConGiacenza();
-    return rows.map((row) => ({ ...row, giacenza: formatDecimal(row.giacenza) }));
+    return rows.map((row) => ({
+      ...row,
+      giacenza: formatDecimal(row.giacenza),
+    }));
   },
 
   async crea({ nome, marca_id, descrizione }) {
-    if (!nome || !nome.trim()) throw new HttpError(400, "Nome prodotto obbligatorio");
+    if (!nome || !nome.trim())
+      throw new HttpError(400, "Nome prodotto obbligatorio");
     const data_creazione = new Date().toISOString();
     let result;
     try {
-      result = await repo.crea(nome.trim(), marca_id || null, descrizione || null, data_creazione);
+      result = await repo.crea(
+        nome.trim(),
+        marca_id || null,
+        descrizione || null,
+        data_creazione,
+      );
     } catch (err) {
       if (String(err.message).includes("UNIQUE"))
         throw new HttpError(400, "Prodotto già esistente");
@@ -30,10 +39,16 @@ const prodottiService = {
   },
 
   async aggiorna(id, { nome, marca_id, descrizione }) {
-    if (!nome || !nome.trim()) throw new HttpError(400, "Nome prodotto obbligatorio");
+    if (!nome || !nome.trim())
+      throw new HttpError(400, "Nome prodotto obbligatorio");
     let result;
     try {
-      result = await repo.aggiorna(id, nome.trim(), marca_id || null, descrizione || null);
+      result = await repo.aggiorna(
+        id,
+        nome.trim(),
+        marca_id || null,
+        descrizione || null,
+      );
     } catch (err) {
       if (String(err.message).includes("UNIQUE"))
         throw new HttpError(400, "Prodotto già esistente");

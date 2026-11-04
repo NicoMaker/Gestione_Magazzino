@@ -37,10 +37,9 @@ const movimentiRepository = {
   },
 
   trovaMovimentoBase(id) {
-    return dbGet(
-      "SELECT prodotto_id, tipo, quantita FROM dati WHERE id = ?",
-      [id],
-    );
+    return dbGet("SELECT prodotto_id, tipo, quantita FROM dati WHERE id = ?", [
+      id,
+    ]);
   },
 
   async inserisciMovimento(m) {
@@ -64,15 +63,36 @@ const movimentiRepository = {
     return r.lastID;
   },
 
-  aggiornaMovimentoCarico(id, { quantita, prezzo, prezzo_totale_movimento, data_movimento, fattura_doc, fornitore }) {
+  aggiornaMovimentoCarico(
+    id,
+    {
+      quantita,
+      prezzo,
+      prezzo_totale_movimento,
+      data_movimento,
+      fattura_doc,
+      fornitore,
+    },
+  ) {
     return dbRun(
       `UPDATE dati SET quantita=?, prezzo=?, prezzo_totale_movimento=?,
          data_movimento=?, fattura_doc=?, fornitore_cliente_id=? WHERE id=?`,
-      [quantita, prezzo, prezzo_totale_movimento, data_movimento, fattura_doc, fornitore, id],
+      [
+        quantita,
+        prezzo,
+        prezzo_totale_movimento,
+        data_movimento,
+        fattura_doc,
+        fornitore,
+        id,
+      ],
     );
   },
 
-  aggiornaMovimentoScarico(id, { quantita, prezzo_totale_movimento, data_movimento, fattura_doc }) {
+  aggiornaMovimentoScarico(
+    id,
+    { quantita, prezzo_totale_movimento, data_movimento, fattura_doc },
+  ) {
     return dbRun(
       `UPDATE dati SET quantita=?, prezzo_totale_movimento=?, data_movimento=?, fattura_doc=? WHERE id=?`,
       [quantita, prezzo_totale_movimento, data_movimento, fattura_doc, id],
@@ -154,11 +174,29 @@ const movimentiRepository = {
     ]);
   },
 
-  aggiornaLottoCarico(lottoId, { quantita_iniziale, quantita_rimanente, prezzo, data_carico, fattura_doc, fornitore }) {
+  aggiornaLottoCarico(
+    lottoId,
+    {
+      quantita_iniziale,
+      quantita_rimanente,
+      prezzo,
+      data_carico,
+      fattura_doc,
+      fornitore,
+    },
+  ) {
     return dbRun(
       `UPDATE lotti SET quantita_iniziale=?, quantita_rimanente=?, prezzo=?,
          data_carico=?, fattura_doc=?, fornitore=? WHERE id=?`,
-      [quantita_iniziale, quantita_rimanente, prezzo, data_carico, fattura_doc, fornitore, lottoId],
+      [
+        quantita_iniziale,
+        quantita_rimanente,
+        prezzo,
+        data_carico,
+        fattura_doc,
+        fornitore,
+        lottoId,
+      ],
     );
   },
 

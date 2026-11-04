@@ -4653,9 +4653,30 @@ input {
   }
 }
 
-
 /* ==================== ELIMINAZIONE MULTIPLA ==================== */
-.bulk-col { width: 40px; text-align: center; }
-.bulk-col input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: #ef4444; }
-.bulk-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 12px; padding: 10px 14px; border-radius: 12px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); }
-.bulk-count { font-weight: 700; font-size: 14px; margin-right: auto; }
+.bulk-col {
+  width: 40px;
+  text-align: center;
+}
+.bulk-col input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #ef4444;
+}
+.bulk-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+.bulk-count {
+  font-weight: 700;
+  font-size: 14px;
+  margin-right: auto;
+}

@@ -29,7 +29,11 @@ const utentiService = {
     const hashedPassword = await bcrypt.hash(password, 10);
     let result;
     try {
-      result = await repo.crea(username.trim(), hashedPassword, new Date().toISOString());
+      result = await repo.crea(
+        username.trim(),
+        hashedPassword,
+        new Date().toISOString(),
+      );
     } catch (err) {
       if (String(err.message).includes("UNIQUE"))
         throw new HttpError(400, "Username già esistente");
@@ -117,7 +121,10 @@ const utentiService = {
       ids,
       async (id) => {
         if (nomi[id] && nomi[id] === currentUser)
-          throw new HttpError(400, "Non puoi eliminare il tuo account in blocco");
+          throw new HttpError(
+            400,
+            "Non puoi eliminare il tuo account in blocco",
+          );
         return this.elimina(id, currentUser);
       },
       nomi,

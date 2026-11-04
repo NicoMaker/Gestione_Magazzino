@@ -43,7 +43,8 @@ function filterMovimenti() {
     );
   }
 
-  if (startDate) filtered = filtered.filter((m) => m.data_movimento >= startDate);
+  if (startDate)
+    filtered = filtered.filter((m) => m.data_movimento >= startDate);
   if (endDate) filtered = filtered.filter((m) => m.data_movimento <= endDate);
 
   movimenti = filtered;
@@ -91,7 +92,9 @@ function rigaMovimento(m) {
     prezzoUnitHtml = formatCurrency(m.prezzo_unitario_scarico);
   }
 
-  const prezzoTotHtml = formatCurrency(Math.abs(m.prezzo_totale_movimento || 0));
+  const prezzoTotHtml = formatCurrency(
+    Math.abs(m.prezzo_totale_movimento || 0),
+  );
 
   const descr = m.prodotto_descrizione
     ? `<small>${escapeHtml(m.prodotto_descrizione.substring(0, 30))}${m.prodotto_descrizione.length > 30 ? "…" : ""}</small>`
@@ -252,8 +255,16 @@ function injectDateFilters() {
 
   // Persistenza (funzioni in search.js)
   if (typeof setupDatePersistence === "function") {
-    setupDatePersistence("filterMovimentiStart", "search_movimenti_start", filterMovimenti);
-    setupDatePersistence("filterMovimentiEnd", "search_movimenti_end", filterMovimenti);
+    setupDatePersistence(
+      "filterMovimentiStart",
+      "search_movimenti_start",
+      filterMovimenti,
+    );
+    setupDatePersistence(
+      "filterMovimentiEnd",
+      "search_movimenti_end",
+      filterMovimenti,
+    );
   }
 
   // Validazione Data Fine >= Data Inizio

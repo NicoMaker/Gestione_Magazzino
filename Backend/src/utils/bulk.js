@@ -13,7 +13,11 @@ async function eliminaMultipli(ids, fn, etichette = {}) {
       await fn(id);
       eliminati.push(id);
     } catch (err) {
-      saltati.push({ id, nome: etichette[id] || `#${id}`, motivo: err.message });
+      saltati.push({
+        id,
+        nome: etichette[id] || `#${id}`,
+        motivo: err.message,
+      });
     }
   }
   return { success: true, eliminati, saltati };
