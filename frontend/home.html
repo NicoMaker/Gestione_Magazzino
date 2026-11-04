@@ -246,11 +246,18 @@
             </div>
           </div>
 
+          <div id="bulkToolbar-marche" class="bulk-toolbar" style="display:none">
+            <span id="bulkCount-marche" class="bulk-count"></span>
+            <button class="btn btn-danger" onclick="bulkDelete('marche')">🗑️ Elimina selezionati</button>
+            <button class="btn btn-secondary" onclick="bulkClear('marche')">✕ Deseleziona</button>
+          </div>
+
           <div class="card">
             <div class="table-container">
               <table>
                 <thead>
                   <tr>
+                    <th class="bulk-col"><input type="checkbox" id="bulkAll-marche" onchange="bulkToggleAll('marche', this)" title="Seleziona tutti"></th>
                     <th>Nome Marca</th>
                     <th style="text-align: center">Prodotti Relazionati</th>
                     <th class="text-right">Azioni</th>
@@ -258,7 +265,7 @@
                 </thead>
                 <tbody id="marcheTableBody">
                   <tr>
-                    <td colspan="3" class="text-center">
+                    <td colspan="4" class="text-center">
                       <span>Caricamento...</span>
                     </td>
                   </tr>
@@ -299,11 +306,18 @@
             </div>
           </div>
 
+          <div id="bulkToolbar-prodotti" class="bulk-toolbar" style="display:none">
+            <span id="bulkCount-prodotti" class="bulk-count"></span>
+            <button class="btn btn-danger" onclick="bulkDelete('prodotti')">🗑️ Elimina selezionati</button>
+            <button class="btn btn-secondary" onclick="bulkClear('prodotti')">✕ Deseleziona</button>
+          </div>
+
           <div class="card">
             <div class="table-container">
               <table>
                 <thead>
                   <tr>
+                    <th class="bulk-col"><input type="checkbox" id="bulkAll-prodotti" onchange="bulkToggleAll('prodotti', this)" title="Seleziona tutti"></th>
                     <th>Codice/Telaio Prodotto</th>
                     <th>Marca</th>
                     <th>Giacenza (pz/l)</th>
@@ -313,7 +327,7 @@
                 </thead>
                 <tbody id="prodottiTableBody">
                   <tr>
-                    <td colspan="5" class="text-center">
+                    <td colspan="6" class="text-center">
                       <span>Caricamento...</span>
                     </td>
                   </tr>
@@ -533,11 +547,18 @@
             </div>
           </div>
 
+          <div id="bulkToolbar-movimenti" class="bulk-toolbar" style="display:none">
+            <span id="bulkCount-movimenti" class="bulk-count"></span>
+            <button class="btn btn-danger" onclick="bulkDelete('movimenti')">🗑️ Elimina selezionati</button>
+            <button class="btn btn-secondary" onclick="bulkClear('movimenti')">✕ Deseleziona</button>
+          </div>
+
           <div class="card">
             <div class="table-container">
               <table>
                 <thead>
                   <tr>
+                    <th class="bulk-col"><input type="checkbox" id="bulkAll-movimenti" onchange="bulkToggleAll('movimenti', this)" title="Seleziona tutti"></th>
                     <th>Data carico/scarico</th>
                     <th>Codice/Telaio Prodotto</th>
                     <th>Marca</th>
@@ -553,7 +574,7 @@
                 </thead>
                 <tbody id="movimentiTableBody">
                   <tr>
-                    <td colspan="11" class="text-center">
+                    <td colspan="12" class="text-center">
                       <span>Caricamento...</span>
                     </td>
                   </tr>
@@ -1009,18 +1030,25 @@
             </div>
           </div>
 
+          <div id="bulkToolbar-utenti" class="bulk-toolbar" style="display:none">
+            <span id="bulkCount-utenti" class="bulk-count"></span>
+            <button class="btn btn-danger" onclick="bulkDelete('utenti')">🗑️ Elimina selezionati</button>
+            <button class="btn btn-secondary" onclick="bulkClear('utenti')">✕ Deseleziona</button>
+          </div>
+
           <div class="card">
             <div class="table-container">
               <table>
                 <thead>
                   <tr>
+                    <th class="bulk-col"><input type="checkbox" id="bulkAll-utenti" onchange="bulkToggleAll('utenti', this)" title="Seleziona tutti"></th>
                     <th>Username</th>
                     <th class="text-right">Azioni</th>
                   </tr>
                 </thead>
                 <tbody id="utentiTableBody">
                   <tr>
-                    <td colspan="2" class="text-center">
+                    <td colspan="3" class="text-center">
                       <span>Caricamento...</span>
                     </td>
                   </tr>
@@ -1634,6 +1662,7 @@
     <script src="js/ui/modals.js"></script>
     <script src="js/search.js"></script>
     <script src="js/company-loader.js"></script>
+    <script src="js/crud/bulk.js"></script>
     <script src="js/crud/marche.js"></script>
     <script src="js/crud/prodotti.js"></script>
     <script src="js/crud/movimenti/render.js"></script>

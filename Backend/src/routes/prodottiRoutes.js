@@ -5,5 +5,6 @@ const router = express.Router();
 router.get("/", catchErrors(c.lista));
 router.post("/", catchErrors(c.crea));
 router.put("/:id", catchErrors(c.aggiorna));
+router.post("/elimina-multiple", catchErrors(c.eliminaMultiple));
 router.delete("/:id", catchErrors(c.elimina));
 module.exports = router;

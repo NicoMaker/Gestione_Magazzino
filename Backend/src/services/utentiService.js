@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const repo = require("../repositories/utentiRepository");
 const realtime = require("../realtime/socket");
 const { HttpError } = require("../middleware/errorHandler");
+const { eliminaMultipli } = require("../utils/bulk");
 
 function isPasswordStrong(password) {
   if (typeof password !== "string") return false;
@@ -106,6 +107,21 @@ const utentiService = {
     realtime.emit("utente_eliminato", { id, username: user.username });
     realtime.emit("utenti_aggiornati");
     return { success: true, id, utente_eliminato: isCurrentUser };
+  },
+
+  // Eliminazione multipla: salta l'utente corrente e l'ultimo utente rimasto
+  async eliminaMultiple(ids, currentUser) {
+    const lista = await repo.lista();
+    const nomi = Object.fromEntries(lista.map((u) => [u.id, u.username]));
+    return eliminaMultipli(
+      ids,
+      async (id) => {
+        if (nomi[id] && nomi[id] === currentUser)
+          throw new HttpError(400, "Non puoi eliminare il tuo account in blocco");
+        return this.elimina(id, currentUser);
+      },
+      nomi,
+    );
   },
 };
 

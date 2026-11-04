@@ -18,6 +18,10 @@ const datiController = {
     res.json(await movimentiService.modifica(req.params.id, req.body));
   },
 
+  async eliminaMultiple(req, res) {
+    res.json(await movimentiService.eliminaMultiple(req.body.ids));
+  },
+
   async elimina(req, res) {
     res.json(await movimentiService.elimina(req.params.id));
   },
