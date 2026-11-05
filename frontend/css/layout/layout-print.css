@@ -1,0 +1,40 @@
+/* Print Styles */
+@media print {
+  .sidebar,
+  .mobile-menu-toggle,
+  .section-header button,
+  .btn-icon,
+  tbody .text-right,
+  .filter-controls {
+    display: none !important;
+  }
+
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 0;
+  }
+
+  .card {
+    box-shadow: none;
+    border: 1px solid var(--border);
+    page-break-inside: avoid;
+  }
+
+  table {
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tbody {
+    display: table-row-group;
+  }
+}
