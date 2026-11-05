@@ -1,13 +1,12 @@
-const { initDatabase } = require("../config/schema");
+const { initDatabase } = require("../src/config/schema");
 const sqlite3 = require("sqlite3").verbose();
 const bcrypt = require("bcrypt");
 const path = require("path");
 const fs = require("fs");
 const readline = require("readline");
 
-// Percorso del database (cartella db/ nella radice del progetto: Backend/db/)
-const dbPath = path.join(__dirname, "..", "..", "db", "magazzino.db");
-fs.mkdirSync(path.dirname(dbPath), { recursive: true }); // crea Backend/db se manca
+// Percorso del database
+const dbPath = path.join(__dirname, "..", "db", "magazzino.db");
 const db = new sqlite3.Database(dbPath);
 
 // Configurazione da readline
@@ -158,7 +157,6 @@ function randomDateFrom(startDateString) {
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   return randomDate(diffDays);
 }
-
 // Genera nome utente univoco
 function generateUsername(index, baseNames) {
   if (index < baseNames.length) {
@@ -206,8 +204,8 @@ async function seedDatabase() {
   const startTime = Date.now();
 
   try {
-    // Carica configurazione da JSON (cartella db/ nella radice del progetto)
-    const configPath = path.join(__dirname, "..", "..", "db", "config.json");
+    // Carica configurazione da JSON
+    const configPath = path.join(__dirname, "..", "db", "config.json");
     const seedConfigTemplate = {
       nomi_utenti: ["Mario", "Luigi", "Giulia", "Andrea", "Sara"],
       marche: ["Ducati", "Yamaha", "KTM", "BMW", "Kawasaki"],
