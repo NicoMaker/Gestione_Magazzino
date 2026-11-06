@@ -289,4 +289,5 @@ function injectDateFilters() {
 
 // ── Esposizione globale ───────────────────────────────────────
 window.renderAlertRiordino = renderAlertRiordino;
-window.filterMovimenti = filterMo
+window.filterMovimenti = filterMovimenti;
+window.filterMovimentiByTipo = filterMovimentiByTipo;
