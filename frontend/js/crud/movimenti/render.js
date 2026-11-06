@@ -59,7 +59,7 @@ function renderMovimenti() {
   if (!Array.isArray(movimenti) || movimenti.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="12" class="text-center">
+        <td colspan="11" class="text-center">
           <div style="padding:40px 20px;color:var(--text-secondary);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                  style="width:48px;height:48px;margin:0 auto 16px;opacity:0.5;">
@@ -75,7 +75,6 @@ function renderMovimenti() {
   }
 
   tbody.innerHTML = movimenti.map(rigaMovimento).join("");
-  bulkAfterRender("movimenti");
 }
 
 // Genera l'HTML di una riga della tabella movimenti
@@ -143,7 +142,6 @@ function rigaMovimento(m) {
 
   return `
   <tr>
-    ${bulkCheckboxCell("movimenti", m.id)}
     <td>${new Date(m.data_movimento).toLocaleDateString("it-IT")}</td>
     <td><strong>${escapeHtml(m.prodotto_nome)}</strong></td>
     <td>${m.marca_nome ? escapeHtml(m.marca_nome) : '<span style="color:#999;">-</span>'}</td>
@@ -291,5 +289,4 @@ function injectDateFilters() {
 
 // ── Esposizione globale ───────────────────────────────────────
 window.renderAlertRiordino = renderAlertRiordino;
-window.filterMovimenti = filterMovimenti;
-window.filterMovimentiByTipo = filterMovimentiByTipo;
+window.filterMovimenti = filterMo

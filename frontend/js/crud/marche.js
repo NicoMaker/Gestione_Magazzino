@@ -22,7 +22,7 @@ function renderMarche() {
   if (marche.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="4" class="text-center">
+        <td colspan="3" class="text-center">
           <div style="padding:40px 20px;color:var(--text-secondary);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                  style="width:48px;height:48px;margin:0 auto 16px;opacity:0.5;">
@@ -42,7 +42,6 @@ function renderMarche() {
       const badgeClass = prodottiCount > 0 ? "has-products" : "empty";
       return `
       <tr>
-        ${bulkCheckboxCell("marche", m.id)}
         <td><strong style="font-size:15px;">${escapeHtml(m.nome)}</strong></td>
         <td class="text-center-badge">
           <span class="prodotti-badge ${badgeClass}">${prodottiCount}</span>
@@ -63,7 +62,6 @@ function renderMarche() {
       </tr>`;
     })
     .join("");
-  bulkAfterRender("marche");
 }
 
 function editMarca(id) {

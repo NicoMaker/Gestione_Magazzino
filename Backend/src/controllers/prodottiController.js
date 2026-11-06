@@ -13,7 +13,4 @@ module.exports = {
   async elimina(req, res) {
     res.json(await prodottiService.elimina(req.params.id));
   },
-  async eliminaMultiple(req, res) {
-    res.json(await prodottiService.eliminaMultiple(req.body.ids));
-  },
 };

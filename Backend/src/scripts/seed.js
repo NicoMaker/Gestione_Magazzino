@@ -1,13 +1,29 @@
-const { initDatabase } = require("../src/config/schema");
+const { initDatabase } = require("../config/schema");
 const sqlite3 = require("sqlite3").verbose();
 const bcrypt = require("bcrypt");
 const path = require("path");
 const fs = require("fs");
 const readline = require("readline");
 
-// Percorso del database
-const dbPath = path.join(__dirname, "..", "db", "magazzino.db");
+// Percorsi:
+//   seed.js sta in  Backend/src/scripts/
+//   db e config stanno in  Backend/db/
+// Da src/scripts/ risalgo di 2 livelli (..\..) -> Backend/, poi entro in db/
+const dbDir = path.join(__dirname, "..", "..", "db");
+const dbPath = path.join(dbDir, "magazzino.db");
+const configPath = path.join(dbDir, "config.json");
+
+// ✅ Crea la cartella del database PRIMA di aprire sqlite3
+// (sqlite3 non crea le cartelle mancanti -> SQLITE_CANTOPEN / ENOENT)
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+  console.log(`📁 Cartella creata: ${dbDir}`);
+}
+
 const db = new sqlite3.Database(dbPath);
+db.on("error", (err) => {
+  console.error("❌ Errore SQLite:", err.message);
+});
 
 // Configurazione da readline
 const rl = readline.createInterface({
@@ -157,6 +173,7 @@ function randomDateFrom(startDateString) {
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   return randomDate(diffDays);
 }
+
 // Genera nome utente univoco
 function generateUsername(index, baseNames) {
   if (index < baseNames.length) {
@@ -204,8 +221,7 @@ async function seedDatabase() {
   const startTime = Date.now();
 
   try {
-    // Carica configurazione da JSON
-    const configPath = path.join(__dirname, "..", "db", "config.json");
+    // Template di configurazione di default
     const seedConfigTemplate = {
       nomi_utenti: ["Mario", "Luigi", "Giulia", "Andrea", "Sara"],
       marche: ["Ducati", "Yamaha", "KTM", "BMW", "Kawasaki"],
@@ -232,6 +248,11 @@ async function seedDatabase() {
     if (!fs.existsSync(configPath)) {
       console.log("⚠ File config.json non trovato!");
       console.log("📝 Creazione file di configurazione completo...");
+
+      // Sicurezza extra: ricrea la cartella se per qualche motivo manca
+      if (!fs.existsSync(dbDir)) {
+        fs.mkdirSync(dbDir, { recursive: true });
+      }
 
       fs.writeFileSync(configPath, JSON.stringify(seedConfigTemplate, null, 2));
       console.log("✅ File config.json creato con dati di esempio!\n");

@@ -464,24 +464,6 @@ const movimentiService = {
     return this._eliminaScarico(id, prodotto_id, qty);
   },
 
-  // Eliminazione multipla: prima gli scarichi (ripristinano i lotti), poi i carichi
-  async eliminaMultiple(ids) {
-    const { eliminaMultipli } = require("../utils/bulk");
-    if (!Array.isArray(ids) || ids.length === 0)
-      throw new HttpError(400, "Nessun elemento selezionato");
-    const info = {};
-    for (const id of ids) {
-      const m = await repo.trovaMovimentoBase(id);
-      if (m) info[id] = m;
-    }
-    const ordinati = [...ids].sort((a, b) => {
-      const ta = info[a]?.tipo === "scarico" ? 0 : 1;
-      const tb = info[b]?.tipo === "scarico" ? 0 : 1;
-      return ta - tb;
-    });
-    return eliminaMultipli(ordinati, (id) => this.elimina(id), {});
-  },
-
   async _eliminaCarico(id, prodotto_id) {
     const lotto = await repo.trovaLottoCaricoDaEliminare(id, prodotto_id);
     const qtaRimanente = formatDecimal(lotto?.quantita_rimanente);

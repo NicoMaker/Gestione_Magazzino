@@ -13,7 +13,4 @@ module.exports = {
   async elimina(req, res) {
     res.json(await marcheService.elimina(req.params.id));
   },
-  async eliminaMultiple(req, res) {
-    res.json(await marcheService.eliminaMultiple(req.body.ids));
-  },
 };

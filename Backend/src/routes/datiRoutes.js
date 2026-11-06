@@ -7,7 +7,6 @@ const router = express.Router();
 router.get("/", catchErrors(datiController.lista));
 router.post("/", catchErrors(datiController.crea));
 router.post("/bulk-scarico", catchErrors(datiController.bulkScarico));
-router.post("/elimina-multiple", catchErrors(datiController.eliminaMultiple));
 router.put("/:id", catchErrors(datiController.modifica));
 router.delete("/:id", catchErrors(datiController.elimina));
 

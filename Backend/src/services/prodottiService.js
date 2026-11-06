@@ -3,7 +3,6 @@ const repo = require("../repositories/prodottiRepository");
 const { transaction } = require("../config/database");
 const realtime = require("../realtime/socket");
 const { HttpError } = require("../middleware/errorHandler");
-const { eliminaMultipli } = require("../utils/bulk");
 const { formatDecimal, formatQtaIT } = require("../utils/decimal");
 
 const prodottiService = {
@@ -87,12 +86,6 @@ const prodottiService = {
     realtime.emit("prodotto_eliminato", { id });
     realtime.emit("prodotti_aggiornati");
     return result;
-  },
-
-  async eliminaMultiple(ids) {
-    const lista = await repo.listaConGiacenza();
-    const nomi = Object.fromEntries(lista.map((p) => [p.id, p.nome]));
-    return eliminaMultipli(ids, (id) => this.elimina(id), nomi);
   },
 };
 

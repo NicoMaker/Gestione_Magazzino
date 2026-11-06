@@ -26,7 +26,7 @@ function renderProdotti() {
   if (prodotti.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="6" class="text-center">
+        <td colspan="5" class="text-center">
           <div style="padding:40px 20px;color:var(--text-secondary);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                  style="width:48px;height:48px;margin:0 auto 16px;opacity:0.5;">
@@ -46,7 +46,6 @@ function renderProdotti() {
     .map(
       (p) => `
     <tr>
-      ${bulkCheckboxCell("prodotti", p.id)}
       <td><strong>${escapeHtml(p.nome)}</strong></td>
       <td><span class="badge badge-marca">${p.marca_nome ? escapeHtml(p.marca_nome).toUpperCase() : "N/A"}</span></td>
       <td>
@@ -71,7 +70,6 @@ function renderProdotti() {
     </tr>`,
     )
     .join("");
-  bulkAfterRender("prodotti");
 }
 
 function editProdotto(id) {
