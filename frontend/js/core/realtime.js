@@ -34,7 +34,8 @@ function initSocket() {
 
   // Qualsiasi evento: aggiorna la dashboard se è la sezione visibile
   socket.onAny(() => {
-    if (typeof refreshDashboardIfActive === "function") refreshDashboardIfActive();
+    if (typeof refreshDashboardIfActive === "function")
+      refreshDashboardIfActive();
   });
 
   // Eventi per aggiornamenti real-time

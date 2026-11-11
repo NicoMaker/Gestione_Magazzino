@@ -398,4 +398,7 @@
 }
 
 /* Badge "aperto" nelle liste della dashboard */
-.dash-mov .ba
+.dash-mov .badge-warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: #b45309;
+}
