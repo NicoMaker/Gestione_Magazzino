@@ -36,6 +36,17 @@ const movimentiRepository = {
     return dbGet("SELECT * FROM dati WHERE id = ?", [id]);
   },
 
+  // Descrizione leggibile del movimento (usata nei report di eliminazione multipla)
+  trovaDescrizione(id) {
+    return dbGet(
+      `SELECT d.id, d.tipo, d.quantita, d.data_movimento, d.prodotto_id,
+              p.nome AS prodotto_nome
+       FROM dati d LEFT JOIN prodotti p ON p.id = d.prodotto_id
+       WHERE d.id = ?`,
+      [id],
+    );
+  },
+
   trovaMovimentoBase(id) {
     return dbGet("SELECT prodotto_id, tipo, quantita FROM dati WHERE id = ?", [
       id,

@@ -4,8 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gestione Magazzino Moto</title>
-    <link rel="stylesheet" href="styles.css" />
-    <link rel="icon" type="image/png" href="img/Logo.png" />
+    <link rel="stylesheet" href="css/base/app.css" />
+    <link rel="stylesheet" href="css/shared/bulk-selection.css" />
+    <link rel="stylesheet" href="css/features/dashboard.css" />
+    <link rel="icon" type="image/png" href="assets/img/Logo.png" />
   </head>
 
   <body>
@@ -26,12 +28,30 @@
       <!-- Sidebar -->
       <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-          <img src="img/Logo2.png" alt="Logo Magazzino Moto" class="logo" />
+          <img
+            src="assets/img/Logo2.png"
+            alt="Logo Magazzino Moto"
+            class="logo"
+          />
           <h2>Magazzino Moto</h2>
         </div>
 
         <nav class="sidebar-nav">
-          <a href="#" class="nav-item active" data-section="marche">
+          <a href="#" class="nav-item active" data-section="dashboard">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <rect x="3" y="3" width="7" height="9" rx="1" />
+              <rect x="14" y="3" width="7" height="5" rx="1" />
+              <rect x="14" y="12" width="7" height="9" rx="1" />
+              <rect x="3" y="16" width="7" height="5" rx="1" />
+            </svg>
+            <span>Dashboard</span>
+          </a>
+          <a href="#" class="nav-item" data-section="marche">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -215,8 +235,41 @@
 
       <!-- Main Content -->
       <main class="main-content">
+        <!-- Sezione DASHBOARD -->
+        <section id="section-dashboard" class="content-section active">
+          <div class="section-header">
+            <div>
+              <h1>Dashboard</h1>
+              <p>
+                Cosa richiede la tua attenzione e come sta andando il magazzino
+              </p>
+            </div>
+            <div class="filter-controls">
+              <button
+                type="button"
+                class="dash-refresh"
+                onclick="loadDashboard()"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <polyline points="23 4 23 10 17 10" />
+                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                </svg>
+                <span>Aggiorna</span>
+              </button>
+            </div>
+          </div>
+          <div id="dashboardContent" class="dash">
+            <p>Caricamento…</p>
+          </div>
+        </section>
+
         <!-- Sezione MARCHE -->
-        <section id="section-marche" class="content-section active">
+        <section id="section-marche" class="content-section">
           <div class="section-header">
             <div>
               <h1>Gestione Marche</h1>
@@ -251,6 +304,13 @@
               <table>
                 <thead>
                   <tr>
+                    <th class="col-select">
+                      <input
+                        type="checkbox"
+                        class="bulk-check-all"
+                        aria-label="Seleziona tutti"
+                      />
+                    </th>
                     <th>Nome Marca</th>
                     <th style="text-align: center">Prodotti Relazionati</th>
                     <th class="text-right">Azioni</th>
@@ -258,7 +318,7 @@
                 </thead>
                 <tbody id="marcheTableBody">
                   <tr>
-                    <td colspan="3" class="text-center">
+                    <td colspan="4" class="text-center">
                       <span>Caricamento...</span>
                     </td>
                   </tr>
@@ -304,6 +364,13 @@
               <table>
                 <thead>
                   <tr>
+                    <th class="col-select">
+                      <input
+                        type="checkbox"
+                        class="bulk-check-all"
+                        aria-label="Seleziona tutti"
+                      />
+                    </th>
                     <th>Codice/Telaio Prodotto</th>
                     <th>Marca</th>
                     <th>Giacenza (pz/l)</th>
@@ -313,7 +380,7 @@
                 </thead>
                 <tbody id="prodottiTableBody">
                   <tr>
-                    <td colspan="5" class="text-center">
+                    <td colspan="6" class="text-center">
                       <span>Caricamento...</span>
                     </td>
                   </tr>
@@ -538,6 +605,13 @@
               <table>
                 <thead>
                   <tr>
+                    <th class="col-select">
+                      <input
+                        type="checkbox"
+                        class="bulk-check-all"
+                        aria-label="Seleziona tutti"
+                      />
+                    </th>
                     <th>Data carico/scarico</th>
                     <th>Codice/Telaio Prodotto</th>
                     <th>Marca</th>
@@ -553,7 +627,7 @@
                 </thead>
                 <tbody id="movimentiTableBody">
                   <tr>
-                    <td colspan="11" class="text-center">
+                    <td colspan="12" class="text-center">
                       <span>Caricamento...</span>
                     </td>
                   </tr>
@@ -1014,13 +1088,20 @@
               <table>
                 <thead>
                   <tr>
+                    <th class="col-select">
+                      <input
+                        type="checkbox"
+                        class="bulk-check-all"
+                        aria-label="Seleziona tutti"
+                      />
+                    </th>
                     <th>Username</th>
                     <th class="text-right">Azioni</th>
                   </tr>
                 </thead>
                 <tbody id="utentiTableBody">
                   <tr>
-                    <td colspan="2" class="text-center">
+                    <td colspan="3" class="text-center">
                       <span>Caricamento...</span>
                     </td>
                   </tr>
@@ -1626,25 +1707,22 @@
       14. navigation.js  → bootstrap app: navigazione, hamburger, logout (unico DOMContentLoaded)
     -->
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-    <script src="js/realtime.js"></script>
-    <script src="js/config.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/ui/notifications.js"></script>
-    <script src="js/ui/formHelpers.js"></script>
-    <script src="js/ui/modals.js"></script>
-    <script src="js/search.js"></script>
-    <script src="js/company-loader.js"></script>
-    <script src="js/crud/marche.js"></script>
-    <script src="js/crud/prodotti.js"></script>
-    <script src="js/crud/movimenti/render.js"></script>
-    <script src="js/crud/movimenti/search.js"></script>
-    <script src="js/crud/movimenti/data.js"></script>
-    <script src="js/crud/riordino.js"></script>
-    <script src="js/crud/riepilogo.js"></script>
-    <script src="js/crud/utenti.js"></script>
-    <script src="js/crud/pdf-scarico.js"></script>
-    <script src="js/crud/pdf-fattura.js"></script>
-    <script src="js/navigation.js"></script>
-    <script src="js/crud/stampe.js"></script>
-  </body>
-</html>
+
+    <!-- core: configurazione, utilità, realtime, dati azienda -->
+    <script src="js/core/realtime.js"></script>
+    <script src="js/core/config.js"></script>
+    <script src="js/core/utils.js"></script>
+
+    <!-- shared: componenti condivisi tra le funzionalità -->
+    <script src="js/shared/ui/notifications.js"></script>
+    <script src="js/shared/ui/formHelpers.js"></script>
+    <script src="js/shared/ui/modals.js"></script>
+    <script src="js/shared/search.js"></script>
+    <script src="js/shared/bulk-selection.js"></script>
+    <script src="js/core/company-loader.js"></script>
+
+    <!-- features: una cartella per funzionalità -->
+    <script src="js/features/dashboard/dashboard.js"></script>
+    <script src="js/features/marche/marche.js"></script>
+    <script src="js/features/prodotti/prodotti.js"></script>
+    <script src="js/features/movimenti/r

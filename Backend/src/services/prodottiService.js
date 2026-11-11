@@ -4,6 +4,7 @@ const { transaction } = require("../config/database");
 const realtime = require("../realtime/socket");
 const { HttpError } = require("../middleware/errorHandler");
 const { formatDecimal, formatQtaIT } = require("../utils/decimal");
+const { eliminaMultipli } = require("../utils/bulkDelete");
 
 const prodottiService = {
   async lista() {
@@ -88,5 +89,17 @@ const prodottiService = {
     return result;
   },
 };
+
+// Elimina più prodotti: salta quelli con giacenza residua o movimenti collegati
+prodottiService.eliminaMultipli = (ids) =>
+  realtime.batch(() =>
+    eliminaMultipli({
+      ids,
+      singolare: "prodotto",
+      plurale: "prodotti",
+      trovaEtichetta: async (id) => (await repo.trovaConMarca(id))?.nome,
+      eliminaSingolo: (id) => prodottiService.elimina(id),
+    }),
+  );
 
 module.exports = prodottiService;

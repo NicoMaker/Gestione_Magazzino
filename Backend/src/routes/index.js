@@ -9,5 +9,6 @@ router.use("/prodotti", require("./prodottiRoutes"));
 router.use("/dati", require("./datiRoutes"));
 router.use("/magazzino", require("./magazzinoRoutes"));
 router.use("/utenti", require("./utentiRoutes"));
+router.use("/dashboard", require("./dashboardRoutes"));
 
 module.exports = router;

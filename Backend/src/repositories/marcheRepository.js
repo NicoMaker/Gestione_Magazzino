@@ -12,6 +12,10 @@ const marcheRepository = {
     `);
   },
 
+  trovaPerId(id) {
+    return dbGet("SELECT id, nome FROM marche WHERE id = ?", [id]);
+  },
+
   crea(nome, data_creazione) {
     return dbRun("INSERT INTO marche (nome, data_creazione) VALUES (?, ?)", [
       nome,

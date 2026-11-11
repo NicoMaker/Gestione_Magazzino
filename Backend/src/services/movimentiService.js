@@ -4,6 +4,7 @@ const repo = require("../repositories/movimentiRepository");
 const { transaction } = require("../config/database");
 const realtime = require("../realtime/socket");
 const { HttpError } = require("../middleware/errorHandler");
+const { eliminaMultipli } = require("../utils/bulkDelete");
 const {
   formatDecimal,
   formatQtaIT,
@@ -511,5 +512,38 @@ const movimentiService = {
     return { success: true, message: "Scarico eliminato con successo" };
   },
 };
+
+// Elimina più movimenti.
+// Gli SCARICHI vengono eliminati per primi: ripristinano la quantità nei lotti
+// e così anche i CARICHI selezionati diventano eliminabili. I carichi già
+// (parzialmente) scaricati da movimenti NON selezionati vengono saltati.
+movimentiService.eliminaMultipli = (ids) =>
+  realtime.batch(async () => {
+    const righe = new Map();
+    for (const id of [...new Set((ids || []).map(Number))]) {
+      if (Number.isInteger(id)) righe.set(id, await repo.trovaDescrizione(id));
+    }
+    const ordinati = [...righe.keys()].sort((a, b) => {
+      const ta = righe.get(a)?.tipo === "scarico" ? 0 : 1;
+      const tb = righe.get(b)?.tipo === "scarico" ? 0 : 1;
+      return ta - tb;
+    });
+
+    return eliminaMultipli({
+      ids: ordinati.length ? ordinati : ids,
+      singolare: "movimento",
+      plurale: "movimenti",
+      trovaEtichetta: async (id) => {
+        const m = righe.get(id);
+        if (!m) return null;
+        const tipo = m.tipo === "carico" ? "Carico" : "Scarico";
+        const data = m.data_movimento
+          ? dataItaliana(m.data_movimento.slice(0, 10))
+          : "";
+        return `${tipo} · ${m.prodotto_nome || "prodotto"} · ${formatQtaIT(formatDecimal(m.quantita) || 0)} pz${data ? " · " + data : ""}`;
+      },
+      eliminaSingolo: (id) => movimentiService.elimina(id),
+    });
+  });
 
 module.exports = movimentiService;

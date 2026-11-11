@@ -10,6 +10,9 @@ module.exports = {
   async aggiorna(req, res) {
     res.json(await prodottiService.aggiorna(req.params.id, req.body));
   },
+  async eliminaMultipli(req, res) {
+    res.json(await prodottiService.eliminaMultipli(req.body.ids));
+  },
   async elimina(req, res) {
     res.json(await prodottiService.elimina(req.params.id));
   },
