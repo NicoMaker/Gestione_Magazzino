@@ -135,15 +135,9 @@ tbody tr.is-selected > td {
   border-top: 5px solid var(--primary, #6366f1);
   box-shadow: var(--shadow-xl, 0 25px 50px -12px rgba(0, 0, 0, 0.25));
 }
-.bulk-dialog.bulk-successo {
-  border-top-color: #10b981;
-}
-.bulk-dialog.bulk-avviso {
-  border-top-color: var(--warning, #f59e0b);
-}
-.bulk-dialog.bulk-errore {
-  border-top-color: var(--danger, #ef4444);
-}
+.bulk-dialog.bulk-successo { border-top-color: #10b981; }
+.bulk-dialog.bulk-avviso { border-top-color: var(--warning, #f59e0b); }
+.bulk-dialog.bulk-errore { border-top-color: var(--danger, #ef4444); }
 .bulk-dialog h3 {
   margin: 0;
   padding: 18px 22px 8px;
@@ -186,12 +180,8 @@ tbody tr.is-selected > td {
   margin: 14px 0 6px;
   font-size: 14px;
 }
-.bulk-result-title.ok {
-  color: #047857;
-}
-.bulk-result-title.skip {
-  color: #b45309;
-}
+.bulk-result-title.ok { color: #047857; }
+.bulk-result-title.skip { color: #b45309; }
 .bulk-result-list {
   margin: 0;
   padding: 0;
@@ -209,55 +199,30 @@ tbody tr.is-selected > td {
   position: relative;
   border-bottom: 1px solid var(--border, #e2e8f0);
 }
-.bulk-result-list li:last-child {
-  border-bottom: 0;
-}
+.bulk-result-list li:last-child { border-bottom: 0; }
 .bulk-result-list li::before {
   position: absolute;
   left: 12px;
   top: 8px;
   font-weight: 700;
 }
-.bulk-result-list.ok li::before {
-  content: "✓";
-  color: #10b981;
-}
-.bulk-result-list.skip li::before {
-  content: "!";
-  color: var(--warning, #f59e0b);
-}
-.bulk-result-name {
-  font-weight: 600;
-}
+.bulk-result-list.ok li::before { content: "✓"; color: #10b981; }
+.bulk-result-list.skip li::before { content: "!"; color: var(--warning, #f59e0b); }
+.bulk-result-name { font-weight: 600; }
 .bulk-result-reason {
   font-size: 13px;
   color: var(--text-secondary, #64748b);
 }
 
 @media (max-width: 600px) {
-  .bulk-toolbar {
-    padding: 10px;
-  }
-  .bulk-toolbar-actions {
-    width: 100%;
-  }
-  .bulk-toolbar-actions .bulk-btn {
-    flex: 1;
-    justify-content: center;
-  }
+  .bulk-toolbar { padding: 10px; }
+  .bulk-toolbar-actions { width: 100%; }
+  .bulk-toolbar-actions .bulk-btn { flex: 1; justify-content: center; }
 }
 @media (prefers-reduced-motion: no-preference) {
-  .bulk-dialog {
-    animation: bulk-in 0.14s ease-out;
-  }
+  .bulk-dialog { animation: bulk-in 0.14s ease-out; }
   @keyframes bulk-in {
-    from {
-      transform: translateY(8px);
-      opacity: 0;
-    }
-    to {
-      transform: none;
-      opacity: 1;
-    }
+    from { transform: translateY(8px); opacity: 0; }
+    to { transform: none; opacity: 1; }
   }
 }
