@@ -91,9 +91,15 @@
   border-left: 6px solid var(--sev);
   border-radius: 12px;
 }
-.dash-sev-alta { --sev: var(--danger, #ef4444); }
-.dash-sev-media { --sev: var(--warning, #f59e0b); }
-.dash-sev-info { --sev: var(--primary-light, #818cf8); }
+.dash-sev-alta {
+  --sev: var(--danger, #ef4444);
+}
+.dash-sev-media {
+  --sev: var(--warning, #f59e0b);
+}
+.dash-sev-info {
+  --sev: var(--primary-light, #818cf8);
+}
 .dash-todo-count {
   font-size: 34px;
   font-weight: 800;
@@ -223,9 +229,15 @@
   stroke: var(--border, #e2e8f0);
   stroke-width: 1;
 }
-.dash-bar-in { fill: #10b981; }
-.dash-bar-out { fill: #ef4444; }
-.dash-bar-neutral { fill: var(--primary, #6366f1); }
+.dash-bar-in {
+  fill: #10b981;
+}
+.dash-bar-out {
+  fill: #ef4444;
+}
+.dash-bar-neutral {
+  fill: var(--primary, #6366f1);
+}
 .dash-legend {
   display: flex;
   align-items: center;
@@ -240,10 +252,18 @@
   margin-left: 8px;
   border-radius: 3px;
 }
-.dash-dot:first-child { margin-left: 0; }
-.dash-dot-in { background: #10b981; }
-.dash-dot-out { background: #ef4444; }
-.dash-dot-neutral { background: var(--primary, #6366f1); }
+.dash-dot:first-child {
+  margin-left: 0;
+}
+.dash-dot-in {
+  background: #10b981;
+}
+.dash-dot-out {
+  background: #ef4444;
+}
+.dash-dot-neutral {
+  background: var(--primary, #6366f1);
+}
 
 /* ── Classifica valore ── */
 .dash-top {
@@ -304,7 +324,9 @@
   border-bottom: 1px solid var(--border, #e2e8f0);
   font-size: 14px;
 }
-.dash-mov li:last-child { border-bottom: 0; }
+.dash-mov li:last-child {
+  border-bottom: 0;
+}
 .dash-mov-name {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -317,7 +339,9 @@
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-.dash-mov-date { text-align: right; }
+.dash-mov-date {
+  text-align: right;
+}
 
 /* Intestazione sezione con pulsante aggiorna */
 .dash-refresh {
@@ -333,25 +357,44 @@
   border-radius: 8px;
   cursor: pointer;
 }
-.dash-refresh svg { width: 16px; height: 16px; }
-.dash-refresh:hover { border-color: var(--primary, #6366f1); }
+.dash-refresh svg {
+  width: 16px;
+  height: 16px;
+}
+.dash-refresh:hover {
+  border-color: var(--primary, #6366f1);
+}
 
 @media (max-width: 900px) {
-  .dash-grid { grid-template-columns: minmax(0, 1fr); }
+  .dash-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 @media (max-width: 600px) {
   .dash-todo {
     grid-template-columns: 48px 1fr;
   }
-  .dash-todo .dash-go { grid-column: 1 / -1; width: 100%; }
-  .dash-todo-count { font-size: 28px; }
+  .dash-todo .dash-go {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+  .dash-todo-count {
+    font-size: 28px;
+  }
   .dash-mov li {
     grid-template-columns: 1fr auto;
     row-gap: 2px;
   }
-  .dash-mov li .dash-mov-name { grid-column: 1 / -1; order: 2; }
-  .dash-mov li .dash-mov-qty { order: 3; }
-  .dash-mov li .dash-mov-date { order: 4; }
+  .dash-mov li .dash-mov-name {
+    grid-column: 1 / -1;
+    order: 2;
+  }
+  .dash-mov li .dash-mov-qty {
+    order: 3;
+  }
+  .dash-mov li .dash-mov-date {
+    order: 4;
+  }
 }
 
 /* Badge "aperto" nelle liste della dashboard */

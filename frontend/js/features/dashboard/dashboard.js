@@ -55,9 +55,11 @@ function renderDashboard(d) {
     ${_dashUltimi(d.ultimi_movimenti)}
     <p class="dash-updated">Aggiornato alle ${new Date(d.generato_il).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}</p>`;
 
-  box.querySelectorAll("[data-go]").forEach((el) =>
-    el.addEventListener("click", () => dashGoTo(el.dataset.go)),
-  );
+  box
+    .querySelectorAll("[data-go]")
+    .forEach((el) =>
+      el.addEventListener("click", () => dashGoTo(el.dataset.go)),
+    );
 }
 
 // ── Da fare adesso ───────────────────────────────────────────
@@ -122,7 +124,12 @@ function _dashGrafico(serie = []) {
   }
   const passo = Math.pow(10, Math.floor(Math.log10(max)));
   const tetto = Math.ceil(max / passo) * passo;
-  const W = 560, H = 230, L = 44, B = 28, T = 10, R = 8;
+  const W = 560,
+    H = 230,
+    L = 44,
+    B = 28,
+    T = 10,
+    R = 8;
   const area = { w: W - L - R, h: H - T - B };
   const gruppo = area.w / serie.length;
   const barra = Math.min(26, gruppo / 3);

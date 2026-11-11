@@ -26,7 +26,14 @@
   const esc = (t) =>
     String(t ?? "").replace(
       /[&<>"']/g,
-      (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c],
+      (c) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[c],
     );
 
   const apiBase = () => (typeof API_URL !== "undefined" ? API_URL : "api");
@@ -92,7 +99,8 @@
         tutti.addEventListener("change", () => {
           this.checkboxRighe().forEach((cb) => {
             const id = Number(cb.dataset.id);
-            if (tutti.checked) this.selezionati.set(id, cb.dataset.label || `#${id}`);
+            if (tutti.checked)
+              this.selezionati.set(id, cb.dataset.label || `#${id}`);
             else this.selezionati.delete(id);
           });
           this.sincronizza();
@@ -100,7 +108,9 @@
       }
 
       // Dopo ogni render della tabella (filtri, realtime, ricarica) riallinea le spunte
-      new MutationObserver(() => this.sincronizza()).observe(this.tbody, { childList: true });
+      new MutationObserver(() => this.sincronizza()).observe(this.tbody, {
+        childList: true,
+      });
     }
 
     checkboxRighe() {
@@ -147,8 +157,14 @@
       if (n === 0) return;
       const { singolare, plurale } = this.cfg;
       const nomi = [...this.selezionati.values()];
-      const mostrati = nomi.slice(0, 8).map((x) => `<li>${esc(x)}</li>`).join("");
-      const altri = nomi.length > 8 ? `<li class="bulk-more">…e altri ${nomi.length - 8}</li>` : "";
+      const mostrati = nomi
+        .slice(0, 8)
+        .map((x) => `<li>${esc(x)}</li>`)
+        .join("");
+      const altri =
+        nomi.length > 8
+          ? `<li class="bulk-more">…e altri ${nomi.length - 8}</li>`
+          : "";
 
       const ok = await Dialogo.apri({
         titolo: `Eliminare ${n} ${n === 1 ? singolare : plurale}?`,
@@ -173,7 +189,8 @@
       let errore = null;
 
       try {
-        const extra = typeof this.cfg.extraBody === "function" ? this.cfg.extraBody() : {};
+        const extra =
+          typeof this.cfg.extraBody === "function" ? this.cfg.extraBody() : {};
         const res = await fetch(`${apiBase()}/${this.cfg.endpoint}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -201,7 +218,8 @@
 
       this.selezionati.clear();
       try {
-        if (typeof this.cfg.onDone === "function") await this.cfg.onDone(risultato);
+        if (typeof this.cfg.onDone === "function")
+          await this.cfg.onDone(risultato);
       } catch (e) {
         console.error("BulkSelection onDone:", e);
       }
@@ -212,7 +230,8 @@
         conferma: "Ok",
         tipo: risultato.non_eliminati_count ? "avviso" : "successo",
       });
-      if (typeof this.cfg.afterSummary === "function") this.cfg.afterSummary(risultato);
+      if (typeof this.cfg.afterSummary === "function")
+        this.cfg.afterSummary(risultato);
     }
 
     htmlRiepilogo(r) {
@@ -222,9 +241,12 @@
       const lista = (arr, cls, mostraMotivo) =>
         `<ul class="bulk-result-list ${cls}">${arr
           .map(
-            (x) => `<li><span class="bulk-result-name">${esc(x.etichetta)}</span>${
-              mostraMotivo ? `<span class="bulk-result-reason">${esc(x.motivo)}</span>` : ""
-            }</li>`,
+            (x) =>
+              `<li><span class="bulk-result-name">${esc(x.etichetta)}</span>${
+                mostraMotivo
+                  ? `<span class="bulk-result-reason">${esc(x.motivo)}</span>`
+                  : ""
+              }</li>`,
           )
           .join("")}</ul>`;
 
@@ -245,7 +267,14 @@
 
   // ── Dialogo modale minimale (indipendente dai modali dell'app) ──
   const Dialogo = {
-    apri({ titolo, corpo, conferma = "Ok", annulla = null, pericolo = false, tipo = "info" }) {
+    apri({
+      titolo,
+      corpo,
+      conferma = "Ok",
+      annulla = null,
+      pericolo = false,
+      tipo = "info",
+    }) {
       return new Promise((resolve) => {
         const precedente = document.activeElement;
         const overlay = document.createElement("div");

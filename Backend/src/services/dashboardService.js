@@ -6,8 +6,18 @@ const GIORNI_MERCE_FERMA = 180;
 const ESEMPI_MAX = 5;
 
 const NOMI_MESI = [
-  "Gen", "Feb", "Mar", "Apr", "Mag", "Giu",
-  "Lug", "Ago", "Set", "Ott", "Nov", "Dic",
+  "Gen",
+  "Feb",
+  "Mar",
+  "Apr",
+  "Mag",
+  "Giu",
+  "Lug",
+  "Ago",
+  "Set",
+  "Ott",
+  "Nov",
+  "Dic",
 ];
 
 // Ultimi n mesi (compreso quello corrente) come [{ chiave: "2026-03", etichetta: "Mar" }]
@@ -15,7 +25,9 @@ function ultimiMesi(n) {
   const oggi = new Date();
   const mesi = [];
   for (let i = n - 1; i >= 0; i--) {
-    const d = new Date(Date.UTC(oggi.getUTCFullYear(), oggi.getUTCMonth() - i, 1));
+    const d = new Date(
+      Date.UTC(oggi.getUTCFullYear(), oggi.getUTCMonth() - i, 1),
+    );
     const chiave = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
     mesi.push({ chiave, etichetta: NOMI_MESI[d.getUTCMonth()] });
   }
@@ -28,8 +40,17 @@ const dashboardService = {
   async panoramica() {
     const mesi = ultimiMesi(6);
     const [
-      conteggi, valore, mov30, esauriti, senzaMov, senzaMarca,
-      marcheVuote, ferma, andamento, ultimi, top,
+      conteggi,
+      valore,
+      mov30,
+      esauriti,
+      senzaMov,
+      senzaMarca,
+      marcheVuote,
+      ferma,
+      andamento,
+      ultimi,
+      top,
     ] = await Promise.all([
       repo.conteggi(),
       repo.valoreEPezzi(),
@@ -62,7 +83,8 @@ const dashboardService = {
         codice: "merce_ferma",
         gravita: "media",
         titolo: `Merce ferma da oltre ${GIORNI_MERCE_FERMA} giorni`,
-        descrizione: "Lotti caricati da molto tempo e ancora in magazzino: valuta una promozione.",
+        descrizione:
+          "Lotti caricati da molto tempo e ancora in magazzino: valuta una promozione.",
         conteggio: ferma.length,
         esempi: esempi(ferma),
         sezione: "riepilogo",
@@ -103,9 +125,7 @@ const dashboardService = {
       });
 
     // ── Andamento ultimi 6 mesi ──
-    const mappa = new Map(
-      andamento.map((r) => [`${r.mese}|${r.tipo}`, r]),
-    );
+    const mappa = new Map(andamento.map((r) => [`${r.mese}|${r.tipo}`, r]));
     const serie = mesi.map(({ chiave, etichetta }) => ({
       mese: chiave,
       etichetta,

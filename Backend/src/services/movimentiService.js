@@ -537,7 +537,9 @@ movimentiService.eliminaMultipli = (ids) =>
         const m = righe.get(id);
         if (!m) return null;
         const tipo = m.tipo === "carico" ? "Carico" : "Scarico";
-        const data = m.data_movimento ? dataItaliana(m.data_movimento.slice(0, 10)) : "";
+        const data = m.data_movimento
+          ? dataItaliana(m.data_movimento.slice(0, 10))
+          : "";
         return `${tipo} · ${m.prodotto_nome || "prodotto"} · ${formatQtaIT(formatDecimal(m.quantita) || 0)} pz${data ? " · " + data : ""}`;
       },
       eliminaSingolo: (id) => movimentiService.elimina(id),
